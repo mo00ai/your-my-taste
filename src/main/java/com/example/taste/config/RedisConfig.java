@@ -1,7 +1,5 @@
 package com.example.taste.config;
 
-import static com.example.auction.common.constant.RedisConst.*;
-
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +23,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import static com.example.taste.common.constant.RedisConst.DEFAULT;
+
+
+
 
 @Configuration
 @EnableCaching
