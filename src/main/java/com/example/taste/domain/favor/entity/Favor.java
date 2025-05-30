@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Entity
@@ -19,4 +20,9 @@ public class Favor {
 
 	@Column(nullable = false)
 	private String name;
+
+	@Builder
+	public Favor(String name) {
+		this.name = name;
+	}
 }
