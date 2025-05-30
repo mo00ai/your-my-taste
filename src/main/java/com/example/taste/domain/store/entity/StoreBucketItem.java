@@ -10,12 +10,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "bucket_item")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class StoreBucketItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,12 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "store_bucket")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class StoreBucket {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
