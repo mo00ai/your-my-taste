@@ -1,50 +1,64 @@
 package com.example.taste.domain.user.entity;
 
-import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.domain.user.enums.Gender;
-import com.example.taste.domain.user.enums.Level;
-import com.example.taste.domain.user.enums.Role;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
 
 @Getter
-@Builder
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "users")
 public class User extends SoftDeletableEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String nickname;
-    private String email;
-    private String password;
-    private String address;
-    private Gender gender;
-    private int age;
-    private Role role;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Builder.Default
-    private Level level = Level.NORMAL;
+	// TODO: 이미지 연관관계 추가
 
-    @Builder.Default
-    private int postingCount = 0;
+	@Column(nullable = false)
+	private String nickname;
 
-    @Builder.Default
-    private int point = 0;
+	@Column(nullable = false)
+	private String email;
 
-    @Builder.Default
-    private int follower = 0;
+	@Column(nullable = false)
+	private String password;
 
-    @Builder.Default
-    private int following = 0;
+	@Column(nullable = false)
+	private String address;
+
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
+
+	private int age;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Role role;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Level level = Level.NORMAL;
+
+	@Column(nullable = false)
+	private int postingCount = 0;
+	private Integer point = 0;
+
+	@Column(nullable = false)
+	private int follower = 0;
+
+	@Column(nullable = false)
+	private int following = 0;
 }
