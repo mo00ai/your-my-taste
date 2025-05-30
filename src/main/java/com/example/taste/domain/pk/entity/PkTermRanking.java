@@ -1,5 +1,7 @@
 package com.example.taste.domain.pk.entity;
 
+import com.example.taste.domain.user.entity.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,13 +36,16 @@ public class PkTermRanking {
 	@JoinColumn(name = "pk_term_id", nullable = false)
 	private PkTerm pkTerm;
 
-	//user 연관관계
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@Builder
-	public PkTermRanking(int ranking, Integer point, PkTerm pkTerm) {
+	public PkTermRanking(int ranking, Integer point, PkTerm pkTerm, User user) {
 		this.ranking = ranking;
 		this.point = point != null ? point : 0;
 		this.pkTerm = pkTerm;
+		this.user = user;
 	}
 
 }
