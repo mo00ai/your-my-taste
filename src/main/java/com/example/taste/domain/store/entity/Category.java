@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -22,4 +23,10 @@ public class Category extends BaseEntity {
 	private String name;
 
 	private int displayOrder;
+
+	@Builder
+	public Category(String name, int displayOrder) {
+		this.name = name;
+		this.displayOrder = displayOrder;
+	}
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -41,4 +42,16 @@ public class Store extends BaseEntity {
 
 	@Column(nullable = false)
 	private BigDecimal mapy;
+
+	@Builder
+	public Store(Category category, String name, String description, String address, String roadAddress,
+		BigDecimal mapx, BigDecimal mapy) {
+		this.category = category;
+		this.name = name;
+		this.description = description;
+		this.address = address;
+		this.roadAddress = roadAddress;
+		this.mapx = mapx;
+		this.mapy = mapy;
+	}
 }

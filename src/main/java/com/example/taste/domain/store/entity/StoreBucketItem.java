@@ -8,12 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "bucket_item")
 @NoArgsConstructor
-public class BucketItem {
+public class StoreBucketItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -25,4 +26,10 @@ public class BucketItem {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
+
+	@Builder
+	public StoreBucketItem(StoreBucket storeBucket, Store store) {
+		this.storeBucket = storeBucket;
+		this.store = store;
+	}
 }
