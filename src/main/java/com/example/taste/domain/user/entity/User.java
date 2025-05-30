@@ -4,21 +4,30 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
 
 @Getter
 @Entity
+@NoArgsConstructor
 @Table(name = "users")
 public class User extends SoftDeletableEntity {
 
@@ -26,7 +35,10 @@ public class User extends SoftDeletableEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// TODO: 이미지 연관관계 추가
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "image_id", nullable = false)
+	private Image image;
 
 	@Column(nullable = false)
 	private String nickname;
