@@ -41,10 +41,9 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "userMatchCond", nullable = false)
-	private UserMatchCondStore stores;
+	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	@JoinColumn(name = "user_match_cond_store_id")
+	private List<UserMatchCondStore> stores;
 
 	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
 	@JoinColumn(name = "user_match_condition_id")
@@ -62,7 +61,8 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	private MatchingStatus matchingStatus;
 
 	@Builder
-	public UserMatchCond(User user, UserMatchCondStore stores, List<UserMatchCondCategory> categories, int ageMinRange,
+	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
+		int ageMinRange,
 		int ageMaxRange, Gender gender, String region, MatchingStatus matchingStatus) {
 		this.user = user;
 		this.stores = stores;

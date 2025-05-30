@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -35,6 +36,7 @@ public class User extends SoftDeletableEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "image_id", nullable = false)
@@ -91,4 +93,5 @@ public class User extends SoftDeletableEntity {
 		this.follower = follower != null ? follower : 0;
 		this.following = following != null ? following : 0;
 	}
+
 }
