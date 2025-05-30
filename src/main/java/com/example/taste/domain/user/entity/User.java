@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
@@ -54,11 +55,28 @@ public class User extends SoftDeletableEntity {
 
 	@Column(nullable = false)
 	private int postingCount = 0;
-	private Integer point = 0;
+	private int point = 0;
 
 	@Column(nullable = false)
 	private int follower = 0;
 
 	@Column(nullable = false)
 	private int following = 0;
+
+	@Builder
+	public User(String nickname, String email, String password, String address, Gender gender, int age, Role role,
+		Level level, Integer postingCount, Integer point, Integer follower, Integer following) {
+		this.nickname = nickname;
+		this.email = email;
+		this.password = password;
+		this.address = address;
+		this.gender = gender;
+		this.age = age;
+		this.role = role;
+		this.level = level == null ? Level.NORMAL : level;
+		this.postingCount = postingCount == null ? postingCount : 0;
+		this.point = point == null ? point : 0;
+		this.follower = follower == null ? point : 0;
+		this.following = following == null ? point : 0;
+	}
 }
