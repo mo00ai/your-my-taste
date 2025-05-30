@@ -62,7 +62,7 @@ public class Board {
 	private List<BoardEvent> boardEventList = new ArrayList<>();
 
 	// 공감 연관관계
-	@OneToMany(mappedBy = "like", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
 	private List<Like> likeList = new ArrayList<>();
 
 	// TODO 연관관계 메서드 필요
