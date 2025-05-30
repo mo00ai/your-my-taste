@@ -24,7 +24,8 @@ public class Comment extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Comment(String content) {
+	public Comment(String content, LocalDateTime deletedAt) {
 		this.content = content;
+		this.deletedAt = deletedAt;
 	}
 }

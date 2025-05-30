@@ -24,7 +24,7 @@ public class NotificationInfo extends BaseEntity {
 	private NotificationCategory category;
 
 	@NotNull
-	private Boolean isRead;
+	private Boolean isRead = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "notification_content_id", nullable = false)
@@ -33,7 +33,7 @@ public class NotificationInfo extends BaseEntity {
 	@Builder
 	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent) {
 		this.category = category;
-		this.isRead = isRead;
+		this.isRead = isRead != null ? isRead : false; // 초기값 세팅
 		this.notificationContent = notificationContent;
 	}
 }
