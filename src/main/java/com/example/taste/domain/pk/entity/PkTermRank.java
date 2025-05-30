@@ -1,8 +1,6 @@
-package com.example.taste.domain.image.entity;
+package com.example.taste.domain.pk.entity;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,8 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,23 +15,30 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "board_image")
+@Table(name = "pk_term_rank")
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class BoardImage {
+public class PkTermRank {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id", nullable = false)
-	private Image image;
+	@Column(nullable = false)
+	private int rank;
 
-	//board 연관관계
+	@Builder.Default
+	@Column(nullable = false)
+	private int point = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "pk_term_id", nullable = false)
+	private PkTerm pkTerm;
+
+
+	//user 연관관계
 
 }
