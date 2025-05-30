@@ -2,14 +2,18 @@ package com.example.taste.domain.pk.entity;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -33,12 +37,15 @@ public class PkLog extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	private int point = 0;
 
-	//user와 연관관계
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@Builder
-	public PkLog(PkType pkType, Integer point) {
+	public PkLog(PkType pkType, Integer point, User user) {
 		this.pkType = pkType;
 		this.point = point != null ? point : 0;
+		this.user = user;
 	}
 
 }
