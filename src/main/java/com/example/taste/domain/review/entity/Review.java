@@ -23,6 +23,9 @@ public class Review extends BaseEntity {
 	private boolean validated;
 
 	@NotNull
+	private boolean isPresented;
+
+	@NotNull
 	private String content;
 
 	@NotNull
@@ -30,9 +33,10 @@ public class Review extends BaseEntity {
 	private int score;
 
 	@Builder
-	public Review(boolean validated, String content, int score) {
+	public Review(boolean validated, String content, int score, boolean isPresented) {
 		this.validated = validated;
 		this.content = content;
 		this.score = score;
+		this.isPresented = isPresented;
 	}
 }
