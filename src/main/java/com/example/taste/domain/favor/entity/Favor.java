@@ -1,4 +1,4 @@
-package com.example.taste.domain.board.entity;
+package com.example.taste.domain.favor.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,19 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "hashtag")
-public class Hashtag {
-
+@Getter
+@NoArgsConstructor
+@Table(name = "favor")
+public class Favor {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -27,7 +24,7 @@ public class Hashtag {
 	private String name;
 
 	@Builder
-	public Hashtag(String name) {
+	public Favor(String name) {
 		this.name = name;
 	}
 }

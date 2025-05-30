@@ -1,5 +1,9 @@
 package com.example.taste.domain.user.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,16 +14,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
@@ -35,8 +43,9 @@ public class User extends SoftDeletableEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "image_id", nullable = false)
 	private Image image;
 
@@ -75,6 +84,12 @@ public class User extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private int following = 0;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	private List<Board> boardList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	private List<Event> eventList = new ArrayList<>();
+
 	@Builder
 	public User(String nickname, String email, String password, String address, Gender gender, int age, Role role,
 		Level level, Integer postingCount, Integer point, Integer follower, Integer following) {
@@ -85,10 +100,11 @@ public class User extends SoftDeletableEntity {
 		this.gender = gender;
 		this.age = age;
 		this.role = role;
-		this.level = level == null ? Level.NORMAL : level;
-		this.postingCount = postingCount == null ? postingCount : 0;
-		this.point = point == null ? point : 0;
-		this.follower = follower == null ? point : 0;
-		this.following = following == null ? point : 0;
+		this.level = level != null ? level : Level.NORMAL;
+		this.postingCount = postingCount != null ? postingCount : 0;
+		this.point = point != null ? point : 0;
+		this.follower = follower != null ? follower : 0;
+		this.following = following != null ? following : 0;
 	}
+
 }

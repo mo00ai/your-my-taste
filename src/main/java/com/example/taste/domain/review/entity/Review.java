@@ -1,12 +1,20 @@
 package com.example.taste.domain.review.entity;
 
 import com.example.taste.common.entity.BaseEntity;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.user.entity.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,11 +43,27 @@ public class Review extends BaseEntity {
 	@Column(columnDefinition = "tinyint", nullable = false)
 	private int score;
 
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "image_id", nullable = false)
+	private Image image;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id", nullable = false)
+	private Store store;
+
 	@Builder
-	public Review(boolean validated, String content, int score, boolean isPresented) {
+	public Review(boolean validated, String content, int score, boolean isPresented,
+		Image image, User user, Store store) {
 		this.validated = validated;
 		this.content = content;
 		this.score = score;
 		this.isPresented = isPresented;
+		this.image = image;
+		this.user = user;
+		this.store = store;
 	}
 }

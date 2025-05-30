@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,22 +33,20 @@ public class Comment extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "commented_user", nullable = false)
-	private User user;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "commented_user", nullable = false)
+	@JoinColumn(name = "board_id", nullable = false)
 	private Board board;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "parent_comment")
-	private Comment comment;
+	public void setBoard(Board board) {
+		this.board = board;
+		if (!board.getCommentList().contains(this)) {
+			board.getCommentList().add(this);
+		}
+	}
 
 	@Builder
-	public Comment(String content, User user, Board board, Comment comment) {
+	public Comment(String content, LocalDateTime deletedAt, Board board) {
 		this.content = content;
-		this.user = user;
-		this.board = board;
-		this.comment = comment;
+		this.deletedAt = deletedAt;
+		setBoard(board);
 	}
 }
