@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,14 +29,19 @@ public class Event {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = false)
 	private String name;
 
+	@Column(nullable = false)
 	private String contents;
 
+	@Column(nullable = false)
 	private LocalDate startDate;
 
+	@Column(nullable = false)
 	private LocalDate endDate;
 
+	@Column(nullable = false)
 	private boolean isActive;
 
 	@OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST)
