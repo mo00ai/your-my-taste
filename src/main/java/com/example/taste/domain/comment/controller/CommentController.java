@@ -1,0 +1,29 @@
+package com.example.taste.domain.comment.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
+import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
+import com.example.taste.domain.comment.service.CommentService;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/boards/{boardsId}")
+public class CommentController {
+	private final CommentService commentService;
+
+	@PostMapping("/comments")
+	public ResponseEntity<CommonResponse<CreateCommentResponseDto>> createComment(
+		@RequestBody CreateCommentRequestDto requestDto,
+		@PathVariable Long boardsId) {
+		return ResponseEntity.ok(CommonResponse.ok(commentService.createComment(requestDto, boardsId)));
+	}
+}
