@@ -1,5 +1,8 @@
 package com.example.taste.domain.party.entity;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.Getter;
@@ -29,10 +33,19 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	@JoinColumn(name = "userMatchCond", nullable = false)
+	private UserMatchCondStore stores;
+
+	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	@JoinColumn(name = "user_match_condition_id")
+	private List<UserMatchCondCategory> categories;
 
 	private int ageMinRange;
 	private int ageMaxRange;
@@ -44,6 +57,4 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	@Enumerated(EnumType.STRING)
 	private MatchingStatus matchingStatus;
-
-	// TODO: 가게, 카테고리 ManyToMany 연관 추가
 }

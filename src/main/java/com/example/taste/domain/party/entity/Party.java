@@ -21,6 +21,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.enums.PartyStatus;
+import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
 
 @Entity
@@ -36,7 +37,6 @@ public class Party extends BaseCreatedAtEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User hostUser;
 
-	// TODO: 맛집 연관관계
 	@Column(nullable = false)
 	private String title;
 	private String description;
@@ -44,6 +44,12 @@ public class Party extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private PartyStatus partyStatus;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	@JoinColumn(name = "store_id", nullable = false)
+	private Store store;
+
 	private LocalDateTime meetingTime;
 
 	@Column(nullable = false)
