@@ -11,13 +11,13 @@ import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Entity
+import com.example.taste.domain.favor.entity.Favor;
+
 @Getter
-@NoArgsConstructor
-@Table(name = "follow")
-public class Follow {
+@Entity
+@Table(name = "user_favor")
+public class UserFavor {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -26,8 +26,13 @@ public class Follow {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "favor_id", nullable = false)
+	private Favor favor;
+
 	@Builder
-	public Follow(User user) {
+	public UserFavor(User user, Favor favor) {
 		this.user = user;
+		this.favor = favor;
 	}
 }
