@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
@@ -75,6 +76,10 @@ public class Board extends SoftDeletableEntity {
 	// 공감 연관관계
 	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
 	private List<Like> likeList = new ArrayList<>();
+
+	// 댓글 연관관계
+	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
+	private List<Comment> commentList = new ArrayList<>();
 
 	// 이벤트와 게시글 양방향 등록
 	public void register(Store store, User user) {
