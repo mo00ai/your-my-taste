@@ -1,6 +1,7 @@
 package com.example.taste.domain.comment.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,14 +17,21 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/boards/{boardsId}")
+@RequestMapping("/boards/{boardsId}/comments")
 public class CommentController {
 	private final CommentService commentService;
 
-	@PostMapping("/comments")
+	@PostMapping()
 	public ResponseEntity<CommonResponse<CreateCommentResponseDto>> createComment(
 		@RequestBody CreateCommentRequestDto requestDto,
 		@PathVariable Long boardsId) {
 		return ResponseEntity.ok(CommonResponse.ok(commentService.createComment(requestDto, boardsId)));
+	}
+
+	@PatchMapping("/{commentId}")
+	public ResponseEntity<CommonResponse<UpdateCommentResponseDto>> updateComment(
+		@RequestBody UpdateCommentRequestDto requestDto,
+		@PathVariable Long commentId) {
+		return ResponseEntity.ok(CommonResponse.ok(commentService.updateComment(requestDto, commentId)));
 	}
 }
