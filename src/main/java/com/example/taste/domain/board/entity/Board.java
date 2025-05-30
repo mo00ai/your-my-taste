@@ -91,10 +91,6 @@ public class Board extends SoftDeletableEntity {
 		this.store = store;
 		this.user = user;
 
-		if (!store.getBoardList().contains(this)) {
-			store.getBoardList().add(this);
-		}
-
 		if (!user.getBoardList().contains(this)) {
 			user.getBoardList().add(this);
 		}

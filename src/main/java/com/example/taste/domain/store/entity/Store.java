@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.taste.common.entity.BaseEntity;
-import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.review.entity.Review;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -54,7 +54,7 @@ public class Store extends BaseEntity {
 	private BigDecimal mapy;
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.PERSIST)
-	private List<Board> boardList = new ArrayList<>();
+	private List<Review> reviewList = new ArrayList<>();
 
 	@Builder
 	public Store(Category category, String name, String description, String address, String roadAddress,
