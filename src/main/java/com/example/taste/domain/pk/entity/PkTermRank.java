@@ -34,10 +34,9 @@ public class PkTermRank {
 	@Column(nullable = false)
 	private int point = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pk_term_id", nullable = false)
 	private PkTerm pkTerm;
-
 
 	//user 연관관계
 
