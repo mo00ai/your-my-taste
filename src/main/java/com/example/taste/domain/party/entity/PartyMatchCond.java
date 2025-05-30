@@ -26,7 +26,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne(mappedBy = "party_id")
+	@OneToOne
 	private Party party;
 
 	private int ageMinRange;

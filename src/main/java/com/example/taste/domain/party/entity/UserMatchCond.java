@@ -42,11 +42,9 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	private User user;
 
 	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
-	@JoinColumn(name = "user_match_cond_store_id")
 	private List<UserMatchCondStore> stores;
 
 	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
-	@JoinColumn(name = "user_match_condition_id")
 	private List<UserMatchCondCategory> categories;
 
 	private int ageMinRange;
