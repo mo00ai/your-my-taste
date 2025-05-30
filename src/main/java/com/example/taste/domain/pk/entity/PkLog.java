@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pk_log")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PkLog extends BaseCreatedAtEntity {
 
 	@Id
@@ -30,9 +27,15 @@ public class PkLog extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	private PkType pkType;
 
-	@Builder.Default
 	@Column(nullable = false)
 	private int point = 0;
 
 	//user와 연관관계
+
+	@Builder
+	public PkLog(PkType pkType, Integer point) {
+		this.pkType = pkType;
+		this.point = point != null ? point : 0;
+	}
+
 }

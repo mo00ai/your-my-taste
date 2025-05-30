@@ -1,6 +1,5 @@
 package com.example.taste.domain.pk.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -10,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pk_term")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PkTerm {
 
 	@Id
@@ -35,4 +31,12 @@ public class PkTerm {
 
 	@Column(nullable = false)
 	private LocalDateTime endDate;
+
+	@Builder
+	public PkTerm(int term, LocalDateTime startDate, LocalDateTime endDate) {
+		this.term = term;
+		this.startDate = startDate;
+		this.endDate = endDate;
+	}
+
 }

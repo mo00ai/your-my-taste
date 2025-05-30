@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pk_term_rank")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PkTermRank {
 
 	@Id
@@ -30,14 +27,20 @@ public class PkTermRank {
 	@Column(nullable = false)
 	private int rank;
 
-	@Builder.Default
 	@Column(nullable = false)
-	private int point = 0;
+	private int point;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pk_term_id", nullable = false)
 	private PkTerm pkTerm;
 
 	//user 연관관계
+
+	@Builder
+	public PkTermRank(int rank, Integer point, PkTerm pkTerm) {
+		this.rank = rank;
+		this.point = point != null ? point : 0;
+		this.pkTerm = pkTerm;
+	}
 
 }

@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,9 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pk_criteria")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PkCriteria {
 
 	@Id
@@ -29,11 +26,17 @@ public class PkCriteria {
 	@Column(nullable = false)
 	private PkType pkType;
 
-	@Builder.Default
 	@Column(nullable = false)
-	private int count = 0;
+	private int count;
 
-	@Builder.Default
 	@Column(nullable = false)
-	private boolean isActive = true;
+	private boolean isActive;
+
+	@Builder
+	public PkCriteria(PkType pkType, Integer count, Boolean isActive) {
+		this.pkType = pkType;
+		this.count = count != null ? count : 0;
+		this.isActive = isActive != null ? isActive : true;
+	}
+
 }
