@@ -20,7 +20,8 @@ public enum ErrorCode implements BaseCode {
 
 	//AUTH
 	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "A001", "인증되지 않은 사용자입니다."),
-	UNAUTHOIZED(HttpStatus.UNAUTHORIZED, "A002", "접근 권한이 없습니다."),
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A002", "접근 권한이 없습니다."),
+	INVALID_ROLE(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 권한입니다."),
 
 	//ImageAspect
 	INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "I001", "이미지 파일의 크기는 최대 2MB까지 업로드 가능합니다."),
