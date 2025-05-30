@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.example.auction.common.response.CommonResponse;
-import com.example.auction.common.response.ErrorResponse;
+import com.example.taste.common.response.CommonResponse;
+import com.example.taste.common.response.ErrorResponse;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;

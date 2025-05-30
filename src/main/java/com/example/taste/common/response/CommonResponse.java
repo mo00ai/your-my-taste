@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.auction.common.exception.BaseCode;
-import com.example.auction.common.exception.SuccessCode;
+import com.example.taste.common.exception.BaseCode;
+import com.example.taste.common.exception.SuccessCode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
