@@ -2,11 +2,11 @@ package com.example.taste.domain.comment.dto;
 
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
+import com.example.taste.domain.comment.entity.Comment;
+
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class CreateCommentResponseDto {
 	private Long id;
 	private Long boardId;
@@ -14,4 +14,13 @@ public class CreateCommentResponseDto {
 	private String content;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+
+	public CreateCommentResponseDto(Comment comment) {
+		this.id = comment.getId();
+		this.boardId = comment.getBoard().getId();
+		this.userId = comment.getUser().getId();
+		this.content = comment.getContent();
+		this.createdAt = comment.getCreatedAt();
+		this.updatedAt = comment.getUpdatedAt();
+	}
 }

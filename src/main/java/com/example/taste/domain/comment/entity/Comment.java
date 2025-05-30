@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,6 +45,7 @@ public class Comment extends BaseEntity {
 	@JoinColumn(name = "parent_comment")
 	private Comment comment;
 
+	@Builder
 	public Comment(String content, User user, Board board, Comment comment) {
 		this.content = content;
 		this.user = user;
