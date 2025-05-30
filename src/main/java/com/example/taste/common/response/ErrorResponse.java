@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.taste.common.exception.BaseCode;
-import com.example.taste.common.exception.BaseCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
