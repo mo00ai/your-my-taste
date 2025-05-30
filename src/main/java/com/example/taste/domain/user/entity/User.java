@@ -3,17 +3,6 @@ package com.example.taste.domain.user.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.event.entity.Event;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.user.enums.Gender;
-import com.example.taste.domain.user.enums.Level;
-import com.example.taste.domain.user.enums.Role;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,9 +16,22 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
 
 @Getter
 @Entity
@@ -41,8 +43,9 @@ public class User extends SoftDeletableEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "image_id", nullable = false)
 	private Image image;
 
@@ -97,10 +100,11 @@ public class User extends SoftDeletableEntity {
 		this.gender = gender;
 		this.age = age;
 		this.role = role;
-		this.level = level == null ? Level.NORMAL : level;
-		this.postingCount = postingCount == null ? postingCount : 0;
-		this.point = point == null ? point : 0;
-		this.follower = follower == null ? point : 0;
-		this.following = following == null ? point : 0;
+		this.level = level != null ? level : Level.NORMAL;
+		this.postingCount = postingCount != null ? postingCount : 0;
+		this.point = point != null ? point : 0;
+		this.follower = follower != null ? follower : 0;
+		this.following = following != null ? following : 0;
 	}
+
 }

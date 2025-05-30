@@ -12,7 +12,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -24,6 +26,7 @@ import com.example.taste.domain.user.entity.User;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "party_invitation")
 public class PartyInvitation extends BaseCreatedAtEntity {
 	@Id
@@ -47,4 +50,11 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	private InvitationStatus invitationStatus;
 
+	@Builder
+	public PartyInvitation(Party party, User user, InvitationType invitationType, InvitationStatus invitationStatus) {
+		this.party = party;
+		this.user = user;
+		this.invitationType = invitationType;
+		this.invitationStatus = invitationStatus;
+	}
 }
