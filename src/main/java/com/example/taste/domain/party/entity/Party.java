@@ -14,7 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -26,6 +28,7 @@ import com.example.taste.domain.user.entity.User;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "party")
 public class Party extends BaseCreatedAtEntity {
 	@Id
@@ -56,4 +59,17 @@ public class Party extends BaseCreatedAtEntity {
 	private int maxMembers;
 	@Column(nullable = false)
 	private boolean enableRandomMatching = false;
+
+	@Builder
+	public Party(User hostUser, String title, String description, PartyStatus partyStatus, Store store,
+		LocalDateTime meetingTime, int maxMembers, Boolean enableRandomMatching) {
+		this.hostUser = hostUser;
+		this.title = title;
+		this.description = description;
+		this.partyStatus = partyStatus;
+		this.store = store;
+		this.meetingTime = meetingTime;
+		this.maxMembers = maxMembers;
+		this.enableRandomMatching = enableRandomMatching != null ? enableRandomMatching : false;
+	}
 }

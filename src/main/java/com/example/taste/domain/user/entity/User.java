@@ -85,10 +85,10 @@ public class User extends SoftDeletableEntity {
 		this.gender = gender;
 		this.age = age;
 		this.role = role;
-		this.level = level == null ? Level.NORMAL : level;
-		this.postingCount = postingCount == null ? postingCount : 0;
-		this.point = point == null ? point : 0;
-		this.follower = follower == null ? point : 0;
-		this.following = following == null ? point : 0;
+		this.level = level != null ? level : Level.NORMAL;
+		this.postingCount = postingCount != null ? postingCount : 0;
+		this.point = point != null ? point : 0;
+		this.follower = follower != null ? follower : 0;
+		this.following = following != null ? following : 0;
 	}
 }

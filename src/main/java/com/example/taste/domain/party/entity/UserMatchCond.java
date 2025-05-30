@@ -15,7 +15,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,6 +29,7 @@ import com.example.taste.domain.user.enums.Gender;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "user_match_cond")
 public class UserMatchCond extends BaseCreatedAtEntity {
 	@Id
@@ -57,4 +60,17 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	@Enumerated(EnumType.STRING)
 	private MatchingStatus matchingStatus;
+
+	@Builder
+	public UserMatchCond(User user, UserMatchCondStore stores, List<UserMatchCondCategory> categories, int ageMinRange,
+		int ageMaxRange, Gender gender, String region, MatchingStatus matchingStatus) {
+		this.user = user;
+		this.stores = stores;
+		this.categories = categories;
+		this.ageMinRange = ageMinRange;
+		this.ageMaxRange = ageMaxRange;
+		this.gender = gender;
+		this.region = region;
+		this.matchingStatus = matchingStatus;
+	}
 }
