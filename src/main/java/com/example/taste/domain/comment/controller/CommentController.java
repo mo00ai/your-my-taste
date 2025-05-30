@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
+import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
+import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
+import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,5 +36,11 @@ public class CommentController {
 		@RequestBody UpdateCommentRequestDto requestDto,
 		@PathVariable Long commentId) {
 		return ResponseEntity.ok(CommonResponse.ok(commentService.updateComment(requestDto, commentId)));
+	}
+
+	@PatchMapping("/{commentId}/delete")
+	public ResponseEntity<CommonResponse<DeleteCommentResponseDto>> deleteComment(
+		@PathVariable Long commentId) {
+		return ResponseEntity.ok(CommonResponse.ok(commentService.deleteComment(commentId)));
 	}
 }

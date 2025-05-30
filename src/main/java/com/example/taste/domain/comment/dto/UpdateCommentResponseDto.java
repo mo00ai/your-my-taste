@@ -7,18 +7,20 @@ import com.example.taste.domain.comment.entity.Comment;
 import lombok.Getter;
 
 @Getter
-public class CreateCommentResponseDto {
+public class UpdateCommentResponseDto {
 	private Long id;
 	private Long boardId;
 	private Long userId;
 	private String content;
 	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
-	public CreateCommentResponseDto(Comment comment) {
+	public UpdateCommentResponseDto(Comment comment) {
 		this.id = comment.getId();
 		this.boardId = comment.getBoard().getId();
 		this.userId = comment.getUser().getId();
 		this.content = comment.getContent();
 		this.createdAt = comment.getCreatedAt();
+		this.updatedAt = comment.getUpdatedAt();
 	}
 }

@@ -1,10 +1,16 @@
 package com.example.taste.domain.comment.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
+import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
+import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
+import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
@@ -17,7 +23,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
-		Board board = new Board();
+		Board board = Board.builder().build();
 		User user = new User(); //세션에서 가져올 것
 
 		Comment comment = Comment.builder()
@@ -30,5 +36,19 @@ public class CommentService {
 		Comment saved = commentRepository.save(comment);
 
 		return new CreateCommentResponseDto(saved);
+	}
+
+	@Transactional
+	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
+		Comment comment = commentRepository.findById(commentId).orElseThrow();
+		comment.updateContent(requestDto.getContent());
+		return new UpdateCommentResponseDto(comment);
+	}
+
+	@Transactional
+	public DeleteCommentResponseDto deleteComment(Long commentId) {
+		Comment comment = commentRepository.findById(commentId).orElseThrow();
+		comment.deleteContent(LocalDateTime.now());
+		return new DeleteCommentResponseDto(comment);
 	}
 }
