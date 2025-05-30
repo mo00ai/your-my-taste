@@ -3,6 +3,8 @@ package com.example.taste.domain.image.entity;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.example.taste.domain.board.entity.Board;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -31,10 +33,14 @@ public class BoardImage {
 	@JoinColumn(name = "image_id", nullable = false)
 	private Image image;
 
-	//board 연관관계
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "board_id", nullable = false)
+	private Board board;
 
 	@Builder
-	public BoardImage(Image image) {
+	public BoardImage(Image image, Board board) {
 		this.image = image;
+		this.board = board;
 	}
+
 }
