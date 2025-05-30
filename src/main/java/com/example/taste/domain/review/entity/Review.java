@@ -44,15 +44,15 @@ public class Review extends BaseEntity {
 	private int score;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "review_image", nullable = false)
+	@JoinColumn(name = "image_id", nullable = false)
 	private Image image;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reviewer", nullable = false)
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reviewed_store", nullable = false)
+	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
 
 	@Builder
