@@ -14,19 +14,24 @@ import jakarta.persistence.Table;
 
 import lombok.Getter;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.user.entity.User;
 
-@Entity        // TODO: 생성일만 있는거 상속
+@Entity
 @Getter
 @Table(name = "party_invitation")
-public class PartyInvitation {
+public class PartyInvitation extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "party_id", nullable = false)
 	private Party party;
 

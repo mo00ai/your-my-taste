@@ -11,13 +11,14 @@ import jakarta.persistence.Table;
 
 import lombok.Getter;
 
+import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.enums.Gender;
 
-@Entity        // TODO: 생성일만 있는거 상속
+@Entity
 @Getter
 @Table(name = "party_match_cond")
-public class PartyMatchCond {
+public class PartyMatchCond extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

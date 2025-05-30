@@ -13,18 +13,23 @@ import jakarta.persistence.Table;
 
 import lombok.Getter;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
 
-@Entity        // TODO: 생성일만 있는거 상속
+@Entity
 @Getter
 @Table(name = "user_match_cond")
-public class UserMatchCond {
+public class UserMatchCond extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
