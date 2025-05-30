@@ -52,7 +52,7 @@ public class BoardEvent extends BaseEntity {
 	}
 
 	@Builder
-	public void BoardEvent(Event event, Board board) {
+	public BoardEvent(Event event, Board board) {
 		this.register(event, board);
 	}
 }
