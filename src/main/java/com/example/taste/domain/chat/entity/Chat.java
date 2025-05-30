@@ -1,8 +1,7 @@
-package com.example.taste.domain.party.entity;
+package com.example.taste.domain.chat.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,14 +12,13 @@ import jakarta.persistence.Table;
 
 import lombok.Getter;
 
-import com.example.taste.domain.party.enums.MatchingStatus;
+import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.enums.Gender;
 
 @Entity        // TODO: 생성일만 있는거 상속
 @Getter
-@Table(name = "user_match_cond")
-public class UserMatchCond {
+@Table(name = "chat")
+public class Chat {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,16 +27,10 @@ public class UserMatchCond {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	private int ageMinRange;
-	private int ageMaxRange;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "party_id", nullable = false)
+	private Party party;
 
-	@Enumerated(EnumType.STRING)
-	private Gender gender;
-
-	private String region;
-
-	@Enumerated(EnumType.STRING)
-	private MatchingStatus matchingStatus;
-
-	// TODO: 가게, 카테고리 ManyToMany 연관 추가
+	@Column(nullable = false)
+	private String message;
 }
