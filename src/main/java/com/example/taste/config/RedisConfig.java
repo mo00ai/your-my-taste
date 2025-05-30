@@ -26,6 +26,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static com.example.taste.common.constant.RedisConst.DEFAULT;
 
+
+
+
 @Configuration
 @EnableCaching
 public class RedisConfig {
