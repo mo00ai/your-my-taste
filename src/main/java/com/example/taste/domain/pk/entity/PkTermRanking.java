@@ -18,14 +18,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PkTermRank {
+public class PkTermRanking {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(nullable = false)
-	private int rank;
+	private int ranking;
 
 	@Column(nullable = false)
 	private int point;
@@ -37,8 +37,8 @@ public class PkTermRank {
 	//user 연관관계
 
 	@Builder
-	public PkTermRank(int rank, Integer point, PkTerm pkTerm) {
-		this.rank = rank;
+	public PkTermRanking(int ranking, Integer point, PkTerm pkTerm) {
+		this.ranking = ranking;
 		this.point = point != null ? point : 0;
 		this.pkTerm = pkTerm;
 	}
