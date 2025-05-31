@@ -1,6 +1,8 @@
 package com.example.taste.domain.comment.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.board.entity.Board;
@@ -14,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +42,10 @@ public class Comment extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_comment")
-	private Comment parentComment;
+	private Comment parent;
+
+	@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+	private List<Comment> children = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -53,12 +59,16 @@ public class Comment extends BaseEntity {
 	}
 
 	@Builder
-	public Comment(String content, LocalDateTime deletedAt, Board board, Comment comment, User user) {
+	public Comment(String content, LocalDateTime deletedAt, Board board, User user, Comment parent) {
 		this.content = content;
 		this.deletedAt = deletedAt;
-		this.parentComment = comment;
+		this.parent = parent;
 		this.user = user;
 		setBoard(board);
+	}
+
+	public void addChild(Comment child) {
+		this.getChildren().add(child);
 	}
 
 	public void updateContent(String content) {

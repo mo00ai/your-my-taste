@@ -1,6 +1,10 @@
 package com.example.taste.domain.comment.controller;
 
+import java.net.URI;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +16,7 @@ import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
+import com.example.taste.domain.comment.dto.GetAllCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
@@ -24,11 +29,13 @@ import lombok.RequiredArgsConstructor;
 public class CommentController {
 	private final CommentService commentService;
 
-	@PostMapping()
+	@PostMapping
 	public ResponseEntity<CommonResponse<CreateCommentResponseDto>> createComment(
 		@RequestBody CreateCommentRequestDto requestDto,
 		@PathVariable Long boardsId) {
-		return ResponseEntity.ok(CommonResponse.ok(commentService.createComment(requestDto, boardsId)));
+		URI redirect = URI.create("temp");
+		return ResponseEntity.created(redirect)
+			.body(CommonResponse.created(commentService.createComment(requestDto, boardsId)));
 	}
 
 	@PatchMapping("/{commentId}")
@@ -42,5 +49,11 @@ public class CommentController {
 	public ResponseEntity<CommonResponse<DeleteCommentResponseDto>> deleteComment(
 		@PathVariable Long commentId) {
 		return ResponseEntity.ok(CommonResponse.ok(commentService.deleteComment(commentId)));
+	}
+
+	@GetMapping
+	public ResponseEntity<CommonResponse<List<GetAllCommentDto>>> getAllCommentOfBoard(
+		@PathVariable Long boardsId) {
+		return ResponseEntity.ok(CommonResponse.ok(commentService.getAllCommentOfBoard(boardsId)));
 	}
 }
