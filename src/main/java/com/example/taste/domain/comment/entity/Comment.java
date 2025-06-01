@@ -1,8 +1,6 @@
 package com.example.taste.domain.comment.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.board.entity.Board;
@@ -16,7 +14,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,8 +41,9 @@ public class Comment extends BaseEntity {
 	@JoinColumn(name = "parent_comment")
 	private Comment parent;
 
-	@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
-	private List<Comment> children = new ArrayList<>();
+	//@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+	//private List<Comment> children = new ArrayList<>();
+	// children 필드는 지금 당장 필요 없어보임
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -67,9 +65,12 @@ public class Comment extends BaseEntity {
 		setBoard(board);
 	}
 
+	/*
 	public void addChild(Comment child) {
 		this.getChildren().add(child);
 	}
+	
+	 */
 
 	public void updateContent(String content) {
 		this.content = content;

@@ -13,7 +13,7 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
-import com.example.taste.domain.comment.dto.GetAllCommentDto;
+import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
@@ -57,17 +57,17 @@ public class CommentService {
 		return new DeleteCommentResponseDto(comment);
 	}
 
-	public List<GetAllCommentDto> getAllCommentOfBoard(Long boardsId) {
+	public List<GetCommentDto> getAllCommentOfBoard(Long boardsId) {
 		// 일단 board 에 종속된 모든 comment 를 구분 없이 가져온다.
 		Board board = Board.builder().build();
 		List<Comment> comments = commentRepository.findAllByBoard(board);
-		List<GetAllCommentDto> roots = new ArrayList<>();
-		Map<Long, GetAllCommentDto> temp = new HashMap();
+		List<GetCommentDto> roots = new ArrayList<>();
+		Map<Long, GetCommentDto> temp = new HashMap();
 		// comment들을 사용해 dto를 만들고, parent가 있는 경우 parent의 children 리스트에 넣어줌
 		// dto는 일단 전부 map에 저장, parent에 넣을 필요가 있을 때 parent를 map에서 찾아서 넣음.
 		// 아닌 경우 root 리스트에 들어가게 됨
 		for (Comment comment : comments) {
-			GetAllCommentDto dto = new GetAllCommentDto(comment);
+			GetCommentDto dto = new GetCommentDto(comment);
 			temp.put(dto.getId(), dto);
 
 			// 이번에 dto로 만든 comment가 부모가 있는 경우
@@ -83,5 +83,9 @@ public class CommentService {
 			//root에 저장되지 않은 dto들은 어딘가의 children으로 등록되어있기 때문에 자동으로 출력된다.
 		}
 		return roots;
+	}
+
+	public GetCommentDto getComment(Long commentId) {
+		return new GetCommentDto(commentRepository.findById(commentId).orElseThrow());
 	}
 }

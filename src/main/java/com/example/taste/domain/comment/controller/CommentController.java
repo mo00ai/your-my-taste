@@ -16,7 +16,7 @@ import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
-import com.example.taste.domain.comment.dto.GetAllCommentDto;
+import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
@@ -52,8 +52,14 @@ public class CommentController {
 	}
 
 	@GetMapping
-	public ResponseEntity<CommonResponse<List<GetAllCommentDto>>> getAllCommentOfBoard(
+	public ResponseEntity<CommonResponse<List<GetCommentDto>>> getAllCommentOfBoard(
 		@PathVariable Long boardsId) {
 		return ResponseEntity.ok(CommonResponse.ok(commentService.getAllCommentOfBoard(boardsId)));
+	}
+
+	@GetMapping("/{commentId}")
+	public ResponseEntity<CommonResponse<GetCommentDto>> getComment(
+		@PathVariable Long commentId) {
+		return ResponseEntity.ok(CommonResponse.ok(commentService.getComment(commentId)));
 	}
 }

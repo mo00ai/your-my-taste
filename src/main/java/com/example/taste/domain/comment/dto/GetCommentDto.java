@@ -10,16 +10,16 @@ import com.example.taste.domain.comment.entity.Comment;
 import lombok.Getter;
 
 @Getter
-public class GetAllCommentDto {
+public class GetCommentDto {
 	private Long id;
 	private Long boardId;
 	private Long userId;
 	private String content;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
-	private List<GetAllCommentDto> children = new ArrayList<>();
+	private List<GetCommentDto> children = new ArrayList<>();
 
-	public GetAllCommentDto(Comment comment) {
+	public GetCommentDto(Comment comment) {
 		this.id = comment.getId();
 		this.boardId = comment.getBoard().getId();
 		this.userId = comment.getUser().getId();
@@ -30,7 +30,7 @@ public class GetAllCommentDto {
 		// 재귀적으로 자식 댓글도 DTO로 변환
 		if (comment.getChildren() != null && !comment.getChildren().isEmpty()) {
 			this.children = comment.getChildren().stream()
-				.map(GetAllCommentDto::new)
+				.map(GetCommentDto::new)
 				.collect(Collectors.toList());
 		}
 	}
