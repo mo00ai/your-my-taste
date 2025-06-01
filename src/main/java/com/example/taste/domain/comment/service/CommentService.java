@@ -31,13 +31,18 @@ public class CommentService {
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
 		Board board = Board.builder().build();
 		User user = new User(); //세션에서 가져올 것
+		Comment parent = requestDto.getParent() == null ? null :
+			commentRepository.findById(requestDto.getParent()).orElseThrow();
+		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
 			.content(requestDto.getContent())
+			.parent(parent)
+			.root(root)
 			.board(board)
 			.user(user)
 			.build();
-
+		
 		Comment saved = commentRepository.save(comment);
 
 		return new CreateCommentResponseDto(saved);
@@ -62,7 +67,7 @@ public class CommentService {
 		Board board = Board.builder().build();
 		List<Comment> comments = commentRepository.findAllByBoard(board);
 		List<GetCommentDto> roots = new ArrayList<>();
-		Map<Long, GetCommentDto> temp = new HashMap();
+		Map<Long, GetCommentDto> temp = new HashMap<Long, GetCommentDto>();
 		// comment들을 사용해 dto를 만들고, parent가 있는 경우 parent의 children 리스트에 넣어줌
 		// dto는 일단 전부 map에 저장, parent에 넣을 필요가 있을 때 parent를 map에서 찾아서 넣음.
 		// 아닌 경우 root 리스트에 들어가게 됨
