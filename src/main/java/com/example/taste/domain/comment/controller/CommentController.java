@@ -1,9 +1,6 @@
 package com.example.taste.domain.comment.controller;
 
-import java.net.URI;
-
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,36 +28,34 @@ public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping
-	public ResponseEntity<CommonResponse<CreateCommentResponseDto>> createComment(
+	public CommonResponse<CreateCommentResponseDto> createComment(
 		@RequestBody CreateCommentRequestDto requestDto,
 		@PathVariable Long boardsId) {
-		URI redirect = URI.create("temp");
-		return ResponseEntity.created(redirect)
-			.body(CommonResponse.created(commentService.createComment(requestDto, boardsId)));
+		return CommonResponse.created(commentService.createComment(requestDto, boardsId));
 	}
 
 	@PatchMapping("/{commentId}")
-	public ResponseEntity<CommonResponse<UpdateCommentResponseDto>> updateComment(
+	public CommonResponse<UpdateCommentResponseDto> updateComment(
 		@RequestBody UpdateCommentRequestDto requestDto,
 		@PathVariable Long commentId) {
-		return ResponseEntity.ok(CommonResponse.ok(commentService.updateComment(requestDto, commentId)));
+		return CommonResponse.ok(commentService.updateComment(requestDto, commentId));
 	}
 
 	@PatchMapping("/{commentId}/delete")
-	public ResponseEntity<CommonResponse<DeleteCommentResponseDto>> deleteComment(
+	public CommonResponse<DeleteCommentResponseDto> deleteComment(
 		@PathVariable Long commentId) {
-		return ResponseEntity.ok(CommonResponse.ok(commentService.deleteComment(commentId)));
+		return CommonResponse.ok(commentService.deleteComment(commentId));
 	}
 
 	@GetMapping
-	public ResponseEntity<CommonResponse<Page<GetCommentDto>>> getAllCommentOfBoard(
+	public CommonResponse<Page<GetCommentDto>> getAllCommentOfBoard(
 		@PathVariable Long boardsId, @RequestParam(defaultValue = "1", required = false) int index) {
-		return ResponseEntity.ok(CommonResponse.ok(commentService.getAllCommentOfBoard(boardsId, index)));
+		return CommonResponse.ok(commentService.getAllCommentOfBoard(boardsId, index));
 	}
 
 	@GetMapping("/{commentId}")
-	public ResponseEntity<CommonResponse<GetCommentDto>> getComment(
+	public CommonResponse<GetCommentDto> getComment(
 		@PathVariable Long commentId) {
-		return ResponseEntity.ok(CommonResponse.ok(commentService.getComment(commentId)));
+		return CommonResponse.ok(commentService.getComment(commentId));
 	}
 }
