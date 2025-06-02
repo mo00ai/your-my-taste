@@ -1,6 +1,7 @@
 package com.example.taste.domain.comment.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +42,7 @@ public class CommentController {
 		return CommonResponse.ok(commentService.updateComment(requestDto, commentId));
 	}
 
-	@PatchMapping("/{commentId}/delete")
+	@DeleteMapping("/{commentId}/delete")
 	public CommonResponse<DeleteCommentResponseDto> deleteComment(
 		@PathVariable Long commentId) {
 		return CommonResponse.ok(commentService.deleteComment(commentId));
