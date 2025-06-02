@@ -63,9 +63,7 @@ public class ImageService {
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
 
-		return ImageResponseDto.builder()
-			.image(image)
-			.build();
+		return new ImageResponseDto(image.getId(), image.getUrl(), image.getUploadFileName());
 	}
 
 	@Transactional
