@@ -5,9 +5,10 @@ import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.store.dto.AddStoreRequest;
-import com.example.taste.domain.store.dto.CreateBucketRequest;
-import com.example.taste.domain.store.dto.StoreBucketResponse;
+import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
+import com.example.taste.domain.store.dto.request.CreateBucketRequest;
+import com.example.taste.domain.store.dto.response.StoreBucketResponse;
+import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.entity.StoreBucket;
 import com.example.taste.domain.store.entity.StoreBucketItem;
@@ -40,7 +41,7 @@ public class StoreBucketServiceImpl implements StoreService {
 	}
 
 	@Override
-	public void addStore(AddStoreRequest request) {
+	public void addBucketItem(AddBucketItemRequest request) {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
@@ -55,5 +56,11 @@ public class StoreBucketServiceImpl implements StoreService {
 
 			storeBucketItemRepository.save(storeBucketItem);
 		}
+	}
+
+	@Override
+	public StoreResponse getStore(Long id) {
+		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		return StoreResponse.from(store);
 	}
 }

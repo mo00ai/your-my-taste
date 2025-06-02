@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.store.dto.AddStoreRequest;
-import com.example.taste.domain.store.dto.CreateBucketRequest;
-import com.example.taste.domain.store.dto.StoreBucketResponse;
+import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
+import com.example.taste.domain.store.dto.request.CreateBucketRequest;
+import com.example.taste.domain.store.dto.response.StoreBucketResponse;
 import com.example.taste.domain.store.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class StoreBucketController {
 	}
 
 	@PostMapping("/store-buckets/store-bucket-items")
-	public CommonResponse<Void> addStore(@RequestBody AddStoreRequest request) {
-		storeService.addStore(request);
+	public CommonResponse<Void> addBucketItem(@RequestBody AddBucketItemRequest request) {
+		storeService.addBucketItem(request);
 		return CommonResponse.ok();
 	}
 }

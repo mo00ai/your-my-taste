@@ -1,4 +1,4 @@
-package com.example.taste.domain.store.dto;
+package com.example.taste.domain.store.dto.response;
 
 import com.example.taste.domain.store.entity.StoreBucket;
 

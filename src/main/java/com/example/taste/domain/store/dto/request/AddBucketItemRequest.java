@@ -1,4 +1,4 @@
-package com.example.taste.domain.store.dto;
+package com.example.taste.domain.store.dto.request;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddStoreRequest {
+public class AddBucketItemRequest {
 	private Long storeId;
 	private List<Long> bucketIds;
 }
