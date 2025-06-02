@@ -1,8 +1,6 @@
-package com.example.taste.domain.image.entity;
+package com.example.taste.domain.event.entity;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
+import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.board.entity.Board;
 
 import jakarta.persistence.Entity;
@@ -14,40 +12,48 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "board_image")
-@Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardImage {
+@Entity
+@Table(name = "board_event")
+public class BoardEvent extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id", nullable = false)
-	private Image image;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "board_id", nullable = false)
 	private Board board;
 
-	public void setBoard(Board board) {
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "event_id", nullable = false)
+	private Event event;
+
+	// 이벤트와 게시글 양방향 등록
+	public void register(Event event, Board board) {
+		this.event = event;
 		this.board = board;
-		if (!board.getBoardImageList().contains(this)) {
-			board.getBoardImageList().add(this);
+
+		if (!board.getBoardEventList().contains(this)) {
+			board.getBoardEventList().add(this);
 		}
+
+		if (!event.getBoardEventList().contains(this)) {
+			event.getBoardEventList().add(this);
+		}
+
 	}
 
 	@Builder
-	public BoardImage(Image image, Board board) {
-		this.image = image;
-		setBoard(board);
+	public BoardEvent(Event event, Board board) {
+		this.register(event, board);
 	}
-
 }

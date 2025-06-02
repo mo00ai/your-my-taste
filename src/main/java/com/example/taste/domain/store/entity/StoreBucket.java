@@ -1,10 +1,12 @@
-package com.example.taste.domain.image.entity;
+package com.example.taste.domain.store.entity;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.user.entity.User;
 
+import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,40 +16,36 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "board_image")
 @Entity
-@Getter
+@Table(name = "store_bucket")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardImage {
-
+@AllArgsConstructor
+@Getter
+public class StoreBucket {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id", nullable = false)
-	private Image image;
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "board_id", nullable = false)
-	private Board board;
+	@Column(nullable = false)
+	private String name;
 
-	public void setBoard(Board board) {
-		this.board = board;
-		if (!board.getBoardImageList().contains(this)) {
-			board.getBoardImageList().add(this);
-		}
-	}
+	@Column(nullable = false)
+	private boolean isOpened;
 
 	@Builder
-	public BoardImage(Image image, Board board) {
-		this.image = image;
-		setBoard(board);
+	public StoreBucket(User user, String name, Boolean isOpened) {
+		this.user = user;
+		this.name = StringUtils.isBlank(name) ? "기본 리스트" : name;
+		this.isOpened = isOpened == null || isOpened;
 	}
-
 }

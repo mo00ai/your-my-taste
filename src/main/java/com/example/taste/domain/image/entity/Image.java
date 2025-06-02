@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,9 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "image")
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Image extends BaseEntity {
 
 	@Id
@@ -41,4 +38,12 @@ public class Image extends BaseEntity {
 	@Column(nullable = false, length = 50)
 	private String fileExtension;
 
+	@Builder
+	public Image(String url, String originFileName, String uploadFileName, Long fileSize, String fileExtension) {
+		this.url = url;
+		this.originFileName = originFileName;
+		this.uploadFileName = uploadFileName;
+		this.fileSize = fileSize;
+		this.fileExtension = fileExtension;
+	}
 }
