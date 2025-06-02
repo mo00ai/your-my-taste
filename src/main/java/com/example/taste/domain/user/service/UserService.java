@@ -2,7 +2,9 @@ package com.example.taste.domain.user.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -11,9 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.user.dto.UserDeleteRequestDto;
-import com.example.taste.domain.user.dto.UserMyProfileResponseDto;
-import com.example.taste.domain.user.dto.UserUpdateRequestDto;
+import com.example.taste.domain.favor.entity.Favor;
+import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
+import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
+import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.UserFavorRepository;
@@ -24,6 +30,7 @@ import com.example.taste.domain.user.repository.UserRepository;
 public class UserService {
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
+	private final FavorRepository favorRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	// 내 정보 조회
@@ -62,10 +69,51 @@ public class UserService {
 	}
 
 	@Transactional
+	public void updateUserFavor(Long userId, UserFavorUpdateListRequestDto requestDto) {
+		List<UserFavorUpdateRequestDto> updateFavorList
+			= requestDto.getUserFavorList();                            // 업데이트 요청 리스트
+
+		User user = userRepository.findById(userId).orElseThrow();
+		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
+
+		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
+		// 2. 삭제된 항목, 혹은 3. 새로 추가한 항목을 반영 (수정 항목)
+
+		// 삭제된 항목 반영
+		ArrayList<UserFavor> newUserFavorList = userFavorList.stream()
+			.filter(userFavor ->
+				updateFavorList.stream()
+					.anyMatch(updateItem -> isSameItem(updateItem, userFavor)))
+			.collect(Collectors.toCollection(ArrayList::new));
+
+		// 새로 추가할 항목만 추출
+		List<UserFavorUpdateRequestDto> newUpdateFavorList = updateFavorList.stream()
+			.filter(updateItem ->
+				userFavorList.stream()
+					.anyMatch(userFavor -> isSameItem(updateItem, userFavor))
+			).toList();
+
+		// Favor 리스트에 있는 것만 추가 반영(올바른 값만)
+		// newUpdateFavorList 의 아이템 하나가 favorList 의 하나와 일치한다면 newUpdateFavorList 에 추가
+		List<Favor> favorList = favorRepository.findAll();
+		newUpdateFavorList.forEach(
+			(updateItem) -> favorList.forEach(
+				(favor) -> {
+					if (isExistsItem(updateItem, favor)) {
+						newUserFavorList.add(new UserFavor(user, favor));
+					}
+				})
+		);
+
+		user.setUserFavorList(newUserFavorList);
+	}
+
+	@Transactional
 	public void followUser(Long userId, Long followingUserId) {
 		User user = userRepository.findById(userId).orElseThrow();
 		User followingUser = userRepository.findById(followingUserId).orElseThrow();
 		user.follow(user, followingUser);
+		// TODO: 팔로우 받은 상대의 팔로워 수 증가
 	}
 
 	@Transactional
@@ -73,5 +121,16 @@ public class UserService {
 		User user = userRepository.findById(userId).orElseThrow();
 		User followingUser = userRepository.findById(followingUserId).orElseThrow();
 		user.unfollow(user, followingUser);
+		// TODO: 팔로우 받은 상대의 팔로워 수 감소
+	}
+
+	private boolean isSameItem(UserFavorUpdateRequestDto update, UserFavor favor) {
+		return update.getUserFavorId().equals(favor.getId()) &&
+			update.getName().equals(favor.getFavor().getName());
+	}
+
+	private boolean isExistsItem(UserFavorUpdateRequestDto update, Favor favor) {
+		return update.getUserFavorId().equals(favor.getId()) &&
+			update.getName().equals(favor.getName());
 	}
 }

@@ -1,4 +1,4 @@
-package com.example.taste.domain.user.dto;
+package com.example.taste.domain.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

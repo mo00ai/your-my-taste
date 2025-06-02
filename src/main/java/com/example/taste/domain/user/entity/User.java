@@ -28,9 +28,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
-import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.user.dto.UserUpdateRequestDto;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
@@ -92,8 +91,9 @@ public class User extends SoftDeletableEntity {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
 
+	@Setter
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-	private List<Favor> favorList = new ArrayList<>();
+	private List<UserFavor> userFavorList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Follow> followingList = new ArrayList<>();
@@ -130,9 +130,11 @@ public class User extends SoftDeletableEntity {
 
 	public void follow(User follower, User following) {
 		this.followingList.add(new Follow(follower, following));
+		this.following++;
 	}
 
-	public void unfollow(User follower, User following) {
-		this.followingList.add(new Follow(follower, following));
+	public void unfollow(Follow follow) {
+		this.followingList.remove(follow);
+		this.following--;
 	}
 }

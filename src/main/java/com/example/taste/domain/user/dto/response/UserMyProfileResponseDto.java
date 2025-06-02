@@ -1,4 +1,4 @@
-package com.example.taste.domain.user.dto;
+package com.example.taste.domain.user.dto.response;
 
 import java.util.List;
 
@@ -9,10 +9,11 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 
 @Getter
-public class UserProfileResponseDto {
+public class UserMyProfileResponseDto {
 	private Long id;
 	private String nickname;
 	private String email;
+	private String address;
 	private String level;
 	private List<UserFavorResponseDto> favors;
 	private int point;
@@ -22,10 +23,11 @@ public class UserProfileResponseDto {
 	private int postingCount;
 
 	@Builder
-	public UserProfileResponseDto(User user, List<UserFavor> favors) {
+	public UserMyProfileResponseDto(User user, List<UserFavor> favors) {
 		this.id = user.getId();
 		this.nickname = user.getNickname();
 		this.email = user.getEmail();
+		this.address = user.getAddress();
 		this.level = user.getLevel().toString();
 		this.favors = favors.stream()
 			.map(UserFavorResponseDto::new)

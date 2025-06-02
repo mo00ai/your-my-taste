@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.dto.UserDeleteRequestDto;
-import com.example.taste.domain.user.dto.UserMyProfileResponseDto;
-import com.example.taste.domain.user.dto.UserUpdateRequestDto;
+import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
+import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.service.UserService;
 
 @RestController
@@ -50,6 +51,15 @@ public class UserController {
 		@RequestBody UserDeleteRequestDto requestDto) {
 		Long userId = 1L;
 		userService.deleteUser(userId, requestDto);
+		return CommonResponse.ok();
+	}
+
+	@PostMapping("/favor")
+	public CommonResponse<Void> updateUserFavor(
+		@RequestBody UserFavorUpdateListRequestDto requestDto
+	) {
+		Long userId = 1L;
+		userService.updateUserFavor(userId, requestDto);
 		return CommonResponse.ok();
 	}
 
