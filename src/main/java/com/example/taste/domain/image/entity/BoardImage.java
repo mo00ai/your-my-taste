@@ -37,10 +37,17 @@ public class BoardImage {
 	@JoinColumn(name = "board_id", nullable = false)
 	private Board board;
 
+	public void setBoard(Board board) {
+		this.board = board;
+		if (!board.getBoardImageList().contains(this)) {
+			board.getBoardImageList().add(this);
+		}
+	}
+
 	@Builder
 	public BoardImage(Image image, Board board) {
 		this.image = image;
-		this.board = board;
+		setBoard(board);
 	}
 
 }
