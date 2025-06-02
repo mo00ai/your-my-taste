@@ -65,5 +65,11 @@ public class Review extends BaseEntity {
 		this.image = image;
 		this.user = user;
 		this.store = store;
+		this.setValidated(validated);
+	}
+
+	public void setValidated(Boolean validated) {
+		this.validated = validated;
+		this.isPresented = validated;
 	}
 }
