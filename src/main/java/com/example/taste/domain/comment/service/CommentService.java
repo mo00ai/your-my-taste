@@ -40,7 +40,7 @@ public class CommentService {
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
-			.content(requestDto.getContent())
+			.contents(requestDto.getContents())
 			.parent(parent)
 			.root(root)
 			.board(board)
@@ -55,7 +55,7 @@ public class CommentService {
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
 		Comment comment = commentRepository.findById(commentId).orElseThrow();
-		comment.updateContent(requestDto.getContent());
+		comment.updateContent(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 

@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateCommentRequestDto {
 	@NotEmpty
-	private String content;
+	private String contents;
 }

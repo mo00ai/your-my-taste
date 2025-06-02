@@ -38,7 +38,7 @@ public class Review extends BaseEntity {
 	private boolean isPresented;
 
 	@Column(nullable = false)
-	private String content;
+	private String contents;
 
 	@Column(columnDefinition = "tinyint", nullable = false)
 	private int score;
@@ -56,10 +56,10 @@ public class Review extends BaseEntity {
 	private Store store;
 
 	@Builder
-	public Review(boolean validated, String content, int score, boolean isPresented,
+	public Review(boolean validated, String contents, int score, boolean isPresented,
 		Image image, User user, Store store) {
 		this.validated = validated;
-		this.content = content;
+		this.contents = contents;
 		this.score = score;
 		this.isPresented = isPresented;
 		this.image = image;

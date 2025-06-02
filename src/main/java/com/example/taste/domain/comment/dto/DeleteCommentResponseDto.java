@@ -11,7 +11,7 @@ public class DeleteCommentResponseDto {
 	private Long id;
 	private Long boardId;
 	private Long userId;
-	private String content;
+	private String contents;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
@@ -19,7 +19,7 @@ public class DeleteCommentResponseDto {
 		this.id = comment.getId();
 		this.boardId = comment.getBoard().getId();
 		this.userId = comment.getUser().getId();
-		this.content = comment.getContent();
+		this.contents = comment.getContents();
 		this.createdAt = comment.getCreatedAt();
 		this.updatedAt = comment.getUpdatedAt();
 	}

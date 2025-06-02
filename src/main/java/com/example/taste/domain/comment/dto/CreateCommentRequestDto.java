@@ -13,6 +13,6 @@ public class CreateCommentRequestDto {
 	@NotEmpty
 	//@Pattern(regexp = "^(?!.*(<script|</script|<img|<a\\s|select\\s|union\\s|insert\\s|update\\s|delete\\s|drop\\s|--|\\bor\\b|\\band\\b)).*$", message = "허용되지 않는 문자가 포함되어있습니다.")
 	//굳이?
-	private String content;
+	private String contents;
 	private Long parent;
 }
