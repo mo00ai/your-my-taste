@@ -30,6 +30,7 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.UserUpdateRequestDto;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
@@ -53,7 +54,7 @@ public class User extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private String nickname;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 
 	@Column(nullable = false)
@@ -111,4 +112,16 @@ public class User extends SoftDeletableEntity {
 		this.following = following != null ? following : 0;
 	}
 
+	// 비밀번호 검증 후 업데이트
+	public void update(UserUpdateRequestDto requestDto) {
+		if (requestDto.getNewPassword() != null) {
+			this.password = requestDto.getNewPassword();        // encoded password
+		}
+		if (requestDto.getNickname() != null) {
+			this.nickname = requestDto.getNickname();        // TODO: UNIQUE 걸건지?
+		}
+		if (requestDto.getAddress() != null) {
+			this.address = requestDto.getAddress();
+		}
+	}
 }
