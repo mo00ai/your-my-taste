@@ -8,7 +8,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
 import com.example.taste.domain.store.dto.response.StoreBucketResponse;
-import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.entity.StoreBucket;
 import com.example.taste.domain.store.entity.StoreBucketItem;
@@ -56,11 +55,5 @@ public class StoreBucketServiceImpl implements StoreService {
 
 			storeBucketItemRepository.save(storeBucketItem);
 		}
-	}
-
-	@Override
-	public StoreResponse getStore(Long id) {
-		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
-		return StoreResponse.from(store);
 	}
 }
