@@ -95,11 +95,14 @@ public class ImageService {
 	// }
 
 	@Transactional
-	public Image saveImage(MultipartFile file, ImageType type) throws IOException {
+	public ImageResponseDto saveImage(MultipartFile file, ImageType type) throws IOException {
+
 		// 유효성 검사 등은 이쪽에서
 		Map<String, String> fileInfo = null;
 
 		try {
+
+			System.out.println("트라이 캐치 들어옴");
 
 			fileInfo = s3Service.upload(file);
 
@@ -113,7 +116,11 @@ public class ImageService {
 					file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase())
 				.build();
 
-			return imageRepository.save(image);
+			Image savedImage = imageRepository.save(image);
+
+			return ImageResponseDto.builder()
+				.image(savedImage)
+				.build();
 
 		} catch (Exception e) {
 
