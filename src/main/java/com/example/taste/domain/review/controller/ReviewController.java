@@ -1,8 +1,11 @@
 package com.example.taste.domain.review.controller;
 
+import java.io.IOException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
+import com.example.taste.domain.review.dto.CreateValidationRequest;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
 import com.example.taste.domain.review.dto.UpdateReviewRequestDto;
 import com.example.taste.domain.review.dto.UpdateReviewResponseDto;
@@ -58,8 +62,9 @@ public class ReviewController {
 	}
 
 	@PostMapping
-	public CommonResponse<String> createValidation(@PathVariable Long storeId) {
-		return CommonResponse.ok(reviewService.createValidation(storeId));
+	public CommonResponse<String> createValidation(@PathVariable Long storeId,
+		@ModelAttribute CreateValidationRequest request) throws IOException {
+		return CommonResponse.ok(reviewService.createValidation(storeId, request.getImage()));
 	}
 
 }

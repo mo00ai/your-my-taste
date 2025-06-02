@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
@@ -30,6 +31,7 @@ import com.example.taste.domain.review.dto.OcrResponseDto;
 import com.example.taste.domain.review.dto.UpdateReviewRequestDto;
 import com.example.taste.domain.review.dto.UpdateReviewResponseDto;
 import com.example.taste.domain.review.entity.Review;
+import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
@@ -64,7 +66,8 @@ public class ReviewService {
 
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId) {
-		Review review = reviewRepository.findById(reviewId).orElseThrow();
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		String contents = requestDto.getContents().isEmpty() ? review.getContents() : requestDto.getContents();
 		Image tempImage = requestDto.getImageID() == null ? review.getImage() : Image.builder().build();
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
@@ -84,20 +87,26 @@ public class ReviewService {
 	}
 
 	public GetReviewResponseDto getReview(Long reviewId) {
-		return new GetReviewResponseDto(reviewRepository.findById(reviewId).orElseThrow());
+		return new GetReviewResponseDto(reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND)));
 	}
 
 	public void deleteReview(Long reviewId) {
-		Review review = reviewRepository.findById(reviewId).orElseThrow();
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		reviewRepository.delete(review);
 	}
 
 	public String createValidation(Long storeId, MultipartFile image) throws IOException {
+
+		if (image == null) {
+			throw new CustomException(ReviewErrorCode.NO_IMAGE_REQUESTED);
+		}
+		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
 		User tempUser = User.builder().build();
 		Store tempStore = Store.builder().build();
-		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
 
-		String apiUrl = "https://cbgrx5natw.apigw.ntruss.com/custom/v1/{DomainId}/{InvokeKey}/document/receipt";
+		String apiUrl = "https://dwyd1vrxhu.apigw.ntruss.com/custom/v1/42612/f7152a2fe3e8899aaf3d099f7c46439dfd24c7a5c926edaed8d9a471ae0b563e/document/receipt";
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -142,8 +151,8 @@ public class ReviewService {
 			.getSubName()
 			.getText();
 
-		Boolean ocrResult = true;
-		String key = "reviewValidation:user:" + tempUser.getId() + ":store:" + tempStore.getName();
+		Boolean ocrResult = tempStore.getName().equals(storeName) && validationResult.equals("VALID");
+		String key = "reviewValidation:user:" + tempUser.getId() + ":store:" + tempStore.getId();
 		redisTemplate.opsForValue().set(key, ocrResult, Duration.ofMinutes(10));
 		return ocrResult ? "인증되었습니다." : "인증에 실패하였습니다.";
 	}
