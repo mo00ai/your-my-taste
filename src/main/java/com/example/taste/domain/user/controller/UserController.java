@@ -2,6 +2,7 @@ package com.example.taste.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.user.dto.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.UserUpdateRequestDto;
 import com.example.taste.domain.user.service.UserService;
@@ -38,6 +40,14 @@ public class UserController {
 		@RequestBody UserUpdateRequestDto requestDto) {
 		Long userId = 1L;
 		userService.updateUser(userId, requestDto);
+		return CommonResponse.ok();
+	}
+
+	@DeleteMapping
+	public CommonResponse<Void> deleteUser(
+		@RequestBody UserDeleteRequestDto requestDto) {
+		Long userId = 1L;
+		userService.deleteUser(userId, requestDto);
 		return CommonResponse.ok();
 	}
 }

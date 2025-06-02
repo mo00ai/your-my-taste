@@ -17,7 +17,10 @@ public class UserMyProfileResponseDto {
 	private String level;
 	private List<UserFavorResponseDto> favors;
 	private int point;
-	private String profile;
+	private String image;
+	private int follower;
+	private int following;
+	private int postingCount;
 
 	@Builder
 	public UserMyProfileResponseDto(User user, List<UserFavor> favors) {
@@ -30,6 +33,9 @@ public class UserMyProfileResponseDto {
 			.map(UserFavorResponseDto::new)
 			.toList();
 		this.point = user.getPoint();
-		this.profile = user.getImage().getUrl();
+		this.image = user.getImage().getUrl();
+		this.follower = user.getFollower();
+		this.following = user.getFollowing();
+		this.postingCount = user.getPostingCount();
 	}
 }
