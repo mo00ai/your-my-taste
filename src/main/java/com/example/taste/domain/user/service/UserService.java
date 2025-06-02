@@ -60,4 +60,18 @@ public class UserService {
 		}
 		user.softDelete();
 	}
+
+	@Transactional
+	public void followUser(Long userId, Long followingUserId) {
+		User user = userRepository.findById(userId).orElseThrow();
+		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		user.follow(user, followingUser);
+	}
+
+	@Transactional
+	public void unfollowUser(Long userId, Long followingUserId) {
+		User user = userRepository.findById(userId).orElseThrow();
+		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		user.unfollow(user, followingUser);
+	}
 }

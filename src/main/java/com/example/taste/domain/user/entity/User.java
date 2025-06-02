@@ -95,6 +95,9 @@ public class User extends SoftDeletableEntity {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Favor> favorList = new ArrayList<>();
 
+	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	private List<Follow> followingList = new ArrayList<>();
+
 	@Builder
 	public User(String nickname, String email, String password, String address, Gender gender, int age, Role role,
 		Level level, Integer postingCount, Integer point, Integer follower, Integer following) {
@@ -123,5 +126,13 @@ public class User extends SoftDeletableEntity {
 		if (requestDto.getAddress() != null) {
 			this.address = requestDto.getAddress();
 		}
+	}
+
+	public void follow(User follower, User following) {
+		this.followingList.add(new Follow(follower, following));
+	}
+
+	public void unfollow(User follower, User following) {
+		this.followingList.add(new Follow(follower, following));
 	}
 }
