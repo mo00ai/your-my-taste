@@ -29,6 +29,7 @@ import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
@@ -52,7 +53,7 @@ public class User extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private String nickname;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 
 	@Column(nullable = false)
@@ -84,11 +85,18 @@ public class User extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private int following = 0;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Board> boardList = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
+
+	@Setter
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	private List<UserFavor> userFavorList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	private List<Follow> followingList = new ArrayList<>();
 
 	@Builder
 	public User(String nickname, String email, String password, String address, Gender gender, int age, Role role,
@@ -107,4 +115,34 @@ public class User extends SoftDeletableEntity {
 		this.following = following != null ? following : 0;
 	}
 
+	// 비밀번호 검증 후 업데이트
+	public void update(UserUpdateRequestDto requestDto) {
+		if (requestDto.getNewPassword() != null) {
+			this.password = requestDto.getNewPassword();        // encoded password
+		}
+		if (requestDto.getNickname() != null) {
+			this.nickname = requestDto.getNickname();        // TODO: UNIQUE 걸건지?
+		}
+		if (requestDto.getAddress() != null) {
+			this.address = requestDto.getAddress();
+		}
+	}
+
+	public void follow(User follower, User following) {
+		this.followingList.add(new Follow(follower, following));
+		this.following++;
+	}
+
+	public void followed() {
+		this.follower++;
+	}
+
+	public void unfollow(Follow follow) {
+		this.followingList.remove(follow);
+		this.following--;
+	}
+
+	public void unfollowed() {
+		this.follower--;
+	}
 }
