@@ -3,12 +3,11 @@ package com.example.taste.common.response;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.taste.common.exception.BaseCode;
-import com.example.taste.common.exception.BaseCode;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import com.example.taste.common.exception.BaseCode;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Getter
 @Builder
@@ -39,6 +38,7 @@ public class ErrorResponse {
 	@Getter
 	@Builder
 	public static class FieldError {
+
 		private String field;
 		private String value;
 		private String reason;

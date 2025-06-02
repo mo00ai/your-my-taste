@@ -1,9 +1,4 @@
-package com.example.taste.domain.image.entity;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import com.example.taste.domain.board.entity.Board;
+package com.example.taste.domain.board.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,39 +9,43 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Table(name = "board_image")
-@Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardImage {
+@Entity
+@Table(name = "board_hashtag")
+public class BoardHashtag {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "image_id", nullable = false)
-	private Image image;
-
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "board_id", nullable = false)
 	private Board board;
 
+	@Setter
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "hashtag_id", nullable = false)
+	private Hashtag hashtag;
+
 	public void setBoard(Board board) {
 		this.board = board;
-		if (!board.getBoardImageList().contains(this)) {
-			board.getBoardImageList().add(this);
+		if (!board.getBoardHashtagList().contains(this)) {
+			board.getBoardHashtagList().add(this);
 		}
 	}
 
 	@Builder
-	public BoardImage(Image image, Board board) {
-		this.image = image;
+	public BoardHashtag(Board board, Hashtag hashtag) {
+		this.hashtag = hashtag;
 		setBoard(board);
 	}
 
