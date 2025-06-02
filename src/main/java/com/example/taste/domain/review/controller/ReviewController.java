@@ -52,6 +52,14 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/{reviewId}")
-	public CommonResponse<>
+	public CommonResponse<String> deleteReview(@PathVariable Long reviewId) {
+		reviewService.deleteReview(reviewId);
+		return CommonResponse.ok("삭제되었습니다.");
+	}
+
+	@PostMapping
+	public CommonResponse<String> createValidation(@PathVariable Long storeId) {
+		return CommonResponse.ok(reviewService.createValidation(storeId));
+	}
 
 }
