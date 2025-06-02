@@ -133,8 +133,16 @@ public class User extends SoftDeletableEntity {
 		this.following++;
 	}
 
+	public void followed() {
+		this.follower++;
+	}
+
 	public void unfollow(Follow follow) {
 		this.followingList.remove(follow);
 		this.following--;
+	}
+
+	public void unfollowed() {
+		this.follower--;
 	}
 }

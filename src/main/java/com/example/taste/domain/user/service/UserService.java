@@ -20,8 +20,10 @@ import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
+import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
@@ -31,20 +33,21 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
+	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
 		User user = userRepository.findById(userId).orElseThrow();
 		List<UserFavor> favorList = userFavorRepository.findAllByUser(userId);
-		return new UserMyProfileResponseDto(user, favorList);        // TODO: 팔로, 팔로잉, 포스터 카운트 합산 필요
+		return new UserMyProfileResponseDto(user, favorList);
 	}
 
 	// 다른 유저 프로필 조회
 	public UserMyProfileResponseDto getProfile(Long userId) {
 		User user = userRepository.findById(userId).orElseThrow();
 		List<UserFavor> favorList = userFavorRepository.findAllByUser(userId);
-		return new UserMyProfileResponseDto(user, favorList);    // TODO: 팔로, 팔로잉, 포스터 카운트 합산 필요
+		return new UserMyProfileResponseDto(user, favorList);
 	}
 
 	// 유저 정보 업데이트
@@ -113,15 +116,17 @@ public class UserService {
 		User user = userRepository.findById(userId).orElseThrow();
 		User followingUser = userRepository.findById(followingUserId).orElseThrow();
 		user.follow(user, followingUser);
-		// TODO: 팔로우 받은 상대의 팔로워 수 증가
+		followingUser.followed();
 	}
 
 	@Transactional
-	public void unfollowUser(Long userId, Long followingUserId) {
-		User user = userRepository.findById(userId).orElseThrow();
+	public void unfollowUser(Long followerUserId, Long followingUserId) {
+		User follower = userRepository.findById(followerUserId).orElseThrow();
 		User followingUser = userRepository.findById(followingUserId).orElseThrow();
-		user.unfollow(user, followingUser);
-		// TODO: 팔로우 받은 상대의 팔로워 수 감소
+		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId);
+
+		follower.unfollow(follow);
+		followingUser.unfollowed();
 	}
 
 	private boolean isSameItem(UserFavorUpdateRequestDto update, UserFavor favor) {
