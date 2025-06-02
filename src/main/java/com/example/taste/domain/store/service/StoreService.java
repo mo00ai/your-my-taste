@@ -9,17 +9,23 @@ import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.StoreRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class StoreServiceImpl implements StoreService {
+public class StoreService {
 
 	private final StoreRepository storeRepository;
 
-	@Override
 	public StoreResponse getStore(Long id) {
 		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 		return StoreResponse.from(store);
+	}
+
+	@Transactional
+	public void deleteStore(Long id) {
+		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		storeRepository.delete(store);
 	}
 }
