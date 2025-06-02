@@ -65,6 +65,9 @@ dependencies {
     implementation 'org.apache.tika:tika-core:2.9.0'
 
     implementation("software.amazon.awssdk:s3:2.25.11")
+
+    // bcrypt
+    implementation 'at.favre.lib:bcrypt:0.10.2'
 }
 
 tasks.named('test') {
