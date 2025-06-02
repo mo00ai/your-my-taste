@@ -26,7 +26,8 @@ public class S3Service {
 
 	private final S3Client s3Client;
 
-	public Map<String, Object> upload(MultipartFile file) throws IOException {
+	public Map<String, String> upload(MultipartFile file) throws IOException {
+
 		String originalFilename = file.getOriginalFilename();
 		String uploadFilename = UUID.randomUUID() + "_" + originalFilename;
 
@@ -47,10 +48,10 @@ public class S3Service {
 		);
 	}
 
-	public void delete(String key) {
+	public void delete(String uploadFileName) {
 		DeleteObjectRequest request = DeleteObjectRequest.builder()
 			.bucket(bucketName)
-			.key(key)
+			.key(uploadFileName)
 			.build();
 		s3Client.deleteObject(request);
 	}
