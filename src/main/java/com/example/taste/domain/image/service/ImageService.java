@@ -26,14 +26,12 @@ public class ImageService {
 	private final ImageRepository imageRepository;
 
 	@Transactional
-	public ImageResponseDto saveImage(MultipartFile file, ImageType type) throws IOException {
+	public void saveImage(MultipartFile file, ImageType type) throws IOException {
 
 		// 유효성 검사 등은 이쪽에서
 		Map<String, String> fileInfo = null;
 
 		try {
-
-			System.out.println("트라이 캐치 들어옴");
 
 			fileInfo = s3Service.upload(file);
 
@@ -48,10 +46,6 @@ public class ImageService {
 				.build();
 
 			Image savedImage = imageRepository.save(image);
-
-			return ImageResponseDto.builder()
-				.image(savedImage)
-				.build();
 
 		} catch (Exception e) {
 
@@ -76,17 +70,40 @@ public class ImageService {
 
 	@Transactional
 	public void update(Long imageId, ImageType type, MultipartFile file) throws IOException {
+
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
+		// 유효성 검사 등은 이쪽에서
+		Map<String, String> fileInfo = null;
 
-		deleteImage(image);// 기존 사진 삭제
-		saveImage(file, type);
+		try {
+
+			fileInfo = s3Service.upload(file);
+
+			image.update(
+				fileInfo.get("url"),
+				fileInfo.get("uploadFileName"),
+				fileInfo.get("originalFileName"),
+				file.getSize(),
+				file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase(),
+				type
+			);
+
+		} catch (Exception e) {
+
+			//롤백
+			if (fileInfo != null) {
+				s3Service.delete(fileInfo.get("uploadFileName"));
+			}
+			throw new CustomException(FILE_UPLOAD_FAILED);
+		}
 	}
 
 	@Transactional
 	public void deleteImage(Image image) {
 		s3Service.delete(image.getUploadFileName());
 		imageRepository.delete(image);
+
 	}
 
 }

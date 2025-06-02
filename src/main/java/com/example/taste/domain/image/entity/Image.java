@@ -55,4 +55,15 @@ public class Image extends BaseEntity {
 		this.fileSize = fileSize;
 		this.fileExtension = fileExtension;
 	}
+
+	public void update(String url, String uploadFileName, String originFileName,
+		Long fileSize, String fileExtension, ImageType type) {
+		this.url = url;
+		this.uploadFileName = uploadFileName;
+		this.originFileName = originFileName;
+		this.fileSize = fileSize;
+		this.fileExtension = fileExtension;
+		this.type = type;
+	}
+
 }
