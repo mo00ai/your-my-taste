@@ -28,6 +28,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
@@ -84,11 +85,14 @@ public class User extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private int following = 0;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Board> boardList = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	private List<Favor> favorList = new ArrayList<>();
 
 	@Builder
 	public User(String nickname, String email, String password, String address, Gender gender, int age, Role role,
