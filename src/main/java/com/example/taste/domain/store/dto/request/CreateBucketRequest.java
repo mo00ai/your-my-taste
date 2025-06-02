@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateBucketRequest {
-	private String name; // Todo : validation
+	private String name;
 	private Boolean isOpened;
 }

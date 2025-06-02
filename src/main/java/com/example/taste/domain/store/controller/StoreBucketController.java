@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,8 +22,11 @@ import com.example.taste.domain.store.dto.response.BucketItemResponse;
 import com.example.taste.domain.store.dto.response.StoreBucketResponse;
 import com.example.taste.domain.store.service.StoreBucketService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 public class StoreBucketController {
@@ -35,7 +39,7 @@ public class StoreBucketController {
 	}
 
 	@PostMapping("/store-buckets/store-bucket-items")
-	public ResponseEntity<Void> addBucketItem(@RequestBody AddBucketItemRequest request) {
+	public ResponseEntity<Void> addBucketItem(@RequestBody @Valid AddBucketItemRequest request) {
 		Long userId = 1L;
 		storeBucketService.addBucketItem(request, userId);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -55,7 +59,7 @@ public class StoreBucketController {
 
 	@PatchMapping("/store-buckets/{bucketId}")
 	public CommonResponse<StoreBucketResponse> updateBucketName(@PathVariable Long bucketId,
-		@RequestParam String name) {
+		@RequestParam @NotBlank String name) {
 		Long userId = 1L;
 		return CommonResponse.ok(storeBucketService.updateBucketName(bucketId, name, userId));
 	}
@@ -70,7 +74,7 @@ public class StoreBucketController {
 
 	@DeleteMapping("/store-buckets/{bucketId}/store-bucket-items")
 	public ResponseEntity<Void> removeBucketItem(@PathVariable Long bucketId,
-		@RequestBody RemoveBucketItemRequest request) {
+		@RequestBody @Valid RemoveBucketItemRequest request) {
 		Long userId = 1L;
 		storeBucketService.removeBucketItem(bucketId, request, userId);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT)
