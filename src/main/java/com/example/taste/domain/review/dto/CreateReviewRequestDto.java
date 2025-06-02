@@ -19,8 +19,8 @@ public class CreateReviewRequestDto {
 	@Min(1)
 	@Max(5)
 	@NotNull
-	private int score;
+	private Integer score;
 
 	@NotNull
-	private Long image;
+	private Long imageId;
 }

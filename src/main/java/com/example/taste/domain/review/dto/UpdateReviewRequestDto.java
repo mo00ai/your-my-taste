@@ -1,6 +1,7 @@
 package com.example.taste.domain.review.dto;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateReviewRequestDto {
-	@NotEmpty
+
 	private String contents;
+
+	@Min(1)
+	@Max(5)
+	private Integer score;
+
+	private Long imageID;
 }

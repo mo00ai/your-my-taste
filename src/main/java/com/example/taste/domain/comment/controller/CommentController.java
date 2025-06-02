@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
-import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
@@ -43,9 +42,10 @@ public class CommentController {
 	}
 
 	@DeleteMapping("/{commentId}/delete")
-	public CommonResponse<DeleteCommentResponseDto> deleteComment(
+	public CommonResponse<String> deleteComment(
 		@PathVariable Long commentId) {
-		return CommonResponse.ok(commentService.deleteComment(commentId));
+		commentService.deleteComment(commentId);
+		return CommonResponse.ok("삭제되었습니다.");
 	}
 
 	@GetMapping

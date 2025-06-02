@@ -41,7 +41,7 @@ public class Review extends BaseEntity {
 	private String contents;
 
 	@Column(columnDefinition = "tinyint", nullable = false)
-	private int score;
+	private Integer score;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "image_id", nullable = false)
@@ -71,5 +71,17 @@ public class Review extends BaseEntity {
 	public void setValidated(Boolean validated) {
 		this.validated = validated;
 		this.isPresented = validated;
+	}
+
+	public void updateContents(String contents) {
+		this.contents = contents;
+	}
+
+	public void updateScore(Integer score) {
+		this.score = score;
+	}
+
+	public void updateImage(Image image) {
+		this.image = image;
 	}
 }

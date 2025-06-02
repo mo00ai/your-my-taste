@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
-import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
@@ -60,16 +59,15 @@ public class CommentService {
 	}
 
 	@Transactional
-	public DeleteCommentResponseDto deleteComment(Long commentId) {
+	public void deleteComment(Long commentId) {
 		Comment comment = commentRepository.findById(commentId).orElseThrow();
 		comment.deleteContent(LocalDateTime.now());
-		return new DeleteCommentResponseDto(comment);
 	}
 
 	public Page<GetCommentDto> getAllCommentOfBoard(Long boardsId, int index) {
 		// 연관관계를 통한 N+1 문제가 발생하지 않도록, root comment와 거기에 달린 comment들을 연관관계에 의존하지 않고 가져온다.
 		Board board = Board.builder().build();
-		Pageable pageable = PageRequest.of(index, 10);
+		Pageable pageable = PageRequest.of(index - 1, 10);
 		// board에 달린 댓글 중에서 root인 댓글들만 가져온다.(root == null 인 케이스)
 		Page<Comment> comments = commentRepository.findAllRootByBoard(board, pageable);
 		//모든 댓글 중에서 위의 comments들을 root로 가진 댓글들만 가져온다(n+1 회피)
