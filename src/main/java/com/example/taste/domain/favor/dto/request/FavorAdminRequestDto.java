@@ -3,6 +3,6 @@ package com.example.taste.domain.favor.dto.request;
 import lombok.Getter;
 
 @Getter
-public class FavorRequestDto {
+public class FavorAdminRequestDto {
 	private String favorName;
 }
