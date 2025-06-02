@@ -20,6 +20,7 @@ import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
@@ -109,6 +110,24 @@ public class UserService {
 		);
 
 		user.setUserFavorList(newUserFavorList);
+	}
+
+	// 유저의 팔로잉 유저 목록 조회
+	public List<UserSimpleResponseDto> getFollowingUserList(Long followerUserId) {
+		return followRepository.findAllByFollower(followerUserId)
+			.stream()
+			.map(Follow::getFollowing)
+			.map(UserSimpleResponseDto::new)
+			.toList();
+	}
+
+	// 유저의 팔로워 유저 목록 조회
+	public List<UserSimpleResponseDto> getFollowerUserList(Long followingUserId) {
+		return followRepository.findAllByFollowing(followingUserId)
+			.stream()
+			.map(Follow::getFollower)
+			.map(UserSimpleResponseDto::new)
+			.toList();
 	}
 
 	@Transactional

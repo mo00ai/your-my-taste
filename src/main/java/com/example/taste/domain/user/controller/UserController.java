@@ -1,5 +1,7 @@
 package com.example.taste.domain.user.controller;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +19,7 @@ import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.service.UserService;
 
 @RestController
@@ -61,6 +64,20 @@ public class UserController {
 		Long userId = 1L;
 		userService.updateUserFavor(userId, requestDto);
 		return CommonResponse.ok();
+	}
+
+	@GetMapping("/{userId}/following")
+	public CommonResponse<List<UserSimpleResponseDto>> getFollowingUsers(
+		@RequestParam Long userId
+	) {
+		return CommonResponse.ok(userService.getFollowingUserList(userId));
+	}
+
+	@GetMapping("/{userId}/followers")
+	public CommonResponse<List<UserSimpleResponseDto>> getFollowerUsers(
+		@RequestParam Long userId
+	) {
+		return CommonResponse.ok(userService.getFollowerUserList(userId));
 	}
 
 	@PostMapping("/{followingUserId}/follow")
