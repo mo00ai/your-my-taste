@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.auth.dto.SignUpRequestDto;
+import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.service.AuthService;
 
 @RestController
@@ -21,8 +22,14 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public CommonResponse<Void> signup(
-		@RequestBody SignUpRequestDto requestDto, @RequestPart MultipartFile file) {
+		@RequestPart SignUpRequestDto requestDto, @RequestPart(required = false) MultipartFile file) {
 		authService.signup(requestDto, file);
+		return CommonResponse.ok();
+	}
+
+	@PostMapping("/login")
+	public CommonResponse<Void> login(@RequestBody SigninRequestDto requestDto) {
+		authService.login(requestDto);
 		return CommonResponse.ok();
 	}
 }

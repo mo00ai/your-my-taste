@@ -20,7 +20,12 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(sm
-				-> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))    // TODO: 세션 매니저
+					-> {
+					sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
+					sm.sessionFixation().changeSessionId();                        // 세션 고정 공격 방어
+				}
+			)
 			.authorizeHttpRequests(auth
 				-> {
 				auth.requestMatchers("/auth/**").permitAll();

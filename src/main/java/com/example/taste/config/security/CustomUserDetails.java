@@ -54,7 +54,7 @@ public class CustomUserDetails implements UserDetails {
 	}
 
 	@Override
-	public boolean isEnabled() {
-		return true;
+	public boolean isEnabled() {        // 계정 활성화 여부
+		return user.getDeletedAt() == null;
 	}
 }
