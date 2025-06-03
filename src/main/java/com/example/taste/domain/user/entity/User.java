@@ -26,6 +26,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.auth.dto.SignUpRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.image.entity.Image;
@@ -113,6 +114,24 @@ public class User extends SoftDeletableEntity {
 		this.point = point != null ? point : 0;
 		this.follower = follower != null ? follower : 0;
 		this.following = following != null ? following : 0;
+	}
+
+	@Builder
+	public User(SignUpRequestDto requestDto, Image image) {
+		this.nickname = requestDto.getNickname();
+		this.email = requestDto.getEmail();
+		this.password = requestDto.getPassword();
+		this.address = requestDto.getAddress();
+		this.gender = requestDto.getGender() != null ?
+			Gender.valueOf(requestDto.getGender()) : null;
+		this.age = requestDto.getAge() != null ? requestDto.getAge() : 0;
+		this.role = Role.valueOf(requestDto.getRole());
+		this.level = Level.NORMAL;
+		this.postingCount = 0;
+		this.point = 0;
+		this.follower = 0;
+		this.following = 0;
+		this.image = image;
 	}
 
 	// 비밀번호 검증 후 업데이트

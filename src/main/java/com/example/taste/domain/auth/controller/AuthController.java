@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.auth.dto.SignUpRequestDto;
 import com.example.taste.domain.auth.service.AuthService;
 
 @RestController
