@@ -1,5 +1,6 @@
 package com.example.taste.domain.pk.entity;
 
+import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.enums.PkType;
 
 import jakarta.persistence.Column;
@@ -27,19 +28,28 @@ public class PkCriteria {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private PkType pkType;
+	private PkType type;
 
 	@Column(nullable = false)
-	private int count;
+	private int point;
 
-	@Column(nullable = false)
-	private boolean isActive;
+	@Column(name = "is_active", nullable = false)
+	private boolean active;
 
 	@Builder
-	public PkCriteria(PkType pkType, Integer count, Boolean isActive) {
-		this.pkType = pkType;
-		this.count = count != null ? count : 0;
-		this.isActive = isActive != null ? isActive : true;
+	public PkCriteria(PkType type, Integer point, Boolean active) {
+		this.type = type;
+		this.point = point;
+		this.active = active;
+	}
+
+	public void update(PkUpdateRequestDto dto) {
+		this.type = dto.getType() != null ? PkType.valueOf(dto.getType()) : this.type;
+		this.point = dto.getPoint() != null ? dto.getPoint() : this.point;
+	}
+
+	public void delete() {
+		this.active = false;
 	}
 
 }
