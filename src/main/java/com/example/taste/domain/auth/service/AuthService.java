@@ -55,21 +55,23 @@ public class AuthService {
 		String encodedPwd = passwordEncoder.encode(requestDto.getPassword());
 		requestDto.setPassword(encodedPwd);
 
-		Image image = null;
-		// 프로필 이미지 저장
-		if (file != null) {
-			try {
-				image = imageService.saveImage(file, ImageType.USER);
-			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 // TODO: 이미지 트랜잭션 확인 필요
-				log.info("유저 이미지 저장에 실패하였습니다 (email: " + requestDto.getEmail() + ")");
-			}
-		}
 		// 유저 정보 저장
-		User user = new User(requestDto, image);
+		User user = new User(requestDto);
 		userRepository.save(user);
 
 		// 입맛 취향 정보 저장
 		userService.updateUserFavors(user.getId(), requestDto.getFavorList());
+
+		// 프로필 이미지 저장
+		if (file != null) {
+			try {
+				Image image = imageService.saveImage(file, ImageType.USER);
+				user.setImage(image);
+				userRepository.save(user);
+			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 // TODO: 이미지 트랜잭션 확인 필요
+				log.info("유저 이미지 저장에 실패하였습니다 (email: " + requestDto.getEmail() + ")");
+			}
+		}
 	}
 
 	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
@@ -118,6 +120,7 @@ public class AuthService {
 		if (session != null) {
 			session.invalidate();
 		}
+		SecurityContextHolder.clearContext();
 	}
 
 	// 중복 이메일 검사

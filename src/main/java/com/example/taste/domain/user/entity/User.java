@@ -116,7 +116,7 @@ public class User extends SoftDeletableEntity {
 	}
 
 	@Builder
-	public User(SignupRequestDto requestDto, Image image) {
+	public User(SignupRequestDto requestDto) {
 		this.nickname = requestDto.getNickname();
 		this.email = requestDto.getEmail();
 		this.password = requestDto.getPassword();
@@ -124,13 +124,13 @@ public class User extends SoftDeletableEntity {
 		this.gender = requestDto.getGender() != null ?
 			Gender.valueOf(requestDto.getGender()) : null;
 		this.age = requestDto.getAge() != null ? requestDto.getAge() : 0;
-		this.role = Role.valueOf(requestDto.getRole());
+		this.role = requestDto.getRole() != null ?
+			Role.valueOf(requestDto.getRole()) : Role.USER;
 		this.level = Level.NORMAL;
 		this.postingCount = 0;
 		this.point = 0;
 		this.follower = 0;
 		this.following = 0;
-		this.image = image;
 	}
 
 	// 비밀번호 검증 후 업데이트

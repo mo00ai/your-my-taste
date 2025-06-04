@@ -114,9 +114,6 @@ public class UserService {
 
 		// 최종 저장
 		userFavorRepository.saveAll(updateUserFavorList);
-		userFavorRepository.findAll().forEach(i ->
-			System.out.printf("UserFavor Id: %d, UserId: %d, FavorId: %d\n",
-				i.getId(), i.getUser().getId(), i.getFavor().getId()));
 	}
 
 	// 유저의 팔로잉 유저 목록 조회
