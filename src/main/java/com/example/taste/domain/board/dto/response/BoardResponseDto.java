@@ -18,7 +18,7 @@ public class BoardResponseDto {
 	private final String writerName;
 	private final List<String> imageUrlList;
 	private final LocalDateTime createdAt;
-	private final LocalDateTime updateAt;
+	private final LocalDateTime updatedAt;
 
 	@Builder
 	public BoardResponseDto(Board entity) {
@@ -32,7 +32,7 @@ public class BoardResponseDto {
 			.map(bi -> bi.getImage().getUrl())
 			.toList();
 		this.createdAt = entity.getCreatedAt();
-		this.updateAt = entity.getUpdatedAt();
+		this.updatedAt = entity.getUpdatedAt();
 	}
 
 }
