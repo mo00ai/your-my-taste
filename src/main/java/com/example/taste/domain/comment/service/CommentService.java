@@ -13,16 +13,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
-import com.example.taste.domain.comment.dto.DeleteCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
+import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,17 +33,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 	private final CommentRepository commentRepository;
+	private final UserRepository userRepository;
 	//private final BoardRepository boardRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
 		Board board = Board.builder().build();
-		User user = new User(); //세션에서 가져올 것
+		// 임시 유저, 세션에서 가져올것
+		User user = userRepository.findById(1L)
+			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		Comment parent = requestDto.getParent() == null ? null :
-			commentRepository.findById(requestDto.getParent()).orElseThrow();
+			commentRepository.findById(requestDto.getParent())
+				.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
-			.content(requestDto.getContent())
+			.contents(requestDto.getContents())
 			.parent(parent)
 			.root(root)
 			.board(board)
@@ -54,22 +61,23 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
-		Comment comment = commentRepository.findById(commentId).orElseThrow();
-		comment.updateContent(requestDto.getContent());
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
-	public DeleteCommentResponseDto deleteComment(Long commentId) {
-		Comment comment = commentRepository.findById(commentId).orElseThrow();
+	public void deleteComment(Long commentId) {
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		comment.deleteContent(LocalDateTime.now());
-		return new DeleteCommentResponseDto(comment);
 	}
 
 	public Page<GetCommentDto> getAllCommentOfBoard(Long boardsId, int index) {
 		// 연관관계를 통한 N+1 문제가 발생하지 않도록, root comment와 거기에 달린 comment들을 연관관계에 의존하지 않고 가져온다.
 		Board board = Board.builder().build();
-		Pageable pageable = PageRequest.of(index, 10);
+		Pageable pageable = PageRequest.of(index - 1, 10);
 		// board에 달린 댓글 중에서 root인 댓글들만 가져온다.(root == null 인 케이스)
 		Page<Comment> comments = commentRepository.findAllRootByBoard(board, pageable);
 		//모든 댓글 중에서 위의 comments들을 root로 가진 댓글들만 가져온다(n+1 회피)
@@ -114,6 +122,7 @@ public class CommentService {
 	}
 
 	public GetCommentDto getComment(Long commentId) {
-		return new GetCommentDto(commentRepository.findById(commentId).orElseThrow());
+		return new GetCommentDto(commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
 	}
 }
