@@ -50,7 +50,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Boolean> redisTemplate;
 	private final ImageService imageService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
@@ -89,7 +89,7 @@ public class ReviewService {
 		Review review = reviewRepository.getReviewWithUser(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		String contents = requestDto.getContents().isEmpty() ? review.getContents() : requestDto.getContents();
-		Image image = imageService.saveImage(multipartFile, imageType);
+		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
 		String key = "reviewValidation:user" + review.getUser().getId() + ":store" + review.getUser().getId();
@@ -149,7 +149,7 @@ public class ReviewService {
 		ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
-			throw new RuntimeException();
+			throw new CustomException(ReviewErrorCode.OCR_CALL_FAILED);
 		}
 
 		ObjectMapper objectMapper = new ObjectMapper();
