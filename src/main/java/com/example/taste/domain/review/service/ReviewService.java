@@ -51,7 +51,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
-	private final RedisTemplate<String, Boolean> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
 	private final ImageService imageService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
@@ -71,7 +71,7 @@ public class ReviewService {
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
-		Boolean value = redisTemplate.opsForValue().get(key);
+		Boolean value = (Boolean)redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? value : false;
 
 		Review review = Review.builder()
@@ -99,7 +99,7 @@ public class ReviewService {
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
 		String key = "reviewValidation:user:" + review.getUser().getId() + ":store:" + review.getStore().getId();
-		Boolean value = redisTemplate.opsForValue().get(key);
+		Boolean value = (Boolean)redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? value : false;
 
 		review.updateContents(contents);
