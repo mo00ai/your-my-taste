@@ -68,7 +68,7 @@ public class Board extends SoftDeletableEntity {
 	private Store store;
 
 	// 게시글 해시태그 연관관계
-	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<BoardHashtag> boardHashtagList = new ArrayList<>();
 
 	// 이벤트 신청 게시글 연관관계
@@ -118,6 +118,11 @@ public class Board extends SoftDeletableEntity {
 		this.openLimit = openLimit;
 		this.openTime = openTime;
 		register(store, user);
+	}
+
+	// 해시태그 삭제
+	public void removeBoardHashtag(BoardHashtag boardHashtag) {
+		boardHashtagList.remove(boardHashtag);
 	}
 
 	public void update(BoardUpdateRequestDto requestDto) {
