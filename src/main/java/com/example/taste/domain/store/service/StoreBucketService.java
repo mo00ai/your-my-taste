@@ -38,34 +38,9 @@ public class StoreBucketService {
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
 		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, request.getName());
 
-		// 동일한 이름의 맛집리스트가 있는지 검증
-		int suffix = 0;
-		for (StoreBucket bucket : buckets) {
-			String name = bucket.getName();
-			// 동일한 이름의 맛집리스트가 있으면 suffix 업데이트
-			if (request.getName().equals(name)) {
-				suffix = Math.max(suffix, 1);
-				continue;
-			}
-
-			int start = name.indexOf('(');
-			int end = name.indexOf(')');
-			// 접미사가 (n) 형식으로 생성된 맛집리스트가 있으면 n값 추출해서 suffix 업데이트
-			if (start != -1 && end != -1 && start < end) {
-				String numberStr = name.substring(start + 1, end);
-
-				try {
-					suffix = Math.max(suffix, Integer.parseInt(numberStr) + 1);
-				} catch (NumberFormatException ignored) {
-					// (abc)처럼 단순 문자열인 경우 exception 무시
-				}
-			}
-		}
-
-		// 동일한 이름의 맛집리스트가 있으면 리스트명(n) 형식으로 저장
-		String name = (suffix == 0) ? request.getName() : request.getName() + "(" + suffix + ")";
+		// 버킷명 중복 확인
+		String name = makeUnduplicateName(request.getName(), user);
 
 		StoreBucket storeBucket = StoreBucket.builder()
 			.user(user)
@@ -127,6 +102,7 @@ public class StoreBucketService {
 
 	@Transactional
 	public StoreBucketResponse updateBucketName(Long bucketId, String name, Long userId) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
@@ -134,6 +110,9 @@ public class StoreBucketService {
 		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
+
+		// 버킷명 중복 확인
+		name = makeUnduplicateName(name, user);
 
 		StoreBucket updatedBucket = storeBucket.updateName(name);
 		return StoreBucketResponse.from(updatedBucket);
@@ -178,5 +157,38 @@ public class StoreBucketService {
 		}
 
 		storeBucketItemRepository.deleteAll(items);
+	}
+
+	// 버킷명 중복 확인 및 중복아닌 이름 반환
+	public String makeUnduplicateName(String newName, User user) {
+		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, newName);
+
+		// 동일한 이름의 버킷이 있는지 검증
+		int suffix = 0;
+		for (StoreBucket bucket : buckets) {
+			String name = bucket.getName();
+			// 동일한 이름의 버킷이 있으면 suffix 업데이트
+			if (newName.equals(name)) {
+				suffix = Math.max(suffix, 1);
+				continue;
+			}
+
+			int start = name.indexOf('(');
+			int end = name.indexOf(')');
+			// 접미사가 (n) 형식으로 생성된 버킷이 있으면 n값 추출해서 suffix 업데이트
+			if (start != -1 && end != -1 && start < end) {
+				String numberStr = name.substring(start + 1, end);
+
+				try {
+					suffix = Math.max(suffix, Integer.parseInt(numberStr) + 1);
+				} catch (NumberFormatException ignored) {
+					// (abc)처럼 단순 문자열인 경우 exception 무시
+				}
+			}
+		}
+
+		// 동일한 이름의 버킷이 있으면 리스트명(n) 형식으로 저장
+		String name = (suffix == 0) ? newName : newName + "(" + suffix + ")";
+		return name;
 	}
 }
