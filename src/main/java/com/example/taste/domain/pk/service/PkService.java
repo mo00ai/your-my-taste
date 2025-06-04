@@ -6,6 +6,7 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -141,7 +142,7 @@ public class PkService {
 			.createdAt(LocalDateTime.now())
 			.build();
 
-		String key = "pkLog:" + LocalDate.now() + ":" + user.getId();
+		String key = "pkLog:" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ":" + user.getId();
 		redisService.setOpsForList(key, dto, Duration.ofDays(1));
 
 		userService.increaseUserPoint(user, point);
