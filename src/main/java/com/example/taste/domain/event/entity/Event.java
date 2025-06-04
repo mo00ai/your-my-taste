@@ -50,6 +50,7 @@ public class Event {
 	@Column(nullable = false)
 	private boolean isActive;
 
+	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST)
 	private List<BoardEvent> boardEventList = new ArrayList<>();
 
