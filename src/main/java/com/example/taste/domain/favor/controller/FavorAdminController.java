@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,9 +20,9 @@ import com.example.taste.domain.favor.dto.request.FavorAdminRequestDto;
 import com.example.taste.domain.favor.dto.response.FavorAdminResponseDto;
 import com.example.taste.domain.favor.service.FavorAdminService;
 
-// @HasRole("ADMIN") // TODO: 추후 권한 필터 추가
 @RestController
 @RequestMapping("/admin/favor")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class FavorAdminController {
 	private final FavorAdminService favorAdminService;

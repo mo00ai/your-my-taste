@@ -23,8 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.config.security.CustomUserDetails;
-import com.example.taste.domain.auth.dto.SignUpRequestDto;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.user.entity.User;
@@ -40,7 +40,7 @@ public class AuthService {
 
 	// 회원 가입
 	@Transactional
-	public void signup(SignUpRequestDto requestDto, MultipartFile file) {
+	public void signup(SignupRequestDto requestDto, MultipartFile file) {
 		// 유저 이메일(아이디) 중복 검사
 		if (isExistsEmail(requestDto.getEmail())) {
 			throw new CustomException(CONFLICT_EMAIL);
@@ -65,7 +65,7 @@ public class AuthService {
 		userRepository.save(user);
 	}
 
-	public void login(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
+	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
 		// 로그인(기존 세션) 확인
 		HttpSession session = httpRequest.getSession(false);
 
@@ -103,6 +103,14 @@ public class AuthService {
 		SecurityContextHolder.setContext(context);
 		httpRequest.getSession(true)
 			.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+	}
+
+	public void signout(HttpServletRequest httpRequest, CustomUserDetails userDetails) {
+		HttpSession session = httpRequest.getSession(false);
+
+		if (session != null) {
+			session.invalidate();
+		}
 	}
 
 	// 중복 이메일 검사

@@ -11,11 +11,13 @@ import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.example.taste.domain.favor.entity.Favor;
 
 @Getter
 @Entity
+@NoArgsConstructor
 @Table(name = "user_favor")
 public class UserFavor {
 	@Id

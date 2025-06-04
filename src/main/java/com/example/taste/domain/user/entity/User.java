@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.domain.auth.dto.SignUpRequestDto;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.image.entity.Image;
@@ -113,7 +113,7 @@ public class User extends SoftDeletableEntity {
 	}
 
 	@Builder
-	public User(SignUpRequestDto requestDto, Image image) {
+	public User(SignupRequestDto requestDto, Image image) {
 		this.nickname = requestDto.getNickname();
 		this.email = requestDto.getEmail();
 		this.password = requestDto.getPassword();
