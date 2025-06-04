@@ -14,6 +14,9 @@ public enum PartyErrorCode implements BaseCode {
 	UNAUTHORIZED_PARTY(HttpStatus.BAD_REQUEST, "P002", "파티장 권한이 없습니다."),
 	MAX_CAPACITY_LESS_THAN_CURRENT(
 		HttpStatus.BAD_REQUEST, "P003", "파티 최대 인원은 현재 인원 이상이어야 합니다."),
+
+	PARTY_INVITATION_NOT_FOUND(
+		HttpStatus.NOT_FOUND, "PI001", "존재하지 않는 파티 초대 정보입니다."),
 	;
 
 	private final HttpStatus httpStatus;

@@ -57,4 +57,8 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 		this.invitationType = invitationType;
 		this.invitationStatus = invitationStatus;
 	}
+
+	public void leave() {
+		this.invitationStatus = InvitationStatus.EXITED;
+	}
 }

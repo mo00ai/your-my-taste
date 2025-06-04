@@ -1,6 +1,7 @@
 package com.example.taste.domain.party.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,9 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 	@Query("SELECT DISTINCT pi.user FROM PartyInvitation pi "
 		+ "WHERE pi.party.id = :partyId AND pi.invitationStatus = 'CONFIRMED'")
 	List<User> findUsersInParty(@Param("partyId") Long partyId);
+
+	@Query("SELECT pi FROM PartyInvitation pi "
+		+ "WHERE pi.user.id = :userId AND pi.party.id = :partyId")
+	Optional<PartyInvitation> findByUserAndParty(
+		@Param("userId") Long userId, @Param("partyId") Long partyId);
 }

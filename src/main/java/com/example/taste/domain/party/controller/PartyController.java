@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import com.example.taste.domain.party.dto.reponse.PartyResponseDto;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
 import com.example.taste.domain.party.enums.PartyFilter;
+import com.example.taste.domain.party.service.PartyInvitationService;
 import com.example.taste.domain.party.service.PartyService;
 
 @RestController
@@ -31,6 +33,7 @@ import com.example.taste.domain.party.service.PartyService;
 @RequiredArgsConstructor
 public class PartyController {
 	private final PartyService partyService;
+	private final PartyInvitationService partyInvitationService;
 
 	@PostMapping
 	public CommonResponse<Void> createParty(
@@ -63,4 +66,10 @@ public class PartyController {
 		return CommonResponse.ok();
 	}
 
+	@DeleteMapping("/{partyId}")
+	public CommonResponse<Void> leaveParty(
+		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
+		partyInvitationService.leaveParty(userDetails.getId(), partyId);
+		return CommonResponse.ok();
+	}
 }

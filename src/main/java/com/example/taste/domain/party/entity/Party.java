@@ -153,4 +153,12 @@ public class Party extends BaseCreatedAtEntity {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
 		}
 	}
+
+	public void joinMember() {
+		this.nowMembers++;
+	}
+
+	public void leaveMember() {
+		this.nowMembers--;
+	}
 }
