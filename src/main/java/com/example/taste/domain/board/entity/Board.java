@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
 import com.example.taste.domain.image.entity.BoardImage;
@@ -117,6 +118,19 @@ public class Board extends SoftDeletableEntity {
 		this.openLimit = openLimit;
 		this.openTime = openTime;
 		register(store, user);
+	}
+
+	public void update(BoardUpdateRequestDto requestDto) {
+		if (requestDto.getTitle() != null) {
+			this.title = requestDto.getTitle();
+		}
+		if (requestDto.getContents() != null) {
+			this.contents = requestDto.getContents();
+		}
+		if (requestDto.getType() != null) {
+			this.type = BoardType.from(requestDto.getType());
+		}
+		// TODO 이미지URL 수정
 	}
 
 }
