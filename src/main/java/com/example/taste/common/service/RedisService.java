@@ -70,10 +70,11 @@ public class RedisService {
 	}
 
 	public void setOpsForList(String key, Object value, Duration duration) {
-		if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
-			redisTemplate.expire(key, Duration.ofDays(1));
-		}
+		boolean keyExists = Boolean.TRUE.equals(redisTemplate.hasKey(key));
 		redisTemplate.opsForList().rightPush(key, value);
+		if (!keyExists) {
+			redisTemplate.expire(key, duration);
+		}
 	}
 
 	/**

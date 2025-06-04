@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,6 +37,7 @@ public class PkService {
 	private final UserRepository userRepository;
 	private final UserService userService;
 	private final RedisService redisService;
+	private final PkCacheService pkCacheService;
 
 	@CacheEvict(value = "pkCriteriaCache", allEntries = true)
 	@Transactional
@@ -69,16 +69,18 @@ public class PkService {
 	@Transactional(readOnly = true)
 	public List<PkCriteriaResponseDto> findAllPkCriteria() {
 
-		List<PkCriteria> all = pkCriteriaRepository.findAll();
+		// List<PkCriteria> all = pkCriteriaRepository.findAll();
+		//
+		// return all.stream().map(pk -> PkCriteriaResponseDto.builder()
+		// 		.id(pk.getId())
+		// 		.type(pk.getType().name())
+		// 		.point(pk.getPoint())
+		// 		.isActive(pk.isActive())
+		// 		.build()
+		// 	)
+		// 	.collect(Collectors.toList());
 
-		return all.stream().map(pk -> PkCriteriaResponseDto.builder()
-				.id(pk.getId())
-				.type(pk.getType().name())
-				.point(pk.getPoint())
-				.isActive(pk.isActive())
-				.build()
-			)
-			.collect(Collectors.toList());
+		return pkCacheService.findAllPkCriteria();
 
 	}
 
@@ -149,41 +151,43 @@ public class PkService {
 	@SuppressWarnings("unchecked")
 	public int getPointByPkType(PkType type) {
 
-		Object beforeCasingDto = redisService.getKeyValue("pkCriteriaCache::all");
+		// Object beforeCasingDto = redisService.getKeyValue("pkCriteriaCache::all");
 
 		// 캐시에 없으면 DB에서 조회 후 캐시에 저장하는 안전장치 로직
-		if (beforeCasingDto == null) {
-			List<PkCriteria> all = pkCriteriaRepository.findAll();
+		// if (beforeCasingDto == null) {
+		// 	List<PkCriteria> all = pkCriteriaRepository.findAll();
+		//
+		// 	if (all.isEmpty()) {
+		// 		throw new CustomException(PK_CRITERIA_NOT_FOUND);
+		// 	}
+		//
+		// 	List<PkCriteriaResponseDto> dtoList = all.stream()
+		// 		.map(pk -> PkCriteriaResponseDto.builder()
+		// 			.id(pk.getId())
+		// 			.type(pk.getType().name())
+		// 			.point(pk.getPoint())
+		// 			.isActive(pk.isActive())
+		// 			.build()
+		// 		).collect(Collectors.toList());
+		//
+		// 	redisService.setKeyValue("pkCriteriaCache::all", dtoList);
+		// 	beforeCasingDto = dtoList;
+		//
+		// }
 
-			if (all.isEmpty()) {
-				throw new CustomException(PK_CRITERIA_NOT_FOUND);
-			}
+		List<PkCriteriaResponseDto> criteriaList = pkCacheService.findAllPkCriteria();
 
-			List<PkCriteriaResponseDto> dtoList = all.stream()
-				.map(pk -> PkCriteriaResponseDto.builder()
-					.id(pk.getId())
-					.type(pk.getType().name())
-					.point(pk.getPoint())
-					.isActive(pk.isActive())
-					.build()
-				).collect(Collectors.toList());
+		// if (!(beforeCasingDto instanceof List<?> list)) {
+		// 	throw new CustomException(PK_CRITERIA_NOT_FOUND);
+		// }
+		//
+		// if (!list.isEmpty() && !(list.get(0) instanceof PkCriteriaResponseDto)) {
+		// 	throw new CustomException(PK_CRITERIA_NOT_FOUND);
+		// }
+		//
+		// List<PkCriteriaResponseDto> castedDto = (List<PkCriteriaResponseDto>)beforeCasingDto;
 
-			redisService.setKeyValue("pkCriteriaCache::all", dtoList);
-			beforeCasingDto = dtoList;
-
-		}
-
-		if (!(beforeCasingDto instanceof List<?> list)) {
-			throw new CustomException(PK_CRITERIA_NOT_FOUND);
-		}
-
-		if (!list.isEmpty() && !(list.get(0) instanceof PkCriteriaResponseDto)) {
-			throw new CustomException(PK_CRITERIA_NOT_FOUND);
-		}
-
-		List<PkCriteriaResponseDto> castedDto = (List<PkCriteriaResponseDto>)beforeCasingDto;
-
-		return castedDto.stream()
+		return criteriaList.stream()
 			.filter(dto -> dto.getType().equals(type.name()))
 			.map(PkCriteriaResponseDto::getPoint)
 			.findFirst()
