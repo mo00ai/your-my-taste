@@ -37,7 +37,7 @@ public class PkService {
 
 		PkType pkType = PkType.valueOf(type.toUpperCase());
 
-		if (pkCriteriaRepository.existsByType(type)) {
+		if (pkCriteriaRepository.existsByType(pkType)) {
 			throw new CustomException(DUPLICATE_PK_TYPE);
 		}
 
