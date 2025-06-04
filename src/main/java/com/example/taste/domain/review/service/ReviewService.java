@@ -67,8 +67,8 @@ public class ReviewService {
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		String key = "reviewValidation:user" + user.getId() + ":store" + store.getId();
-		Object value = (Boolean)redisTemplate.opsForValue().get(key);
-		Boolean valid = value != null ? (Boolean)value : false;
+		Boolean value = redisTemplate.opsForValue().get(key);
+		Boolean valid = value != null ? value : false;
 
 		Review review = Review.builder()
 			.contents(requestDto.getContents())
@@ -88,13 +88,15 @@ public class ReviewService {
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
 		Review review = reviewRepository.getReviewWithUserAndStore(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
-		String contents = requestDto.getContents().isEmpty() ? review.getContents() : requestDto.getContents();
+		String contents =
+			requestDto.getContents().isEmpty() ? review.getContents() :
+				requestDto.getContents();
 		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
-		String key = "reviewValidation:user" + review.getUser().getId() + ":store" + review.getStore().getId();
-		Object value = (Boolean)redisTemplate.opsForValue().get(key);
-		Boolean valid = value != null ? (Boolean)value : false;
+		String key = "reviewValidation:user:" + review.getUser().getId() + ":store" + review.getStore().getId();
+		Boolean value = redisTemplate.opsForValue().get(key);
+		Boolean valid = value != null ? value : false;
 
 		review.updateContents(contents);
 		review.updateScore(score);
@@ -104,7 +106,8 @@ public class ReviewService {
 	}
 
 	public Page<GetReviewResponseDto> getAllReview(Long storeId, int index, int score) {
-		Store store = storeRepository.findById(storeId).orElseThrow();
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		Page<Review> reviews = reviewRepository.getAllReview(store, pageable, score);
 		return reviews.map(GetReviewResponseDto::new);
