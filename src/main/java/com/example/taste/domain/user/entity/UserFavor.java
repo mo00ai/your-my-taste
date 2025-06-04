@@ -13,7 +13,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import com.example.taste.domain.favor.entity.Favor;
 
@@ -26,12 +25,10 @@ public class UserFavor {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "favor_id", nullable = false)
 	private Favor favor;
@@ -41,5 +38,10 @@ public class UserFavor {
 		this.user = user;
 		this.favor = favor;
 		user.getUserFavorList().add(this);
+	}
+
+	public void remove() {
+		this.user = null;
+		this.favor = null;
 	}
 }

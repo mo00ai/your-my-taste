@@ -174,8 +174,7 @@ public class User extends SoftDeletableEntity {
 	public void removeUserFavorList(List<UserFavor> userFavorList) {
 		for (UserFavor userFavor : userFavorList) {
 			this.userFavorList.remove(userFavor);
-			userFavor.setUser(null);
-			userFavor.setFavor(null);
+			userFavor.remove();
 		}
 	}
 }
