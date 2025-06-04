@@ -1,14 +1,14 @@
-package com.example.taste.domain.pk.annotation;
+package com.example.taste.common.annotation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class PkTypeValidator implements ConstraintValidator<ValidPkType, String> {
+public class EnumValidator implements ConstraintValidator<ValidEnum, String> {
 
-	private ValidPkType annotation;
+	private ValidEnum annotation;
 
 	@Override
-	public void initialize(ValidPkType constraintAnnotation) {
+	public void initialize(ValidEnum constraintAnnotation) {
 		this.annotation = constraintAnnotation;
 	}
 

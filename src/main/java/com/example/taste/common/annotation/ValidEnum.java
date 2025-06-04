@@ -1,4 +1,4 @@
-package com.example.taste.domain.pk.annotation;
+package com.example.taste.common.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -12,8 +12,8 @@ import jakarta.validation.Payload;
 @Documented
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PkTypeValidator.class)
-public @interface ValidPkType {
+@Constraint(validatedBy = EnumValidator.class)
+public @interface ValidEnum {
 
 	String message() default "Enum에 없는 값입니다.";
 
