@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.pk.dto.request.PkSaveRequestDto;
-import com.example.taste.domain.pk.dto.request.PkUpdateReqeustDto;
+import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
 import com.example.taste.domain.pk.service.PkService;
 
@@ -28,7 +28,7 @@ public class PkController {
 	private final PkService pkCriteriaService;
 
 	@PostMapping("/criteria")
-	public CommonResponse<PkCriteriaResponseDto> savePkCrieteria(@Valid @RequestBody PkSaveRequestDto dto) {
+	public CommonResponse<PkCriteriaResponseDto> savePkCriteria(@Valid @RequestBody PkSaveRequestDto dto) {
 
 		return CommonResponse.created(pkCriteriaService.savePkCriteria(dto.getType(), dto.getPoint()));
 	}
@@ -41,7 +41,7 @@ public class PkController {
 
 	@PutMapping("/criteria/{id}")
 	public CommonResponse<Void> updatePkCriteria(@PathVariable Long id,
-		@Valid @RequestBody PkUpdateReqeustDto dto) {
+		@Valid @RequestBody PkUpdateRequestDto dto) {
 
 		pkCriteriaService.updatePkCriteria(id, dto);
 		return CommonResponse.ok();

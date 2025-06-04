@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Min;
 import lombok.Getter;
 
 @Getter
-public class PkUpdateReqeustDto {
+public class PkUpdateRequestDto {
 
 	@ValidPkType(message = "등록되지 않은 Pk 포인트 유형 값입니다.", target = PkType.class)
 	@Length(max = 20, message = "Pk 포인트 유형은 20자 이내로 작성해주세요. ")

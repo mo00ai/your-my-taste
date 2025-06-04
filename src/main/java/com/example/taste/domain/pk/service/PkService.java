@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.pk.dto.request.PkUpdateReqeustDto;
+import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
 import com.example.taste.domain.pk.entity.PkCriteria;
 import com.example.taste.domain.pk.entity.PkLog;
@@ -36,7 +36,7 @@ public class PkService {
 	public PkCriteriaResponseDto savePkCriteria(String type, Integer point) {
 
 		PkType pkType = PkType.valueOf(type.toUpperCase());
-		
+
 		if (pkCriteriaRepository.existsByType(type)) {
 			throw new CustomException(DUPLICATE_PK_TYPE);
 		}
@@ -74,7 +74,7 @@ public class PkService {
 	}
 
 	@Transactional
-	public void updatePkCriteria(Long id, PkUpdateReqeustDto dto) {
+	public void updatePkCriteria(Long id, PkUpdateRequestDto dto) {
 
 		PkCriteria pkCriteria = pkCriteriaRepository.findById(id)
 			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));

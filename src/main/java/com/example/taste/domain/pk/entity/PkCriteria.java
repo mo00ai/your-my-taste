@@ -1,6 +1,6 @@
 package com.example.taste.domain.pk.entity;
 
-import com.example.taste.domain.pk.dto.request.PkUpdateReqeustDto;
+import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.enums.PkType;
 
 import jakarta.persistence.Column;
@@ -43,7 +43,7 @@ public class PkCriteria {
 		this.active = active;
 	}
 
-	public void update(PkUpdateReqeustDto dto) {
+	public void update(PkUpdateRequestDto dto) {
 		this.type = dto.getType() != null ? PkType.valueOf(dto.getType()) : this.type;
 		this.point = dto.getPoint() != null ? dto.getPoint() : this.point;
 	}
