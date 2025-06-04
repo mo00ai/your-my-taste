@@ -26,6 +26,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
@@ -64,13 +65,14 @@ public class Party extends BaseCreatedAtEntity {
 
 	@Column(nullable = false)
 	private int maxMembers;
+	private int nowMembers = 0;
 	@Column(nullable = false)
 	private boolean enableRandomMatching = false;
 
 	@Builder
 	public Party(User hostUser, List<PartyInvitation> partyInvitationList, String title,
 		String description, PartyStatus partyStatus, Store store,
-		LocalDateTime meetingTime, int maxMembers, Boolean enableRandomMatching) {
+		LocalDateTime meetingTime, int maxMembers, int nowMembers, Boolean enableRandomMatching) {
 		this.hostUser = hostUser;
 		this.partyInvitationList = partyInvitationList;
 		this.title = title;
@@ -79,6 +81,7 @@ public class Party extends BaseCreatedAtEntity {
 		this.store = store;
 		this.meetingTime = meetingTime;
 		this.maxMembers = maxMembers;
+		this.nowMembers = nowMembers;
 		this.enableRandomMatching = enableRandomMatching != null ? enableRandomMatching : false;
 	}
 
@@ -108,8 +111,46 @@ public class Party extends BaseCreatedAtEntity {
 			requestDto.getMeetingTime() != null ? requestDto.getMeetingTime() : null;
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
+		this.nowMembers = 1;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
 		this.partyStatus = PartyStatus.RECRUITING;
+	}
+
+	public void update(PartyDetailUpdateRequestDto requestDto, Store store) {
+		this.store = store;
+		if (requestDto.getTitle() != null) {
+			this.title = requestDto.getTitle();
+		}
+		if (requestDto.getDescription() != null) {
+			this.description = requestDto.getDescription();
+		}
+		if (requestDto.getMeetingTime() != null) {
+			this.meetingTime = requestDto.getMeetingTime();
+		}
+		if (requestDto.getMaxMembers() != null) {
+			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나?
+		}
+		if (requestDto.getEnableRandomMatching() != null) {
+			this.enableRandomMatching = requestDto.getEnableRandomMatching();
+		}
+	}
+
+	public void update(PartyDetailUpdateRequestDto requestDto) {
+		if (requestDto.getTitle() != null) {
+			this.title = requestDto.getTitle();
+		}
+		if (requestDto.getDescription() != null) {
+			this.description = requestDto.getDescription();
+		}
+		if (requestDto.getMeetingTime() != null) {
+			this.meetingTime = requestDto.getMeetingTime();
+		}
+		if (requestDto.getMaxMembers() != null) {
+			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나?
+		}
+		if (requestDto.getEnableRandomMatching() != null) {
+			this.enableRandomMatching = requestDto.getEnableRandomMatching();
+		}
 	}
 }

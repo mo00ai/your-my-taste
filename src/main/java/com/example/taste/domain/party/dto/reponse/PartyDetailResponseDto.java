@@ -30,7 +30,7 @@ public class PartyDetailResponseDto {
 		this.storeName = party.getStore().getName();
 		this.meetingTime = party.getMeetingTime();
 		this.maxMembers = party.getMaxMembers();
-		this.nowMembers = members.size() + 1;            // 파티장 포함
+		this.nowMembers = party.getNowMembers();            // 파티장 포함
 		this.enableRandomMatching = party.isEnableRandomMatching();
 		this.host = host;
 		this.members = members;

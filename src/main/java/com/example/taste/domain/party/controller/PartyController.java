@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,7 @@ import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.party.dto.reponse.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.reponse.PartyResponseDto;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
 import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.service.PartyService;
 
@@ -48,7 +51,16 @@ public class PartyController {
 	@GetMapping("/{partyId}")
 	public CommonResponse<PartyDetailResponseDto> getPartyDetail(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam Long partyId) {
+		@PathVariable Long partyId) {
 		return CommonResponse.ok(partyService.getPartyDetail(userDetails.getId(), partyId));
 	}
+
+	@PatchMapping("/{partyId}")
+	public CommonResponse<Void> updatePartyDetail(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Long partyId, @RequestBody PartyDetailUpdateRequestDto requestDto) {
+		partyService.updatePartyDetail(userDetails.getId(), partyId, requestDto);
+		return CommonResponse.ok();
+	}
+
 }

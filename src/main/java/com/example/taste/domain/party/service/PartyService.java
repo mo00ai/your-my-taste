@@ -1,6 +1,8 @@
 package com.example.taste.domain.party.service;
 
+import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
+import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
 import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
@@ -15,6 +17,7 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.party.dto.reponse.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.reponse.PartyResponseDto;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
@@ -86,5 +89,33 @@ public class PartyService {
 
 		return new PartyDetailResponseDto(
 			party, hostDto, membersDtoList);
+	}
+
+	@Transactional
+	public void updatePartyDetail(
+		Long hostUserId, Long partyId, PartyDetailUpdateRequestDto requestDto) {
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+
+		// 호스트가 아니라면
+		if (!party.getHostUser().getId().equals(hostUserId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		// 최대 인원 변경하는 경우
+		if (requestDto.getMaxMembers() != null) {
+			if (requestDto.getMaxMembers() < party.getNowMembers()) {
+				throw new CustomException(MAX_CAPACITY_LESS_THAN_CURRENT);
+			}
+		}
+
+		// 장소 바꾸는 경우
+		if (requestDto.getStoreId() != null) {
+			Store store = storeRepository.findById(requestDto.getStoreId())    // TODO: 이것도 검색 API로 추가해보고 안되는 걸로 변경
+				.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+			party.update(requestDto, store);
+		} else {
+			party.update(requestDto);
+		}
 	}
 }
