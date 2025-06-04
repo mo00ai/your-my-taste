@@ -1,6 +1,7 @@
 package com.example.taste.domain.store.dto.response;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.example.taste.domain.store.entity.Store;
 
@@ -18,6 +19,7 @@ public class StoreResponse {
 	private String roadAddress;
 	private BigDecimal mapx;
 	private BigDecimal mapy;
+	private List<String> reviewImages;
 
 	public static StoreResponse from(Store store) {
 		return StoreResponse.builder()
@@ -29,6 +31,11 @@ public class StoreResponse {
 			.roadAddress(store.getRoadAddress())
 			.mapx(store.getMapx())
 			.mapy(store.getMapy())
+			.reviewImages(store.getReviewList().stream()
+				.sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+				.limit(3)
+				.map(review -> review.getImage().getUrl())
+				.toList())
 			.build();
 	}
 }
