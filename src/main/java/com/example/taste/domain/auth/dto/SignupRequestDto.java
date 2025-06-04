@@ -1,5 +1,7 @@
 package com.example.taste.domain.auth.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -9,7 +11,7 @@ import lombok.Setter;
 
 import org.hibernate.validator.constraints.Range;
 
-import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
+import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 
 @Getter
 public class SignupRequestDto {
@@ -33,8 +35,9 @@ public class SignupRequestDto {
 	@NotBlank(message = "주소는 필수값입니다.")
 	private String address;
 
-	// @NotBlank(message = "입맛 취향값은 필수값입니다.")
-	private UserFavorUpdateListRequestDto favorList;
+	@NotBlank(message = "입맛 취향값은 필수값입니다.")
+	@Size(min = 1, max = 5, message = "취향 입맛은 1개 이상 5개 이하로 입력해야 합니다.")
+	private List<UserFavorUpdateRequestDto> favorList;
 
 	private String gender;        // TODO: enum valid 적용 필요
 
