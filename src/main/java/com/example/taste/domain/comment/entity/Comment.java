@@ -32,7 +32,7 @@ public class Comment extends BaseEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private String content;
+	private String contents;
 
 	private LocalDateTime deletedAt;
 
@@ -70,8 +70,8 @@ public class Comment extends BaseEntity {
 	}
 
 	@Builder
-	public Comment(String content, LocalDateTime deletedAt, Board board, User user, Comment parent, Comment root) {
-		this.content = content;
+	public Comment(String contents, LocalDateTime deletedAt, Board board, User user, Comment parent, Comment root) {
+		this.contents = contents;
 		this.deletedAt = deletedAt;
 		this.user = user;
 		this.root = root;
@@ -83,8 +83,8 @@ public class Comment extends BaseEntity {
 		this.getChildren().add(child);
 	}
 
-	public void updateContent(String content) {
-		this.content = content;
+	public void updateContents(String contents) {
+		this.contents = contents;
 	}
 
 	public void deleteContent(LocalDateTime deleteTime) {

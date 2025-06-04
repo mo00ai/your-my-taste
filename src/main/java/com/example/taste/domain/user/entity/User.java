@@ -1,22 +1,9 @@
 package com.example.taste.domain.user.entity;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
+import static com.example.taste.domain.pk.exception.PkErrorCode.PK_POINT_OVERFLOW;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.event.entity.Event;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
-import com.example.taste.domain.user.enums.Gender;
-import com.example.taste.domain.user.enums.Level;
-import com.example.taste.domain.user.enums.Role;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -28,17 +15,29 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
+
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor        // TODO: 추후 PROTECTED 로 리팩토링
 @Table(name = "users")
 public class User extends SoftDeletableEntity {
 
@@ -47,9 +46,8 @@ public class User extends SoftDeletableEntity {
 	private Long id;
 
 	@Setter
-	@ManyToOne(fetch = FetchType.LAZY)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "image_id", nullable = false)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "image_id")
 	private Image image;
 
 	@Column(nullable = false)
@@ -93,8 +91,8 @@ public class User extends SoftDeletableEntity {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
 
-	@Setter
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
+		cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserFavor> userFavorList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -115,6 +113,24 @@ public class User extends SoftDeletableEntity {
 		this.point = point != null ? point : 0;
 		this.follower = follower != null ? follower : 0;
 		this.following = following != null ? following : 0;
+	}
+
+	@Builder
+	public User(SignupRequestDto requestDto) {
+		this.nickname = requestDto.getNickname();
+		this.email = requestDto.getEmail();
+		this.password = requestDto.getPassword();
+		this.address = requestDto.getAddress();
+		this.gender = requestDto.getGender() != null ?
+			Gender.valueOf(requestDto.getGender()) : null;
+		this.age = requestDto.getAge() != null ? requestDto.getAge() : 0;
+		this.role = requestDto.getRole() != null ?
+			Role.valueOf(requestDto.getRole()) : Role.USER;
+		this.level = Level.NORMAL;
+		this.postingCount = 0;
+		this.point = 0;
+		this.follower = 0;
+		this.following = 0;
 	}
 
 	// 비밀번호 검증 후 업데이트
@@ -153,5 +169,12 @@ public class User extends SoftDeletableEntity {
 			throw new CustomException(PK_POINT_OVERFLOW);
 		}
 		this.point += point;
+	}
+
+	public void removeUserFavorList(List<UserFavor> userFavorList) {
+		for (UserFavor userFavor : userFavorList) {
+			this.userFavorList.remove(userFavor);
+			userFavor.remove();
+		}
 	}
 }
