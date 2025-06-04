@@ -29,7 +29,8 @@ public class FavorAdminController {
 	private final FavorAdminService favorAdminService;
 
 	@PostMapping
-	public CommonResponse<Void> createFavor(@RequestBody @Valid List<FavorAdminRequestDto> requestDtoList) {
+	public CommonResponse<Void> createFavor(
+		@RequestBody @Valid List<@Valid FavorAdminRequestDto> requestDtoList) {
 		favorAdminService.createFavor(requestDtoList);
 		return CommonResponse.ok();
 	}
