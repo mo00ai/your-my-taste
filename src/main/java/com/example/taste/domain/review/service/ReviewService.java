@@ -37,8 +37,10 @@ import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -58,18 +60,19 @@ public class ReviewService {
 
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
-		imageService.saveImage(multipartFile, imageType);
-		Image tempImage = Image.builder().build();
-		Store store = storeRepository.findById(storeId).orElseThrow();
+		Image image = imageService.saveImage(multipartFile, imageType);
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		// 임시 유저. 세션 구현하면 처리
-		User user = userRepository.findById(1L).orElseThrow();
+		User user = userRepository.findById(1L)
+			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		String key = "reviewValidation:user" + user.getId() + ":store" + store.getId();
 		Object value = (Boolean)redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? (Boolean)value : false;
 
 		Review review = Review.builder()
 			.contents(requestDto.getContents())
-			.image(tempImage)
+			.image(image)
 			.store(store)
 			.score(requestDto.getScore())
 			.user(user)
@@ -83,11 +86,10 @@ public class ReviewService {
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
-		Review review = reviewRepository.findById(reviewId)
+		Review review = reviewRepository.getReviewWithUser(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		String contents = requestDto.getContents().isEmpty() ? review.getContents() : requestDto.getContents();
-		// 대충 이미지가 있으면 수정하고 없으면 저장하는 코드
-		Image tempImage = Image.builder().build();
+		Image image = imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
 		String key = "reviewValidation:user" + review.getUser().getId() + ":store" + review.getUser().getId();
@@ -96,7 +98,7 @@ public class ReviewService {
 
 		review.updateContents(contents);
 		review.updateScore(score);
-		review.updateImage(tempImage);
+		review.updateImage(image);
 		review.setValidation(valid);
 		return new UpdateReviewResponseDto(review);
 	}
@@ -124,10 +126,6 @@ public class ReviewService {
 			throw new CustomException(ReviewErrorCode.NO_IMAGE_REQUESTED);
 		}
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
-		// 임시 유저. 세션 구현하면 처리
-		User user = userRepository.findById(1L).orElseThrow();
-		Store store = storeRepository.findById(storeId).orElseThrow();
-
 		String apiUrl = "https://dwyd1vrxhu.apigw.ntruss.com/custom/v1/42612/f7152a2fe3e8899aaf3d099f7c46439dfd24c7a5c926edaed8d9a471ae0b563e/document/receipt";
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -164,9 +162,9 @@ public class ReviewService {
 			.map(result -> result.getStoreInfo())
 			.map(storeInfo -> storeInfo.getName())
 			.map(name -> name.getText())
-			.orElse(null);
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.STORE_NAME_NOT_FOUND));
 
-		String storeSubNamea = Optional.ofNullable(ocrResponsedto.getImages())
+		String storeSubName = Optional.ofNullable(ocrResponsedto.getImages())
 			.filter(images -> !images.isEmpty())
 			.map(images -> images.get(0))
 			.map(i -> i.getReceipt())
@@ -174,11 +172,17 @@ public class ReviewService {
 			.map(result -> result.getStoreInfo())
 			.map(storeInfo -> storeInfo.getSubName())
 			.map(subName -> subName.getText())
-			.orElseThrow(() -> new CustomException(ReviewErrorCode.STORE_NAME_NOT_FOUND));  // 없으면 null 반환
+			.orElse(null);  // 없으면 null 반환
 
+		// 임시 유저. 세션 구현하면 처리
+		User user = userRepository.findById(1L)
+			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
+
+		// 가게 이름 어떻게 저장하나
 		Boolean ocrResult = store.getName().equals(storeName);
-		//String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
-		String key = "reviewValidation:user:1" + ":store:1";
+		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		redisTemplate.opsForValue().set(key, ocrResult, Duration.ofMinutes(10));
 	}
 }

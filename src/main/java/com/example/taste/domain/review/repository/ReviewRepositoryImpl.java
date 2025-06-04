@@ -1,6 +1,7 @@
 package com.example.taste.domain.review.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,12 +11,24 @@ import com.example.taste.domain.image.entity.QImage;
 import com.example.taste.domain.review.entity.QReview;
 import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
+	@Override
+	public Optional<Review> getReviewWithUser(Long reviewId) {
+		QReview qReview = QReview.review;
+		QUser qUser = QUser.user;
+		return Optional.ofNullable(queryFactory.selectFrom(qReview)
+			.leftJoin(qReview.user, qUser).fetchJoin()
+			.where(
+				qReview.id.eq(reviewId)
+			).fetch().get(0));
+	}
+
 	private final JPAQueryFactory queryFactory;
 
 	@Override
