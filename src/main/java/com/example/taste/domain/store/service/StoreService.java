@@ -25,6 +25,7 @@ public class StoreService {
 
 		List<String> imageUrls = store.getReviewList().stream()
 			.sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+			.filter(review -> review.getImage() != null)
 			.limit(3)
 			.map(review -> review.getImage().getUrl())
 			.toList();
