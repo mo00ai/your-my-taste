@@ -22,7 +22,7 @@ public class StoreResponse {
 	public static StoreResponse from(Store store) {
 		return StoreResponse.builder()
 			.id(store.getId())
-			.category(store.getCategory().getName())
+			.category(store.getCategory() != null ? store.getCategory().getName() : "카테고리 없음")
 			.name(store.getName())
 			.description(store.getDescription())
 			.address(store.getAddress())
