@@ -1,5 +1,7 @@
 package com.example.taste.domain.user.entity;
 
+import static com.example.taste.domain.pk.exception.PkErrorCode.PK_POINT_OVERFLOW;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
@@ -159,5 +162,12 @@ public class User extends SoftDeletableEntity {
 
 	public void unfollowed() {
 		this.follower--;
+	}
+
+	public void increasePoint(int point) {
+		if (this.point > Integer.MAX_VALUE - point) {
+			throw new CustomException(PK_POINT_OVERFLOW);
+		}
+		this.point += point;
 	}
 }
