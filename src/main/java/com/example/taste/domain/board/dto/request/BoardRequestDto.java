@@ -1,5 +1,7 @@
 package com.example.taste.domain.board.dto.request;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -16,7 +18,7 @@ import lombok.Getter;
 )
 @JsonSubTypes({
 	@JsonSubTypes.Type(value = NormalBoardRequestDto.class, name = "N"),
-	@JsonSubTypes.Type(value = HongdaeBoardRequestDto.class, name = "O")
+	@JsonSubTypes.Type(value = OpenRunBoardRequestDto.class, name = "O")
 })
 @Getter
 public abstract class BoardRequestDto {
@@ -34,5 +36,7 @@ public abstract class BoardRequestDto {
 	private String status;
 
 	private Long storeId;
+	// 해시 태그 추가
+	private List<@NotBlank(message = "해시태그는 빈 문자열일 수 없습니다.") String> hashtagList;
 
 }
