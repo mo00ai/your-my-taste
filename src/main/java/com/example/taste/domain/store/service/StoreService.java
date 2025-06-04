@@ -3,13 +3,13 @@ package com.example.taste.domain.store.service;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.StoreRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,5 +27,11 @@ public class StoreService {
 	public void deleteStore(Long id) {
 		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 		storeRepository.delete(store);
+	}
+
+	@Transactional(readOnly = true)
+	public Store findById(Long storeId) {
+		return storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 	}
 }

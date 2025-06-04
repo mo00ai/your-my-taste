@@ -32,16 +32,16 @@ public class Review extends BaseEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private boolean validated;
+	private boolean isValidated;
 
 	@Column(nullable = false)
 	private boolean isPresented;
 
 	@Column(nullable = false)
-	private String content;
+	private String contents;
 
 	@Column(columnDefinition = "tinyint", nullable = false)
-	private int score;
+	private Integer score;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "image_id", nullable = false)
@@ -56,14 +56,30 @@ public class Review extends BaseEntity {
 	private Store store;
 
 	@Builder
-	public Review(boolean validated, String content, int score, boolean isPresented,
+	public Review(boolean isValidated, String contents, Integer score,
 		Image image, User user, Store store) {
-		this.validated = validated;
-		this.content = content;
+		this.contents = contents;
 		this.score = score;
-		this.isPresented = isPresented;
 		this.image = image;
 		this.user = user;
 		this.store = store;
+		this.setValidation(isValidated);
+	}
+
+	public void setValidation(Boolean validation) {
+		this.isValidated = validation;
+		this.isPresented = validation;
+	}
+
+	public void updateContents(String contents) {
+		this.contents = contents;
+	}
+
+	public void updateScore(Integer score) {
+		this.score = score;
+	}
+
+	public void updateImage(Image image) {
+		this.image = image;
 	}
 }

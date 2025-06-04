@@ -9,13 +9,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.example.taste.domain.favor.entity.Favor;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_favor")
 public class UserFavor {
 	@Id
@@ -34,5 +37,11 @@ public class UserFavor {
 	public UserFavor(User user, Favor favor) {
 		this.user = user;
 		this.favor = favor;
+		user.getUserFavorList().add(this);
+	}
+
+	public void remove() {
+		this.user = null;
+		this.favor = null;
 	}
 }
