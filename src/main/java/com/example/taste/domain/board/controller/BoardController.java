@@ -22,6 +22,7 @@ import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.service.BoardService;
+import com.example.taste.domain.board.service.LikeService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class BoardController {
 
 	private final BoardService boardService;
+	private final LikeService likeService;
 
 	@PostMapping
 	public CommonResponse<Void> createBoard(@RequestBody BoardRequestDto requestDto) {
@@ -97,4 +99,18 @@ public class BoardController {
 		return CommonResponse.success(BOARD_DELETED);
 	}
 
+	@PostMapping("/{boardId}/likes")
+	public CommonResponse<Void> likeBoard(@PathVariable Long boardId,
+		// TODO user 코드 수정필요
+		@RequestParam Long userId) {
+		likeService.likeBoard(userId, boardId);
+		return CommonResponse.success(BOARD_LIKED);
+	}
+
+	@DeleteMapping("/{boardId}/likes")
+	public CommonResponse<Void> unlikeBoard(@PathVariable Long boardId,
+		@RequestParam Long userId) {
+		likeService.unlikedboard(userId, boardId);
+		return CommonResponse.success(BOARD_UNLIKED);
+	}
 }
