@@ -4,13 +4,11 @@ import java.time.LocalDateTime;
 
 import com.example.taste.domain.review.entity.Review;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class GetReviewResponseDto {
 	private Long id;
@@ -21,7 +19,7 @@ public class GetReviewResponseDto {
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public GetReviewResponseDto(Long id, String contents, int score, String imageUrl, LocalDateTime createdAt,
+	public GetReviewResponseDto(Long id, String contents, Integer score, String imageUrl, LocalDateTime createdAt,
 		LocalDateTime updatedAt) {
 		this.id = id;
 		this.contents = contents;

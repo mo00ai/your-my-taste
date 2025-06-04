@@ -19,7 +19,7 @@ public class CreateReviewResponseDto {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public CreateReviewResponseDto(Long id, String contents, int score, String imageUrl, Boolean isPresented,
+	public CreateReviewResponseDto(Long id, String contents, Integer score, String imageUrl, Boolean isPresented,
 		LocalDateTime createdAt) {
 		this.id = id;
 		this.contents = contents;
