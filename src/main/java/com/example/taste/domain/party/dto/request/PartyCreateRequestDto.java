@@ -31,5 +31,5 @@ public class PartyCreateRequestDto {
 	private Integer maxMembers;
 
 	@NotNull(message = "랜덤 매치 여부를 선택하세요.")
-	private Boolean isRandomMatch;
+	private Boolean enableRandomMatching;
 }

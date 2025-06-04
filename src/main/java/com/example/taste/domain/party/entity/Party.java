@@ -1,7 +1,9 @@
 package com.example.taste.domain.party.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
@@ -41,6 +44,9 @@ public class Party extends BaseCreatedAtEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User hostUser;
 
+	@OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<PartyInvitation> partyInvitationList;
+
 	@Column(nullable = false)
 	private String title;
 	private String description;
@@ -62,9 +68,11 @@ public class Party extends BaseCreatedAtEntity {
 	private boolean enableRandomMatching = false;
 
 	@Builder
-	public Party(User hostUser, String title, String description, PartyStatus partyStatus, Store store,
+	public Party(User hostUser, List<PartyInvitation> partyInvitationList, String title,
+		String description, PartyStatus partyStatus, Store store,
 		LocalDateTime meetingTime, int maxMembers, Boolean enableRandomMatching) {
 		this.hostUser = hostUser;
+		this.partyInvitationList = partyInvitationList;
 		this.title = title;
 		this.description = description;
 		this.partyStatus = partyStatus;
@@ -85,7 +93,7 @@ public class Party extends BaseCreatedAtEntity {
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
 		this.enableRandomMatching =
-			requestDto.getIsRandomMatch() != null ? requestDto.getIsRandomMatch() : null;
+			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
 		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면)
 	}
 
@@ -101,7 +109,7 @@ public class Party extends BaseCreatedAtEntity {
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
 		this.enableRandomMatching =
-			requestDto.getIsRandomMatch() != null ? requestDto.getIsRandomMatch() : null;
+			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
 		this.partyStatus = PartyStatus.RECRUITING;
 	}
 }
