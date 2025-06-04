@@ -8,4 +8,6 @@ import com.example.taste.domain.favor.entity.Favor;
 @Repository
 public interface FavorRepository extends JpaRepository<Favor, Long> {
 	Favor findByName(String favorName);
+
+	boolean existsByName(String favorName);
 }
