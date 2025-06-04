@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -69,6 +69,13 @@ public class RedisService {
 		redisTemplate.opsForValue().set(key, values, validityTime);
 	}
 
+	public void setOpsForList(String key, Object value, Duration duration) {
+		if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
+			redisTemplate.expire(key, Duration.ofDays(1));
+		}
+		redisTemplate.opsForList().rightPush(key, value);
+	}
+
 	/**
 	 * 사용자가 필요한 get 메서드가 더 있다면 직접 만들어서 사용하세요(형변환 등)
 	 */
@@ -103,4 +110,5 @@ public class RedisService {
 	public Set<Object> getZSetRangeByScore(String key, Long min, Long max) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
+
 }
