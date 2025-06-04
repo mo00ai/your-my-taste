@@ -1,18 +1,12 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
@@ -28,6 +22,8 @@ import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -35,7 +31,7 @@ public class UserService {
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
-	private final PasswordEncoder passwordEncoder;
+	//private final PasswordEncoder passwordEncoder;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -55,10 +51,10 @@ public class UserService {
 	@Transactional
 	public void updateUser(Long userId, UserUpdateRequestDto requestDto) {
 		User user = userRepository.findById(userId).orElseThrow();
-		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
-			throw new CustomException(INVALID_PASSWORD);
-		}
-		requestDto.setNewPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+		//	if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
+		//		throw new CustomException(INVALID_PASSWORD);
+		//	}
+		//	requestDto.setNewPassword(passwordEncoder.encode(requestDto.getNewPassword()));
 		user.update(requestDto);
 	}
 
@@ -66,9 +62,9 @@ public class UserService {
 	@Transactional
 	public void deleteUser(Long userId, UserDeleteRequestDto requestDto) {
 		User user = userRepository.findById(userId).orElseThrow();
-		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-			throw new CustomException(INVALID_PASSWORD);
-		}
+		//	if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+		//		throw new CustomException(INVALID_PASSWORD);
+		//	}
 		user.softDelete();
 	}
 

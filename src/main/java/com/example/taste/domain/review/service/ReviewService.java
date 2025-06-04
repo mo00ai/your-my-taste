@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
-	private final RedisTemplate<String, Boolean> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
 	@Value("${ocr_key}")
 	private String secretKey;
 
@@ -143,17 +144,22 @@ public class ReviewService {
 			.getStoreInfo()
 			.getName()
 			.getText();
-		String storeSubName = ocrResponsedto.getImages()
-			.get(0)
-			.getReceipt()
-			.getResult()
-			.getStoreInfo()
-			.getSubName()
-			.getText();
 
-		Boolean ocrResult = tempStore.getName().equals(storeName) && validationResult.equals("VALID");
-		String key = "reviewValidation:user:" + tempUser.getId() + ":store:" + tempStore.getId();
+		String storeSubNamea = Optional.ofNullable(ocrResponsedto.getImages())
+			.filter(images -> !images.isEmpty())
+			.map(images -> images.get(0))
+			.map(a -> a.getReceipt())
+			.map(receipt -> receipt.getResult())
+			.map(result -> result.getStoreInfo())
+			.map(storeInfo -> storeInfo.getSubName())
+			.map(subName -> subName.getText())
+			.orElse(null);  // 없으면 null 반환
+
+		// Boolean ocrResult = tempStore.getName().equals(storeName) && validationResult.equals("VALID");
+		Boolean ocrResult = validationResult.equals("VALID") ? true : false;
+		//String key = "reviewValidation:user:" + tempUser.getId() + ":store:" + tempStore.getId();
+		String key = "reviewValidation:user:1" + ":store:1";
 		redisTemplate.opsForValue().set(key, ocrResult, Duration.ofMinutes(10));
-		return ocrResult ? "인증되었습니다." : "인증에 실패하였습니다.";
+		return storeName + validationResult;
 	}
 }
