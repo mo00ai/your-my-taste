@@ -28,7 +28,7 @@ public class BoardMapper {
 	 * 홍대병 게시글 DTO → Board 엔터티
 	 */
 	public static Board toEntity(HongdaeBoardRequestDto requestDto, Store store, User user) {
-		return Board.hBoardBuilder()
+		return Board.oBoardBuilder()
 			.title(requestDto.getTitle())
 			.contents(requestDto.getContents())
 			.type(BoardType.from(requestDto.getType()))

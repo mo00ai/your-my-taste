@@ -1,11 +1,13 @@
 package com.example.taste.domain.board.entity;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum BoardType {
 	N("N", "일반 게시글"),
-	H("H", "홍대병 게시글");
+	H("O", "오픈런 게시글");
 
 	private final String code;
 	private final String displayName;
@@ -14,7 +16,7 @@ public enum BoardType {
 		this.code = code;
 		this.displayName = displayName;
 	}
-	
+
 	@JsonCreator
 	public static BoardType from(String input) {
 		for (BoardType type : BoardType.values()) {
@@ -22,8 +24,7 @@ public enum BoardType {
 				return type;
 			}
 		}
-		// TODO 추후 글로벌 예외처리 예정
-		throw new IllegalArgumentException("해당하는 Type이 없습니다: " + input);
+		throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
 	}
 
 	@JsonValue
