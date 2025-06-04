@@ -1,6 +1,7 @@
 package com.example.taste.domain.review.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
@@ -31,16 +34,22 @@ import lombok.RequiredArgsConstructor;
 public class ReviewController {
 	private final ReviewService reviewService;
 
+	@ImageValid
 	@PostMapping
 	public CommonResponse<CreateReviewResponseDto> createReview(@RequestBody CreateReviewRequestDto requestDto,
-		@PathVariable Long storeId) {
-		return CommonResponse.created(reviewService.createReview(requestDto, storeId));
+		@PathVariable Long storeId,
+		@RequestPart(value = "files", required = false) List<MultipartFile> files)
+		throws IOException {
+		return CommonResponse.created(reviewService.createReview(requestDto, storeId, files.get(0), ImageType.REVIEW));
 	}
 
+	@ImageValid
 	@PatchMapping("/{reviewId}")
 	public CommonResponse<UpdateReviewResponseDto> updateReview(@RequestBody UpdateReviewRequestDto requestDto,
-		@PathVariable Long reviewId) {
-		return CommonResponse.ok(reviewService.updateReview(requestDto, reviewId));
+		@PathVariable Long reviewId,
+		@RequestPart(value = "files", required = false) List<MultipartFile> files)
+		throws IOException {
+		return CommonResponse.ok(reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW));
 	}
 
 	@GetMapping()
@@ -56,15 +65,16 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/{reviewId}")
-	public CommonResponse<String> deleteReview(@PathVariable Long reviewId) {
+	public CommonResponse<Void> deleteReview(@PathVariable Long reviewId) {
 		reviewService.deleteReview(reviewId);
-		return CommonResponse.ok("삭제되었습니다.");
+		return CommonResponse.ok();
 	}
 
 	@PostMapping("/validate")
-	public CommonResponse<String> createValidation(@PathVariable Long storeId,
+	public CommonResponse<Void> createValidation(@PathVariable Long storeId,
 		@RequestPart("image") MultipartFile image) throws IOException {
-		return CommonResponse.ok(reviewService.createValidation(storeId, image));
+		reviewService.createValidation(storeId, image);
+		return CommonResponse.ok();
 	}
 
 }

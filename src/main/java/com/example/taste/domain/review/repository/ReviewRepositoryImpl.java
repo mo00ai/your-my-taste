@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.example.taste.domain.image.entity.QImage;
 import com.example.taste.domain.review.entity.QReview;
 import com.example.taste.domain.review.entity.Review;
-import com.example.taste.domain.store.entity.QStore;
 import com.example.taste.domain.store.entity.Store;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -20,10 +20,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
 	@Override
 	public Page<Review> getAllReview(Store store, Pageable pageable, int score) {
-		QStore qStore = QStore.store;
+		QImage qImage = QImage.image;
 		QReview qReview = QReview.review;
 		List<Review> reviews = queryFactory.selectFrom(qReview)
-			.leftJoin(qReview.store, qStore).fetchJoin()
+			.leftJoin(qReview.image, qImage).fetchJoin()
 			.where(
 				qReview.store.eq(store),
 				qReview.isPresented.isTrue(),

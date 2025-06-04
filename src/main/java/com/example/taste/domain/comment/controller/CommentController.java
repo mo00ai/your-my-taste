@@ -42,10 +42,10 @@ public class CommentController {
 	}
 
 	@DeleteMapping("/{commentId}/delete")
-	public CommonResponse<String> deleteComment(
+	public CommonResponse<Void> deleteComment(
 		@PathVariable Long commentId) {
 		commentService.deleteComment(commentId);
-		return CommonResponse.ok("삭제되었습니다.");
+		return CommonResponse.ok();
 	}
 
 	@GetMapping

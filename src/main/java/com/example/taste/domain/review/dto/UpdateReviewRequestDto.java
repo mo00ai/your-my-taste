@@ -16,6 +16,4 @@ public class UpdateReviewRequestDto {
 	@Min(1)
 	@Max(5)
 	private Integer score;
-
-	private Long imageID;
 }

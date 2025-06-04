@@ -32,7 +32,7 @@ public class Review extends BaseEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private boolean validated;
+	private boolean isValidated;
 
 	@Column(nullable = false)
 	private boolean isPresented;
@@ -56,21 +56,20 @@ public class Review extends BaseEntity {
 	private Store store;
 
 	@Builder
-	public Review(boolean validated, String contents, int score, boolean isPresented,
+	public Review(boolean isValidated, String contents, int score,
 		Image image, User user, Store store) {
-		this.validated = validated;
+		this.isValidated = isValidated;
 		this.contents = contents;
 		this.score = score;
-		this.isPresented = isPresented;
 		this.image = image;
 		this.user = user;
 		this.store = store;
-		this.setValidated(validated);
+		this.setValidation(isValidated);
 	}
 
-	public void setValidated(Boolean validated) {
-		this.validated = validated;
-		this.isPresented = validated;
+	public void setValidation(Boolean validation) {
+		this.isValidated = validation;
+		this.isPresented = validation;
 	}
 
 	public void updateContents(String contents) {

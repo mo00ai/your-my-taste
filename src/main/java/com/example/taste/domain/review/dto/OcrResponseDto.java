@@ -15,26 +15,10 @@ public class OcrResponseDto {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Image {
-		private ValidationResult validationResult;
 		private Receipt receipt;
-
-		// validation 결과를 가져온다
-		// images/validationResult
-		public ValidationResult getValidationResult() {
-			return validationResult;
-		}
 
 		public Receipt getReceipt() {
 			return receipt;
-		}
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class ValidationResult {
-		private String result;
-
-		public String getResult() {
-			return result;
 		}
 	}
 
