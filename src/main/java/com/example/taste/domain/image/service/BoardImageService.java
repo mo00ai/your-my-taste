@@ -99,13 +99,10 @@ public class BoardImageService {
 	}
 
 	@Transactional
-	public void updateBoardImages(Long boardId, List<Long> keepImageIds, List<MultipartFile> newImages) throws
+	public void updateBoardImages(Board board, List<Long> keepImageIds, List<MultipartFile> newImages) throws
 		IOException {
 
-		Board board = boardRepository.findById(boardId)
-			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
-
-		List<BoardImage> toExistImages = boardImageRepository.findImagesById(boardId);
+		List<BoardImage> toExistImages = boardImageRepository.findImagesByBoard(board);
 
 		// 삭제할 이미지 조회
 		List<BoardImage> toDeleteImages = toExistImages.stream()
@@ -132,12 +129,9 @@ public class BoardImageService {
 	}
 
 	@Transactional
-	public void deleteBoardImages(Long boardId) {
+	public void deleteBoardImages(Board board) {
 
-		Board board = boardRepository.findById(boardId)
-			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
-
-		List<BoardImage> boardImages = boardImageRepository.findImagesById(boardId);
+		List<BoardImage> boardImages = boardImageRepository.findImagesByBoard(board);
 		for (BoardImage bi : boardImages) {
 			imageService.deleteImage(bi.getImage());
 		}

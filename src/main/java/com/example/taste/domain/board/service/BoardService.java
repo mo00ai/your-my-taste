@@ -74,10 +74,12 @@ public class BoardService {
 	}
 
 	@Transactional
-	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) {
+	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto, List<Long> keepImageIds,
+		List<MultipartFile> newImages) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.update(requestDto);
+		boardImageService.updateBoardImages(board, keepImageIds, newImages);
 
 	}
 
@@ -86,6 +88,7 @@ public class BoardService {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.softDelete();
+		boardImageService.deleteBoardImages(board);
 	}
 
 	@Transactional(readOnly = true)
