@@ -2,6 +2,7 @@ package com.example.taste.domain.store.service;
 
 import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
 import java.util.Objects;
