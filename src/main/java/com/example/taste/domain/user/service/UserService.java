@@ -163,4 +163,9 @@ public class UserService {
 		user.increasePoint(point);
 	}
 
+	@Transactional(readOnly = true)
+	public User findById(long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+	}
 }
