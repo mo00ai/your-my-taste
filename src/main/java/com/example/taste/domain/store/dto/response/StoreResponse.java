@@ -21,7 +21,7 @@ public class StoreResponse {
 	private BigDecimal mapy;
 	private List<String> reviewImages;
 
-	public static StoreResponse from(Store store, List<String> imageUrls) {
+	public static StoreResponse create(Store store, List<String> imageUrls) {
 		return StoreResponse.builder()
 			.id(store.getId())
 			.category(store.getCategory() != null ? store.getCategory().getName() : "카테고리 없음")

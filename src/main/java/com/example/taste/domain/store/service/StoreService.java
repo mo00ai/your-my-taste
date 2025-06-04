@@ -29,7 +29,7 @@ public class StoreService {
 			.map(review -> review.getImage().getUrl())
 			.toList();
 
-		return StoreResponse.from(store, imageUrls);
+		return StoreResponse.create(store, imageUrls);
 	}
 
 	@Transactional
