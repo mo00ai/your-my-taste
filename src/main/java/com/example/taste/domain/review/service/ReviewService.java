@@ -86,13 +86,13 @@ public class ReviewService {
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
-		Review review = reviewRepository.getReviewWithUser(reviewId)
+		Review review = reviewRepository.getReviewWithUserAndStore(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		String contents = requestDto.getContents().isEmpty() ? review.getContents() : requestDto.getContents();
 		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
-		String key = "reviewValidation:user" + review.getUser().getId() + ":store" + review.getUser().getId();
+		String key = "reviewValidation:user" + review.getUser().getId() + ":store" + review.getStore().getId();
 		Object value = (Boolean)redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? (Boolean)value : false;
 

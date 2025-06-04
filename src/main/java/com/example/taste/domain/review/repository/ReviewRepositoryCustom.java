@@ -11,5 +11,5 @@ import com.example.taste.domain.store.entity.Store;
 public interface ReviewRepositoryCustom {
 	Page<Review> getAllReview(Store store, Pageable pageable, int score);
 
-	Optional<Review> getReviewWithUser(Long reviewId);
+	Optional<Review> getReviewWithUserAndStore(Long reviewId);
 }

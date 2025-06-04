@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import com.example.taste.domain.image.entity.QImage;
 import com.example.taste.domain.review.entity.QReview;
 import com.example.taste.domain.review.entity.Review;
+import com.example.taste.domain.store.entity.QStore;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,11 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 	@Override
-	public Optional<Review> getReviewWithUser(Long reviewId) {
+	public Optional<Review> getReviewWithUserAndStore(Long reviewId) {
 		QReview qReview = QReview.review;
 		QUser qUser = QUser.user;
+		QStore qStore = QStore.store;
 		return Optional.ofNullable(queryFactory.selectFrom(qReview)
 			.leftJoin(qReview.user, qUser).fetchJoin()
+			.leftJoin(qReview.store, qStore).fetchJoin()
 			.where(
 				qReview.id.eq(reviewId)
 			).fetchFirst());
