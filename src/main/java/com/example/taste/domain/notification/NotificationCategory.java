@@ -4,5 +4,4 @@ public enum NotificationCategory {
 	SYSTEM,
 	MARKETING,
 	SUBSCRIBE;
-
 }

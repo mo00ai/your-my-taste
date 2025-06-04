@@ -2,6 +2,7 @@ package com.example.taste.domain.notification.entity;
 
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.notification.NotificationCategory;
+import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,10 @@ public class NotificationInfo extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "notification_target", nullable = false)
+	private User user;
+
 	@Column(nullable = false)
 	private NotificationCategory category;
 
@@ -39,8 +44,10 @@ public class NotificationInfo extends BaseEntity {
 	private NotificationContent notificationContent;
 
 	@Builder
-	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent) {
+	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent,
+		User user) {
 		this.category = category;
+		this.user = user;
 		this.isRead = isRead != null ? isRead : false; // 초기값 세팅
 		this.notificationContent = notificationContent;
 	}

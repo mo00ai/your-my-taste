@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.domain.notification.dto.NotificationEvent;
+import com.example.taste.domain.notification.redis.RedisChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -67,6 +69,11 @@ public class RedisService {
 	// key, List<String>, Duration
 	public void setKeyValues(String key, List<String> values, Duration validityTime) {
 		redisTemplate.opsForValue().set(key, values, validityTime);
+	}
+
+	//Notification publish
+	public void publishNotification(NotificationEvent event) {
+		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, event);
 	}
 
 	/**
