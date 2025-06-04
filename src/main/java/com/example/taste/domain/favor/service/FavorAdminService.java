@@ -25,7 +25,7 @@ public class FavorAdminService {
 	@Transactional
 	public void createFavor(List<FavorAdminRequestDto> requestDtoList) {
 		requestDtoList.forEach(favor -> {
-			if (favorRepository.findByName(favor.getFavorName()) == null) {
+			if (!favorRepository.existsByName(favor.getFavorName())) {
 				favorRepository.save(new Favor(favor.getFavorName()));
 			}
 		});
