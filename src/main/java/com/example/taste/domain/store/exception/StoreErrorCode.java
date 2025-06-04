@@ -4,11 +4,11 @@ import org.springframework.http.HttpStatus;
 
 import com.example.taste.common.exception.BaseCode;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum StoreErrorCode implements BaseCode {
 	// bucket
 	BUCKET_NOT_FOUND(HttpStatus.NOT_FOUND, "B001", "버킷 정보가 존재하지 않습니다."),
@@ -17,7 +17,7 @@ public enum StoreErrorCode implements BaseCode {
 	// store
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "S002", "맛집 정보가 존재하지 않습니다.");
 
-	private HttpStatus httpStatus;
-	private String code;
-	private String message;
+	private final HttpStatus httpStatus;
+	private final String code;
+	private final String message;
 }
