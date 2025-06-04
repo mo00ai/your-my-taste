@@ -1,5 +1,6 @@
 package com.example.taste.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByIdWithUserFavorList(@Param("id") Long id);
 
 	boolean existsByEmail(String email);
+
+	// notification 용 전체 유저 id 검색 메서드
+	@Query("select u.id from User u")
+	List<Long> findAllUserId();
 }

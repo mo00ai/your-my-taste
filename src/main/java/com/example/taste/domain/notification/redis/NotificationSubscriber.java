@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
@@ -59,8 +61,25 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	private void sendAll(NotificationEvent event) {
-		List<User> allUser = userRepository.findAll();
-		notificationService.sendBunch(event, allUser);
+		// 페이징 방식
+		long startLogging = System.currentTimeMillis();
+		int page = 0;
+		int size = 1000;
+		Page<User> users;
+		do {
+			users = userRepository.findAll(PageRequest.of(page, size));
+			notificationService.sendBunch(event, users.getContent());
+			page++;
+		} while (users.hasNext());
+		long endLogging = System.currentTimeMillis();
+		log.info("paging 타임 체크", (endLogging - startLogging));
+
+		// reference by id
+		startLogging = System.currentTimeMillis();
+		List<Long> userIds = userRepository.findAllUserId();
+		notificationService.sendBunchUsingReference(event, userIds);
+		endLogging = System.currentTimeMillis();
+		log.info("reference by id 타임 체크", (endLogging - startLogging));
 	}
 
 	private void sendSubscriber(NotificationEvent event) {
