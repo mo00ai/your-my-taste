@@ -67,7 +67,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		Order direction = order.equalsIgnoreCase("asc") ? Order.ASC : Order.DESC;
 		OrderSpecifier<? extends Comparable> orderSpecifier;
 		switch (sort) {
-			case "createAt":
+			case "createdAt":
 				orderSpecifier = new OrderSpecifier<>(
 					direction,
 					pathBuilder.getDate(sort, java.time.LocalDateTime.class)
@@ -83,7 +83,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				orderSpecifier = new OrderSpecifier<>(
 					Order.DESC,
 					pathBuilder.getDateTime(
-						"createAt",
+						"createdAt",
 						java.time.LocalDateTime.class)
 				);
 		}
