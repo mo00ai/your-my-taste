@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserErrorCode implements BaseCode {
 	INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U001", "비밀번호가 일치하지 않습니다."),
-	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "요청하신 사용자 정보를 찾을 수 없습니다.");
+	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "유저 정보가 존재하지 않습니다."),
+	FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "F001", "팔로우 정보가 존재하지 않습니다."),
+	;
 
 	private final HttpStatus httpStatus;
 	private final String code;
