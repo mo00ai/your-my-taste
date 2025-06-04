@@ -21,7 +21,7 @@ public class StoreResponse {
 	private BigDecimal mapy;
 	private List<String> reviewImages;
 
-	public static StoreResponse from(Store store) {
+	public static StoreResponse from(Store store, List<String> imageUrls) {
 		return StoreResponse.builder()
 			.id(store.getId())
 			.category(store.getCategory() != null ? store.getCategory().getName() : "카테고리 없음")
@@ -31,11 +31,7 @@ public class StoreResponse {
 			.roadAddress(store.getRoadAddress())
 			.mapx(store.getMapx())
 			.mapy(store.getMapy())
-			.reviewImages(store.getReviewList().stream()
-				.sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
-				.limit(3)
-				.map(review -> review.getImage().getUrl())
-				.toList())
+			.reviewImages(imageUrls)
 			.build();
 	}
 }
