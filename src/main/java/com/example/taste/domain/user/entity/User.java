@@ -1,5 +1,7 @@
 package com.example.taste.domain.user.entity;
 
+import static com.example.taste.domain.pk.exception.PkErrorCode.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +9,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.image.entity.Image;
@@ -146,6 +149,9 @@ public class User extends SoftDeletableEntity {
 	}
 
 	public void increasePoint(int point) {
+		if (this.point > Integer.MAX_VALUE - point) {
+			throw new CustomException(PK_POINT_OVERFLOW);
+		}
 		this.point += point;
 	}
 }
