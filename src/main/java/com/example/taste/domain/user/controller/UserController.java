@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
-import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
+import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
@@ -64,9 +64,9 @@ public class UserController {
 	@PostMapping("/favor")
 	public CommonResponse<Void> updateUserFavor(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserFavorUpdateListRequestDto requestDto
+		@RequestBody List<UserFavorUpdateRequestDto> requestDtoList
 	) {
-		userService.updateUserFavor(userDetails.getId(), requestDto);
+		userService.updateUserFavors(userDetails.getId(), requestDtoList);
 		return CommonResponse.ok();
 	}
 

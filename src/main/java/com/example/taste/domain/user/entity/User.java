@@ -37,7 +37,7 @@ import com.example.taste.domain.user.enums.Role;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor        // TODO: 추후 PROTECTED 로 리팩토링
 @Table(name = "users")
 public class User extends SoftDeletableEntity {
 
@@ -91,8 +91,8 @@ public class User extends SoftDeletableEntity {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
 
-	@Setter
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
+		cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserFavor> userFavorList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -169,5 +169,13 @@ public class User extends SoftDeletableEntity {
 			throw new CustomException(PK_POINT_OVERFLOW);
 		}
 		this.point += point;
+	}
+
+	public void removeUserFavorList(List<UserFavor> userFavorList) {
+		for (UserFavor userFavor : userFavorList) {
+			this.userFavorList.remove(userFavor);
+			userFavor.setUser(null);
+			userFavor.setFavor(null);
+		}
 	}
 }

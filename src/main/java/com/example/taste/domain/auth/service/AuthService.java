@@ -6,6 +6,8 @@ import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
+import java.io.IOException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -26,17 +28,20 @@ import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.example.taste.domain.user.service.UserService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+	private final UserService userService;
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
 	private final ImageService imageService;
+	private final PasswordEncoder passwordEncoder;
 
 	// 회원 가입
 	@Transactional
@@ -52,17 +57,19 @@ public class AuthService {
 
 		Image image = null;
 		// 프로필 이미지 저장
-		// if (file != null) {
-		// 	try {
-		// 		image = imageService.saveImage(file, ImageType.USER);    // TODO: 리턴값 받는걸로 변경 질문
-		// 	} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 // TODO: 이미지 트랜잭션 확인 필요
-		// 		log.info("유저 이미지 저장에 실패하였습니다 (email: " + requestDto.getEmail() + ")");
-		// 	}
-		// }
-
+		if (file != null) {
+			try {
+				image = imageService.saveImage(file, ImageType.USER);
+			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 // TODO: 이미지 트랜잭션 확인 필요
+				log.info("유저 이미지 저장에 실패하였습니다 (email: " + requestDto.getEmail() + ")");
+			}
+		}
 		// 유저 정보 저장
 		User user = new User(requestDto, image);
 		userRepository.save(user);
+
+		// 입맛 취향 정보 저장
+		userService.updateUserFavors(user.getId(), requestDto.getFavorList());
 	}
 
 	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {

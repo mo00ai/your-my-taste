@@ -1,10 +1,13 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,7 +17,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
-import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
@@ -26,11 +28,10 @@ import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
+	private final UserFavorService userFavorService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
@@ -40,7 +41,8 @@ public class UserService {
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
 		User user = userRepository.findById(userId).orElseThrow();
-		List<UserFavor> favorList = userFavorRepository.findAllByUser(userId);
+		List<UserFavor> favorList = userFavorRepository.findAllByUser(
+			userId);        // TODO: withList 조회 레포지토리 메소드를 추가하기
 		return new UserMyProfileResponseDto(user, favorList);
 	}
 
@@ -73,43 +75,50 @@ public class UserService {
 	}
 
 	@Transactional
-	public void updateUserFavor(Long userId, UserFavorUpdateListRequestDto requestDto) {
-		List<UserFavorUpdateRequestDto> updateFavorList
-			= requestDto.getUserFavorList();                            // 업데이트 요청 리스트
-
+	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
 		User user = userRepository.findById(userId).orElseThrow();
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
 
 		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
-		// 2. 삭제된 항목, 혹은 3. 새로 추가한 항목을 반영 (수정 항목)
+		// 2. 삭제된 항목을 리스트에서 제거, 3. 새로 추가한 항목을 반영 (수정 항목)
 
-		// 삭제된 항목 반영
-		ArrayList<UserFavor> newUserFavorList = userFavorList.stream()
+		// 삭제된 항목 리스트에서 제거
+		user.removeUserFavorList(userFavorList.stream()
 			.filter(userFavor ->
-				updateFavorList.stream()
-					.anyMatch(updateItem -> isSameItem(updateItem, userFavor)))
-			.collect(Collectors.toCollection(ArrayList::new));
+				requestDtoList.stream()
+					.anyMatch(updateItem -> !isSameItem(updateItem, userFavor)))
+			.collect(Collectors.toCollection(ArrayList::new)));
 
-		// 새로 추가할 항목만 추출
-		List<UserFavorUpdateRequestDto> newUpdateFavorList = updateFavorList.stream()
-			.filter(updateItem ->
-				userFavorList.stream()
-					.anyMatch(userFavor -> isSameItem(updateItem, userFavor))
-			).toList();
+		// 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
+		List<UserFavorUpdateRequestDto> updateFavorList =
+			userFavorList == null || userFavorList.isEmpty() ? requestDtoList
+				: requestDtoList.stream()
+				.filter(updateItem ->
+					userFavorList.stream()
+						.noneMatch(userFavor -> isSameItem(updateItem, userFavor))
+				).toList();
 
-		// Favor 리스트에 있는 것만 추가 반영(올바른 값만)
-		// newUpdateFavorList 의 아이템 하나가 favorList 의 하나와 일치한다면 newUpdateFavorList 에 추가
+		// Favor 리스트에 있는 것만 추가 (올바른 값만)
+		// updateFavorList 의 아이템 하나가 favorList 의 하나와 일치한다면 새로운 userFavor 생성
 		List<Favor> favorList = favorRepository.findAll();
-		newUpdateFavorList.forEach(
+		ArrayList<UserFavor> updateUserFavorList = new ArrayList<>();
+
+		updateFavorList.forEach(
 			(updateItem) -> favorList.forEach(
 				(favor) -> {
 					if (isExistsItem(updateItem, favor)) {
-						newUserFavorList.add(new UserFavor(user, favor));
+						updateUserFavorList.add(new UserFavor(user, favor));
 					}
 				})
 		);
 
-		user.setUserFavorList(newUserFavorList);
+		// 최종 저장
+		userFavorRepository.saveAll(updateUserFavorList);
+		userFavorRepository.findAll().forEach(i ->
+			System.out.printf("UserFavor Id: %d, UserId: %d, FavorId: %d\n",
+				i.getId(), i.getUser().getId(), i.getFavor().getId()));
+
+		// userFavorService.saveUserFavorList(updateUserFavorList);
 	}
 
 	// 유저의 팔로잉 유저 목록 조회
@@ -149,13 +158,14 @@ public class UserService {
 	}
 
 	private boolean isSameItem(UserFavorUpdateRequestDto update, UserFavor favor) {
-		return update.getUserFavorId().equals(favor.getId()) &&
-			update.getName().equals(favor.getFavor().getName());
+		if (update.getUserFavorId() != null) {
+			return Objects.equals(update.getUserFavorId(), favor.getId());
+		}
+		return update.getName().equals(favor.getFavor().getName());
 	}
 
 	private boolean isExistsItem(UserFavorUpdateRequestDto update, Favor favor) {
-		return update.getUserFavorId().equals(favor.getId()) &&
-			update.getName().equals(favor.getName());
+		return update.getName().equals(favor.getName());
 	}
 
 	@Transactional

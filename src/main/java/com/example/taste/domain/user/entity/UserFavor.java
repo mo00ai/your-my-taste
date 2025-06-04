@@ -9,25 +9,29 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import com.example.taste.domain.favor.entity.Favor;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_favor")
 public class UserFavor {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	@Setter
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "favor_id", nullable = false)
 	private Favor favor;
@@ -36,5 +40,6 @@ public class UserFavor {
 	public UserFavor(User user, Favor favor) {
 		this.user = user;
 		this.favor = favor;
+		user.getUserFavorList().add(this);
 	}
 }
