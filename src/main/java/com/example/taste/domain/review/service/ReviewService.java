@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.exception.ImageErrorCode;
@@ -51,7 +51,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
-	private final RedisTemplate<String, Boolean> redisTemplate;
+	private final RedisService redisService;
 	private final ImageService imageService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
@@ -71,8 +71,8 @@ public class ReviewService {
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
-		Boolean value = redisTemplate.opsForValue().get(key);
-		Boolean valid = value != null ? value : false;
+		Object value = redisService.getKeyValue(key);
+		Boolean valid = value != null ? (Boolean)value : false;
 
 		Review review = Review.builder()
 			.contents(requestDto.getContents())
@@ -99,8 +99,8 @@ public class ReviewService {
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
 		String key = "reviewValidation:user:" + review.getUser().getId() + ":store:" + review.getStore().getId();
-		Boolean value = redisTemplate.opsForValue().get(key);
-		Boolean valid = value != null ? value : false;
+		Object value = redisService.getKeyValue(key);
+		Boolean valid = value != null ? (Boolean)value : false;
 
 		review.updateContents(contents);
 		review.updateScore(score);
@@ -190,6 +190,6 @@ public class ReviewService {
 		// 가게 이름 어떻게 저장하나
 		Boolean ocrResult = store.getName().equals(storeName);
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
-		redisTemplate.opsForValue().set(key, ocrResult, Duration.ofMinutes(10));
+		redisService.setKeyValue(key, ocrResult, Duration.ofMinutes(5));
 	}
 }
