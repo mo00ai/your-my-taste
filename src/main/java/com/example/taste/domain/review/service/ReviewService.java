@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
+import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
@@ -60,6 +61,9 @@ public class ReviewService {
 
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
+		if (multipartFile == null) {
+			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
+		}
 		Image image = imageService.saveImage(multipartFile, imageType);
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
@@ -91,7 +95,7 @@ public class ReviewService {
 		String contents =
 			requestDto.getContents().isEmpty() ? review.getContents() :
 				requestDto.getContents();
-		Image image = imageService.saveImage(multipartFile, imageType);
+		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
 		String key = "reviewValidation:user:" + review.getUser().getId() + ":store:" + review.getStore().getId();
