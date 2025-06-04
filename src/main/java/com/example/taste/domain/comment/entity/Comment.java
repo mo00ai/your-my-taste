@@ -83,8 +83,8 @@ public class Comment extends BaseEntity {
 		this.getChildren().add(child);
 	}
 
-	public void updateContent(String content) {
-		this.contents = content;
+	public void updateContents(String contents) {
+		this.contents = contents;
 	}
 
 	public void deleteContent(LocalDateTime deleteTime) {

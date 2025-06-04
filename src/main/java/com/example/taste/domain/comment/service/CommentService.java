@@ -63,7 +63,7 @@ public class CommentService {
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
-		comment.updateContent(requestDto.getContents());
+		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
