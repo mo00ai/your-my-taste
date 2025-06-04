@@ -36,6 +36,10 @@ public class PkService {
 	public PkCriteriaResponseDto savePkCriteria(String type, Integer point) {
 
 		PkType pkType = PkType.valueOf(type.toUpperCase());
+		
+		if (pkCriteriaRepository.existsByType(type)) {
+			throw new CustomException(DUPLICATE_PK_TYPE);
+		}
 
 		PkCriteria pkCriteria = PkCriteria.builder()
 			.type(pkType)
