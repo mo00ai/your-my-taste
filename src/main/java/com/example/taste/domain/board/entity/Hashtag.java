@@ -23,11 +23,13 @@ public class Hashtag {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 50, unique = true)
 	private String name;
 
 	@Builder
 	public Hashtag(String name) {
-		this.name = name;
+		if (name != null) {
+			this.name = name.trim().toLowerCase();
+		}
 	}
 }
