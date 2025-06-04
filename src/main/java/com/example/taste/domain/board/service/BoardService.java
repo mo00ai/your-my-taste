@@ -21,7 +21,9 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,17 +32,13 @@ import lombok.RequiredArgsConstructor;
 public class BoardService {
 
 	private final BoardRepository boardRepository;
-	// TODO 가게 정보, 유저 정보 가져오기
-	// private final StoreService storeService;
-	// private final UserService userService;
+	private final StoreService storeService;
+	private final UserService userService;
 
 	@Transactional
-	public void createBoard(BoardRequestDto requestDto) {
-		// TODO 가게, 유저 주석 해제하기
-		// User user = userService.findById(userId);
-		// Store store = storeService.findById(storeId);
-		User user = new User();
-		Store store = new Store();
+	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto) {
+		User user = userService.findById(userId);
+		Store store = storeService.findById(storeId);
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
 			boardRepository.save(entity);
@@ -113,9 +111,9 @@ public class BoardService {
 	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
 	@Transactional(readOnly = true)
 	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
-
 		List<Long> userFollowList = new ArrayList<>();
+		// 쿼리로 바로 dto프로젝션
 		return boardRepository.findBoardListDtoByUserIdList(userFollowList, pageable);
 	}
-	
+
 }

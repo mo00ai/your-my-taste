@@ -37,7 +37,7 @@ public class BoardController {
 		Long storeId = 1L;
 		Long userId = 1L;
 		// TODO store, user 객체 받아오기
-		boardService.createBoard(requestDto);
+		boardService.createBoard(userId, storeId, requestDto);
 		return CommonResponse.success(BOARD_CREATED);
 
 	}
@@ -57,7 +57,6 @@ public class BoardController {
 
 		// TODO user 코드 수정필요
 		Long userId = 1L;
-		// TODO 기능 미구현
 		List<BoardListResponseDto> responseDtoList = boardService.findBoardList(userId, pageable);
 		return CommonResponse.ok(responseDtoList);
 	}
