@@ -1,6 +1,7 @@
 package com.example.taste.domain.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +27,7 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public CommonResponse<Void> signup(
-		@RequestPart SignupRequestDto requestDto, @RequestPart(required = false) MultipartFile file) {
+		@RequestPart("data") @Valid SignupRequestDto requestDto, @RequestPart(required = false) MultipartFile file) {
 		authService.signup(requestDto, file);
 		return CommonResponse.ok();
 	}
