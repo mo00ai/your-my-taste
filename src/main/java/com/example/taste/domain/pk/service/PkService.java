@@ -98,14 +98,17 @@ public class PkService {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
+		PkCriteria pkCriteria = pkCriteriaRepository.findByType(type)
+			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
+
 		PkLog pkLog = PkLog.builder()
 			.pkType(type)
-			.point(type.getPoint())
+			.point(pkCriteria.getPoint())
 			.user(user)
 			.build();
 
 		pkLogRepository.save(pkLog);
-		userService.increaseUserPoint(user, type.getPoint());
+		userService.increaseUserPoint(user, pkCriteria.getPoint());
 
 	}
 
