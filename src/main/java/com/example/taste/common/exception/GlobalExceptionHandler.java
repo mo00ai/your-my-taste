@@ -63,13 +63,12 @@ public class GlobalExceptionHandler {
 	 * Validated 예외 처리 - Controller의 @Validated 검증 실패 시 발생 컨트롤러에서 개별적으로 처리하지 않은 경우에만 여기서 처리됨
 	 */
 	@ExceptionHandler(ConstraintViolationException.class)
-	protected ResponseEntity<CommonResponse<String>> handleConstraintViolationException(
+	protected ResponseEntity<CommonResponse<Void>> handleConstraintViolationException(
 		ConstraintViolationException ex) {
-		log.error("MethodArgumentNotValidException: {}", ex.getMessage());
+		log.error("ConstraintViolationException: {}", ex.getMessage());
 
 		return new ResponseEntity<>(
-			CommonResponse.error(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus(), ErrorCode.INVALID_INPUT_VALUE.getCode(),
-				ex.getMessage()), ErrorCode.INVALID_INPUT_VALUE.getHttpStatus());
+			CommonResponse.error(ErrorCode.INVALID_INPUT_VALUE), ErrorCode.INVALID_INPUT_VALUE.getHttpStatus());
 	}
 
 	/**
