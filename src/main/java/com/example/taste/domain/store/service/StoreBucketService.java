@@ -75,6 +75,7 @@ public class StoreBucketService {
 		return StoreBucketResponse.from(storeBucketRepository.save(storeBucket));
 	}
 
+	@Transactional
 	public void addBucketItem(AddBucketItemRequest request, Long userId) {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
