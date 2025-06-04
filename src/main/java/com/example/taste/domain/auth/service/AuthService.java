@@ -1,19 +1,28 @@
 package com.example.taste.domain.auth.service;
 
+import static com.example.taste.domain.auth.exception.AuthErrorCode.ALREADY_LOGIN;
 import static com.example.taste.domain.user.exception.UserErrorCode.CONFLICT_EMAIL;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SignUpRequestDto;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.image.entity.Image;
@@ -56,7 +65,20 @@ public class AuthService {
 		userRepository.save(user);
 	}
 
-	public void login(SigninRequestDto requestDto) {
+	public void login(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
+		// 로그인(기존 세션) 확인
+		HttpSession session = httpRequest.getSession(false);
+
+		SecurityContext securityContext = (session != null) ?
+			(SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT") : null;
+
+		if (securityContext != null) {
+			Authentication auth = securityContext.getAuthentication();
+			if (auth != null && auth.isAuthenticated()) {
+				throw new CustomException(ALREADY_LOGIN);
+			}
+		}
+
 		// 이메일 검증
 		User user = userRepository.findUserByEmail(requestDto.getEmail()).orElseThrow(
 			() -> new CustomException(NOT_FOUND_USER));
@@ -71,7 +93,16 @@ public class AuthService {
 			throw new CustomException(INVALID_PASSWORD);
 		}
 
-		// 세션 저장
+		// 인증 정보 저장
+		CustomUserDetails userDetails = new CustomUserDetails(user);
+		Authentication auth =
+			new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(auth);
+		SecurityContextHolder.setContext(context);
+		httpRequest.getSession(true)
+			.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 	}
 
 	// 중복 이메일 검사

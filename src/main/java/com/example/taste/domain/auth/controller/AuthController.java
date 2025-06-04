@@ -1,5 +1,7 @@
 package com.example.taste.domain.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +29,13 @@ public class AuthController {
 		return CommonResponse.ok();
 	}
 
-	@PostMapping("/login")
-	public CommonResponse<Void> login(@RequestBody SigninRequestDto requestDto) {
-		authService.login(requestDto);
+	// TODO: 로그인 시 파라미터가 json body 로 넘어가는지 아니면 requestParam 으로 넘겨줘야하는지 확인필요
+	// TODO: 혹은 로그인 실패 핸들러를 추가해야하는지?
+	@PostMapping("/signin")
+	public CommonResponse<Void> login(
+		HttpServletRequest httpRequest, @RequestBody SigninRequestDto requestDto) {
+		authService.login(httpRequest, requestDto);
+		
 		return CommonResponse.ok();
 	}
 }

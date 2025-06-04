@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateListRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
@@ -30,9 +32,9 @@ public class UserController {
 
 	// TODO: 인증/인가 추가
 	@GetMapping
-	public CommonResponse<UserMyProfileResponseDto> getMyProfile() {
-		Long userId = 1L;
-		return CommonResponse.ok(userService.getMyProfile(1L));
+	public CommonResponse<UserMyProfileResponseDto> getMyProfile(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return CommonResponse.ok(userService.getMyProfile(userDetails.getId()));
 	}
 
 	@GetMapping("/{userId}")

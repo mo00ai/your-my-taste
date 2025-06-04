@@ -13,17 +13,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.auth.dto.SignUpRequestDto;
@@ -46,9 +43,8 @@ public class User extends SoftDeletableEntity {
 	private Long id;
 
 	@Setter
-	@ManyToOne(fetch = FetchType.LAZY)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "image_id", nullable = false)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@JoinColumn(name = "image_id")
 	private Image image;
 
 	@Column(nullable = false)

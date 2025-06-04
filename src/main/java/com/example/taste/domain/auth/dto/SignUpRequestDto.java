@@ -29,7 +29,11 @@ public class SignUpRequestDto {
 	@Size(min = 2, max = 20, message = "닉네임은 2글자 이상 20글자 이하입니다.")
 	@Pattern(regexp = "^[a-z|A-Z|0-9|ㄱ-ㅎ|가-힣]+$", message = "닉네임은 영문자, 한글, 숫자만 입력 가능합니다.")
 	private String nickname;
+
+	@NotBlank(message = "주소는 필수값입니다.")
 	private String address;
+
+	// @NotBlank(message = "입맛 취향값은 필수값입니다.")
 	private UserFavorUpdateListRequestDto favorList;
 
 	private String gender;        // TODO: enum valid 적용 필요

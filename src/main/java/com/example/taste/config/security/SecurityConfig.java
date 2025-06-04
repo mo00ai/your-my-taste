@@ -16,27 +16,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+	private final CustomUserDetailsService userDetailsService;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(AbstractHttpConfigurer::disable)
-			.sessionManagement(sm
-					-> {
+			.sessionManagement(sm -> {
 					sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
 					sm.sessionFixation().changeSessionId();                        // 세션 고정 공격 방어
 				}
 			)
-			.authorizeHttpRequests(auth
-				-> {
+			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/auth/**").permitAll();
 
 				// TODO: 인증 경로 수정
-				// "/stores/*/waiting" USER도 허용
-				auth.requestMatchers("/stores/*/waiting").hasRole("USER");
-				// "/store/*/reservation" USER도 허용
-				auth.requestMatchers("/stores/*/reservation").hasRole("USER");
+				auth.requestMatchers("/admin/**").hasRole("ADMIN");
 				auth.anyRequest().authenticated();
-			});
+			})
+			.userDetailsService(userDetailsService);
 
 		return httpSecurity.build();
 	}
