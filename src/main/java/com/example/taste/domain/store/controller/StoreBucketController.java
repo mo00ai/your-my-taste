@@ -2,8 +2,6 @@ package com.example.taste.domain.store.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,11 +37,10 @@ public class StoreBucketController {
 	}
 
 	@PostMapping("/store-buckets/store-bucket-items")
-	public ResponseEntity<Void> addBucketItem(@RequestBody @Valid AddBucketItemRequest request) {
+	public CommonResponse<Void> addBucketItem(@RequestBody @Valid AddBucketItemRequest request) {
 		Long userId = 1L;
 		storeBucketService.addBucketItem(request, userId);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT)
-			.body(null);
+		return CommonResponse.ok();
 	}
 
 	@GetMapping("/users/{targetUserId}/store-buckets")
@@ -65,19 +62,17 @@ public class StoreBucketController {
 	}
 
 	@DeleteMapping("/store-buckets/{bucketId}")
-	public ResponseEntity<Void> deleteBucket(@PathVariable Long bucketId) {
+	public CommonResponse<Void> deleteBucket(@PathVariable Long bucketId) {
 		Long userId = 1L;
 		storeBucketService.deleteBucket(bucketId, userId);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT)
-			.body(null);
+		return CommonResponse.ok();
 	}
 
 	@DeleteMapping("/store-buckets/{bucketId}/store-bucket-items")
-	public ResponseEntity<Void> removeBucketItem(@PathVariable Long bucketId,
+	public CommonResponse<Void> removeBucketItem(@PathVariable Long bucketId,
 		@RequestBody @Valid RemoveBucketItemRequest request) {
 		Long userId = 1L;
 		storeBucketService.removeBucketItem(bucketId, request, userId);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT)
-			.body(null);
+		return CommonResponse.ok();
 	}
 }
