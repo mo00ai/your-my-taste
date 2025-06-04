@@ -33,7 +33,7 @@ public class StoreBucketController {
 	private final StoreBucketService storeBucketService;
 
 	@PostMapping("/store-buckets")
-	public CommonResponse<StoreBucketResponse> createBucket(@RequestBody CreateBucketRequest request) {
+	public CommonResponse<StoreBucketResponse> createBucket(@RequestBody @Valid CreateBucketRequest request) {
 		Long userId = 1L; // Todo : 세션에서 추출
 		return CommonResponse.created(storeBucketService.createBucket(request, userId));
 	}

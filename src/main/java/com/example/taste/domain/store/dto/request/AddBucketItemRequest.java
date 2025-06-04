@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddBucketItemRequest {
-	@NotNull
+	@NotNull(message = "필수 요청값이 생략되었습니다.")
 	private Long storeId;
-	@NotEmpty
+	@NotEmpty(message = "필수 요청값이 생략되었습니다.")
 	private List<Long> bucketIds;
 }
