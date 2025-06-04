@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.party.dto.reponse.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.reponse.PartyResponseDto;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.enums.PartyFilter;
@@ -39,8 +40,15 @@ public class PartyController {
 	@GetMapping
 	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(name = "filter", defaultValue = "ALL")
-		@ValidEnum(target = PartyFilter.class) String partyFilter) {
-		return CommonResponse.ok(partyService.getParties(userDetails.getId(), partyFilter));
+		@RequestParam(defaultValue = "ALL")
+		@ValidEnum(target = PartyFilter.class) String filter) {
+		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
+	}
+
+	@GetMapping("/{partyId}")
+	public CommonResponse<PartyDetailResponseDto> getPartyDetail(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam Long partyId) {
+		return CommonResponse.ok(partyService.getPartyDetail(userDetails.getId(), partyId));
 	}
 }
