@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.entity.UserFavor;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Getter
@@ -25,13 +24,13 @@ public class UserMyProfileResponseDto {
 	private int postingCount;
 
 	@Builder
-	public UserMyProfileResponseDto(User user, List<UserFavor> favors) {
+	public UserMyProfileResponseDto(User user) {
 		this.id = user.getId();
 		this.nickname = user.getNickname();
 		this.email = user.getEmail();
 		this.address = user.getAddress();
 		this.level = user.getLevel().toString();
-		this.favors = favors.stream()
+		this.favors = user.getUserFavorList().stream()
 			.map(UserFavorResponseDto::new)
 			.toList();
 		this.point = user.getPoint();

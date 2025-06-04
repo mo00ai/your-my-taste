@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.favor.dto.request.FavorAdminListCreateRequestDto;
 import com.example.taste.domain.favor.dto.request.FavorAdminRequestDto;
 import com.example.taste.domain.favor.dto.response.FavorAdminResponseDto;
 import com.example.taste.domain.favor.entity.Favor;
@@ -24,8 +23,8 @@ public class FavorAdminService {
 	private final FavorRepository favorRepository;
 
 	@Transactional
-	public void createFavor(FavorAdminListCreateRequestDto requestDto) {
-		requestDto.getFavorList().forEach(favor -> {
+	public void createFavor(List<FavorAdminRequestDto> requestDtoList) {
+		requestDtoList.forEach(favor -> {
 			if (favorRepository.findByName(favor.getFavorName()) == null) {
 				favorRepository.save(new Favor(favor.getFavorName()));
 			}

@@ -2,6 +2,8 @@ package com.example.taste.domain.user.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +23,7 @@ import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.service.UserService;
 
@@ -31,7 +34,6 @@ import com.example.taste.domain.user.service.UserService;
 public class UserController {
 	private final UserService userService;
 
-	// TODO: @Valid 붙이기
 	@GetMapping
 	public CommonResponse<UserMyProfileResponseDto> getMyProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -40,7 +42,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}")
-	public CommonResponse<UserMyProfileResponseDto> getProfile(
+	public CommonResponse<UserProfileResponseDto> getProfile(
 		@PathVariable Long userId) {
 		return CommonResponse.ok(userService.getProfile(userId));
 	}
@@ -48,7 +50,7 @@ public class UserController {
 	@PatchMapping
 	public CommonResponse<Void> updateProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserUpdateRequestDto requestDto) {
+		@RequestBody @Valid UserUpdateRequestDto requestDto) {
 		userService.updateUser(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}
@@ -56,7 +58,7 @@ public class UserController {
 	@DeleteMapping
 	public CommonResponse<Void> deleteUser(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserDeleteRequestDto requestDto) {
+		@RequestBody @Valid UserDeleteRequestDto requestDto) {
 		userService.deleteUser(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}
@@ -64,7 +66,7 @@ public class UserController {
 	@PostMapping("/favor")
 	public CommonResponse<Void> updateUserFavor(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody List<UserFavorUpdateRequestDto> requestDtoList
+		@RequestBody @Valid List<UserFavorUpdateRequestDto> requestDtoList
 	) {
 		userService.updateUserFavors(userDetails.getId(), requestDtoList);
 		return CommonResponse.ok();

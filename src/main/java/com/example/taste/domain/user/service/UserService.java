@@ -1,6 +1,7 @@
 package com.example.taste.domain.user.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
@@ -31,7 +33,6 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	private final UserFavorService userFavorService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
@@ -40,17 +41,16 @@ public class UserService {
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
-		User user = userRepository.findById(userId).orElseThrow();
-		List<UserFavor> favorList = userFavorRepository.findAllByUser(
-			userId);        // TODO: withList 조회 레포지토리 메소드를 추가하기
-		return new UserMyProfileResponseDto(user, favorList);
+		User user = userRepository.findByIdWithUserFavorList(userId)
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		return new UserMyProfileResponseDto(user);
 	}
 
 	// 다른 유저 프로필 조회
-	public UserMyProfileResponseDto getProfile(Long userId) {
-		User user = userRepository.findById(userId).orElseThrow();
-		List<UserFavor> favorList = userFavorRepository.findAllByUser(userId);
-		return new UserMyProfileResponseDto(user, favorList);
+	public UserProfileResponseDto getProfile(Long userId) {
+		User user = userRepository.findByIdWithUserFavorList(userId)
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		return new UserProfileResponseDto(user);
 	}
 
 	// 유저 정보 업데이트
@@ -117,8 +117,6 @@ public class UserService {
 		userFavorRepository.findAll().forEach(i ->
 			System.out.printf("UserFavor Id: %d, UserId: %d, FavorId: %d\n",
 				i.getId(), i.getUser().getId(), i.getFavor().getId()));
-
-		// userFavorService.saveUserFavorList(updateUserFavorList);
 	}
 
 	// 유저의 팔로잉 유저 목록 조회
