@@ -56,9 +56,8 @@ public class Review extends BaseEntity {
 	private Store store;
 
 	@Builder
-	public Review(boolean isValidated, String contents, int score,
+	public Review(boolean isValidated, String contents, Integer score,
 		Image image, User user, Store store) {
-		this.isValidated = isValidated;
 		this.contents = contents;
 		this.score = score;
 		this.image = image;
