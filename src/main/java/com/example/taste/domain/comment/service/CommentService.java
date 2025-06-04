@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
@@ -20,8 +21,11 @@ import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
+import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,13 +33,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 	private final CommentRepository commentRepository;
+	private final UserRepository userRepository;
 	//private final BoardRepository boardRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
 		Board board = Board.builder().build();
-		User user = new User(); //세션에서 가져올 것
+		// 임시 유저, 세션에서 가져올것
+		User user = userRepository.findById(1L)
+			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		Comment parent = requestDto.getParent() == null ? null :
-			commentRepository.findById(requestDto.getParent()).orElseThrow();
+			commentRepository.findById(requestDto.getParent())
+				.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
@@ -53,14 +61,16 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
-		Comment comment = commentRepository.findById(commentId).orElseThrow();
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		comment.updateContent(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
 	public void deleteComment(Long commentId) {
-		Comment comment = commentRepository.findById(commentId).orElseThrow();
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		comment.deleteContent(LocalDateTime.now());
 	}
 
@@ -112,6 +122,7 @@ public class CommentService {
 	}
 
 	public GetCommentDto getComment(Long commentId) {
-		return new GetCommentDto(commentRepository.findById(commentId).orElseThrow());
+		return new GetCommentDto(commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
 	}
 }
