@@ -15,16 +15,19 @@ public class UpdateReviewResponseDto {
 	private String contents;
 	private Integer score;
 	private String imageUrl;
+	private Boolean isPresented;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public UpdateReviewResponseDto(Long id, String contents, int score, String imageUrl, LocalDateTime createdAt,
+	public UpdateReviewResponseDto(Long id, String contents, int score, String imageUrl, Boolean isPresented,
+		LocalDateTime createdAt,
 		LocalDateTime updatedAt) {
 		this.id = id;
 		this.contents = contents;
 		this.score = score;
 		this.imageUrl = imageUrl;
+		this.isPresented = isPresented;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -34,6 +37,7 @@ public class UpdateReviewResponseDto {
 		this.contents = review.getContents();
 		this.score = review.getScore();
 		this.imageUrl = review.getImage().getUrl();
+		this.isPresented = review.isPresented();
 		this.createdAt = review.getCreatedAt();
 		this.updatedAt = review.getUpdatedAt();
 	}

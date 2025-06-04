@@ -15,14 +15,17 @@ public class CreateReviewResponseDto {
 	private String contents;
 	private Integer score;
 	private String imageUrl;
+	private Boolean isPresented;
 	private LocalDateTime createdAt;
 
 	@Builder
-	public CreateReviewResponseDto(Long id, String contents, int score, String imageUrl, LocalDateTime createdAt) {
+	public CreateReviewResponseDto(Long id, String contents, int score, String imageUrl, Boolean isPresented,
+		LocalDateTime createdAt) {
 		this.id = id;
 		this.contents = contents;
 		this.score = score;
 		this.imageUrl = imageUrl;
+		this.isPresented = isPresented;
 		this.createdAt = createdAt;
 	}
 
@@ -31,6 +34,7 @@ public class CreateReviewResponseDto {
 		this.contents = review.getContents();
 		this.score = review.getScore();
 		this.imageUrl = review.getImage().getUrl();
+		this.isPresented = review.isPresented();
 		this.createdAt = review.getCreatedAt();
 	}
 }
