@@ -93,12 +93,12 @@ public class PartyService {
 
 	@Transactional
 	public void updatePartyDetail(
-		Long hostUserId, Long partyId, PartyDetailUpdateRequestDto requestDto) {
+		Long hostId, Long partyId, PartyDetailUpdateRequestDto requestDto) {
 		Party party = partyRepository.findById(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면
-		if (!party.getHostUser().getId().equals(hostUserId)) {
+		if (!isHostOfParty(party, hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -117,5 +117,9 @@ public class PartyService {
 		} else {
 			party.update(requestDto);
 		}
+	}
+
+	private boolean isHostOfParty(Party party, Long hostId) {
+		return party.getHostUser().getId().equals(hostId);
 	}
 }

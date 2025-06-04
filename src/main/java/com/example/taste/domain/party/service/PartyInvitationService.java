@@ -2,6 +2,7 @@ package com.example.taste.domain.party.service;
 
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
+import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +32,27 @@ public class PartyInvitationService {
 		Party party = partyRepository.findById(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		party.leaveMember();
+	}
+
+	@Transactional
+	public void removePartyMember(Long hostId, Long userId, Long partyId) {
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		// 호스트가 아니라면
+		if (!isHostOfParty(party, hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		// 파티 초대 가져와서 상태 변경
+		PartyInvitation partyInvitation = partyInvitationRepository.findByUserAndParty(userId, partyId)
+			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		partyInvitation.leave();
+
+		// 파티에서 현재 멤버 수 차감
+		party.leaveMember();
+	}
+
+	private boolean isHostOfParty(Party party, Long hostId) {
+		return party.getHostUser().getId().equals(hostId);
 	}
 }

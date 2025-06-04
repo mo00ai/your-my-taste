@@ -12,8 +12,8 @@ import com.example.taste.domain.party.entity.Party;
 @Repository
 public interface PartyRepository extends JpaRepository<Party, Long> {
 	@Query("SELECT DISTINCT p FROM Party p LEFT JOIN FETCH p.hostUser LEFT JOIN FETCH p.store "
-		+ "WHERE p.hostUser.id != :hostUserId AND p.partyStatus = 'RECRUITING'")
-	List<Party> findAllByRecruitingAndUserNotIn(@Param("hostUserId") Long hostUserId);
+		+ "WHERE p.hostUser.id != :hostId AND p.partyStatus = 'RECRUITING'")
+	List<Party> findAllByRecruitingAndUserNotIn(@Param("hostId") Long hostId);
 
 	@Query(
 		"SELECT DISTINCT pi.party FROM PartyInvitation pi "

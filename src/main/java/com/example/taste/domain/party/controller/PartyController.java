@@ -72,4 +72,12 @@ public class PartyController {
 		partyInvitationService.leaveParty(userDetails.getId(), partyId);
 		return CommonResponse.ok();
 	}
+
+	@DeleteMapping("/{partyId}/{userId}")
+	public CommonResponse<Void> removePartyMember(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Long userId, @PathVariable Long partyId) {
+		partyInvitationService.removePartyMember(userDetails.getId(), userId, partyId);
+		return CommonResponse.ok();
+	}
 }
