@@ -1,5 +1,6 @@
 package com.example.taste.domain.notification.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -34,14 +35,16 @@ public class NotificationService {
 
 	public void sendBunch(NotificationEvent event, List<User> allUser) {
 		NotificationContent content = saveContent(event);
+		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (User user : allUser) {
-			infoRepository.save(NotificationInfo.builder()
+			notificationInfos.add(NotificationInfo.builder()
 				.category(event.getCategory())
 				.notificationContent(content)
 				.user(user)
 				.isRead(false)
 				.build());
 		}
+		infoRepository.saveAll(notificationInfos);
 	}
 
 	public NotificationContent saveContent(NotificationEvent event) {
