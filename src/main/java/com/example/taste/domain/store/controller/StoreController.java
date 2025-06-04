@@ -28,6 +28,7 @@ public class StoreController {
 	//@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteStore(@PathVariable Long id) {
+		storeService.deleteStore(id);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT)
 			.body(null);
 	}
