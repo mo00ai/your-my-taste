@@ -46,7 +46,7 @@ public class User extends SoftDeletableEntity {
 	private Long id;
 
 	@Setter
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "image_id")
 	private Image image;
 
