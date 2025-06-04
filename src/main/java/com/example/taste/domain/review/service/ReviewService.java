@@ -66,7 +66,7 @@ public class ReviewService {
 		// 임시 유저. 세션 구현하면 처리
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-		String key = "reviewValidation:user" + user.getId() + ":store" + store.getId();
+		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		Boolean value = redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? value : false;
 
@@ -91,10 +91,10 @@ public class ReviewService {
 		String contents =
 			requestDto.getContents().isEmpty() ? review.getContents() :
 				requestDto.getContents();
-		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
+		Image image = imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
-		String key = "reviewValidation:user:" + review.getUser().getId() + ":store" + review.getStore().getId();
+		String key = "reviewValidation:user:" + review.getUser().getId() + ":store:" + review.getStore().getId();
 		Boolean value = redisTemplate.opsForValue().get(key);
 		Boolean valid = value != null ? value : false;
 
