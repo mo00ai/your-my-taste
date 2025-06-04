@@ -46,7 +46,7 @@ public class UserController {
 		return CommonResponse.ok(userService.getProfile(userId));
 	}
 
-	@PatchMapping
+	@PatchMapping    // TODO: 프로필 이미지 변경 필드 추가
 	public CommonResponse<Void> updateProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserUpdateRequestDto requestDto) {
@@ -54,7 +54,7 @@ public class UserController {
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping
+	@DeleteMapping// TODO: 비밀번호 확인 로직 추가
 	public CommonResponse<Void> deleteUser(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserDeleteRequestDto requestDto) {

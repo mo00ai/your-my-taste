@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +26,10 @@ import com.example.taste.domain.auth.service.AuthService;
 public class AuthController {
 	private final AuthService authService;
 
-	@PostMapping("/signup")
+	@PostMapping(path = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> signup(
-		@RequestPart("data") @Valid SignupRequestDto requestDto, @RequestPart(required = false) MultipartFile file) {
+		@RequestPart(name = "data") @Valid SignupRequestDto requestDto,
+		@RequestPart(name = "file", required = false) MultipartFile file) {
 		authService.signup(requestDto, file);
 		return CommonResponse.ok();
 	}

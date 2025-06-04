@@ -22,6 +22,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
@@ -71,5 +72,36 @@ public class Party extends BaseCreatedAtEntity {
 		this.meetingTime = meetingTime;
 		this.maxMembers = maxMembers;
 		this.enableRandomMatching = enableRandomMatching != null ? enableRandomMatching : false;
+	}
+
+	@Builder
+	public Party(PartyCreateRequestDto requestDto, User hostUser) {
+		this.hostUser = hostUser;
+		this.title = requestDto.getTitle();
+		this.description =
+			requestDto.getDescription() != null ? requestDto.getDescription() : null;
+		this.meetingTime =
+			requestDto.getMeetingTime() != null ? requestDto.getMeetingTime() : null;
+		this.maxMembers =
+			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
+		this.enableRandomMatching =
+			requestDto.getIsRandomMatch() != null ? requestDto.getIsRandomMatch() : null;
+		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면)
+	}
+
+	@Builder
+	public Party(PartyCreateRequestDto requestDto, User hostUser, Store store) {
+		this.hostUser = hostUser;
+		this.store = store;
+		this.title = requestDto.getTitle();
+		this.description =
+			requestDto.getDescription() != null ? requestDto.getDescription() : null;
+		this.meetingTime =
+			requestDto.getMeetingTime() != null ? requestDto.getMeetingTime() : null;
+		this.maxMembers =
+			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
+		this.enableRandomMatching =
+			requestDto.getIsRandomMatch() != null ? requestDto.getIsRandomMatch() : null;
+		this.partyStatus = PartyStatus.RECRUITING;
 	}
 }
