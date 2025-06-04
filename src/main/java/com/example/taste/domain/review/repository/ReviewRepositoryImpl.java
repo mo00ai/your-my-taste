@@ -26,7 +26,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 			.leftJoin(qReview.user, qUser).fetchJoin()
 			.where(
 				qReview.id.eq(reviewId)
-			).fetch().get(0));
+			).fetchFirst());
 	}
 
 	private final JPAQueryFactory queryFactory;
@@ -35,6 +35,15 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 	public Page<Review> getAllReview(Store store, Pageable pageable, int score) {
 		QImage qImage = QImage.image;
 		QReview qReview = QReview.review;
+
+		long total = queryFactory.selectFrom(qReview)
+			.where(
+				qReview.store.eq(store),
+				qReview.isPresented.isTrue(),
+				score == 0 ? null : qReview.score.eq(score)
+			)
+			.fetchCount();
+
 		List<Review> reviews = queryFactory.selectFrom(qReview)
 			.leftJoin(qReview.image, qImage).fetchJoin()
 			.where(
@@ -42,10 +51,10 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 				qReview.isPresented.isTrue(),
 				score == 0 ? null : qReview.score.eq(score)
 			)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
 			.fetch();
-		int here = (int)pageable.getOffset();
-		int there = Math.min(here + pageable.getPageSize(), reviews.size());
-		List<Review> sub = reviews.subList(here, there);
-		return new PageImpl<Review>(sub, pageable, reviews.size());
+
+		return new PageImpl<Review>(reviews, pageable, total);
 	}
 }
