@@ -26,7 +26,7 @@ public class ImageService {
 	private final ImageRepository imageRepository;
 
 	@Transactional
-	public void saveImage(MultipartFile file, ImageType type) throws IOException {
+	public Image saveImage(MultipartFile file, ImageType type) throws IOException {
 
 		// 유효성 검사 등은 이쪽에서
 		Map<String, String> fileInfo = null;
@@ -46,6 +46,8 @@ public class ImageService {
 				.build();
 
 			Image savedImage = imageRepository.save(image);
+
+			return savedImage;
 
 		} catch (Exception e) {
 
