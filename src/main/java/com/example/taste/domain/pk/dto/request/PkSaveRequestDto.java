@@ -8,9 +8,13 @@ import com.example.taste.domain.pk.enums.PkType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PkSaveRequestDto {
 
 	@ValidPkType(message = "등록되지 않은 Pk 포인트 유형 값입니다.", target = PkType.class)
