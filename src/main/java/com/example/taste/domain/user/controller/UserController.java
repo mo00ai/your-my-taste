@@ -37,7 +37,6 @@ public class UserController {
 	@GetMapping
 	public CommonResponse<UserMyProfileResponseDto> getMyProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		log.info("NOW USER: {}, ROLE: {}", userDetails.getUsername(), userDetails.getAuthorities());
 		return CommonResponse.ok(userService.getMyProfile(userDetails.getId()));
 	}
 

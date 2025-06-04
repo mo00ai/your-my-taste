@@ -86,7 +86,7 @@ public class UserService {
 		user.removeUserFavorList(userFavorList.stream()
 			.filter(userFavor ->
 				requestDtoList.stream()
-					.anyMatch(updateItem -> !isSameItem(updateItem, userFavor)))
+					.noneMatch(updateItem -> isSameItem(updateItem, userFavor)))
 			.collect(Collectors.toCollection(ArrayList::new)));
 
 		// 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
