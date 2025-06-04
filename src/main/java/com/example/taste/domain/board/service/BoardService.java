@@ -2,12 +2,14 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
@@ -20,6 +22,7 @@ import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
+import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
@@ -31,21 +34,32 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class BoardService {
 
+	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final StoreService storeService;
 	private final UserService userService;
 
 	@Transactional
-	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto) {
+	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto, List<MultipartFile> files) throws
+		IOException {
 		User user = userService.findById(userId);
 		Store store = storeService.findById(storeId);
+
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
 			boardRepository.save(entity);
 
+			if (files != null && !files.isEmpty()) {
+				boardImageService.saveBoardImages(entity, files);
+			}
+
 		} else if (requestDto instanceof HongdaeBoardRequestDto hongdaeRequestDto) {
 			Board entity = BoardMapper.toEntity(hongdaeRequestDto, store, user);
 			boardRepository.save(entity);
+
+			if (files != null && !files.isEmpty()) {
+				boardImageService.saveBoardImages(entity, files);
+			}
 
 		} else {
 			throw new IllegalArgumentException("지원하지 않는 게시글 타입입니다.");

@@ -2,6 +2,7 @@ package com.example.taste.domain.board.controller;
 
 import static com.example.taste.domain.board.dto.response.BoardSuccessCode.*;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
@@ -33,11 +36,12 @@ public class BoardController {
 	private final BoardService boardService;
 
 	@PostMapping
-	public CommonResponse<Void> createBoard(@RequestBody BoardRequestDto requestDto) {
+	public CommonResponse<Void> createBoard(@RequestBody BoardRequestDto requestDto,
+		@RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 		Long storeId = 1L;
 		Long userId = 1L;
 		// TODO store, user 객체 받아오기
-		boardService.createBoard(userId, storeId, requestDto);
+		boardService.createBoard(userId, storeId, requestDto, files);
 		return CommonResponse.success(BOARD_CREATED);
 
 	}
@@ -81,7 +85,8 @@ public class BoardController {
 
 	@PatchMapping("/{boardId}")
 	public CommonResponse<Void> updateBoard(@RequestBody BoardUpdateRequestDto requestDto,
-		@PathVariable Long boardId
+		@PathVariable Long boardId,
+		@RequestPart List<Long>
 	) {
 		// TODO user 코드 수정필요
 		Long userId = 1L;
