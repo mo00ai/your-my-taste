@@ -48,4 +48,9 @@ public class StoreBucket {
 		this.name = StringUtils.isBlank(name) ? "기본 리스트" : name;
 		this.isOpened = isOpened == null || isOpened;
 	}
+
+	public StoreBucket updateName(String name) {
+		this.name = name;
+		return this;
+	}
 }
