@@ -34,15 +34,14 @@ public class LikeService {
 		likeRepository.save(like);
 	}
 
-	public void unlikedboard(Long userId, Long boardId) {
+	public void unlikeBoard(Long userId, Long boardId) {
 		User user = userService.findById(userId);
 		Board board = boardService.findByBoardId(boardId);
 
 		Like like = likeRepository.findByUserAndBoard(user, board)
 			.orElseThrow(() -> new CustomException(BoardErrorCode.LIKE_NOT_FOUND));
-		if (like != null) {
-			likeRepository.delete(like);
-		}
+		likeRepository.delete(like);
+
 	}
 
 	public boolean isLiked(Long userId, Long boardId) {

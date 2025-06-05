@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,11 +17,14 @@ import lombok.Getter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventRequestDto {
-
+	@NotBlank(message = "이벤트 이름은 필수입니다")
 	private String name;
+	@NotBlank(message = "이벤트 내용은 필수입니다")
 	private String contents;
+	@NotNull(message = "시작일은 필수입니다")
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate startDate;
+	@NotNull(message = "종료일은 필수입니다")
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate endDate;
 	@JsonProperty("isActive")
