@@ -1,14 +1,11 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +26,8 @@ import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -170,6 +169,7 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public User findById(long userId) {
+		// TODO 삭제된 유저도 고려필요할거 같은데 추후
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 	}
