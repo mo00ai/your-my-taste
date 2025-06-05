@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.image.dto.ImageResponseDto;
 import com.example.taste.domain.image.entity.BoardImage;
 
@@ -17,4 +18,5 @@ public interface BoardImageRepository extends JpaRepository<BoardImage, Long> {
 	@Query("select bi from BoardImage bi where bi.board.id = :boardId")
 	List<BoardImage> findImagesById(@Param("boardId") Long boardId);
 
+	List<BoardImage> findImagesByBoard(Board board);
 }
