@@ -22,6 +22,7 @@ import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.event.dto.request.EventRequestDto;
 import com.example.taste.domain.event.dto.request.EventUpdateRequestDto;
 import com.example.taste.domain.event.dto.response.EventResponseDto;
+import com.example.taste.domain.event.service.BoardEventService;
 import com.example.taste.domain.event.service.EventService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class EventController {
 
 	private final EventService eventService;
+	private final BoardEventService boardEventService;
 
 	// 이벤트 등록
 	@PreAuthorize("hasRole('ADMIN')")
@@ -81,7 +83,8 @@ public class EventController {
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		return CommonResponse.ok();
+		boardEventService.createBoardEvent(eventId, boardId, userDetails.getId());
+		return CommonResponse.success(EVENT_APPLIED);
 	}
 
 	// 이벤트 신청 취소
@@ -91,6 +94,7 @@ public class EventController {
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		return CommonResponse.ok();
+		boardEventService.cancelEventApplication(eventId, boardId, userDetails.getId());
+		return CommonResponse.success(EVENT_APPLICATION_CANCELED);
 	}
 }
