@@ -120,7 +120,7 @@ public class BoardController {
 	public CommonResponse<Void> unlikeBoard(@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		likeService.unlikedboard(userDetails.getId(), boardId);
+		likeService.unlikeBoard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_UNLIKED);
 	}
 }

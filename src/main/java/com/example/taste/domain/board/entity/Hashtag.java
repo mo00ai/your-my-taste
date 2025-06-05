@@ -1,5 +1,8 @@
 package com.example.taste.domain.board.entity;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.exception.BoardErrorCode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,8 +31,9 @@ public class Hashtag {
 
 	@Builder
 	public Hashtag(String name) {
-		if (name != null) {
-			this.name = name.trim().toLowerCase();
+		if (name == null || name.trim().isEmpty()) {
+			throw new CustomException(BoardErrorCode.INVALID_HASHTAG);
 		}
+		this.name = name.trim().toLowerCase();
 	}
 }
