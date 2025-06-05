@@ -23,6 +23,8 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.service.BoardImageService;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
@@ -38,6 +40,7 @@ public class BoardService {
 	private final BoardRepository boardRepository;
 	private final StoreService storeService;
 	private final UserService userService;
+	private final PkService pkService;
 
 	@Transactional
 	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto, List<MultipartFile> files) throws
@@ -48,7 +51,7 @@ public class BoardService {
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
 			boardRepository.save(entity);
-
+			pkService.savePkLog(userId, PkType.POST);
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
@@ -56,7 +59,7 @@ public class BoardService {
 		} else if (requestDto instanceof HongdaeBoardRequestDto hongdaeRequestDto) {
 			Board entity = BoardMapper.toEntity(hongdaeRequestDto, store, user);
 			boardRepository.save(entity);
-
+			pkService.savePkLog(userId, PkType.POST);
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
@@ -74,13 +77,10 @@ public class BoardService {
 	}
 
 	@Transactional
-	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto, List<Long> keepImageIds,
-		List<MultipartFile> newImages) throws IOException {
+	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.update(requestDto);
-		boardImageService.updateBoardImages(board, keepImageIds, newImages);
-
 	}
 
 	@Transactional

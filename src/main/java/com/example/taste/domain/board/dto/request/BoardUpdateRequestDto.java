@@ -18,5 +18,4 @@ public class BoardUpdateRequestDto {
 	@Size(max = 1000, message = "내용은 1000자 이내여야 합니다.")
 	private String contents;
 	private String type;
-	private String imageUrl;
 }

@@ -98,35 +98,37 @@ public class BoardImageService {
 		return boardImageRepository.findAllById(boardId);
 	}
 
-	@Transactional
-	public void updateBoardImages(Board board, List<Long> keepImageIds, List<MultipartFile> newImages) throws
-		IOException {
-
-		List<BoardImage> toExistImages = boardImageRepository.findImagesByBoard(board);
-
-		// 삭제할 이미지 조회
-		List<BoardImage> toDeleteImages = toExistImages.stream()
-			.filter(image -> !keepImageIds.contains(image.getImage().getId()))
-			.toList();
-
-		// 삭제
-		for (BoardImage bi : toDeleteImages) {
-			imageService.deleteImage(bi.getImage());
-		}
-		boardImageRepository.deleteAll(toDeleteImages);
-
-		// 새 이미지 추가
-		for (MultipartFile file : newImages) {
-			Image image = imageService.saveImage(file, ImageType.BOARD);
-
-			BoardImage boardImage = BoardImage.builder()
-				.board(board)
-				.image(image)
-				.build();
-
-			boardImageRepository.save(boardImage);
-		}
-	}
+	// @Transactional
+	// public void updateBoardImages(Board board, List<Long> keepImageIds, List<MultipartFile> newImages) throws
+	// 	IOException {
+	//
+	// 	List<BoardImage> toExistImages = boardImageRepository.findImagesByBoard(board);
+	//
+	// 	List<Long> safeKeepImageIds = keepImageIds != null ? keepImageIds : List.of();
+	//
+	// 	// 삭제할 이미지 조회
+	// 	List<BoardImage> toDeleteImages = toExistImages.stream()
+	// 		.filter(image -> !safeKeepImageIds.contains(image.getImage().getId()))
+	// 		.toList();
+	//
+	// 	// 삭제
+	// 	for (BoardImage bi : toDeleteImages) {
+	// 		imageService.deleteImage(bi.getImage());
+	// 	}
+	// 	boardImageRepository.deleteAll(toDeleteImages);
+	//
+	// 	// 새 이미지 추가
+	// 	for (MultipartFile file : newImages) {
+	// 		Image image = imageService.saveImage(file, ImageType.BOARD);
+	//
+	// 		BoardImage boardImage = BoardImage.builder()
+	// 			.board(board)
+	// 			.image(image)
+	// 			.build();
+	//
+	// 		boardImageRepository.save(boardImage);
+	// 	}
+	// }
 
 	@Transactional
 	public void deleteBoardImages(Board board) {

@@ -7,19 +7,20 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
@@ -37,10 +38,11 @@ public class BoardController {
 
 	private final BoardService boardService;
 
-	@PostMapping
+	@ImageValid
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> createBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody BoardRequestDto requestDto,
+		@RequestPart("requestDto") BoardRequestDto requestDto,
 		@RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 		Long storeId = 1L;
 		Long userId = 1L;
@@ -92,17 +94,17 @@ public class BoardController {
 		return CommonResponse.ok(responseDtoList);
 	}
 
-	@PatchMapping("/{boardId}")
+	@ImageValid
+	@PatchMapping(value = "/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> updateBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody BoardUpdateRequestDto requestDto,
-		@PathVariable Long boardId,
-		@RequestPart(required = false) List<Long> keepImageIds,
-		@RequestPart(required = false) List<MultipartFile> newImages
+		@RequestPart("requestDto") BoardUpdateRequestDto requestDto,
+		@PathVariable Long boardId
 	) throws IOException {
 		// TODO user 코드 수정필요
 		Long userId = 1L;
-		boardService.updateBoard(userDetails.getId(), boardId, requestDto, keepImageIds, newImages);
+
+		boardService.updateBoard(userDetails.getId(), boardId, requestDto);
 		return CommonResponse.success(BOARD_UPDATED);
 	}
 
