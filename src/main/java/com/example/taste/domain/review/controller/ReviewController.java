@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
@@ -41,9 +43,11 @@ public class ReviewController {
 	public CommonResponse<CreateReviewResponseDto> createReview(
 		@RequestPart("requestDto") CreateReviewRequestDto requestDto,
 		@PathVariable Long storeId,
-		@RequestPart(value = "files", required = false) List<MultipartFile> files)
+		@RequestPart(value = "files", required = false) List<MultipartFile> files,
+		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
-		return CommonResponse.created(reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW));
+		return CommonResponse.created(
+			reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW, userDetails));
 	}
 
 	@ImageValid
@@ -51,12 +55,14 @@ public class ReviewController {
 	public CommonResponse<UpdateReviewResponseDto> updateReview(
 		@RequestPart("requestDto") UpdateReviewRequestDto requestDto,
 		@PathVariable Long reviewId,
-		@RequestPart(value = "files", required = false) List<MultipartFile> files)
+		@RequestPart(value = "files", required = false) List<MultipartFile> files,
+		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
 		if (files == null || files.isEmpty()) {
 			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
 		}
-		return CommonResponse.ok(reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW));
+		return CommonResponse.ok(
+			reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW, userDetails));
 	}
 
 	@GetMapping()
@@ -72,15 +78,17 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/{reviewId}")
-	public CommonResponse<Void> deleteReview(@PathVariable Long reviewId) {
-		reviewService.deleteReview(reviewId);
+	public CommonResponse<Void> deleteReview(@PathVariable Long reviewId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		reviewService.deleteReview(reviewId, userDetails);
 		return CommonResponse.ok();
 	}
 
 	@PostMapping("/validate")
 	public CommonResponse<Void> createValidation(@PathVariable Long storeId,
-		@RequestPart("image") MultipartFile image) throws IOException {
-		reviewService.createValidation(storeId, image);
+		@RequestPart("image") MultipartFile image,
+		@AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
+		reviewService.createValidation(storeId, image, userDetails);
 		return CommonResponse.ok();
 	}
 
