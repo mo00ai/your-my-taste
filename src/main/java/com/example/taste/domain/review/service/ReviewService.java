@@ -28,6 +28,8 @@ import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
@@ -55,6 +57,7 @@ public class ReviewService {
 	private final ImageService imageService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
+	private final PkService pkService;
 
 	@Value("${ocr_key}")
 	private String secretKey;
@@ -84,6 +87,7 @@ public class ReviewService {
 			.build();
 
 		Review saved = reviewRepository.save(review);
+		pkService.savePkLog(user.getId(), PkType.REVIEW);
 		return new CreateReviewResponseDto(saved);
 	}
 
