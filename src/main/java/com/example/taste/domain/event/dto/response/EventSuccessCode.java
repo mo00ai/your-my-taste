@@ -16,6 +16,8 @@ public enum EventSuccessCode implements BaseCode {
 	EVENT_UPDATED(HttpStatus.OK, "E003", "이벤트가 성공적으로 수정되었습니다."),
 	EVENT_DELETED(HttpStatus.OK, "E004", "이벤트가 성공적으로 삭제되었습니다."),
 
+	EVENT_APPLIED(HttpStatus.OK, "E005", "이벤트에 성공적으로 신청되었습니다."),
+	EVENT_APPLICATION_CANCELED(HttpStatus.OK, "E006", "이벤트 신청이 취소되었습니다."),
 	;
 
 	private final HttpStatus httpStatus;
