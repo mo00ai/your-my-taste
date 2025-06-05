@@ -48,10 +48,7 @@ public class BoardController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestPart("requestDto") BoardRequestDto requestDto,
 		@RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
-		Long storeId = 1L;
-		Long userId = 1L;
-		// TODO store, user 객체 받아오기
-		boardService.createBoard(userDetails.getId(), storeId, requestDto, files);
+		boardService.createBoard(userDetails.getId(), requestDto, files);
 		return CommonResponse.success(BOARD_CREATED);
 
 	}
@@ -71,9 +68,6 @@ public class BoardController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PageableDefault(page = 0, size = 10) Pageable pageable
 	) {
-
-		// TODO user 코드 수정필요
-		Long userId = 1L;
 		List<BoardListResponseDto> responseDtoList = boardService.findBoardList(userDetails.getId(), pageable);
 		return CommonResponse.ok(responseDtoList);
 	}
@@ -87,8 +81,6 @@ public class BoardController {
 		@RequestParam(defaultValue = "desc") String order,
 		Pageable pageable
 	) {
-		// TODO user 코드 수정필요
-		Long userId = 1L;
 		// TODO 기능 미구현
 		List<BoardResponseDto> responseDtoList = boardService.findBoardsFromFollowingUsers(userDetails.getId(), type,
 			status, sort,
@@ -104,9 +96,6 @@ public class BoardController {
 		@Valid @RequestBody BoardUpdateRequestDto requestDto,
 		@PathVariable Long boardId
 	) throws IOException {
-		// TODO user 코드 수정필요
-		Long userId = 1L;
-
 		boardService.updateBoard(userDetails.getId(), boardId, requestDto);
 		return CommonResponse.success(BOARD_UPDATED);
 	}
@@ -115,24 +104,23 @@ public class BoardController {
 	public CommonResponse<Void> deleteBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long boardId) {
-		// TODO user 코드 수정필요
-		Long userId = 1L;
 		boardService.deleteBoard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_DELETED);
 	}
 
 	@PostMapping("/{boardId}/likes")
 	public CommonResponse<Void> likeBoard(@PathVariable Long boardId,
-		// TODO user 코드 수정필요
-		@RequestParam Long userId) {
-		likeService.likeBoard(userId, boardId);
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		likeService.likeBoard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_LIKED);
 	}
 
 	@DeleteMapping("/{boardId}/likes")
 	public CommonResponse<Void> unlikeBoard(@PathVariable Long boardId,
-		@RequestParam Long userId) {
-		likeService.unlikedboard(userId, boardId);
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		likeService.unlikedboard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_UNLIKED);
 	}
 }

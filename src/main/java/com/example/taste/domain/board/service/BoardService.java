@@ -45,10 +45,10 @@ public class BoardService {
 	private final HashtagService hashtagService;
 
 	@Transactional
-	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto, List<MultipartFile> files) throws
+	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
 		IOException {
 		User user = userService.findById(userId);
-		Store store = storeService.findById(storeId);
+		Store store = storeService.findById(requestDto.getStoreId());
 
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
