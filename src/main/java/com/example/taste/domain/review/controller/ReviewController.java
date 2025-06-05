@@ -43,10 +43,7 @@ public class ReviewController {
 		@PathVariable Long storeId,
 		@RequestPart(value = "files", required = false) List<MultipartFile> files)
 		throws IOException {
-		if (files == null || files.isEmpty()) {
-			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
-		}
-		return CommonResponse.created(reviewService.createReview(requestDto, storeId, files.get(0), ImageType.REVIEW));
+		return CommonResponse.created(reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW));
 	}
 
 	@ImageValid

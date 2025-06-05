@@ -37,7 +37,7 @@ public class BoardController {
 		Long storeId = 1L;
 		Long userId = 1L;
 		// TODO store, user 객체 받아오기
-		boardService.createBoard(userId, storeId, requestDto);
+		boardService.createBoard(userId, requestDto.getStoreId(), requestDto);
 		return CommonResponse.success(BOARD_CREATED);
 
 	}

@@ -26,7 +26,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
-import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
@@ -60,11 +59,11 @@ public class ReviewService {
 	private String secretKey;
 
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
-		MultipartFile multipartFile, ImageType imageType) throws IOException {
-		if (multipartFile == null) {
-			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
+		List<MultipartFile> files, ImageType imageType) throws IOException {
+		Image image = null;
+		if (files != null && !files.isEmpty()) {
+			image = imageService.saveImage(files.get(0), imageType);
 		}
-		Image image = imageService.saveImage(multipartFile, imageType);
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		// 임시 유저. 세션 구현하면 처리
