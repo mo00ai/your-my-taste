@@ -42,21 +42,20 @@ public class EventService {
 
 	@Transactional
 	public void updateEvent(Long eventId, Long userId, EventUpdateRequestDto requestDto) {
-		checkUser(userId, eventId);
 		Event event = findById(eventId);
+		checkUser(userId, event);
 		event.update(requestDto);
 
 	}
 
 	@Transactional
 	public void deleteEvent(Long eventId, Long userId) {
-		checkUser(userId, eventId);
 		Event event = findById(eventId);
+		checkUser(userId, event);
 		eventRepository.delete(event);
 	}
 
-	protected void checkUser(Long userId, Long eventId) {
-		Event event = findById(eventId);
+	protected void checkUser(Long userId, Event event) {
 		if (!event.getUser().getId().equals(userId)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
