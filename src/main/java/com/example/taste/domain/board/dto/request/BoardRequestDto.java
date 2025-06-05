@@ -30,7 +30,7 @@ public abstract class BoardRequestDto {
 	@Size(max = 1000, message = "내용은 1000자 이내여야 합니다.")
 	private String contents;
 
-	@Pattern(regexp = "^(NH)$", message = "게시글 타입은 'N' 또는 'H'만 허용됩니다.")
+	@Pattern(regexp = "^(NO)$", message = "게시글 타입은 'N' 또는 'O'만 허용됩니다.")
 	private String type;
 
 	private String status;
