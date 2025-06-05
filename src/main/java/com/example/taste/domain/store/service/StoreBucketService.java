@@ -6,6 +6,8 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
@@ -159,36 +161,39 @@ public class StoreBucketService {
 		storeBucketItemRepository.deleteAll(items);
 	}
 
-	// 버킷명 중복 확인 및 중복아닌 이름 반환
 	public String makeUnduplicateName(String newName, User user) {
+		// "newName" 으로 시작하는 버킷 모두 조회
 		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, newName);
 
-		// 동일한 이름의 버킷이 있는지 검증
+		// newName이 특수문자를 포함하는 경우를 대비해서 quote로 감싸서 패턴 생성
+		Pattern pattern = Pattern.compile("^" + Pattern.quote(newName) + "\\((\\d+)\\)$");
+		boolean isEquals = false;
 		int suffix = 0;
+
 		for (StoreBucket bucket : buckets) {
 			String name = bucket.getName();
-			// 동일한 이름의 버킷이 있으면 suffix 업데이트
-			if (newName.equals(name)) {
-				suffix = Math.max(suffix, 1);
-				continue;
+
+			if (name.equals(newName)) {
+				isEquals = true;
 			}
 
-			int start = name.indexOf('(');
-			int end = name.indexOf(')');
-			// 접미사가 (n) 형식으로 생성된 버킷이 있으면 n값 추출해서 suffix 업데이트
-			if (start != -1 && end != -1 && start < end) {
-				String numberStr = name.substring(start + 1, end);
-
+			// "버킷(숫자)" 형식이면 숫자 추출
+			Matcher matcher = pattern.matcher(name);
+			if (matcher.matches()) {
 				try {
-					suffix = Math.max(suffix, Integer.parseInt(numberStr) + 1);
-				} catch (NumberFormatException ignored) {
-					// (abc)처럼 단순 문자열인 경우 exception 무시
+					suffix = Math.max(suffix, Integer.parseInt(matcher.group(1)));
+				} catch (NumberFormatException e) {
+					throw new CustomException(BUCKET_NAME_OVERFLOW);
 				}
 			}
 		}
 
-		// 동일한 이름의 버킷이 있으면 리스트명(n) 형식으로 저장
-		String name = (suffix == 0) ? newName : newName + "(" + suffix + ")";
-		return name;
+		// 정확히 일치하는 이름이 없으면 입력값 그대로 반환
+		if (!isEquals) {
+			return newName;
+		}
+
+		// 이름 중복 시, 뒤에 suffix 붙인 값 반환
+		return newName + "(" + (suffix + 1) + ")";
 	}
 }
