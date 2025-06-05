@@ -8,12 +8,16 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZ
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.party.dto.reponse.MyInvitationResponseDto;
+import com.example.taste.domain.party.dto.reponse.PartyInvitationResponseDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
@@ -123,8 +127,29 @@ public class PartyInvitationService {
 			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
 	}
 
+	public List<MyInvitationResponseDto> getMyInvitations(Long userId) {
+		List<PartyInvitation> partyInvitationList =
+			partyInvitationRepository.findByUserAndInvitationStatus(userId, InvitationStatus.WAITING);
+		return partyInvitationList.stream()
+			.map(MyInvitationResponseDto::new).toList();
+	}
+
+	public List<PartyInvitationResponseDto> getPartyInvitations(Long hostId, Long partyId) {
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		// 호스트가 아닌 경우
+		if (!isHostOfParty(party, hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+		// 파티 상태 확잉ㄴ
+
+		List<PartyInvitation> partyInvitationList =
+			partyInvitationRepository.findByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
+		return partyInvitationList.stream()
+			.map(PartyInvitationResponseDto::new).toList();
+	}
+
 	private boolean isHostOfParty(Party party, Long hostId) {
 		return party.getHostUser().getId().equals(hostId);
 	}
-
 }

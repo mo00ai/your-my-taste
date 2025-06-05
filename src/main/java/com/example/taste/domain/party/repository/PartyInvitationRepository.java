@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.party.entity.PartyInvitation;
+import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.user.entity.User;
 
 @Repository
@@ -21,4 +22,8 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		+ "WHERE pi.user.id = :userId AND pi.party.id = :partyId")
 	Optional<PartyInvitation> findByUserAndParty(
 		@Param("userId") Long userId, @Param("partyId") Long partyId);
+
+	List<PartyInvitation> findByUserAndInvitationStatus(Long userId, InvitationStatus invitationStatus);
+
+	List<PartyInvitation> findByPartyAndInvitationStatus(Long partyId, InvitationStatus invitationStatus);
 }
