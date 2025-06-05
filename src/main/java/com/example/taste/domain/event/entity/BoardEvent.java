@@ -71,12 +71,15 @@ public class BoardEvent extends BaseEntity {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		BoardEvent that = (BoardEvent)o;
-		return Objects.equals(id, that.id) && Objects.equals(board, that.board)
-			&& Objects.equals(event, that.event);
+		return Objects.equals(id, that.id)
+			&& Objects.equals(board != null ? board.getId() : null, that.board != null ? that.board.getId() : null)
+			&& Objects.equals(event != null ? event.getId() : null, that.event != null ? that.event.getId() : null);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, board, event);
+		return Objects.hash(id,
+			board != null ? board.getId() : null,
+			event != null ? event.getId() : null);
 	}
 }

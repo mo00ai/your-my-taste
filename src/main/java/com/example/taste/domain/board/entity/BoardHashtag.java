@@ -37,13 +37,12 @@ public class BoardHashtag {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		BoardHashtag that = (BoardHashtag)o;
-		return Objects.equals(id, that.id) && Objects.equals(board, that.board)
-			&& Objects.equals(hashtag, that.hashtag);
+		return Objects.equals(board, that.board) && Objects.equals(hashtag, that.hashtag);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, board, hashtag);
+		return Objects.hash(board, hashtag);
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
