@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -29,6 +30,7 @@ import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.service.BoardService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class BoardController {
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> createBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestPart("requestDto") BoardRequestDto requestDto,
+		@Valid @RequestPart("requestDto") BoardRequestDto requestDto,
 		@RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 		Long storeId = 1L;
 		Long userId = 1L;
@@ -98,7 +100,7 @@ public class BoardController {
 	@PatchMapping(value = "/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> updateBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestPart("requestDto") BoardUpdateRequestDto requestDto,
+		@Valid @RequestBody BoardUpdateRequestDto requestDto,
 		@PathVariable Long boardId
 	) throws IOException {
 		// TODO user 코드 수정필요
