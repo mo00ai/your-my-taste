@@ -64,6 +64,7 @@ public class Review extends BaseEntity {
 		this.user = user;
 		this.store = store;
 		this.setValidation(isValidated);
+		this.store.addReview(this);
 	}
 
 	public void setValidation(Boolean validation) {

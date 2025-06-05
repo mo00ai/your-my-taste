@@ -28,6 +28,8 @@ import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
@@ -55,10 +57,12 @@ public class ReviewService {
 	private final ImageService imageService;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
+	private final PkService pkService;
 
 	@Value("${ocr_key}")
 	private String secretKey;
 
+	@Transactional
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
 		if (multipartFile == null) {
@@ -84,6 +88,7 @@ public class ReviewService {
 			.build();
 
 		Review saved = reviewRepository.save(review);
+		pkService.savePkLog(user.getId(), PkType.REVIEW);
 		return new CreateReviewResponseDto(saved);
 	}
 
@@ -122,10 +127,11 @@ public class ReviewService {
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND)));
 	}
 
+	@Transactional
 	public void deleteReview(Long reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
-		reviewRepository.delete(review);
+		review.getStore().removeReview(review);
 	}
 
 	public void createValidation(Long storeId, MultipartFile image) throws IOException {
