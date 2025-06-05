@@ -96,8 +96,7 @@ public class BoardController {
 		return CommonResponse.ok(responseDtoList);
 	}
 
-	@ImageValid
-	@PatchMapping(value = "/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PatchMapping("/{boardId}")
 	public CommonResponse<Void> updateBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody BoardUpdateRequestDto requestDto,
