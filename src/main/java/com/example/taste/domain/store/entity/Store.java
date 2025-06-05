@@ -53,8 +53,8 @@ public class Store extends BaseEntity {
 	@Column(nullable = false)
 	private BigDecimal mapy;
 
-	@OneToMany(mappedBy = "store", cascade = CascadeType.PERSIST)
-	private List<Review> reviewList = new ArrayList<>();
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Review> reviewList;
 
 	@Builder
 	public Store(Category category, String name, String description, String address, String roadAddress,
@@ -67,5 +67,16 @@ public class Store extends BaseEntity {
 		this.roadAddress = roadAddress;
 		this.mapx = mapx;
 		this.mapy = mapy;
+	}
+
+	public void addReview(Review review) {
+		if (this.reviewList == null) {
+			this.reviewList = new ArrayList<>();
+		}
+		this.reviewList.add(review);
+	}
+
+	public void removeReview(Review review) {
+		this.reviewList.remove(review);
 	}
 }

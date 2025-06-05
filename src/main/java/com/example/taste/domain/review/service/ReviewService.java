@@ -59,6 +59,7 @@ public class ReviewService {
 	@Value("${ocr_key}")
 	private String secretKey;
 
+	@Transactional
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
 		MultipartFile multipartFile, ImageType imageType) throws IOException {
 		if (multipartFile == null) {
@@ -122,10 +123,11 @@ public class ReviewService {
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND)));
 	}
 
+	@Transactional
 	public void deleteReview(Long reviewId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
-		reviewRepository.delete(review);
+		review.getStore().removeReview(review);
 	}
 
 	public void createValidation(Long storeId, MultipartFile image) throws IOException {
