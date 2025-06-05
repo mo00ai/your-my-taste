@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class HongdaeBoardRequestDto extends BoardRequestDto {
+public class OpenRunBoardRequestDto extends BoardRequestDto {
 	private int openLimit;
 	private LocalDateTime openTime;
 }

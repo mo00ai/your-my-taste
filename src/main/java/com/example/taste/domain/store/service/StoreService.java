@@ -2,6 +2,8 @@ package com.example.taste.domain.store.service;
 
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,15 @@ public class StoreService {
 
 	public StoreResponse getStore(Long id) {
 		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
-		return StoreResponse.from(store);
+
+		List<String> imageUrls = store.getReviewList().stream()
+			.sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+			.filter(review -> review.getImage() != null)
+			.limit(3)
+			.map(review -> review.getImage().getUrl())
+			.toList();
+
+		return StoreResponse.create(store, imageUrls);
 	}
 
 	@Transactional
