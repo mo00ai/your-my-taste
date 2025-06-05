@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.taste.domain.event.dto.request.EventUpdateRequestDto;
 import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -74,6 +75,20 @@ public class Event {
 		this.endDate = endDate;
 		this.isActive = isActive;
 		setUser(user);
+	}
+
+	public void update(EventUpdateRequestDto dto) {
+		if (dto.getName() != null)
+			this.name = dto.getName();
+		if (dto.getContents() != null)
+			this.contents = dto.getContents();
+		if (dto.getStartDate() != null)
+			this.startDate = dto.getStartDate();
+		if (dto.getEndDate() != null)
+			this.endDate = dto.getEndDate();
+
+		if (dto.getIsActive() != null)
+			this.isActive = dto.getIsActive();
 	}
 
 }

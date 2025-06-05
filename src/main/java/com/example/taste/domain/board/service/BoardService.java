@@ -101,7 +101,7 @@ public class BoardService {
 	}
 
 	@Transactional(readOnly = true)
-	protected Board findByBoardId(Long boardId) {
+	public Board findByBoardId(Long boardId) {
 		// deleteAt이 null인 유효한 게시물만 조회
 		return boardRepository.findActiveBoard(boardId)
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
