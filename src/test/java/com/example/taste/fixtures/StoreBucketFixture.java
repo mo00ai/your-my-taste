@@ -16,7 +16,7 @@ public class StoreBucketFixture {
 		return StoreBucket.builder()
 			.user(user)
 			.name("기본 리스트")
-			.isOpened(true)
+			.isOpened(false)
 			.build();
 	}
 }

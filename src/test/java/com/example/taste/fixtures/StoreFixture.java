@@ -6,9 +6,9 @@ import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
 
 public class StoreFixture {
-	public static Store create() {
+	public static Store create(Category category) {
 		return Store.builder()
-			.category(Category.builder().name("testCategory").displayOrder(0).build())
+			.category(category)
 			.name("testStore")
 			.description("testDescription")
 			.address("서울특별시 00구 00동")

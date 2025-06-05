@@ -15,4 +15,6 @@ public interface StoreBucketItemRepository extends JpaRepository<StoreBucketItem
 	StoreBucket store(Store store);
 
 	Optional<StoreBucketItem> findByStoreAndStoreBucket(Store store, StoreBucket storeBucket);
+
+	void deleteAllByStoreBucket(StoreBucket storeBucket);
 }

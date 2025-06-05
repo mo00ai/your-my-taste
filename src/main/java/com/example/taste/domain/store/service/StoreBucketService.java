@@ -128,6 +128,7 @@ public class StoreBucketService {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
+		storeBucketItemRepository.deleteAllByStoreBucket(storeBucket);
 		storeBucketRepository.delete(storeBucket);
 	}
 
