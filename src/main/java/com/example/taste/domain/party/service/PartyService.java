@@ -45,6 +45,7 @@ public class PartyService {
 				.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 			// TODO: store 에 없을 시 새로 추가해서 처리하는 로직 --> 근데 이 경우 가게 검색 API 쪽에서 처리하나
 			// 근데 만약 파티가 제대로 안 만들어졌을 시 가게도 추가 안된걸로 치려면 여기서 처리하고 트랜잭션 거는게 맞을듯.
+			// TODO: 파티장도 INVITATION 만들어서 관리
 			partyRepository.save(new Party(requestDto, hostUser, store));
 		} else {
 			partyRepository.save(new Party(requestDto, hostUser));
