@@ -113,7 +113,7 @@ public class Board extends SoftDeletableEntity {
 		LocalDateTime openTime, Store store, User user) {
 		this.title = title;
 		this.contents = contents;
-		this.type = type != null ? type : BoardType.H;
+		this.type = type != null ? type : BoardType.O;
 		this.status = status != null ? status : BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
 		this.openLimit = openLimit;
 		this.openTime = openTime;

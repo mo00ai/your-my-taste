@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum BoardType {
 	N("N", "일반 게시글"),
-	H("O", "오픈런 게시글");
+	O("O", "오픈런 게시글");
 
 	private final String code;
 	private final String displayName;
