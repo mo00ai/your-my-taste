@@ -1,10 +1,18 @@
 package com.example.taste.domain.pk.dto.response;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class PkCriteriaResponseDto {
+@NoArgsConstructor
+public class PkCriteriaResponseDto implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
 
 	private Long id;
 	private String type;
