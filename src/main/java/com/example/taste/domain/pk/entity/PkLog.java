@@ -1,6 +1,7 @@
 package com.example.taste.domain.pk.entity;
 
-import com.example.taste.common.entity.BaseCreatedAtEntity;
+import java.time.LocalDateTime;
+
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.user.entity.User;
 
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PkLog extends BaseCreatedAtEntity {
+public class PkLog {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,15 +38,19 @@ public class PkLog extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	private int point = 0;
 
+	@Column(nullable = false)
+	private LocalDateTime createdAt;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@Builder
-	public PkLog(PkType pkType, Integer point, User user) {
+	public PkLog(PkType pkType, Integer point, User user, LocalDateTime createdAt) {
 		this.pkType = pkType;
 		this.point = point != null ? point : 0;
 		this.user = user;
+		this.createdAt = createdAt;
 	}
 
 }
