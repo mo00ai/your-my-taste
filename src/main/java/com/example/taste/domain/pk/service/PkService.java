@@ -3,17 +3,22 @@ package com.example.taste.domain.pk.service;
 import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
+import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
 import com.example.taste.domain.pk.entity.PkCriteria;
-import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkCriteriaRepository;
 import com.example.taste.domain.pk.repository.PkLogRepository;
@@ -31,7 +36,10 @@ public class PkService {
 	private final PkLogRepository pkLogRepository;
 	private final UserRepository userRepository;
 	private final UserService userService;
+	private final RedisService redisService;
+	private final PkCacheService pkCacheService;
 
+	@CacheEvict(value = "pkCriteriaCache", allEntries = true)
 	@Transactional
 	public PkCriteriaResponseDto savePkCriteria(String type, Integer point) {
 
@@ -60,19 +68,11 @@ public class PkService {
 	@Transactional(readOnly = true)
 	public List<PkCriteriaResponseDto> findAllPkCriteria() {
 
-		List<PkCriteria> all = pkCriteriaRepository.findAll();
-
-		return all.stream().map(pk -> PkCriteriaResponseDto.builder()
-				.id(pk.getId())
-				.type(pk.getType().name())
-				.point(pk.getPoint())
-				.isActive(pk.isActive())
-				.build()
-			)
-			.collect(Collectors.toList());
+		return pkCacheService.findAllPkCriteria();
 
 	}
 
+	@CacheEvict(value = "pkCriteriaCache", allEntries = true)
 	@Transactional
 	public void updatePkCriteria(Long id, PkUpdateRequestDto dto) {
 
@@ -83,6 +83,7 @@ public class PkService {
 
 	}
 
+	@CacheEvict(value = "pkCriteriaCache", allEntries = true)
 	@Transactional
 	public void deletePkCriteria(Long id) {
 
@@ -98,17 +99,31 @@ public class PkService {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-		PkCriteria pkCriteria = pkCriteriaRepository.findByType(type)
-			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
+		int point = getPointByPkType(type);
 
-		PkLog pkLog = PkLog.builder()
+		PkLogCacheDto dto = PkLogCacheDto.builder()
+			.userId(user.getId())
 			.pkType(type)
-			.point(pkCriteria.getPoint())
-			.user(user)
+			.point(point)
+			.createdAt(LocalDateTime.now())
 			.build();
 
-		pkLogRepository.save(pkLog);
-		userService.increaseUserPoint(user, pkCriteria.getPoint());
+		String key = "pkLog:" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ":" + user.getId();
+		redisService.setOpsForList(key, dto, Duration.ofDays(1));
+
+		userService.increaseUserPoint(user, point);
+
+	}
+
+	public int getPointByPkType(PkType type) {
+
+		List<PkCriteriaResponseDto> criteriaList = pkCacheService.findAllPkCriteria();
+
+		return criteriaList.stream()
+			.filter(dto -> dto.getType().equals(type.name()))
+			.map(PkCriteriaResponseDto::getPoint)
+			.findFirst()
+			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
 
 	}
 

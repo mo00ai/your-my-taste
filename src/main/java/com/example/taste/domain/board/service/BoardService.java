@@ -2,12 +2,14 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
@@ -21,6 +23,9 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
+import com.example.taste.domain.image.service.BoardImageService;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
@@ -32,21 +37,29 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class BoardService {
 
+	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final StoreService storeService;
 	private final UserService userService;
+	private final PkService pkService;
 	private final HashtagService hashtagService;
 
 	@Transactional
-	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto) {
+	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto, List<MultipartFile> files) throws
+		IOException {
 		User user = userService.findById(userId);
 		Store store = storeService.findById(storeId);
+
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
 			if (normalRequestDto.getHashtagList() != null && !normalRequestDto.getHashtagList().isEmpty()) {
 				hashtagService.applyHashtagsToBoard(entity, normalRequestDto.getHashtagList());
 			}
 			boardRepository.save(entity);
+			pkService.savePkLog(userId, PkType.POST);
+			if (files != null && !files.isEmpty()) {
+				boardImageService.saveBoardImages(entity, files);
+			}
 
 		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
 			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
@@ -55,6 +68,10 @@ public class BoardService {
 				hashtagService.applyHashtagsToBoard(entity, openRunBoardRequestDto.getHashtagList());
 			}
 			boardRepository.save(entity);
+			pkService.savePkLog(userId, PkType.POST);
+			if (files != null && !files.isEmpty()) {
+				boardImageService.saveBoardImages(entity, files);
+			}
 
 		} else {
 			throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
@@ -69,11 +86,10 @@ public class BoardService {
 	}
 
 	@Transactional
-	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) {
+	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.update(requestDto);
-
 	}
 
 	@Transactional
@@ -81,6 +97,7 @@ public class BoardService {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.softDelete();
+		boardImageService.deleteBoardImages(board);
 	}
 
 	@Transactional(readOnly = true)

@@ -135,7 +135,6 @@ public class Board extends SoftDeletableEntity {
 		if (requestDto.getType() != null) {
 			this.type = BoardType.from(requestDto.getType());
 		}
-		// TODO 이미지URL 수정
 	}
 
 }
