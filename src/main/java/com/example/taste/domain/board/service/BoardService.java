@@ -15,11 +15,12 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
-import com.example.taste.domain.board.dto.request.HongdaeBoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
+import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.service.BoardImageService;
@@ -41,23 +42,31 @@ public class BoardService {
 	private final StoreService storeService;
 	private final UserService userService;
 	private final PkService pkService;
+	private final HashtagService hashtagService;
 
 	@Transactional
-	public void createBoard(Long userId, Long storeId, BoardRequestDto requestDto, List<MultipartFile> files) throws
+	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
 		IOException {
 		User user = userService.findById(userId);
-		Store store = storeService.findById(storeId);
+		Store store = storeService.findById(requestDto.getStoreId());
 
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
+			if (normalRequestDto.getHashtagList() != null && !normalRequestDto.getHashtagList().isEmpty()) {
+				hashtagService.applyHashtagsToBoard(entity, normalRequestDto.getHashtagList());
+			}
 			boardRepository.save(entity);
 			pkService.savePkLog(userId, PkType.POST);
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
 
-		} else if (requestDto instanceof HongdaeBoardRequestDto hongdaeRequestDto) {
-			Board entity = BoardMapper.toEntity(hongdaeRequestDto, store, user);
+		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
+			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
+			// 해시태그 적용
+			if (openRunBoardRequestDto.getHashtagList() != null && !openRunBoardRequestDto.getHashtagList().isEmpty()) {
+				hashtagService.applyHashtagsToBoard(entity, openRunBoardRequestDto.getHashtagList());
+			}
 			boardRepository.save(entity);
 			pkService.savePkLog(userId, PkType.POST);
 			if (files != null && !files.isEmpty()) {
@@ -65,7 +74,7 @@ public class BoardService {
 			}
 
 		} else {
-			throw new IllegalArgumentException("지원하지 않는 게시글 타입입니다.");
+			throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
 		}
 
 	}
@@ -92,7 +101,7 @@ public class BoardService {
 	}
 
 	@Transactional(readOnly = true)
-	protected Board findByBoardId(Long boardId) {
+	public Board findByBoardId(Long boardId) {
 		// deleteAt이 null인 유효한 게시물만 조회
 		return boardRepository.findActiveBoard(boardId)
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
@@ -133,4 +142,19 @@ public class BoardService {
 		return boardRepository.findBoardListDtoByUserIdList(userFollowList, pageable);
 	}
 
+	// 게시글에 특정해시태그 삭제(단건 삭제)
+	@Transactional
+	public void removeHashtagFromBoard(Long userId, Long boardId, String hashtagName) {
+		Board board = findByBoardId(boardId);
+		checkUser(userId, board);
+		hashtagService.removeHashtagFromBoard(board, hashtagName);
+	}
+
+	// 게시글에 해시태그 전부 삭제
+	@Transactional
+	public void removeAllHashtagsFromBoard(Long userId, Long boardId) {
+		Board board = findByBoardId(boardId);
+		checkUser(userId, board);
+		hashtagService.clearBoardHashtags(board);
+	}
 }
