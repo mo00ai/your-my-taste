@@ -1,6 +1,6 @@
 package com.example.taste.domain.party.dto.reponse;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import lombok.Builder;
@@ -14,7 +14,7 @@ public class PartyDetailResponseDto {
 	private String partyStatus;
 	private Long storeId;
 	private String storeName;
-	private LocalDateTime meetingTime;    // TODO: 그냥 넘겨줘도 되나?
+	private String meetingTime;
 	private int maxMembers;
 	private int nowMembers;
 	private boolean enableRandomMatching;
@@ -28,7 +28,8 @@ public class PartyDetailResponseDto {
 		this.partyStatus = party.getPartyStatus().toString();
 		this.storeId = party.getStore().getId();
 		this.storeName = party.getStore().getName();
-		this.meetingTime = party.getMeetingTime();
+		this.meetingTime = party.getMeetingTime().format(
+			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 		this.maxMembers = party.getMaxMembers();
 		this.nowMembers = party.getNowMembers();            // 파티장 포함
 		this.enableRandomMatching = party.isEnableRandomMatching();

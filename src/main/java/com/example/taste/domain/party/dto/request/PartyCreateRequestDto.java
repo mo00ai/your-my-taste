@@ -11,6 +11,8 @@ import lombok.Getter;
 
 import org.hibernate.validator.constraints.Range;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Getter
 public class PartyCreateRequestDto {
 	@Positive(message = "유효하지 않은 가게 ID 정보입니다.")
@@ -24,6 +26,7 @@ public class PartyCreateRequestDto {
 	private String description;
 
 	@FutureOrPresent(message = "현재 이후의 시간이어야 합니다.")        // TODO: 현재부터 30분뒤~최대 일주일뒤? 제한필요
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
 	private LocalDateTime meetingTime;
 
 	@NotNull(message = "최대 인원은 필수 입력값입니다.")

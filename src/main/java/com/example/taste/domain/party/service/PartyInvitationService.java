@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.party.dto.reponse.MyInvitationResponseDto;
 import com.example.taste.domain.party.dto.reponse.PartyInvitationResponseDto;
+import com.example.taste.domain.party.dto.reponse.UserInvitationResponseDto;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.entity.Party;
@@ -126,12 +126,12 @@ public class PartyInvitationService {
 			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
 	}
 
-	public List<MyInvitationResponseDto> getMyInvitations(Long userId) {
+	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
 		// TODO: 파티가 모집 중이고, 대기 중인 초대만 가져오기
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findByUserAndInvitationStatus(userId, InvitationStatus.WAITING);
 		return partyInvitationList.stream()
-			.map(MyInvitationResponseDto::new).toList();
+			.map(UserInvitationResponseDto::new).toList();
 	}
 
 	public List<PartyInvitationResponseDto> getPartyInvitations(Long hostId, Long partyId) {

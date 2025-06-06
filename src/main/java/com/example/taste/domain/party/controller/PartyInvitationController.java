@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
-import com.example.taste.domain.party.dto.reponse.MyInvitationResponseDto;
 import com.example.taste.domain.party.dto.reponse.PartyInvitationResponseDto;
+import com.example.taste.domain.party.dto.reponse.UserInvitationResponseDto;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -49,7 +49,7 @@ public class PartyInvitationController {
 	}
 
 	@GetMapping("/users/invitations")
-	public CommonResponse<List<MyInvitationResponseDto>> getMyInvitations(
+	public CommonResponse<List<UserInvitationResponseDto>> getMyInvitations(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return CommonResponse.ok(partyInvitationService.getMyInvitations(userDetails.getId()));
 	}

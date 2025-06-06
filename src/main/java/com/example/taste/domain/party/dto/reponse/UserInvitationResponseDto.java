@@ -7,7 +7,7 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 
 @Getter
-public class MyInvitationResponseDto {
+public class UserInvitationResponseDto {
 	private Long invitationId;
 	private String invitationType;
 	private String invitationStatus;
@@ -15,9 +15,11 @@ public class MyInvitationResponseDto {
 	private UserSimpleResponseDto host;
 
 	@Builder
-	public MyInvitationResponseDto(PartyInvitation partyInvitation) {
+	public UserInvitationResponseDto(PartyInvitation partyInvitation) {
 		this.invitationId = partyInvitation.getId();
+		this.invitationType = partyInvitation.getInvitationType().toString();
 		this.invitationStatus = partyInvitation.getInvitationStatus().toString();
 		this.party = new PartySimpleResponseDto(partyInvitation.getParty());
+		this.host = new UserSimpleResponseDto(partyInvitation.getParty().getHostUser());
 	}
 }
