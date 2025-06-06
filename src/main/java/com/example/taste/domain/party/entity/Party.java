@@ -97,7 +97,7 @@ public class Party extends BaseCreatedAtEntity {
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
-		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면)
+		this.partyStatus = PartyStatus.RECRUITING;
 	}
 
 	@Builder
@@ -114,7 +114,7 @@ public class Party extends BaseCreatedAtEntity {
 		this.nowMembers = 1;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
-		this.partyStatus = PartyStatus.RECRUITING;
+		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면)
 	}
 
 	public void update(PartyDetailUpdateRequestDto requestDto, Store store) {
