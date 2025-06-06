@@ -25,7 +25,7 @@ public class PartyResponseDto {
 		this.storeName = party.getStore() != null ? party.getStore().getName() : null;
 		this.meetingTime = party.getMeetingTime() != null ? party.getMeetingTime() : null;
 		this.maxMembers = party.getMaxMembers();
-		// TODO: this.nowMembers = party; 인원 수 구해오는 로직 필요, 혹은 파라미터로 전달
+		this.nowMembers = party.getNowMembers();
 		this.enableRandomMatching = party.isEnableRandomMatching();
 	}
 }

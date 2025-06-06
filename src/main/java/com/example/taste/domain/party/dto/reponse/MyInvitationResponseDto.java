@@ -9,6 +9,7 @@ import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 @Getter
 public class MyInvitationResponseDto {
 	private Long invitationId;
+	private String invitationType;
 	private String invitationStatus;
 	private PartySimpleResponseDto party;
 	private UserSimpleResponseDto host;

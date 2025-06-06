@@ -7,4 +7,5 @@ public enum InvitationStatus {
 	EXITED,       // 매칭 이후 나감 (초대X)
 	CLOSED,        // 파티 해산
 	KICKED,            // 강퇴 (초대O)
+	CANCELED,            // 취소 (초대O)
 }
