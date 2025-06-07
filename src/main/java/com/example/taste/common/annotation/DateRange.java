@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {DateRangeValidator.class})
 public @interface DateRange {
-	String message() default "최소 현재로부터 30분 이후, 최대 1달 뒤의 약속시간을 설정할 수 있습니다.";
+	String message() default "날짜는 현재 시간 기준 {min} {unit}부터 {max} {unit}까지 입력 가능합니다.";
 
 	Class<?>[] groups() default {};
 
@@ -21,9 +21,9 @@ public @interface DateRange {
 
 	Class<? extends Enum<?>> target();
 
-	String minDate();
+	int min() default 30;
 
-	String maxDate();
+	int max() default 60 * 24 * 7;
 
-	TimeUnit unit() default TimeUnit.MINUTES;
+	ChronoUnit unit() default ChronoUnit.MINUTES;
 }
