@@ -23,7 +23,7 @@ public class SearchApiService {
 
 	private final WebClient webClient;
 	private final NaverDatalabConfig naverDatalabConfig;
-	
+
 	/**
 	 *
 	 * @param keyword
