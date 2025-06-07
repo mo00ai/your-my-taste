@@ -1,5 +1,7 @@
 package com.example.taste.domain.notification.entity;
 
+import java.io.Serializable;
+
 import com.example.taste.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
-public class NotificationContent extends BaseEntity {
+public class NotificationContent extends BaseEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

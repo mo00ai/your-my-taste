@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
@@ -24,8 +26,7 @@ import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.exception.UserErrorCode;
-import com.example.taste.domain.user.repository.UserRepository;
+import com.example.taste.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,17 +34,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 	private final CommentRepository commentRepository;
-	private final UserRepository userRepository;
-	//private final BoardRepository boardRepository;
+	private final UserService userService;
+	private final BoardService boardService;
 
-	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
-		Board board = Board.builder().build();
-		// 임시 유저, 세션에서 가져올것
-		User user = userRepository.findById(1L)
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId,
+		CustomUserDetails userDetails) {
+		Board board = boardService.findByBoardId(boardsId);
+		User user = userService.findById(userDetails.getId());
 		Comment parent = requestDto.getParent() == null ? null :
-			commentRepository.findById(requestDto.getParent())
-				.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+			findById(requestDto.getParent());
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
@@ -60,26 +59,35 @@ public class CommentService {
 	}
 
 	@Transactional
-	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
+		CustomUserDetails userDetails) {
+		User user = userService.findById(userDetails.getId());
+		Comment comment = findById(commentId);
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
+		User user = userService.findById(userDetails.getId());
+		Comment comment = findById(commentId);
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
 		comment.deleteContent(LocalDateTime.now());
 	}
 
-	public Page<GetCommentDto> getAllCommentOfBoard(Long boardsId, int index) {
+	@Transactional(readOnly = true)
+	public Page<GetCommentDto> getAllCommentOfBoard(Long boardId, int index) {
+		//계층형 쿼리
+
 		// 연관관계를 통한 N+1 문제가 발생하지 않도록, root comment와 거기에 달린 comment들을 연관관계에 의존하지 않고 가져온다.
-		Board board = Board.builder().build();
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		// board에 달린 댓글 중에서 root인 댓글들만 가져온다.(root == null 인 케이스)
-		Page<Comment> comments = commentRepository.findAllRootByBoard(board, pageable);
+		Page<Comment> comments = commentRepository.findAllRootByBoard(boardId, pageable);
 		//모든 댓글 중에서 위의 comments들을 root로 가진 댓글들만 가져온다(n+1 회피)
 		List<Comment> replies = commentRepository.findAllReplies(comments);
 		// 이런 식이면 댓글을 가져오고 거기의 child를 찾아 가져오고, 그 댓글의 child를 다시 가져오고...
@@ -121,8 +129,15 @@ public class CommentService {
 		return new PageImpl<>(rootsList, comments.getPageable(), comments.getTotalElements());
 	}
 
+	@Transactional(readOnly = true)
 	public GetCommentDto getComment(Long commentId) {
 		return new GetCommentDto(commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
+	}
+
+	@Transactional(readOnly = true)
+	public Comment findById(Long commentId) {
+		return commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 	}
 }

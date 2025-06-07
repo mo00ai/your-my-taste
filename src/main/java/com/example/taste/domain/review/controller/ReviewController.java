@@ -28,6 +28,7 @@ import com.example.taste.domain.review.dto.CreateReviewResponseDto;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
 import com.example.taste.domain.review.dto.UpdateReviewRequestDto;
 import com.example.taste.domain.review.dto.UpdateReviewResponseDto;
+import com.example.taste.domain.review.service.OCRService;
 import com.example.taste.domain.review.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/stores/{storeId}/review")
 public class ReviewController {
 	private final ReviewService reviewService;
+	private final OCRService ocrService;
 
 	@ImageValid
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -88,8 +90,7 @@ public class ReviewController {
 	public CommonResponse<Void> createValidation(@PathVariable Long storeId,
 		@RequestPart("image") MultipartFile image,
 		@AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
-		reviewService.createValidation(storeId, image, userDetails);
+		ocrService.createValidation(storeId, image, userDetails);
 		return CommonResponse.ok();
 	}
-
 }

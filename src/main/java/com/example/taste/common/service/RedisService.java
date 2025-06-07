@@ -6,15 +6,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.NotificationEvent;
+import com.example.taste.domain.notification.dto.NotificationRedis;
 import com.example.taste.domain.notification.redis.RedisChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -82,6 +85,14 @@ public class RedisService {
 	//Notification publish
 	public void publishNotification(NotificationEvent event) {
 		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, event);
+	}
+
+	//Notification store
+	@Builder
+	public void storeNotification(Long userId, NotificationCategory category, Long uuid, NotificationEvent event) {
+		NotificationRedis dto = new NotificationRedis(event.getContent(), event.getRedirectUrl(), false);
+		String key = "notification:user:" + userId + ":" + category.name() + ":id:" + uuid;
+		redisTemplate.opsForValue().set(key, dto, Duration.ofDays(7));
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package com.example.taste.domain.comment.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
@@ -23,35 +25,38 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/boards/{boardsId}/comments")
+@RequestMapping("/boards/{boardId}/comments")
 public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping
 	public CommonResponse<CreateCommentResponseDto> createComment(
 		@RequestBody CreateCommentRequestDto requestDto,
-		@PathVariable Long boardsId) {
-		return CommonResponse.created(commentService.createComment(requestDto, boardsId));
+		@PathVariable Long boardId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails));
 	}
 
 	@PatchMapping("/{commentId}")
 	public CommonResponse<UpdateCommentResponseDto> updateComment(
 		@RequestBody UpdateCommentRequestDto requestDto,
-		@PathVariable Long commentId) {
-		return CommonResponse.ok(commentService.updateComment(requestDto, commentId));
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails));
 	}
 
 	@DeleteMapping("/{commentId}/delete")
 	public CommonResponse<Void> deleteComment(
-		@PathVariable Long commentId) {
-		commentService.deleteComment(commentId);
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		commentService.deleteComment(commentId, userDetails);
 		return CommonResponse.ok();
 	}
 
 	@GetMapping
 	public CommonResponse<Page<GetCommentDto>> getAllCommentOfBoard(
-		@PathVariable Long boardsId, @RequestParam(defaultValue = "1", required = false) int index) {
-		return CommonResponse.ok(commentService.getAllCommentOfBoard(boardsId, index));
+		@PathVariable Long boardId, @RequestParam(defaultValue = "1", required = false) int index) {
+		return CommonResponse.ok(commentService.getAllCommentOfBoard(boardId, index));
 	}
 
 	@GetMapping("/{commentId}")

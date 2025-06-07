@@ -6,10 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationEvent;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
-import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
 import com.example.taste.domain.user.entity.User;
 
@@ -18,12 +18,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-	private final NotificationContentRepository contentRepository;
+
 	private final NotificationInfoRepository infoRepository;
+	private final RedisService redisService;
 
-	public void sendIndividual(NotificationEvent event, User user) {
-		NotificationContent content = saveContent(event);
+	public void sendIndividual(NotificationContent content, NotificationEvent event, User user) {
 
+		redisService.storeNotification(user.getId(), event.getCategory(), content.getId(), event);
 		infoRepository.save(NotificationInfo.builder()
 			.category(event.getCategory())
 			.notificationContent(content)
@@ -33,10 +34,10 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void sendBunch(NotificationEvent event, List<User> allUser) {
-		NotificationContent content = saveContent(event);
+	public void sendBunch(NotificationContent content, NotificationEvent event, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (User user : allUser) {
+			redisService.storeNotification(user.getId(), event.getCategory(), content.getId(), event);
 			notificationInfos.add(NotificationInfo.builder()
 				.category(event.getCategory())
 				.notificationContent(content)
@@ -48,8 +49,7 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void sendBunchUsingReference(NotificationEvent event, List<Long> allUserId) {
-		NotificationContent content = saveContent(event);
+	public void sendBunchUsingReference(NotificationContent content, NotificationEvent event, List<Long> allUserId) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (Long id : allUserId) {
 			notificationInfos.add(NotificationInfo.builder()
@@ -62,10 +62,4 @@ public class NotificationService {
 		infoRepository.saveAll(notificationInfos);
 	}
 
-	public NotificationContent saveContent(NotificationEvent event) {
-		return contentRepository.save(NotificationContent.builder()
-			.content(event.getContent())
-			.redirectionUrl(event.getRedirectUrl())
-			.build());
-	}
 }

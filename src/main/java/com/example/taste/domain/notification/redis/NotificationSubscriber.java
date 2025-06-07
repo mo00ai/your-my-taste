@@ -6,12 +6,15 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.dto.NotificationEvent;
+import com.example.taste.domain.notification.entity.NotificationContent;
+import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
@@ -31,6 +34,7 @@ public class NotificationSubscriber implements MessageListener {
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
 	private final FollowRepository followRepository;
+	private final NotificationContentRepository contentRepository;
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
@@ -42,11 +46,14 @@ public class NotificationSubscriber implements MessageListener {
 				case INDIVIDUAL -> {
 					sendIndividual(event);
 				}
-				case BROADCAST_ALL -> {
-					sendAll(event);
+				case SYSTEM -> {
+					sendSystem(event);
 				}
 				case BROADCAST_SUBSCRIBERS -> {
 					sendSubscriber(event);
+				}
+				case MARKETING -> {
+
 				}
 			}
 		} catch (Exception e) {
@@ -55,12 +62,40 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	private void sendIndividual(NotificationEvent event) {
+		NotificationContent content = saveContent(event);
 		User user = userRepository.findById(event.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-		notificationService.sendIndividual(event, user);
+		notificationService.sendIndividual(content, event, user);
 	}
 
-	private void sendAll(NotificationEvent event) {
+	private void sendSystem(NotificationEvent event) {
+		NotificationContent content = saveContent(event);
+		// 페이징 방식
+		long startLogging = System.currentTimeMillis();
+		int page = 0;
+		int size = 100;
+		Page<User> users;
+		do {
+			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
+			notificationService.sendBunch(content, event, users.getContent());
+			page++;
+		} while (users.hasNext());
+		long endLogging = System.currentTimeMillis();
+		log.info("paging 타임 체크: {} ms", (endLogging - startLogging));
+
+		/*
+		// reference by id
+		startLogging = System.currentTimeMillis();
+		List<Long> userIds = userRepository.findAllUserId();
+		notificationService.sendBunchUsingReference(event, userIds);
+		endLogging = System.currentTimeMillis();
+		log.info("reference by id 타임 체크", (endLogging - startLogging));
+
+		 */
+	}
+
+	private void sendMarketing(NotificationEvent event) {
+		NotificationContent content = saveContent(event);
 		// 페이징 방식
 		long startLogging = System.currentTimeMillis();
 		int page = 0;
@@ -68,26 +103,37 @@ public class NotificationSubscriber implements MessageListener {
 		Page<User> users;
 		do {
 			users = userRepository.findAll(PageRequest.of(page, size));
-			notificationService.sendBunch(event, users.getContent());
+			notificationService.sendBunch(content, event, users.getContent());
 			page++;
 		} while (users.hasNext());
 		long endLogging = System.currentTimeMillis();
 		log.info("paging 타임 체크", (endLogging - startLogging));
 
+		/*
 		// reference by id
 		startLogging = System.currentTimeMillis();
 		List<Long> userIds = userRepository.findAllUserId();
 		notificationService.sendBunchUsingReference(event, userIds);
 		endLogging = System.currentTimeMillis();
 		log.info("reference by id 타임 체크", (endLogging - startLogging));
+
+		 */
 	}
 
 	private void sendSubscriber(NotificationEvent event) {
+		NotificationContent content = saveContent(event);
 		List<Follow> followList = followRepository.findAllByFollowing(event.getUserId());
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
 			followers.add(follow.getFollower());
 		}
-		notificationService.sendBunch(event, followers);
+		notificationService.sendBunch(content, event, followers);
+	}
+
+	public NotificationContent saveContent(NotificationEvent event) {
+		return contentRepository.save(NotificationContent.builder()
+			.content(event.getContent())
+			.redirectionUrl(event.getRedirectUrl())
+			.build());
 	}
 }
