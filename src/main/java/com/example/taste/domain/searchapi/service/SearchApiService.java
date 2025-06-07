@@ -2,8 +2,11 @@ package com.example.taste.domain.searchapi.service;
 
 import static com.example.taste.domain.searchapi.exception.SearchErrorCode.*;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -37,19 +40,24 @@ public class SearchApiService {
 	public NaverLocalSearchResponseDto searchLocal(String keyword) {
 
 		try {
-			String uri = UriComponentsBuilder
+			URI uri = UriComponentsBuilder
 				.fromUriString(naverDatalabConfig.getBaseUrl())
 				.queryParam("query", keyword)
 				.queryParam("display", 5)
+				.queryParam("start", 1)
 				.queryParam("sort", "random")
-				.encode()
-				.toUriString();
+				.encode(StandardCharsets.UTF_8)            // 인코딩 UTF_8 설정
+				.build()
+				.toUri();        // 기존 toUriString과 String에서 -> toUrl와 URI 객체로 변경
 
 			return webClient.get()
 				.uri(uri)
 				.header("X-Naver-Client-Id", naverDatalabConfig.getClientId())
 				.header("X-Naver-Client-Secret", naverDatalabConfig.getClientSecret())
-				.header("Accept", "application/json")
+				.header("Content-Type", "application/json; charset=UTF-8")
+				// .header("Accept", "*/*")
+				// .header("Content-Type", "plain/text")  // Playground와 동일하게 설정
+				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToMono(NaverLocalSearchResponseDto.class)
 				.timeout(Duration.ofSeconds(10))
@@ -65,7 +73,9 @@ public class SearchApiService {
 			} else {
 				throw new CustomException(SYSTEM_ERROR);
 			}
-
+		} catch (Exception e) {
+			log.error("JSON 파싱 오류: ", e);
+			throw new CustomException(SYSTEM_ERROR);
 		}
 	}
 }
