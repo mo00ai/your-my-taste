@@ -127,7 +127,7 @@ public class PartyInvitationService {
 	}
 
 	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
-		// TODO: 파티가 모집 중이고, 대기 중인 초대만 가져오기
+		// TODO: 파티가 모집 중이고(조건 추가), 대기 중인 초대만 가져오기
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findByUserAndInvitationStatus(userId, InvitationStatus.WAITING);
 		return partyInvitationList.stream()
