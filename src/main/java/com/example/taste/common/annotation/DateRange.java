@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-@Target(value = ElementType.METHOD)
+@Target(value = {ElementType.FIELD, ElementType.PARAMETER})
 @Retention(value = RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {DateRangeValidator.class})
 public @interface DateRange {
@@ -18,8 +18,6 @@ public @interface DateRange {
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
-
-	Class<? extends Enum<?>> target();
 
 	int min() default 30;
 

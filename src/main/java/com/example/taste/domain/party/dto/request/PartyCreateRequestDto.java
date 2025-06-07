@@ -2,7 +2,6 @@ package com.example.taste.domain.party.dto.request;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -11,6 +10,7 @@ import lombok.Getter;
 
 import org.hibernate.validator.constraints.Range;
 
+import com.example.taste.common.annotation.DateRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
@@ -25,7 +25,7 @@ public class PartyCreateRequestDto {
 	@Size(min = 0, max = 500, message = "파티 설명은 500자 이내입니다.")
 	private String description;
 
-	@FutureOrPresent(message = "현재 이후의 시간이어야 합니다.")        // TODO: 현재부터 30분뒤~최대 일주일뒤 제한, 10분 단위 검증 추가
+	@DateRange
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
 	private LocalDateTime meetingTime;
 
