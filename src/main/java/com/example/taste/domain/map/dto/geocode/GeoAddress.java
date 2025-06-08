@@ -1,7 +1,8 @@
-package com.example.taste.domain.map.dto.geo;
+package com.example.taste.domain.map.dto.geocode;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoAddress {
 	/**
 	 *	roadAddress: 도로명 주소

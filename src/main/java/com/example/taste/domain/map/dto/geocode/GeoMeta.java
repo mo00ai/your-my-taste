@@ -1,4 +1,4 @@
-package com.example.taste.domain.map.dto.geo;
+package com.example.taste.domain.map.dto.geocode;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
