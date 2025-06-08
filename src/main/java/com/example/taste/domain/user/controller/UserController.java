@@ -54,7 +54,7 @@ public class UserController {
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping// TODO: 비밀번호 확인 로직 추가
+	@DeleteMapping
 	public CommonResponse<Void> deleteUser(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserDeleteRequestDto requestDto) {
