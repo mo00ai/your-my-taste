@@ -1,7 +1,9 @@
 package com.example.taste.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByIdWithUserFavorList(@Param("id") Long id);
 
 	boolean existsByEmail(String email);
+
+	List<User> findAllByOrderByPointDesc(PageRequest of);
 }

@@ -112,4 +112,16 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public <T> List<T> getOpsForList(String key, Class<T> clazz) {
+		List<Object> objectList = redisTemplate.opsForList().range(key, 0, -1);
+
+		if (objectList == null) {
+			return List.of();
+		}
+
+		return objectList.stream()
+			.map(item -> objectMapper.convertValue(item, clazz))
+			.toList();
+	}
+
 }

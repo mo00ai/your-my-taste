@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
+import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,7 @@ public class UserService {
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final UserJdbcRepository userJdbcRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -172,5 +175,15 @@ public class UserService {
 		// TODO 삭제된 유저도 고려필요할거 같은데 추후
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+	}
+
+	@Transactional(readOnly = true)
+	public List<User> findPkRankingUsers() {
+		return userRepository.findAllByOrderByPointDesc(PageRequest.of(0, 100));
+	}
+
+	@Transactional
+	public void resetUsersPoint() {
+		userJdbcRepository.resetAllUserPoints();
 	}
 }
