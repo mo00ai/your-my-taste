@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
@@ -49,8 +51,9 @@ public class UserController {
 	@PatchMapping    // TODO: 프로필 이미지 변경 필드 추가
 	public CommonResponse<Void> updateProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody @Valid UserUpdateRequestDto requestDto) {
-		userService.updateUser(userDetails.getId(), requestDto);
+		@RequestPart(name = "data") @Valid UserUpdateRequestDto requestDto,
+		@RequestPart(name = "file", required = false) MultipartFile file) {
+		userService.updateUser(userDetails.getId(), requestDto, file);
 		return CommonResponse.ok();
 	}
 
