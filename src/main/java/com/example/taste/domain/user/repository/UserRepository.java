@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	boolean existsByEmail(String email);
 
 	List<User> findAllByOrderByPointDesc(PageRequest of);
+
+	List<User> findByPointGreaterThan(int i);
 }

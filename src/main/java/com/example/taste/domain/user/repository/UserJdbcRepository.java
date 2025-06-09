@@ -12,7 +12,7 @@ public class UserJdbcRepository {
 	private final JdbcTemplate jdbcTemplate;
 
 	public void resetAllUserPoints() {
-		String sql = "UPDATE users SET point = 0";
+		String sql = "UPDATE users SET point = 0 WHERE point != 0 ";
 		jdbcTemplate.update(sql);
 	}
 }

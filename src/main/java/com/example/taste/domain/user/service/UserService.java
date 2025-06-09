@@ -2,6 +2,7 @@ package com.example.taste.domain.user.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.pk.entity.PkLog;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
@@ -40,6 +44,7 @@ public class UserService {
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserJdbcRepository userJdbcRepository;
+	private final PkLogJdbcRepository pkLogJdbcRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -184,6 +189,23 @@ public class UserService {
 
 	@Transactional
 	public void resetUsersPoint() {
+
+		List<User> usersWithPoints = userRepository.findByPointGreaterThan(0);
+
+		if (!usersWithPoints.isEmpty()) {
+
+			List<PkLog> resetLogs = usersWithPoints.stream()
+				.map(user -> PkLog.builder()
+					.pkType(PkType.RESET)
+					.point(0)
+					.user(user)
+					.createdAt(LocalDateTime.now())
+					.build())
+				.toList();
+
+			pkLogJdbcRepository.batchInsert(resetLogs);
+		}
+
 		userJdbcRepository.resetAllUserPoints();
 	}
 }
