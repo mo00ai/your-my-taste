@@ -170,7 +170,11 @@ public class PartyInvitationService {
 			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 
 		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
-		partyInvitation.getParty().joinMember();
+		if (!party.isFull()) {
+			partyInvitation.getParty().joinMember();
+		} else {
+			throw new CustomException(NOT_RECRUITING_PARTY);
+		}
 	}
 
 	// 호스트가 파티 초대 거절/취소
@@ -214,7 +218,11 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
-		partyInvitation.getParty().joinMember();
+		if (!party.isFull()) {
+			partyInvitation.getParty().joinMember();
+		} else {
+			throw new CustomException(NOT_RECRUITING_PARTY);
+		}
 	}
 
 	// 유저가 파티 초대 거절/취소

@@ -161,4 +161,8 @@ public class Party extends BaseCreatedAtEntity {
 	public void leaveMember() {
 		this.nowMembers--;
 	}
+
+	public boolean isFull() {
+		return this.partyStatus.equals(PartyStatus.FULL) || (this.nowMembers >= this.maxMembers);
+	}
 }
