@@ -93,6 +93,9 @@ public class RedisService {
 		NotificationRedis dto = new NotificationRedis(event.getContent(), event.getRedirectUrl(), false);
 		String key = "notification:user:" + userId + ":" + category.name() + ":id:" + uuid;
 		redisTemplate.opsForValue().set(key, dto, Duration.ofDays(7));
+		// 모든 카테고리에 대해 count 증가
+		String countKey = "notification:user:" + userId + ":" + category.name() + ":unreadCount";
+		redisTemplate.opsForValue().increment(countKey);
 	}
 
 	/**
