@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -69,6 +69,14 @@ public class RedisService {
 		redisTemplate.opsForValue().set(key, values, validityTime);
 	}
 
+	public void setOpsForList(String key, Object value, Duration duration) {
+		boolean keyExists = Boolean.TRUE.equals(redisTemplate.hasKey(key));
+		redisTemplate.opsForList().rightPush(key, value);
+		if (!keyExists) {
+			redisTemplate.expire(key, duration);
+		}
+	}
+
 	/**
 	 * 사용자가 필요한 get 메서드가 더 있다면 직접 만들어서 사용하세요(형변환 등)
 	 */
@@ -103,4 +111,27 @@ public class RedisService {
 	public Set<Object> getZSetRangeByScore(String key, Long min, Long max) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
+
+	public <T> List<T> getOpsForList(String key, Class<T> clazz) {
+		List<Object> objectList = redisTemplate.opsForList().range(key, 0, -1);
+
+		if (objectList == null) {
+			return List.of();
+		}
+
+		return objectList.stream()
+			.map(item -> {
+				try {
+					return objectMapper.convertValue(item, clazz);
+				} catch (Exception e) {
+					log.warn("레디스 내 Ojbect -> PkLogCacheDto로 변환 실패");
+					return null;
+					//CustomException을 날리진 않음
+					//convert 실패 처리 하나 때문에 모든 스케줄러 로직이 멈출 순 없으니까
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
 }
