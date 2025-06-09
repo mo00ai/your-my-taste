@@ -25,7 +25,7 @@ public class EventScheduler {
 	@Scheduled(cron = "0 0 0 * * *")
 	public void selectEventWinner() {
 
-		log.info("이벤트 우승자 선정 스케줄러 시작");
+		log.info("[Event] 이벤트 우승자 선정 스케줄러 시작");
 
 		try {
 

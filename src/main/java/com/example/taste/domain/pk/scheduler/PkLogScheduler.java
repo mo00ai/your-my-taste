@@ -1,6 +1,5 @@
 package com.example.taste.domain.pk.scheduler;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
@@ -20,7 +19,9 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PkLogScheduler {
@@ -33,11 +34,13 @@ public class PkLogScheduler {
 	@Scheduled(cron = "0 0 0 * * *")
 	public void insertPkLogs() {
 
+		log.info("[PK LOG] Redis → DB Bulk insert 스케줄러 시작");
+
 		ScanOptions options = ScanOptions.scanOptions().match("pkLog:*").count(100).build();
 
 		try (Cursor<byte[]> cursor = redisService.getRedisConnection().keyCommands().scan(options)) {
 			while (cursor.hasNext()) {
-				
+
 				String key = new String(cursor.next());
 
 				Long userId = getUserIdFromKey(key);
@@ -57,10 +60,13 @@ public class PkLogScheduler {
 					).toList();
 
 				pkLogJdbcRepository.batchInsert(pkLogs);
-
 			}
+
+			log.info("[PK LOG] Redis → DB Bulk insert 스케줄러 완료");
+
 		} catch (Exception e) {
-			throw new CustomException(PK_LOG_BULK_INSERT_FAILED);
+
+			log.error("[PK LOG] Redis → DB Bulk insert 실패", e);
 
 			// Todo 재시도 로직 또는 Retryable, Log 추적(테이블 따로 만듦), 통합 스케줄러 관리 등
 

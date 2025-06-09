@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import com.example.taste.domain.pk.service.PkService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PkTermScheduler {
@@ -17,7 +19,18 @@ public class PkTermScheduler {
 
 	@Scheduled(cron = "0 0 0 1 * *")
 	public void changePkTerm() {
-		pkService.runPkTermRankingScheduler(LocalDate.now());
+
+		log.info("[PK TERM] 월간 랭킹 및 포인트 초기화 스케줄러 시작");
+
+		try {
+			pkService.runPkTermRankingScheduler(LocalDate.now());
+
+			log.info("[PK TERM] 월간 랭킹 및 포인트 초기화 스케줄러 완료");
+
+		} catch (Exception e) {
+			log.error("[PK TERM] 랭킹 스케줄러 실행 실패", e);
+			//Todo Slf4j 로그 생성, 재시도 로직
+		}
 	}
 
 }
