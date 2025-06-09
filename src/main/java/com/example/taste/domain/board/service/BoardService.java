@@ -102,6 +102,13 @@ public class BoardService {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
+		// 타임어택 게시글의 공개 종료시각 <= 현재시각이면 error (스케줄링 누락 방지)
+		if (board.getStatus() == BoardStatus.TIMEATTACK && !board.getOpenTime()
+			.plusMinutes(board.getOpenLimit())
+			.isAfter(LocalDateTime.now())) {
+			throw new CustomException(CLOSED_BOARD);
+		}
+
 		return new BoardResponseDto(board);
 	}
 
