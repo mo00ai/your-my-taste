@@ -45,7 +45,7 @@ public class CommentController {
 		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails));
 	}
 
-	@DeleteMapping("/{commentId}/delete")
+	@DeleteMapping("/{commentId}")
 	public CommonResponse<Void> deleteComment(
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {

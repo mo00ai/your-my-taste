@@ -1,5 +1,6 @@
 package com.example.taste.domain.notification.service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class NotificationService {
 
 	public void sendIndividual(NotificationContent content, NotificationEvent event, User user) {
 
-		redisService.storeNotification(user.getId(), event.getCategory(), content.getId(), event);
+		redisService.storeNotification(user.getId(), content.getId(), event, Duration.ofDays(7), false);
 		infoRepository.save(NotificationInfo.builder()
 			.category(event.getCategory())
 			.notificationContent(content)
@@ -37,7 +38,7 @@ public class NotificationService {
 	public void sendBunch(NotificationContent content, NotificationEvent event, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (User user : allUser) {
-			redisService.storeNotification(user.getId(), event.getCategory(), content.getId(), event);
+			redisService.storeNotification(user.getId(), content.getId(), event, Duration.ofDays(7), false);
 			notificationInfos.add(NotificationInfo.builder()
 				.category(event.getCategory())
 				.notificationContent(content)

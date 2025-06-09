@@ -1,16 +1,17 @@
 package com.example.taste.common.service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.NotificationEvent;
 import com.example.taste.domain.notification.dto.NotificationRedis;
 import com.example.taste.domain.notification.redis.RedisChannel;
@@ -89,13 +90,29 @@ public class RedisService {
 
 	//Notification store
 	@Builder
-	public void storeNotification(Long userId, NotificationCategory category, Long uuid, NotificationEvent event) {
-		NotificationRedis dto = new NotificationRedis(event.getContent(), event.getRedirectUrl(), false);
-		String key = "notification:user:" + userId + ":" + category.name() + ":id:" + uuid;
-		redisTemplate.opsForValue().set(key, dto, Duration.ofDays(7));
+	public void storeNotification(Long userId, Long uuid, NotificationEvent event,
+		Duration duration, Boolean isRead) {
+		NotificationRedis dto = new NotificationRedis(uuid, event.getCategory(), event.getContent(),
+			event.getRedirectUrl(),
+			isRead,
+			LocalDateTime.now());
+		String key = "notification:info:user:" + userId + ":id:" + uuid + ":" + event.getCategory().name();
+		redisTemplate.opsForValue().set(key, dto, duration);
 		// 모든 카테고리에 대해 count 증가
-		String countKey = "notification:user:" + userId + ":" + category.name() + ":unreadCount";
+		String countKey = "notification:count:user:" + userId + ":" + event.getCategory().name();
 		redisTemplate.opsForValue().increment(countKey);
+	}
+
+	public void updateNotification(NotificationRedis notification, String key) {
+		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
+		NotificationRedis dto = new NotificationRedis(notification.getUuid(), notification.getCategory(),
+			notification.getContent(),
+			notification.getRedirectUrl(), notification.isRead(), notification.getCreatedAt());
+		redisTemplate.opsForValue().set(key, dto, duration);
+	}
+
+	public void decreaseCount(String key, Long amount) {
+		redisTemplate.opsForValue().decrement(key, amount);
 	}
 
 	/**
@@ -133,4 +150,11 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public Set<String> getKeys(String pattern) {
+		Set<String> keys = redisTemplate.keys(pattern);
+		if (keys != null && !keys.isEmpty()) {
+			return keys;
+		}
+		return Collections.emptySet();
+	}
 }
