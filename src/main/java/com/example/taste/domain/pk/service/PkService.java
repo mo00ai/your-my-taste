@@ -21,7 +21,6 @@ import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
 import com.example.taste.domain.pk.entity.PkCriteria;
-import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.entity.PkTerm;
 import com.example.taste.domain.pk.entity.PkTermRanking;
 import com.example.taste.domain.pk.enums.PkType;
@@ -134,11 +133,6 @@ public class PkService {
 			.findFirst()
 			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
 
-	}
-
-	@Transactional
-	public void savePkLogs(List<PkLog> pkLogs) {
-		pkLogRepository.saveAll(pkLogs);
 	}
 
 	@Transactional
