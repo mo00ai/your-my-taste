@@ -63,6 +63,8 @@ public class BoardService {
 
 		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
 			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
+			// 포스팅 횟수 증가
+			user.increasePostingCnt();
 			// 해시태그 적용
 			if (openRunBoardRequestDto.getHashtagList() != null && !openRunBoardRequestDto.getHashtagList().isEmpty()) {
 				hashtagService.applyHashtagsToBoard(entity, openRunBoardRequestDto.getHashtagList());
