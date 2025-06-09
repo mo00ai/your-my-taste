@@ -1,5 +1,6 @@
-package com.example.taste.domain.party.entity;
+package com.example.taste.domain.match.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -18,11 +19,13 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.domain.match.dto.UserMatchCondCreateRequestDto;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
@@ -41,10 +44,12 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	@Setter
+	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchCondStore> stores;
 
-	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	@Setter
+	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchCondCategory> categories;
 
 	private int ageMinRange;
@@ -58,6 +63,8 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	@Enumerated(EnumType.STRING)
 	private MatchingStatus matchingStatus;
 
+	private LocalDateTime matchStartedAt;
+
 	@Builder
 	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
 		int ageMinRange,
@@ -70,5 +77,15 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.gender = gender;
 		this.region = region;
 		this.matchingStatus = matchingStatus;
+	}
+
+	@Builder
+	public UserMatchCond(UserMatchCondCreateRequestDto requestDto, User user) {
+		this.user = user;
+		this.ageMinRange = requestDto.getAgeMinRange();
+		this.ageMaxRange = requestDto.getAgeMaxRange();
+		this.gender = Gender.valueOf(requestDto.getGender());
+		this.region = requestDto.getRegion();
+		this.matchingStatus = MatchingStatus.IDLE;
 	}
 }

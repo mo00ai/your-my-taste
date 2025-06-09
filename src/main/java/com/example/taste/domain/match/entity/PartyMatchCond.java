@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.entity;
+package com.example.taste.domain.match.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.enums.Gender;
 

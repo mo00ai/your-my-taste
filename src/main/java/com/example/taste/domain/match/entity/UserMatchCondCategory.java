@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.entity;
+package com.example.taste.domain.match.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

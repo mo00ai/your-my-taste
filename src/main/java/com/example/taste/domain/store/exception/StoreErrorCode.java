@@ -1,11 +1,11 @@
 package com.example.taste.domain.store.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 
 import com.example.taste.common.exception.BaseCode;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
@@ -17,6 +17,9 @@ public enum StoreErrorCode implements BaseCode {
 
 	// store
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "S002", "맛집 정보가 존재하지 않습니다."),
+
+	// category
+	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "카테고리 정보가 존재하지 않습니다."),
 	;
 
 	private final HttpStatus httpStatus;
