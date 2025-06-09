@@ -20,19 +20,21 @@ public class EventScheduler {
 	private final EventService eventService;
 	private final PkService pkService;
 
-	@Scheduled(cron = "0 */10 * * * *")
+	@Scheduled(cron = "0 0 0 * * *")
 	public void selectEventWinner() {
 
 		LocalDate yesterday = LocalDate.now().minusDays(1);
 
 		List<Event> eventList = eventService.findEndedEventList(yesterday);
 
-		for (Event event : eventList) {
-			eventService.findWinningBoard(event.getId())
-				.ifPresent(winnerBoard -> {
-					Long userId = winnerBoard.getUser().getId();
-					pkService.savePkLog(userId, PkType.EVENT);
-				});
+		if (eventList != null) {
+			for (Event event : eventList) {
+				eventService.findWinningBoard(event.getId())
+					.ifPresent(winnerBoard -> {
+						Long userId = winnerBoard.getUser().getId();
+						pkService.savePkLog(userId, PkType.EVENT);
+					});
+			}
 		}
 	}
 
