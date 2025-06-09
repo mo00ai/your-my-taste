@@ -69,7 +69,7 @@ public class PartyService {
 
 	public PartyDetailResponseDto getPartyDetail(Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-		User host = entityFetcher.getUserOrThrow(userId);
+		User host = party.getHostUser();
 
 		List<User> members = partyInvitationRepository.findUsersInParty(partyId);
 		members.remove(host);        // 파티인원 목록에서 호스트는 제거
