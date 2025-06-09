@@ -29,11 +29,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 	public List<Event> findEndedEventList(LocalDate endDate) {
 
 		List<Event> eventList = queryFactory
-			.selectDistinct(event)
-			.from(event)
-			.join(event.boardEventList, boardEvent).fetchJoin()
-			.join(boardEvent.board, board).fetchJoin()
-			.leftJoin(board.likeList, like).fetchJoin()
+			.selectFrom(event)
 			.where(event.endDate.eq(endDate))
 			.fetch();
 
