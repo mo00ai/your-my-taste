@@ -240,8 +240,8 @@ public class PartyInvitationService {
 	}
 
 	private void validateRequestOrInvitationType(String type) {
-		if (!type.equals(InvitationType.REQUEST.toString()) ||
-			type.equals(InvitationType.INVITATION.toString())) {
+		if ((!type.equals(InvitationType.REQUEST.toString()) ||
+			!type.equals(InvitationType.INVITATION.toString()))) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
