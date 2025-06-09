@@ -1,7 +1,7 @@
 package com.example.taste.domain.pk.service;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.pk.exception.PkErrorCode.DUPLICATE_PK_TYPE;
+import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -9,12 +9,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
@@ -26,12 +29,10 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.domain.user.service.UserService;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class PkService {
-
+	private final EntityFetcher entityFetcher;
 	private final PkCriteriaRepository pkCriteriaRepository;
 	private final PkLogRepository pkLogRepository;
 	private final UserRepository userRepository;
@@ -76,8 +77,7 @@ public class PkService {
 	@Transactional
 	public void updatePkCriteria(Long id, PkUpdateRequestDto dto) {
 
-		PkCriteria pkCriteria = pkCriteriaRepository.findById(id)
-			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
+		PkCriteria pkCriteria = entityFetcher.getPkCriteriaOrThrow(id);
 
 		pkCriteria.update(dto);
 
@@ -87,9 +87,7 @@ public class PkService {
 	@Transactional
 	public void deletePkCriteria(Long id) {
 
-		PkCriteria pkCriteria = pkCriteriaRepository.findById(id)
-			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
-
+		PkCriteria pkCriteria = entityFetcher.getPkCriteriaOrThrow(id);
 		pkCriteria.delete();
 
 	}
@@ -97,7 +95,7 @@ public class PkService {
 	@Transactional
 	public void savePkLog(Long userId, PkType type) {
 
-		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		int point = getPointByPkType(type);
 

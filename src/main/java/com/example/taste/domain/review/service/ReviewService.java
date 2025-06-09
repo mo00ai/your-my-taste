@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.exception.ImageErrorCode;
@@ -40,18 +43,16 @@ import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+	private final EntityFetcher entityFetcher;
 	private final ReviewRepository reviewRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ImageService imageService;
@@ -69,8 +70,7 @@ public class ReviewService {
 			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
 		}
 		Image image = imageService.saveImage(multipartFile, imageType);
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
+		Store store = entityFetcher.getStoreOrThrow(storeId);
 		// 임시 유저. 세션 구현하면 처리
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
@@ -115,8 +115,7 @@ public class ReviewService {
 	}
 
 	public Page<GetReviewResponseDto> getAllReview(Long storeId, int index, int score) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
+		Store store = entityFetcher.getStoreOrThrow(storeId);
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		Page<Review> reviews = reviewRepository.getAllReview(store, pageable, score);
 		return reviews.map(GetReviewResponseDto::new);
@@ -129,8 +128,7 @@ public class ReviewService {
 
 	@Transactional
 	public void deleteReview(Long reviewId) {
-		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
+		Review review = entityFetcher.getReviewOrThrow(reviewId);
 		review.getStore().removeReview(review);
 	}
 
@@ -190,8 +188,7 @@ public class ReviewService {
 		// 임시 유저. 세션 구현하면 처리
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
+		Store store = entityFetcher.getStoreOrThrow(storeId);
 
 		// 가게 이름 어떻게 저장하나
 		Boolean ocrResult = store.getName().equals(storeName);
