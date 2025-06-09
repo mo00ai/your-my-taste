@@ -1,21 +1,30 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.image.enums.ImageType;
+import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
@@ -33,11 +42,11 @@ import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
@@ -62,13 +71,33 @@ public class UserService {
 
 	// 유저 정보 업데이트
 	@Transactional
-	public void updateUser(Long userId, UserUpdateRequestDto requestDto) {
+	public void updateUser(Long userId, UserUpdateRequestDto requestDto, MultipartFile file) {
 		User user = userRepository.findById(userId).orElseThrow();
 		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
 		requestDto.setNewPassword(passwordEncoder.encode(requestDto.getNewPassword()));
 		user.update(requestDto);
+
+		// 프로필 이미지 저장
+		if (file != null) {
+			Image oldImage = user.getImage();
+
+			if (oldImage != null) {
+				try {
+					imageService.update(oldImage.getId(), ImageType.USER, file);
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+					log.info("유저 이미지 업데이트에 실패하였습니다 (email: " + user.getEmail() + ")");
+				}
+			} else {
+				try {
+					Image image = imageService.saveImage(file, ImageType.USER);
+					user.setImage(image);
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+					log.info("유저 이미지 저장에 실패하였습니다 (email: " + user.getEmail() + ")");
+				}
+			}
+		}
 	}
 
 	// 유저 탈퇴
