@@ -3,6 +3,7 @@ package com.example.taste.domain.user.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByIdWithUserFavorList(@Param("id") Long id);
 
 	boolean existsByEmail(String email);
+
+	@Modifying(clearAutomatically = true)
+	@Query("UPDATE User u SET u.postingCount = 0")
+	void resetPostingCnt();
 }
