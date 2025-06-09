@@ -12,7 +12,9 @@ import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EventScheduler {
@@ -23,18 +25,32 @@ public class EventScheduler {
 	@Scheduled(cron = "0 0 0 * * *")
 	public void selectEventWinner() {
 
-		LocalDate yesterday = LocalDate.now().minusDays(1);
+		log.info("이벤트 우승자 선정 스케줄러 시작");
 
-		List<Event> eventList = eventService.findEndedEventList(yesterday);
+		try {
 
-		if (eventList != null) {
+			LocalDate yesterday = LocalDate.now().minusDays(1);
+
+			List<Event> eventList = eventService.findEndedEventList(yesterday);
+
+			log.info("종료된 이벤트 수: {}", eventList.size());
+
 			for (Event event : eventList) {
 				eventService.findWinningBoard(event.getId())
 					.ifPresent(winnerBoard -> {
 						Long userId = winnerBoard.getUser().getId();
 						pkService.savePkLog(userId, PkType.EVENT);
+						log.info("이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
 					});
 			}
+
+			log.info("이벤트 우승자 선정 스케줄러 완료");
+
+		} catch (Exception e) {
+			log.error("이벤트 우승자 선정 중 오류 발생", e);
+
+			//Todo 재시도 로직
+
 		}
 	}
 
