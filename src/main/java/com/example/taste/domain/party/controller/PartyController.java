@@ -61,7 +61,7 @@ public class PartyController {
 	@PatchMapping("/{partyId}")
 	public CommonResponse<Void> updatePartyDetail(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Long partyId, @RequestBody PartyDetailUpdateRequestDto requestDto) {
+		@PathVariable Long partyId, @RequestBody @Valid PartyDetailUpdateRequestDto requestDto) {
 		partyService.updatePartyDetail(userDetails.getId(), partyId, requestDto);
 		return CommonResponse.ok();
 	}
