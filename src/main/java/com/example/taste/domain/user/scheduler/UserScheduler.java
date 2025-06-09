@@ -13,7 +13,7 @@ public class UserScheduler {
 
 	private final UserRepository userRepository;
 
-	@Scheduled(cron = "0 0 0 1 1-12 *")
+	@Scheduled(cron = "0 0 0 1 * *")
 	public void resetPostingCnt() {
 		userRepository.resetPostingCnt();
 	}

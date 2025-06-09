@@ -3,6 +3,7 @@ package com.example.taste.domain.board.service;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,8 @@ import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.entity.BoardStatus;
+import com.example.taste.domain.board.entity.BoardType;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.mapper.BoardMapper;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -84,6 +87,21 @@ public class BoardService {
 	@Transactional(readOnly = true)
 	public BoardResponseDto findBoard(Long boardId) {
 		Board board = findByBoardId(boardId);
+
+		if (board.getType() == BoardType.N) {
+			return new BoardResponseDto(board);
+		}
+
+		// openTime 검증 (현재시각 < openTime 이면 error)
+		if (LocalDateTime.now().isBefore(board.getOpenTime())) {
+			throw new CustomException(BOARD_NOT_YET_OPEN);
+		}
+
+		// 비공개 게시글이면 error
+		if (board.getStatus() == BoardStatus.CLOSED) {
+			throw new CustomException(CLOSED_BOARD);
+		}
+
 		return new BoardResponseDto(board);
 	}
 
@@ -117,7 +135,7 @@ public class BoardService {
 	}
 
 	// 게시물 목록 상세 조회
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = true) // XXX 게시글 목록을 상세조회하는 메서드가 필요한가요?
 	public List<BoardResponseDto> findBoardsFromFollowingUsers(Long userId, String type, String status, String sort,
 		String order,
 		Pageable pageable) {
@@ -136,7 +154,7 @@ public class BoardService {
 			.toList();
 	}
 
-	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
+	// 팔로우한 유저들의 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
 	@Transactional(readOnly = true)
 	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
 		List<Long> userFollowList = new ArrayList<>();
@@ -151,6 +169,8 @@ public class BoardService {
 		checkUser(userId, board);
 		hashtagService.removeHashtagFromBoard(board, hashtagName);
 	}
+
+	// todo : 모든 유저들의 게시물 목록 조회(Nomal or Openrun -> 유저명, 프로필 이미지, 게시글 제목 리스트, (오픈타임) 반환)
 
 	// 게시글에 해시태그 전부 삭제
 	@Transactional

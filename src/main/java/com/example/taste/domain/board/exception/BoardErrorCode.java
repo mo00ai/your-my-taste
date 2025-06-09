@@ -21,6 +21,9 @@ public enum BoardErrorCode implements BaseCode {
 
 	ALREADY_LIKED(HttpStatus.BAD_REQUEST, "L001", "이미 좋아요을 눌렀습니다."),
 	LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "L002", "좋아요를 찾을 수 없습니다."),
+
+	BOARD_NOT_YET_OPEN(HttpStatus.FORBIDDEN, "O001", "게시글이 아직 공개되지 않았습니다."),
+	CLOSED_BOARD(HttpStatus.FORBIDDEN, "O002", "비공개 게시글입니다."),
 	;
 
 	private final HttpStatus httpStatus;
