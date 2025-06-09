@@ -13,7 +13,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.entity.PkLog;
-import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
@@ -29,7 +28,6 @@ public class PkLogScheduler {
 	private final PkService pkService;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
-	private final PkLogJdbcRepository pkLogJdbcRepository;
 
 	@Scheduled(cron = "0 0 0 * * *")
 	public void insertPkLogs() {
@@ -59,7 +57,7 @@ public class PkLogScheduler {
 						.build()
 					).toList();
 
-				pkLogJdbcRepository.batchInsert(pkLogs);
+				pkService.saveBulkPkLogs(pkLogs);
 			}
 
 			log.info("[PK LOG] Redis → DB Bulk insert 스케줄러 완료");

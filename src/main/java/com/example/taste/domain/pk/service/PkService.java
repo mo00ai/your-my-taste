@@ -21,10 +21,12 @@ import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.dto.request.PkUpdateRequestDto;
 import com.example.taste.domain.pk.dto.response.PkCriteriaResponseDto;
 import com.example.taste.domain.pk.entity.PkCriteria;
+import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.entity.PkTerm;
 import com.example.taste.domain.pk.entity.PkTermRanking;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkCriteriaRepository;
+import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.pk.repository.PkLogRepository;
 import com.example.taste.domain.pk.repository.PkTermRankingRepository;
 import com.example.taste.domain.pk.repository.PkTermRepository;
@@ -46,6 +48,7 @@ public class PkService {
 	private final PkCacheService pkCacheService;
 	private final PkTermRepository pkTermRepository;
 	private final PkTermRankingRepository pkTermRankingRepository;
+	private final PkLogJdbcRepository pkLogJdbcRepository;
 
 	@CacheEvict(value = "pkCriteriaCache", allEntries = true)
 	@Transactional
@@ -195,5 +198,10 @@ public class PkService {
 		return pkTermRepository.findTopByOrderByTermDesc()
 			.map(pkTerm -> pkTerm.getTerm() + 1)
 			.orElse(1);
+	}
+
+	@Transactional
+	public void saveBulkPkLogs(List<PkLog> pkLogs) {
+		pkLogJdbcRepository.batchInsert(pkLogs);
 	}
 }
