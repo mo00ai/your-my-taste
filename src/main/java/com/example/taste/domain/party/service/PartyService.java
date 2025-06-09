@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.party.dto.reponse.PartyDetailResponseDto;
-import com.example.taste.domain.party.dto.reponse.PartyResponseDto;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
+import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;

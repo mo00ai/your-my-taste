@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.dto.reponse;
+package com.example.taste.domain.party.dto.response;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
