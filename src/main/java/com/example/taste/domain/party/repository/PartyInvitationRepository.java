@@ -23,7 +23,7 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 	Optional<PartyInvitation> findByUserAndParty(
 		@Param("userId") Long userId, @Param("partyId") Long partyId);
 
-	List<PartyInvitation> findByUserAndInvitationStatus(Long userId, InvitationStatus invitationStatus);
+	List<PartyInvitation> findByUserIdAndInvitationStatus(Long userId, InvitationStatus invitationStatus);
 
-	List<PartyInvitation> findByPartyAndInvitationStatus(Long partyId, InvitationStatus invitationStatus);
+	List<PartyInvitation> findByPartyIdAndInvitationStatus(Long partyId, InvitationStatus invitationStatus);
 }
