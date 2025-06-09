@@ -1,7 +1,6 @@
 package com.example.taste.domain.notification.dto;
 
 import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.notification.NotificationType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationEvent {
-	private NotificationType notificationType;
 
 	private NotificationCategory category;
 	private String content;

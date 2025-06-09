@@ -42,18 +42,15 @@ public class NotificationSubscriber implements MessageListener {
 			String json = new String(message.getBody(), StandardCharsets.UTF_8);
 			NotificationEvent event = objectMapper.readValue(json, NotificationEvent.class);
 
-			switch (event.getNotificationType()) {
+			switch (event.getCategory()) {
 				case INDIVIDUAL -> {
 					sendIndividual(event);
 				}
-				case SYSTEM -> {
+				case SYSTEM, MARKETING -> {
 					sendSystem(event);
 				}
-				case BROADCAST_SUBSCRIBERS -> {
+				case SUBSCRIBERS -> {
 					sendSubscriber(event);
-				}
-				case MARKETING -> {
-
 				}
 			}
 		} catch (Exception e) {
@@ -82,32 +79,6 @@ public class NotificationSubscriber implements MessageListener {
 		} while (users.hasNext());
 		long endLogging = System.currentTimeMillis();
 		log.info("paging 타임 체크: {} ms", (endLogging - startLogging));
-
-		/*
-		// reference by id
-		startLogging = System.currentTimeMillis();
-		List<Long> userIds = userRepository.findAllUserId();
-		notificationService.sendBunchUsingReference(event, userIds);
-		endLogging = System.currentTimeMillis();
-		log.info("reference by id 타임 체크", (endLogging - startLogging));
-
-		 */
-	}
-
-	private void sendMarketing(NotificationEvent event) {
-		NotificationContent content = saveContent(event);
-		// 페이징 방식
-		long startLogging = System.currentTimeMillis();
-		int page = 0;
-		int size = 1000;
-		Page<User> users;
-		do {
-			users = userRepository.findAll(PageRequest.of(page, size));
-			notificationService.sendBunch(content, event, users.getContent());
-			page++;
-		} while (users.hasNext());
-		long endLogging = System.currentTimeMillis();
-		log.info("paging 타임 체크", (endLogging - startLogging));
 
 		/*
 		// reference by id
