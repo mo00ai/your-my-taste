@@ -17,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventScheduler {
 
-	private EventService eventService;
-	private PkService pkService;
+	private final EventService eventService;
+	private final PkService pkService;
 
 	@Scheduled(cron = "0 */10 * * * *")
 	public void selectEventWinner() {
@@ -34,7 +34,6 @@ public class EventScheduler {
 					pkService.savePkLog(userId, PkType.EVENT);
 				});
 		}
-
 	}
 
 }
