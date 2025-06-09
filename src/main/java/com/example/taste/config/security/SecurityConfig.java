@@ -28,6 +28,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/auth/**").permitAll();
 				auth.requestMatchers("/admin/**").hasRole("ADMIN");
+				// ✅ 검색 API 요청 허용
+				auth.requestMatchers("/api/search/**").permitAll();
+				// ✅ 지도 API 요청 허용
+				auth.requestMatchers("/api/map/**").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.userDetailsService(userDetailsService);
