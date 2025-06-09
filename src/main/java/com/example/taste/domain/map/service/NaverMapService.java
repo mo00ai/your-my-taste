@@ -86,6 +86,7 @@ public class NaverMapService {
 			.header("x-ncp-apigw-api-key", naverConfig.getClientSecret())
 			.retrieve()
 			.bodyToMono(ReverseGeocodeDetailResponse.class)
+			.timeout(Duration.ofSeconds(10))
 			.block();
 	}
 
