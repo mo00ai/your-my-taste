@@ -74,7 +74,7 @@ dependencies {
     // WebClient를 위한 webflux
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // @ConfigurationProperties
-    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
 }
 
