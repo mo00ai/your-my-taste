@@ -4,6 +4,7 @@ import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASS
 import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,9 @@ import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.pk.entity.PkLog;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
@@ -35,6 +40,7 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
+import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Slf4j
@@ -48,6 +54,8 @@ public class UserService {
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final UserJdbcRepository userJdbcRepository;
+	private final PkLogJdbcRepository pkLogJdbcRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -196,5 +204,32 @@ public class UserService {
 	@Transactional
 	public void increaseUserPoint(User user, int point) {
 		user.increasePoint(point);
+	}
+
+	@Transactional(readOnly = true)
+	public List<User> findPkRankingUsers() {
+		return userRepository.findAllByOrderByPointDesc(PageRequest.of(0, 100));
+	}
+
+	@Transactional
+	public void resetUsersPoint() {
+
+		List<User> usersWithPoints = userRepository.findByPointGreaterThan(0);
+
+		if (!usersWithPoints.isEmpty()) {
+
+			List<PkLog> resetLogs = usersWithPoints.stream()
+				.map(user -> PkLog.builder()
+					.pkType(PkType.RESET)
+					.point(0)
+					.user(user)
+					.createdAt(LocalDateTime.now())
+					.build())
+				.toList();
+
+			pkLogJdbcRepository.batchInsert(resetLogs);
+		}
+
+		userJdbcRepository.resetAllUserPoints();
 	}
 }
