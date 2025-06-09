@@ -2,6 +2,7 @@ package com.example.taste.domain.pk.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -27,7 +28,7 @@ public class PkLogJdbcRepository {
 				PkLog pkLog = pkLogs.get(i);
 				ps.setString(1, pkLog.getPkType().name());
 				ps.setInt(2, pkLog.getPoint());
-				ps.setObject(3, pkLog.getCreatedAt());
+				ps.setTimestamp(3, Timestamp.valueOf(pkLog.getCreatedAt()));
 				ps.setLong(4, pkLog.getUser().getId());
 			}
 
