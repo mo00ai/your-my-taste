@@ -2,6 +2,10 @@ package com.example.taste.domain.event.service;
 
 import static com.example.taste.domain.event.exception.EventErrorCode.*;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
+import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.dto.request.EventRequestDto;
 import com.example.taste.domain.event.dto.request.EventUpdateRequestDto;
 import com.example.taste.domain.event.dto.response.EventResponseDto;
@@ -66,6 +71,16 @@ public class EventService {
 	public Event findById(Long eventId) {
 		return eventRepository.findById(eventId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_EVENT));
+	}
+
+	@Transactional(readOnly = true)
+	public List<Event> findEndedEventList(LocalDate endDate) {
+		return eventRepository.findEndedEventList(endDate);
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<Board> findWinningBoard(Long eventId) {
+		return eventRepository.findWinningBoard(eventId);
 	}
 
 }
