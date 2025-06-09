@@ -13,8 +13,8 @@ public class BoardScheduler {
 
 	private final BoardRepository boardRepository;
 
-	@Scheduled
-	public void closePost() {
-
+	@Scheduled(cron = "0 */10 * * * *") // 성능 고려해서 10분 단위로만 오픈런 게시글 공개가 가능하다고 가정
+	public void closeOpenrunPost() {
+		boardRepository.closeExpiredTimeAttackPosts();
 	}
 }
