@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
@@ -27,11 +30,10 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
 	private final UserRepository userRepository;
 	//private final BoardRepository boardRepository;
@@ -42,8 +44,7 @@ public class CommentService {
 		User user = userRepository.findById(1L)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		Comment parent = requestDto.getParent() == null ? null :
-			commentRepository.findById(requestDto.getParent())
-				.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+			entityFetcher.getCommentOrThrow(requestDto.getParent());
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
@@ -61,16 +62,14 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
 	public void deleteComment(Long commentId) {
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		comment.deleteContent(LocalDateTime.now());
 	}
 

@@ -100,7 +100,7 @@ public class EntityFetcher {
 			.orElseThrow(() -> new CustomException(NOT_FOUND_EVENT));
 	}
 
-	public Comment getEntityOrThrow(Long id) {
+	public Comment getCommentOrThrow(Long id) {
 		return commentRepository.findById(id)
 			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 	}
