@@ -188,6 +188,7 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public User findById(long userId) {
+		// TODO 삭제된 유저도 고려필요할거 같은데 추후
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 	}

@@ -1,5 +1,7 @@
 package com.example.taste.domain.event.entity;
 
+import java.util.Objects;
+
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.board.entity.Board;
 
@@ -12,14 +14,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "board_event")
@@ -55,5 +54,32 @@ public class BoardEvent extends BaseEntity {
 	@Builder
 	public BoardEvent(Event event, Board board) {
 		this.register(event, board);
+	}
+
+	// 삭제시 연관관계 해제
+	public void unregister() {
+		if (this.board != null) {
+			this.board.getBoardEventList().remove(this);
+		}
+		if (this.event != null) {
+			this.event.getBoardEventList().remove(this);
+		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass())
+			return false;
+		BoardEvent that = (BoardEvent)o;
+		return Objects.equals(id, that.id)
+			&& Objects.equals(board != null ? board.getId() : null, that.board != null ? that.board.getId() : null)
+			&& Objects.equals(event != null ? event.getId() : null, that.event != null ? that.event.getId() : null);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id,
+			board != null ? board.getId() : null,
+			event != null ? event.getId() : null);
 	}
 }
