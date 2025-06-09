@@ -68,9 +68,8 @@ public class MatchService {
 
 	@Transactional
 	public void updateUserMatchCond(
-		Long id, Long matchingConditionId,
-		UserMatchCondUpdateRequestDto requestDto) {
-		UserMatchCond matchCond = userMatchCondRepository.findById(id)
+		Long matchingConditionId, UserMatchCondUpdateRequestDto requestDto) {
+		UserMatchCond matchCond = userMatchCondRepository.findById(matchingConditionId)
 			.orElseThrow(() -> new CustomException(USER_MATCH_COND_NOT_FOUND));        // TODO: entity fetcher
 
 		// 매칭 중이면 업데이트 불가
@@ -113,5 +112,17 @@ public class MatchService {
 
 		return categoryList.stream()
 			.map((c) -> new UserMatchCondCategory(matchCond, c)).toList();
+	}
+
+	@Transactional
+	public void deleteUserMatchCond(Long matchingConditionId) {
+		MatchingStatus matchingStatus = userMatchCondRepository.findUserMatchCondById(matchingConditionId);
+
+		// 매칭 중이면 업데이트 불가
+		if (!matchingStatus.equals(MatchingStatus.IDLE)) {
+			throw new CustomException(ACTIVE_MATCH_EXISTS);
+		}
+
+		userMatchCondRepository.deleteById(matchingConditionId);
 	}
 }
