@@ -68,7 +68,7 @@ public class Board extends SoftDeletableEntity {
 	private Store store;
 
 	// 게시글 해시태그 연관관계
-	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<BoardHashtag> boardHashtagList = new ArrayList<>();
 
 	// 이벤트 신청 게시글 연관관계
@@ -108,16 +108,21 @@ public class Board extends SoftDeletableEntity {
 	}
 
 	// 오버로딩된 빌더 생성자
-	@Builder(builderMethodName = "hBoardBuilder")
+	@Builder(builderMethodName = "oBoardBuilder")
 	public Board(String title, String contents, BoardType type, BoardStatus status, Integer openLimit,
 		LocalDateTime openTime, Store store, User user) {
 		this.title = title;
 		this.contents = contents;
-		this.type = type != null ? type : BoardType.H;
-		this.status = status != null ? status : BoardStatus.CLOSED;  // 홍대병 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
+		this.type = type != null ? type : BoardType.O;
+		this.status = status != null ? status : BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
 		this.openLimit = openLimit;
 		this.openTime = openTime;
 		register(store, user);
+	}
+
+	// 해시태그 삭제
+	public void removeBoardHashtag(BoardHashtag boardHashtag) {
+		boardHashtagList.remove(boardHashtag);
 	}
 
 	public void update(BoardUpdateRequestDto requestDto) {
@@ -130,7 +135,6 @@ public class Board extends SoftDeletableEntity {
 		if (requestDto.getType() != null) {
 			this.type = BoardType.from(requestDto.getType());
 		}
-		// TODO 이미지URL 수정
 	}
 
 }

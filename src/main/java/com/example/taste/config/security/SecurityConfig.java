@@ -1,7 +1,5 @@
 package com.example.taste.config.security;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,6 +8,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +28,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/auth/**").permitAll();
 				auth.requestMatchers("/admin/**").hasRole("ADMIN");
+				// ✅ 검색 API 요청 허용
+				auth.requestMatchers("/api/search/**").permitAll();
+				// ✅ 지도 API 요청 허용
+				auth.requestMatchers("/api/map/**").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.userDetailsService(userDetailsService);

@@ -1,5 +1,7 @@
 package com.example.taste.config;
 
+import static com.example.taste.common.constant.RedisConst.*;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +25,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static com.example.taste.common.constant.RedisConst.DEFAULT;
-
-
-
 
 @Configuration
 @EnableCaching
@@ -64,7 +61,8 @@ public class RedisConfig {
 
 		// 각 캐시별 TTL 설정
 		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(Duration.ofMinutes(10)));    // 기본 유효기간 10분
+		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(Duration.ofMinutes(10)));// 기본 유효기간 10분
+		cacheConfigurations.put("pkCriteriaCache", RedisCacheConfiguration.defaultCacheConfig());
 		// Todo 캐싱할 데이터의 key값을 자유롭게 설정해서 입력해 주세요.
 
 		return RedisCacheManager.builder(connectionFactory)

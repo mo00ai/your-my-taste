@@ -1,7 +1,7 @@
 package com.example.taste.domain.board.mapper;
 
-import com.example.taste.domain.board.dto.request.HongdaeBoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
+import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.BoardStatus;
@@ -27,8 +27,8 @@ public class BoardMapper {
 	/**
 	 * 홍대병 게시글 DTO → Board 엔터티
 	 */
-	public static Board toEntity(HongdaeBoardRequestDto requestDto, Store store, User user) {
-		return Board.hBoardBuilder()
+	public static Board toEntity(OpenRunBoardRequestDto requestDto, Store store, User user) {
+		return Board.oBoardBuilder()
 			.title(requestDto.getTitle())
 			.contents(requestDto.getContents())
 			.type(BoardType.from(requestDto.getType()))
