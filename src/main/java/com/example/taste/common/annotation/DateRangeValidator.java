@@ -37,7 +37,8 @@ public class DateRangeValidator implements ConstraintValidator<DateRange, LocalD
 		LocalDateTime minBound = now.plus(min, unit);
 		LocalDateTime maxBound = now.plus(max, unit);
 
-		return minBound.isBefore(value) && maxBound.isAfter(value);
+		return (value.isAfter(minBound) || value.isEqual(minBound))
+			&& (value.isBefore(maxBound) || value.isEqual(maxBound));
 	}
 
 }
