@@ -8,7 +8,7 @@ import lombok.Getter;
 
 import com.example.taste.domain.match.entity.UserMatchCond;
 
-@Getter
+@Getter    // TODO: JSON NULLABLE
 public class UserMatchCondResponseDto {
 	private Long id;
 	private List<UserMatchCondStoreResponseDto> stores;

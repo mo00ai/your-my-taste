@@ -26,6 +26,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
@@ -87,5 +88,12 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
 		this.matchingStatus = MatchingStatus.IDLE;
+	}
+
+	public void update(UserMatchCondUpdateRequestDto requestDto) {
+		this.ageMinRange = requestDto.getAgeMinRange();
+		this.ageMaxRange = requestDto.getAgeMaxRange();
+		this.gender = Gender.valueOf(requestDto.getGender());
+		this.region = requestDto.getRegion();
 	}
 }
