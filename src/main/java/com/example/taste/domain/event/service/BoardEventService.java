@@ -1,5 +1,7 @@
 package com.example.taste.domain.event.service;
 
+import static com.example.taste.domain.event.exception.EventErrorCode.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,10 @@ public class BoardEventService {
 		Event event = eventService.findById(eventId);
 		Board board = boardService.findByBoardId(boardId);
 		checkUser(board, userId);
+
+		if (board.getCreatedAt().toLocalDate().isBefore(event.getStartDate())) {
+			throw new CustomException(EVENT_REGISTER_BLOCKED);
+		}
 
 		// 먼저 중복 체크
 		boolean exists = boardEventRepository.existsByEventAndBoard(event, board);
