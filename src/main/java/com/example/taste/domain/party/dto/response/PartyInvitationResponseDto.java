@@ -18,7 +18,11 @@ public class PartyInvitationResponseDto {
 	public PartyInvitationResponseDto(PartyInvitation partyInvitation) {
 		this.invitationId = partyInvitation.getId();
 		this.partyId = partyInvitation.getParty().getId();
-		this.user = new UserSimpleResponseDto(partyInvitation.getUser());
+		if (partyInvitation.getUser() != null) {
+			this.user = new UserSimpleResponseDto(partyInvitation.getUser());
+		} else {
+			this.user = null;
+		}
 		this.invitationType = partyInvitation.getInvitationType().toString();
 		this.invitationStatus = partyInvitation.getInvitationStatus().toString();
 	}

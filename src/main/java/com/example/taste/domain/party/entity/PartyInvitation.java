@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -47,7 +46,6 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	@Column(nullable = false)
 	private InvitationType invitationType;
 
-	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private InvitationStatus invitationStatus;
