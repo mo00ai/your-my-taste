@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
@@ -46,11 +50,13 @@ public class UserController {
 		return CommonResponse.ok(userService.getProfile(userId));
 	}
 
-	@PatchMapping
+	@ImageValid
+	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> updateProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody @Valid UserUpdateRequestDto requestDto) {
-		userService.updateUser(userDetails.getId(), requestDto);
+		@RequestPart(name = "data") @Valid UserUpdateRequestDto requestDto,
+		@RequestPart(name = "file", required = false) MultipartFile file) {
+		userService.updateUser(userDetails.getId(), requestDto, file);
 		return CommonResponse.ok();
 	}
 
