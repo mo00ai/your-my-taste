@@ -37,23 +37,24 @@ public class PkLogScheduler {
 
 		try (Cursor<byte[]> cursor = redisService.getRedisConnection().keyCommands().scan(options)) {
 			while (cursor.hasNext()) {
-
+				
 				String key = new String(cursor.next());
 
-				List<PkLogCacheDto> pkLogDtos = redisService.getOpsForList(key, PkLogCacheDto.class);
+				Long userId = getUserIdFromKey(key);
 
-				List<PkLog> pkLogs = pkLogDtos.stream().map(dto -> {
+				User user = userRepository.findById(userId)
+					.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-					User user = userRepository.findById(dto.getUserId())
-						.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+				List<PkLogCacheDto> dtoList = redisService.getOpsForList(key, PkLogCacheDto.class);
 
-					return PkLog.builder()
+				List<PkLog> pkLogs = dtoList.stream()
+					.map(dto -> PkLog.builder()
+						.user(user)
 						.pkType(dto.getPkType())
 						.point(dto.getPoint())
 						.createdAt(dto.getCreatedAt())
-						.user(user)
-						.build();
-				}).toList();
+						.build()
+					).toList();
 
 				pkLogJdbcRepository.batchInsert(pkLogs);
 
@@ -64,6 +65,11 @@ public class PkLogScheduler {
 			// Todo 재시도 로직 또는 Retryable, Log 추적(테이블 따로 만듦), 통합 스케줄러 관리 등
 
 		}
+	}
+
+	private Long getUserIdFromKey(String key) {
+		String[] parts = key.split(":");
+		return Long.parseLong(parts[2]);
 	}
 
 }
