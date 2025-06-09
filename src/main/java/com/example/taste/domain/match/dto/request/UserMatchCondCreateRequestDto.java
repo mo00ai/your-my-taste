@@ -1,4 +1,4 @@
-package com.example.taste.domain.match.dto;
+package com.example.taste.domain.match.dto.request;
 
 import java.util.List;
 

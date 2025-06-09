@@ -25,7 +25,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
-import com.example.taste.domain.match.dto.UserMatchCondCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
 import com.example.taste.domain.party.enums.MatchingStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;

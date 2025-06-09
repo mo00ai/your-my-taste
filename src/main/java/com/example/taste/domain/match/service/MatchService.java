@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.match.dto.UserMatchCondCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
+import com.example.taste.domain.match.dto.response.UserMatchCondResponseDto;
 import com.example.taste.domain.match.entity.UserMatchCond;
 import com.example.taste.domain.match.entity.UserMatchCondCategory;
 import com.example.taste.domain.match.entity.UserMatchCondStore;
@@ -73,5 +74,12 @@ public class MatchService {
 			matchCond.setCategories(categoryList.stream()
 				.map((c) -> new UserMatchCondCategory(matchCond, c)).toList());
 		}
+	}
+
+	public List<UserMatchCondResponseDto> findUserMatchCond(Long userId) {
+		User user = entityFetcher.getUserOrThrow(userId);
+		return userMatchCondRepository.findAllByUser(user).stream()
+			.map(UserMatchCondResponseDto::new)
+			.toList();
 	}
 }
