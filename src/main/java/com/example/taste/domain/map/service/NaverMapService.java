@@ -69,7 +69,8 @@ public class NaverMapService {
 	 */
 	// coordinates -> address
 	public ReverseGeocodeDetailResponse getAddressFromCoordinates(double longitude, double latitude) {
-		String coords = longitude + "," + latitude;
+		String coords = String.format("%.7f,%.7f", longitude, latitude);    // 네이버 api 좌표 포매팅
+		// String coords = longitude + "," + latitude;
 		try {
 			URI uri = UriComponentsBuilder
 				.fromUriString(naverConfig.getReverseGeoCoding().getBaseUrl())
