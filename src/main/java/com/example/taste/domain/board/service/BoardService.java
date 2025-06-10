@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -43,11 +44,12 @@ public class BoardService {
 	private final UserService userService;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
+	private final EntityFetcher entityFetcher;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
 		IOException {
-		User user = userService.findById(userId);
+		User user = entityFetcher.getUserOrThrow(userId);
 		Store store = storeService.findById(requestDto.getStoreId());
 
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
