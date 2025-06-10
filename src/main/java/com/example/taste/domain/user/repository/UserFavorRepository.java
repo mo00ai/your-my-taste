@@ -11,6 +11,6 @@ import com.example.taste.domain.user.entity.UserFavor;
 
 @Repository
 public interface UserFavorRepository extends JpaRepository<UserFavor, Long> {
-	@Query("SELECT uf FROM UserFavor uf JOIN FETCH uf.user WHERE uf.user.id = :userId")
+	@Query("SELECT DISTINCT uf FROM UserFavor uf JOIN FETCH uf.user WHERE uf.user.id = :userId")
 	List<UserFavor> findAllByUser(@Param("userId") Long userId);
 }
