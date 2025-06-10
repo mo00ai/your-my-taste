@@ -157,4 +157,26 @@ public class RedisService {
 		}
 		return Collections.emptySet();
 	}
+	public <T> List<T> getOpsForList(String key, Class<T> clazz) {
+		List<Object> objectList = redisTemplate.opsForList().range(key, 0, -1);
+
+		if (objectList == null) {
+			return List.of();
+		}
+
+		return objectList.stream()
+			.map(item -> {
+				try {
+					return objectMapper.convertValue(item, clazz);
+				} catch (Exception e) {
+					log.warn("레디스 내 Ojbect -> PkLogCacheDto로 변환 실패");
+					return null;
+					//CustomException을 날리진 않음
+					//convert 실패 처리 하나 때문에 모든 스케줄러 로직이 멈출 순 없으니까
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
 }

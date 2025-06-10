@@ -1,0 +1,32 @@
+package com.example.taste.domain.party.dto.response;
+
+import java.time.format.DateTimeFormatter;
+
+import lombok.Builder;
+import lombok.Getter;
+
+import com.example.taste.domain.party.entity.Party;
+import com.example.taste.domain.party.enums.PartyStatus;
+
+@Getter
+public class PartyResponseDto {
+	private Long storeId;            // TODO: Store 통째로 넘겨주는게 좋을지, 아니면 필요한 정보만?
+	private PartyStatus partyStatus;
+	private String storeName;
+	private String meetingTime;
+	private int maxMembers;
+	private int nowMembers;
+	private boolean enableRandomMatching;
+
+	@Builder
+	public PartyResponseDto(Party party) {
+		this.storeId = party.getStore() != null ? party.getStore().getId() : null;
+		this.partyStatus = party.getPartyStatus();
+		this.storeName = party.getStore() != null ? party.getStore().getName() : null;
+		this.meetingTime = party.getMeetingTime() != null ?
+			party.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null;
+		this.maxMembers = party.getMaxMembers();
+		this.nowMembers = party.getNowMembers();
+		this.enableRandomMatching = party.isEnableRandomMatching();
+	}
+}

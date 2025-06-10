@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -13,36 +15,30 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
-import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
-	private final UserService userService;
-	private final BoardService boardService;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId,
 		CustomUserDetails userDetails) {
-		Board board = boardService.findByBoardId(boardsId);
-		User user = userService.findById(userDetails.getId());
+		Board board = entityFetcher.getBoardOrThrow(boardsId);
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		Comment parent = requestDto.getParent() == null ? null :
-			findById(requestDto.getParent());
+			entityFetcher.getCommentOrThrow(requestDto.getParent());
 		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
 
 		Comment comment = Comment.builder()
@@ -59,24 +55,15 @@ public class CommentService {
 	}
 
 	@Transactional
-	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
-		CustomUserDetails userDetails) {
-		User user = userService.findById(userDetails.getId());
-		Comment comment = findById(commentId);
-		if (!comment.getUser().equals(user)) {
-			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
-		}
+	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
+		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
-		User user = userService.findById(userDetails.getId());
-		Comment comment = findById(commentId);
-		if (!comment.getUser().equals(user)) {
-			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
-		}
+	public void deleteComment(Long commentId) {
+		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		comment.deleteContent(LocalDateTime.now());
 	}
 
@@ -131,13 +118,6 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public GetCommentDto getComment(Long commentId) {
-		return new GetCommentDto(commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
-	}
-
-	@Transactional(readOnly = true)
-	public Comment findById(Long commentId) {
-		return commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+		return new GetCommentDto(entityFetcher.getCommentOrThrow(commentId));
 	}
 }

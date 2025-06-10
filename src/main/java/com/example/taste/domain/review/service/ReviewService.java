@@ -3,6 +3,9 @@ package com.example.taste.domain.review.service;
 import java.io.IOException;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.image.entity.Image;
@@ -27,20 +31,15 @@ import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+	private final EntityFetcher entityFetcher;
 	private final ReviewRepository reviewRepository;
 	private final RedisService redisService;
 	private final ImageService imageService;
-	private final StoreService storeService;
-	private final UserService userService;
 	private final PkService pkService;
 
 	@Transactional
@@ -50,8 +49,8 @@ public class ReviewService {
 		if (files != null && !files.isEmpty()) {
 			image = imageService.saveImage(files.get(0), imageType);
 		}
-		Store store = storeService.findById(storeId);
-		User user = userService.findById(userDetails.getId());
+		Store store = entityFetcher.getStoreOrThrow(storeId);
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		Object value = redisService.getKeyValue(key);
@@ -74,8 +73,8 @@ public class ReviewService {
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		MultipartFile multipartFile, ImageType imageType, CustomUserDetails userDetails) throws IOException {
-		Review review = findById(reviewId);
-		User user = userService.findById(userDetails.getId());
+		Review review = entityFetcher.getReviewOrThrow(reviewId);
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
@@ -83,8 +82,6 @@ public class ReviewService {
 		String contents =
 			requestDto.getContents().isEmpty() ? review.getContents() :
 				requestDto.getContents();
-
-		// if
 		Image image = multipartFile == null ? review.getImage() : imageService.saveImage(multipartFile, imageType);
 		Integer score = requestDto.getScore() == null ? review.getScore() : requestDto.getScore();
 
@@ -101,7 +98,7 @@ public class ReviewService {
 
 	@Transactional(readOnly = true)
 	public Page<GetReviewResponseDto> getAllReview(Long storeId, int index, int score) {
-		Store store = storeService.findById(storeId);
+		Store store = entityFetcher.getStoreOrThrow(storeId);
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		Page<Review> reviews = reviewRepository.getAllReview(store, pageable, score);
 		return reviews.map(GetReviewResponseDto::new);
@@ -113,9 +110,9 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void deleteReview(Long reviewId, CustomUserDetails userDetails) {
-		Review review = findById(reviewId);
-		User user = userService.findById(userDetails.getId());
+	public void deleteReview(Long reviewId) {
+		Review review = entityFetcher.getReviewOrThrow(reviewId);
+		User user = entityFetcher.getUserOrThrow(review.getUser().getId());
 		if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
