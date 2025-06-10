@@ -129,7 +129,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.meetingTime = requestDto.getMeetingTime();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나?
+			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나?
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
