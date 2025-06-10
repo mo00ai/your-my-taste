@@ -1,17 +1,23 @@
 package com.example.taste.domain.store.service;
 
-import static com.example.taste.common.exception.ErrorCode.*;
-import static com.example.taste.domain.store.exception.StoreErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
+import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_ACCESS_DENIED;
+import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NAME_OVERFLOW;
+import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.transaction.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
 import com.example.taste.domain.store.dto.request.RemoveBucketItemRequest;
@@ -26,20 +32,17 @@ import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class StoreBucketService {
-
+	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		// 버킷명 중복 확인
 		String name = makeUnduplicateName(request.getName(), user);
@@ -54,8 +57,7 @@ public class StoreBucketService {
 
 	@Transactional
 	public void addBucketItem(AddBucketItemRequest request, Long userId) {
-		Store store = storeRepository.findById(request.getStoreId())
-			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		Store store = entityFetcher.getStoreOrThrow(request.getStoreId());
 
 		for (Long bucketId : request.getBucketIds()) {
 			StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
@@ -80,7 +82,7 @@ public class StoreBucketService {
 	}
 
 	public List<StoreBucketResponse> getBucketsByUserId(Long targetUserId) {
-		User targetUser = userRepository.findById(targetUserId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User targetUser = entityFetcher.getUserOrThrow(targetUserId);
 
 		// 공개된 버킷만 반환
 		return storeBucketRepository.findAllByUserAndIsOpened(targetUser, true).stream()
@@ -104,7 +106,7 @@ public class StoreBucketService {
 
 	@Transactional
 	public StoreBucketResponse updateBucketName(Long bucketId, String name, Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 

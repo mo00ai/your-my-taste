@@ -1,27 +1,27 @@
 package com.example.taste.domain.image.service;
 
-import static com.example.taste.common.exception.ErrorCode.*;
-import static com.example.taste.domain.image.exception.ImageErrorCode.*;
+import static com.example.taste.common.exception.ErrorCode.FILE_UPLOAD_FAILED;
 
 import java.io.IOException;
 import java.util.Map;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.dto.ImageResponseDto;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.repository.ImageRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-
+	private final EntityFetcher entityFetcher;
 	private final S3Service s3Service;
 	private final ImageRepository imageRepository;
 
@@ -62,8 +62,7 @@ public class ImageService {
 
 	@Transactional(readOnly = true)
 	public ImageResponseDto findImage(Long imageId) {
-		Image image = imageRepository.findById(imageId)
-			.orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
+		Image image = entityFetcher.getImageOrThrow(imageId);
 
 		return new ImageResponseDto(image.getId(), image.getUrl(), image.getUploadFileName());
 	}
@@ -71,8 +70,7 @@ public class ImageService {
 	@Transactional
 	public void update(Long imageId, ImageType type, MultipartFile file) throws IOException {
 
-		Image image = imageRepository.findById(imageId)
-			.orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
+		Image image = entityFetcher.getImageOrThrow(imageId);
 		// 유효성 검사 등은 이쪽에서
 		Map<String, String> fileInfo = null;
 
