@@ -3,12 +3,12 @@ package com.example.taste.domain.board.service;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.Like;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.repository.LikeRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,11 +17,11 @@ import lombok.RequiredArgsConstructor;
 public class LikeService {
 
 	private final LikeRepository likeRepository;
-	private final UserService userService;
 	private final BoardService boardService;
+	private final EntityFetcher entityFetcher;
 
 	public void likeBoard(Long userId, Long boardId) {
-		User user = userService.findById(userId);
+		User user = entityFetcher.getUserOrThrow(userId);
 		Board board = boardService.findByBoardId(boardId);
 		// 이미 저장되어 있다면
 		if (likeRepository.existsByUserAndBoard(user, board)) {
@@ -35,7 +35,7 @@ public class LikeService {
 	}
 
 	public void unlikeBoard(Long userId, Long boardId) {
-		User user = userService.findById(userId);
+		User user = entityFetcher.getUserOrThrow(userId);
 		Board board = boardService.findByBoardId(boardId);
 
 		Like like = likeRepository.findByUserAndBoard(user, board)

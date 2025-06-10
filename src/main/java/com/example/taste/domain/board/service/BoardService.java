@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -34,7 +35,6 @@ import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,7 +45,7 @@ public class BoardService {
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final StoreService storeService;
-	private final UserService userService;
+	private final EntityFetcher entityFetcher;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
 	private final RedisService redisService;
@@ -53,7 +53,7 @@ public class BoardService {
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
 		IOException {
-		User user = userService.findById(userId);
+		User user = entityFetcher.getUserOrThrow(userId);
 		Store store = storeService.findById(requestDto.getStoreId());
 
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
