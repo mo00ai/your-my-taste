@@ -1,7 +1,6 @@
 package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
-import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_COND_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
 
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchCondResponseDto;
@@ -35,9 +35,8 @@ public class MatchService {
 	private final CategoryRepository categoryRepository;
 	private final UserMatchCondRepository userMatchCondRepository;
 
-	public void startUserMatch(Long conditionId) {
-		UserMatchCond userMatchCond = userMatchCondRepository.findById(conditionId)
-			.orElseThrow(() -> new CustomException(USER_MATCH_COND_NOT_FOUND));
+	public void startUserMatch(Long matchConditionId) {
+		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
 		// TODO: 매칭 시작, 매칭 시작일 알고리즘 추가
 	}
 
@@ -68,9 +67,8 @@ public class MatchService {
 
 	@Transactional
 	public void updateUserMatchCond(
-		Long matchingConditionId, UserMatchCondUpdateRequestDto requestDto) {
-		UserMatchCond matchCond = userMatchCondRepository.findById(matchingConditionId)
-			.orElseThrow(() -> new CustomException(USER_MATCH_COND_NOT_FOUND));        // TODO: entity fetcher
+		Long matchConditionId, UserMatchCondUpdateRequestDto requestDto) {
+		UserMatchCond matchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);       // TODO: entity fetcher
 
 		// 매칭 중이면 업데이트 불가
 		if (!matchCond.getMatchingStatus().equals(MatchingStatus.IDLE)) {

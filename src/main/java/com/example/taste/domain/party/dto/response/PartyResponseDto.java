@@ -10,8 +10,8 @@ import com.example.taste.domain.party.enums.PartyStatus;
 
 @Getter
 public class PartyResponseDto {
-	private Long storeId;            // TODO: Store 통째로 넘겨주는게 좋을지, 아니면 필요한 정보만?
 	private PartyStatus partyStatus;
+	private Long storeId;
 	private String storeName;
 	private String meetingTime;
 	private int maxMembers;
@@ -20,8 +20,8 @@ public class PartyResponseDto {
 
 	@Builder
 	public PartyResponseDto(Party party) {
-		this.storeId = party.getStore() != null ? party.getStore().getId() : null;
 		this.partyStatus = party.getPartyStatus();
+		this.storeId = party.getStore() != null ? party.getStore().getId() : null;
 		this.storeName = party.getStore() != null ? party.getStore().getName() : null;
 		this.meetingTime = party.getMeetingTime() != null ?
 			party.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null;
