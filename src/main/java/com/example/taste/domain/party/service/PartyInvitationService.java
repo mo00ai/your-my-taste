@@ -4,10 +4,8 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.ALREADY_EX
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUITING_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import java.util.List;
 
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
@@ -34,6 +33,7 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationService {
+	private final EntityFetcher entityFetcher;
 	private final UserRepository userRepository;
 	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
@@ -46,15 +46,13 @@ public class PartyInvitationService {
 		partyInvitation.leave();
 
 		// 파티에서 현재 멤버 수 차감
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		party.leaveMember();
 	}
 
 	@Transactional
 	public void removePartyMember(Long hostId, Long userId, Long partyId) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
 		if (!isHostOfParty(party, hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
@@ -71,8 +69,7 @@ public class PartyInvitationService {
 
 	public void inviteUserToParty(
 		Long hostId, Long partyId, PartyInvitationRequestDto requestDto) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아닌 경우
 		if (!isHostOfParty(party, hostId)) {
@@ -99,8 +96,7 @@ public class PartyInvitationService {
 	}
 
 	private User getActiveUserOrElseThrow(Long userId) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 		if (user.getDeletedAt() != null) {
 			throw new CustomException(DEACTIVATED_USER);
 		}
@@ -108,8 +104,7 @@ public class PartyInvitationService {
 	}
 
 	public void joinIntoParty(Long userId, Long partyId) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트인 경우
 		if (isHostOfParty(party, userId)) {
@@ -135,8 +130,7 @@ public class PartyInvitationService {
 	}
 
 	public List<PartyInvitationResponseDto> getPartyInvitations(Long hostId, Long partyId) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
 		if (!isHostOfParty(party, hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
@@ -156,8 +150,7 @@ public class PartyInvitationService {
 		// 초대 스테이터스가 대기가 아닌 경우
 		validateWaitingInvitationType(requestDto.getInvitationStatus());
 
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 파티 모집 중이 아닌 경우
 		validateRecruitingParty(party);
 
@@ -166,8 +159,7 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
-		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
-			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 
 		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 		if (!party.isFull()) {
@@ -185,8 +177,7 @@ public class PartyInvitationService {
 		// 초대 스테이터스가 대기가 아닌 경우
 		validateWaitingInvitationType(requestDto.getInvitationStatus());
 
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 파티 모집 중이 아닌 경우
 		validateRecruitingParty(party);
 
@@ -195,8 +186,7 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
-		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
-			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
@@ -211,8 +201,7 @@ public class PartyInvitationService {
 		// 초대 스테이터스가 대기가 아닌 경우
 		validateWaitingInvitationType(requestDto.getInvitationStatus());
 
-		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
-			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		Party party = partyInvitation.getParty();
 		// 파티 모집 중이 아닌 경우
 		validateRecruitingParty(party);
@@ -233,8 +222,7 @@ public class PartyInvitationService {
 		// 초대 스테이터스가 대기가 아닌 경우
 		validateWaitingInvitationType(requestDto.getInvitationStatus());
 
-		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
-			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		Party party = partyInvitation.getParty();
 		// 파티 모집 중이 아닌 경우
 		validateRecruitingParty(party);

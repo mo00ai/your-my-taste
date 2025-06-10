@@ -1,9 +1,7 @@
 package com.example.taste.domain.party.service;
 
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import java.util.List;
 
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
@@ -32,15 +31,14 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class PartyService {
+	private final EntityFetcher entityFetcher;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	public void createParty(Long hostId, PartyCreateRequestDto requestDto) {
-		User hostUser = userRepository.findById(hostId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-
+		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
 		Party party = partyRepository.save(new Party(requestDto, hostUser));
 		partyInvitationRepository.save(new PartyInvitation(
@@ -70,10 +68,8 @@ public class PartyService {
 	}
 
 	public PartyDetailResponseDto getPartyDetail(Long userId, Long partyId) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
-		User host = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+		User host = party.getHostUser();
 
 		List<User> members = partyInvitationRepository.findUsersInParty(partyId);
 		members.remove(host);        // 파티인원 목록에서 호스트는 제거
@@ -89,8 +85,7 @@ public class PartyService {
 	@Transactional
 	public void updatePartyDetail(
 		Long hostId, Long partyId, PartyDetailUpdateRequestDto requestDto) {
-		Party party = partyRepository.findById(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아니라면
 		if (!isHostOfParty(party, hostId)) {

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.image.entity.Image;
@@ -46,6 +47,7 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+	private final EntityFetcher entityFetcher;
 	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
@@ -72,7 +74,7 @@ public class UserService {
 	// 유저 정보 업데이트
 	@Transactional
 	public void updateUser(Long userId, UserUpdateRequestDto requestDto, MultipartFile file) {
-		User user = userRepository.findById(userId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
 		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
@@ -103,7 +105,7 @@ public class UserService {
 	// 유저 탈퇴
 	@Transactional
 	public void deleteUser(Long userId, UserDeleteRequestDto requestDto) {
-		User user = userRepository.findById(userId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
@@ -112,7 +114,7 @@ public class UserService {
 
 	@Transactional
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
-		User user = userRepository.findById(userId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
 
 		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
@@ -172,16 +174,16 @@ public class UserService {
 
 	@Transactional
 	public void followUser(Long userId, Long followingUserId) {
-		User user = userRepository.findById(userId).orElseThrow();
-		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
+		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
 		user.follow(user, followingUser);
 		followingUser.followed();
 	}
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
-		User follower = userRepository.findById(followerUserId).orElseThrow();
-		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		User follower = entityFetcher.getUserOrThrow(followerUserId);
+		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
 		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId);
 
 		follower.unfollow(follow);
@@ -202,13 +204,6 @@ public class UserService {
 	@Transactional
 	public void increaseUserPoint(User user, int point) {
 		user.increasePoint(point);
-	}
-
-	@Transactional(readOnly = true)
-	public User findById(long userId) {
-		// TODO 삭제된 유저도 고려필요할거 같은데 추후
-		return userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 	}
 
 	@Transactional(readOnly = true)
