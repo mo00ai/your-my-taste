@@ -1,7 +1,6 @@
 package com.example.taste.domain.pk.service;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.DUPLICATE_PK_TYPE;
-import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
+import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -10,8 +9,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -36,6 +33,8 @@ import com.example.taste.domain.pk.repository.PkTermRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.domain.user.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

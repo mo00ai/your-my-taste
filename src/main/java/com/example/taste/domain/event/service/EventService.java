@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +22,8 @@ import com.example.taste.domain.event.repository.EventRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -33,7 +33,7 @@ public class EventService {
 
 	@Transactional
 	public void createEvent(Long userId, EventRequestDto requestDto) {
-		User user = userService.findById(userId);
+		User user = entityFetcher.getUserOrThrow(userId);
 		Event entity = EventRequestDto.toEntity(user, requestDto);
 		eventRepository.save(entity);
 	}
