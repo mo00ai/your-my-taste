@@ -1,5 +1,6 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -46,6 +48,7 @@ public class BoardService {
 	private final UserService userService;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
+	private final RedisService redisService;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
@@ -84,15 +87,15 @@ public class BoardService {
 
 	}
 
-	@Transactional(readOnly = true)
-	public BoardResponseDto findBoard(Long boardId) {
+	@Transactional
+	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
 
 		if (board.getType() == BoardType.N) {
 			return new BoardResponseDto(board);
 		}
 
-		// openTime 검증 (현재시각 < openTime 이면 error)
+		// 게시글 공개시간 전이면 error
 		if (LocalDateTime.now().isBefore(board.getOpenTime())) {
 			throw new CustomException(BOARD_NOT_YET_OPEN);
 		}
@@ -102,15 +105,15 @@ public class BoardService {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
-		// 타임어택 게시글의 공개 종료시각 <= 현재시각이면 error (스케줄링 누락 방지)
-		if (board.getStatus() == BoardStatus.TIMEATTACK && !board.getOpenTime()
-			.plusMinutes(board.getOpenLimit())
-			.isAfter(LocalDateTime.now())) {
-			board.updateStatusClosed();
-			throw new CustomException(CLOSED_BOARD);
+		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
+		if (board.getStatus() == BoardStatus.TIMEATTACK) {
+			board.validateAndCloseIfExpired();
 		}
 
-		// todo : 선착순 순위 검증 메서드 호출
+		// 선착순 공개 게시글이면 순위 검증
+		if (board.getStatus() == BoardStatus.FCFS) {
+			tryEnterFcfsQueue(board, userId);
+		}
 
 		return new BoardResponseDto(board);
 	}
@@ -126,6 +129,7 @@ public class BoardService {
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
+		redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
 	}
@@ -188,5 +192,26 @@ public class BoardService {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		hashtagService.clearBoardHashtags(board);
+	}
+
+	public void tryEnterFcfsQueue(Board board, Long userId) {
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+
+		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+		Long size = redisService.getZSetSize(key);
+		if (size >= board.getOpenLimit()) {
+			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
+
+		// 순위가 없는 유저만 ZSet에 insert
+		if (!redisService.hasRankInZSet(key, userId)) {
+			redisService.addToZSet(key, userId, System.currentTimeMillis());
+		}
+
+		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
+		if (redisService.getRank(key, userId) >= board.getOpenLimit()) {
+			redisService.removeFromZSet(key, userId);
+			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
 	}
 }

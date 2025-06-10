@@ -58,7 +58,8 @@ public class BoardController {
 	public CommonResponse<BoardResponseDto> findBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long boardId) {
-		BoardResponseDto responseDto = boardService.findBoard(boardId);
+		Long userId = userDetails.getId();
+		BoardResponseDto responseDto = boardService.findBoard(boardId, userId);
 		return CommonResponse.ok(responseDto);
 	}
 

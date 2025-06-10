@@ -1,10 +1,13 @@
 package com.example.taste.domain.board.entity;
 
+import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
@@ -139,5 +142,14 @@ public class Board extends SoftDeletableEntity {
 
 	public void updateStatusClosed() {
 		this.status = BoardStatus.CLOSED;
+	}
+
+	// 게시글의 공개 종료시각 <= 현재시각이면 error
+	public void validateAndCloseIfExpired() {
+		if (!this.openTime.plusMinutes(this.openLimit)
+			.isAfter(LocalDateTime.now())) {
+			updateStatusClosed();
+			throw new CustomException(CLOSED_BOARD);
+		}
 	}
 }

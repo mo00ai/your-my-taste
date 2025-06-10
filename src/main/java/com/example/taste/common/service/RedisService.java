@@ -77,6 +77,20 @@ public class RedisService {
 		}
 	}
 
+	public void addToZSet(String key, Object value, Long score) {
+		redisTemplate.opsForZSet().add(key, value, score);
+	}
+
+	public void removeFromZSet(String key, Object value) {
+		redisTemplate.opsForZSet().remove(key, value);
+	}
+
+	public void deleteZSetKey(String key) {
+		if (redisTemplate.hasKey(key)) {
+			redisTemplate.delete(key);
+		}
+	}
+
 	/**
 	 * 사용자가 필요한 get 메서드가 더 있다면 직접 만들어서 사용하세요(형변환 등)
 	 */
@@ -112,4 +126,15 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public Long getZSetSize(String key) {
+		return redisTemplate.opsForZSet().size(key);
+	}
+
+	public Long getRank(String key, Object value) {
+		return redisTemplate.opsForZSet().rank(key, value);
+	}
+
+	public boolean hasRankInZSet(String key, Object value) {
+		return redisTemplate.opsForZSet().score(key, value) != null;
+	}
 }
