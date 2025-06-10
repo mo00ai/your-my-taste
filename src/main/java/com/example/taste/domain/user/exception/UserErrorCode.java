@@ -15,9 +15,10 @@ public enum UserErrorCode implements BaseCode {
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U003", "유저 정보가 존재하지 않습니다."),
 	DEACTIVATED_USER(HttpStatus.BAD_REQUEST, "U004", "탈퇴한 유저입니다"),
 	CONFLICT_EMAIL(HttpStatus.BAD_REQUEST, "U005", "중복 이메일입니다."),
+	POSTING_COUNT_OVERFLOW(HttpStatus.CONFLICT, "U006", "포스팅 허용 횟수를 초과했습니다."),
 
 	FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "F001", "팔로우 정보가 존재하지 않습니다."),
-	POSTING_COUNT_OVERFLOW(HttpStatus.CONFLICT, "O001", "포스팅 허용 횟수를 초과했습니다.");
+	;
 
 	private final HttpStatus httpStatus;
 	private final String code;
