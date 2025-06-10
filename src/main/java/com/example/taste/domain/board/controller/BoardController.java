@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -94,7 +95,8 @@ public class BoardController {
 	}
 
 	@GetMapping("/openRun")
-	public CommonResponse<PageResponse<OpenRunBoardResponseDto>> findOpenRunBoardList(Pageable pageable) {
+	public CommonResponse<PageResponse<OpenRunBoardResponseDto>> findOpenRunBoardList(
+		@PageableDefault(sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable) {
 		return CommonResponse.ok(boardService.findOpenRunBoardList(pageable));
 	}
 
