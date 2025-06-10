@@ -22,13 +22,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.review.dto.OcrResponseDto;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -37,8 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OCRService {
 
-	private final UserService userService;
-	private final StoreService storeService;
+	private final EntityFetcher entityFetcher;
 	private final RedisService redisService;
 
 	@Value("${ocr_key}")
@@ -100,8 +98,8 @@ public class OCRService {
 			.map(subName -> subName.getText())
 			.orElse(null);  // 없으면 null 반환
 
-		User user = userService.findById(userDetails.getId());
-		Store store = storeService.findById(storeId);
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		Store store = entityFetcher.getStoreOrThrow(storeId);
 
 		// 가게 이름 어떻게 저장하나
 		Boolean ocrResult = store.getName().equals(storeName);

@@ -73,14 +73,20 @@ public class Review extends BaseEntity {
 	}
 
 	public void updateContents(String contents) {
-		this.contents = contents;
+		if (contents != null) {
+			this.contents = contents;
+		}
 	}
 
 	public void updateScore(Integer score) {
-		this.score = score;
+		if (score != null) {
+			this.score = score;
+		}
 	}
 
 	public void updateImage(Image image) {
-		this.image = image;
+		if (image != null) {
+			this.image = image;
+		}
 	}
 }
