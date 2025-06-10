@@ -106,8 +106,11 @@ public class BoardService {
 		if (board.getStatus() == BoardStatus.TIMEATTACK && !board.getOpenTime()
 			.plusMinutes(board.getOpenLimit())
 			.isAfter(LocalDateTime.now())) {
+			board.updateStatusClosed();
 			throw new CustomException(CLOSED_BOARD);
 		}
+
+		// todo : 선착순 순위 검증 메서드 호출
 
 		return new BoardResponseDto(board);
 	}

@@ -137,4 +137,7 @@ public class Board extends SoftDeletableEntity {
 		}
 	}
 
+	public void updateStatusClosed() {
+		this.status = BoardStatus.CLOSED;
+	}
 }
