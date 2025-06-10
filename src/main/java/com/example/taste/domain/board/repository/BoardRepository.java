@@ -3,6 +3,7 @@ package com.example.taste.domain.board.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.entity.BoardType;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom {
@@ -46,4 +48,6 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
 		""", nativeQuery = true)
 	void closeExpiredTimeAttackPosts();
+
+	Page<Board> findByTypeEquals(BoardType type, Pageable pageable);
 }

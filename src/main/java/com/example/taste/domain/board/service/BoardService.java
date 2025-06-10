@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
@@ -23,6 +25,7 @@ import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
@@ -155,7 +158,7 @@ public class BoardService {
 		Pageable pageable) {
 
 		/**
-		 * TODO 구현할 기능 
+		 * TODO 구현할 기능
 		 * 현재 사용자id로 팔로우중인 사람들의 게시물 리스트 조회
 		 * userService 코드 필요
 		 */
@@ -168,7 +171,9 @@ public class BoardService {
 			.toList();
 	}
 
-	// 팔로우한 유저들의 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
+	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
+	// XXX 지금은 팔로우중인 유저의 게시글만 조회하려는 거 같은데 전체 유저의 게시글 조회가 낫지 않을까요?
+	// XXX dto 이름을 BoardListResponseDto -> BoardResponseDto로 변경하는 건 어떄요?
 	@Transactional(readOnly = true)
 	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
 		List<Long> userFollowList = new ArrayList<>();
@@ -184,7 +189,13 @@ public class BoardService {
 		hashtagService.removeHashtagFromBoard(board, hashtagName);
 	}
 
-	// todo : 모든 유저들의 게시물 목록 조회(Nomal or Openrun -> 유저명, 프로필 이미지, 게시글 제목 리스트, (오픈타임) 반환)
+	// 오픈런 게시글 목록 조회
+	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
+		Page<Board> boards = boardRepository.findByTypeEquals(BoardType.O, pageable);
+		Page<OpenRunBoardResponseDto> dtos = boards.map(OpenRunBoardResponseDto::from);
+		// todo : 조회 가능한 잔여 인원/시간 조회
+		return PageResponse.from(dtos);
+	}
 
 	// 게시글에 해시태그 전부 삭제
 	@Transactional

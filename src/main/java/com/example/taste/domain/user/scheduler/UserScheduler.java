@@ -13,6 +13,7 @@ public class UserScheduler {
 
 	private final UserRepository userRepository;
 
+	// todo : 재시도 로직 구현
 	@Scheduled(cron = "0 0 0 1 * *")
 	public void resetPostingCnt() {
 		userRepository.resetPostingCnt();

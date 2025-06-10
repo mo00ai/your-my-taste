@@ -23,11 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
@@ -89,6 +91,11 @@ public class BoardController {
 			pageable);
 		// TODO 반환
 		return CommonResponse.ok(responseDtoList);
+	}
+
+	@GetMapping("/openRun")
+	public CommonResponse<PageResponse<OpenRunBoardResponseDto>> findOpenRunBoardList(Pageable pageable) {
+		return CommonResponse.ok(boardService.findOpenRunBoardList(pageable));
 	}
 
 	@PatchMapping("/{boardId}")
