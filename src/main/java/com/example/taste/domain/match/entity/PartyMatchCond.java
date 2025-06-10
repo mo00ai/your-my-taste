@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.entity.Party;
-import com.example.taste.domain.party.enums.MatchingStatus;
+import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.user.enums.Gender;
 
 @Entity
@@ -39,16 +39,16 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	private String region;
 
 	@Enumerated(EnumType.STRING)
-	private MatchingStatus matchingStatus;
+	private MatchStatus matchStatus;
 
 	@Builder
 	public PartyMatchCond(Party party, int ageMinRange, int ageMaxRange, Gender gender, String region,
-		MatchingStatus matchingStatus) {
+		MatchStatus matchStatus) {
 		this.party = party;
 		this.ageMinRange = ageMinRange;
 		this.ageMaxRange = ageMaxRange;
 		this.gender = gender;
 		this.region = region;
-		this.matchingStatus = matchingStatus;
+		this.matchStatus = matchStatus;
 	}
 }

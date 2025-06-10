@@ -17,7 +17,7 @@ public class UserMatchCondResponseDto {
 	private int ageMaxRange;
 	private String gender;
 	private String region;
-	private String matchingStatus;
+	private String matchStatus;
 	private LocalDateTime matchStartedAt;
 
 	@Builder
@@ -31,6 +31,6 @@ public class UserMatchCondResponseDto {
 		this.ageMaxRange = userMatchCond.getAgeMaxRange();
 		this.gender = userMatchCond.getGender().toString();
 		this.region = userMatchCond.getRegion();
-		this.matchingStatus = userMatchCond.getMatchingStatus().toString();
+		this.matchStatus = userMatchCond.getMatchStatus().toString();
 	}
 }

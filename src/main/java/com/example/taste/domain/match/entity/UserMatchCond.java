@@ -27,7 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
-import com.example.taste.domain.party.enums.MatchingStatus;
+import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
 
@@ -61,15 +61,16 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	private String region;
 
+	@Setter
 	@Enumerated(EnumType.STRING)
-	private MatchingStatus matchingStatus;
+	private MatchStatus matchStatus;
 
 	private LocalDateTime matchStartedAt;
 
 	@Builder
 	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
 		int ageMinRange,
-		int ageMaxRange, Gender gender, String region, MatchingStatus matchingStatus) {
+		int ageMaxRange, Gender gender, String region, MatchStatus matchStatus) {
 		this.user = user;
 		this.stores = stores;
 		this.categories = categories;
@@ -77,7 +78,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.ageMaxRange = ageMaxRange;
 		this.gender = gender;
 		this.region = region;
-		this.matchingStatus = matchingStatus;
+		this.matchStatus = matchStatus;
 	}
 
 	@Builder
@@ -87,7 +88,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.ageMaxRange = requestDto.getAgeMaxRange();
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
-		this.matchingStatus = MatchingStatus.IDLE;
+		this.matchStatus = MatchStatus.IDLE;
 	}
 
 	public void update(UserMatchCondUpdateRequestDto requestDto) {
@@ -95,5 +96,10 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.ageMaxRange = requestDto.getAgeMaxRange();
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
+	}
+
+	public void registerMatch() {
+		this.matchStatus = MatchStatus.MATCHING;
+		this.matchStartedAt = LocalDateTime.now();
 	}
 }
