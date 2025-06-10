@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 
 @Repository
-public interface NotificationInfoRepository extends JpaRepository<NotificationInfo, Long> {
+public interface NotificationInfoRepository
+	extends JpaRepository<NotificationInfo, Long>, NotificationInfoRepositoryCustom {
 }

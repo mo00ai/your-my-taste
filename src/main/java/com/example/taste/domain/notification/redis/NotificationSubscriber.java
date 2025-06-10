@@ -12,7 +12,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.notification.dto.NotificationEvent;
+import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
@@ -40,7 +40,7 @@ public class NotificationSubscriber implements MessageListener {
 	public void onMessage(Message message, byte[] pattern) {
 		try {
 			String json = new String(message.getBody(), StandardCharsets.UTF_8);
-			NotificationEvent event = objectMapper.readValue(json, NotificationEvent.class);
+			NotificationEventDto event = objectMapper.readValue(json, NotificationEventDto.class);
 
 			switch (event.getCategory()) {
 				case INDIVIDUAL -> {
@@ -58,14 +58,14 @@ public class NotificationSubscriber implements MessageListener {
 		}
 	}
 
-	private void sendIndividual(NotificationEvent event) {
+	private void sendIndividual(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		User user = userRepository.findById(event.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 		notificationService.sendIndividual(content, event, user);
 	}
 
-	private void sendSystem(NotificationEvent event) {
+	private void sendSystem(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		// 페이징 방식
 		long startLogging = System.currentTimeMillis();
@@ -91,7 +91,7 @@ public class NotificationSubscriber implements MessageListener {
 		 */
 	}
 
-	private void sendSubscriber(NotificationEvent event) {
+	private void sendSubscriber(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		List<Follow> followList = followRepository.findAllByFollowing(event.getUserId());
 		List<User> followers = new ArrayList<>();
@@ -101,7 +101,7 @@ public class NotificationSubscriber implements MessageListener {
 		notificationService.sendBunch(content, event, followers);
 	}
 
-	public NotificationContent saveContent(NotificationEvent event) {
+	public NotificationContent saveContent(NotificationEventDto event) {
 		return contentRepository.save(NotificationContent.builder()
 			.content(event.getContent())
 			.redirectionUrl(event.getRedirectUrl())

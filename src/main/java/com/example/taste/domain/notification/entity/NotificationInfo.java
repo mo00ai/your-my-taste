@@ -33,6 +33,7 @@ public class NotificationInfo extends BaseEntity {
 	private User user;
 
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private NotificationCategory category;
 
 	@Column(nullable = false)
@@ -40,7 +41,6 @@ public class NotificationInfo extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "notification_content_id", nullable = false)
-	@Enumerated(EnumType.STRING)
 	private NotificationContent notificationContent;
 
 	@Builder
@@ -50,5 +50,9 @@ public class NotificationInfo extends BaseEntity {
 		this.user = user;
 		this.isRead = isRead != null ? isRead : false; // 초기값 세팅
 		this.notificationContent = notificationContent;
+	}
+
+	public void readIt() {
+		this.isRead = true;
 	}
 }

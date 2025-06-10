@@ -1,7 +1,6 @@
 package com.example.taste.domain.notification.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
-import com.example.taste.domain.notification.dto.NotificationRedis;
+import com.example.taste.domain.notification.dto.NotificationDto;
 import com.example.taste.domain.notification.service.NotificationUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,10 +31,16 @@ public class NotificationUserController {
 	}
 
 	// 알림 목록 접근
-	@GetMapping("/notifications")
-	public CommonResponse<List<NotificationRedis>> getNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails));
+	@GetMapping("/list")
+	public CommonResponse<Slice<NotificationDto>> getNotificationList(
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
+		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
+	}
+
+	@GetMapping("/list/old")
+	public CommonResponse<Slice<NotificationDto>> getOldNotificationList(
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
+		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
 	}
 
 	// 알림 읽음 처리하기
@@ -43,6 +48,14 @@ public class NotificationUserController {
 	public CommonResponse<Void> markNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam Long uuid) {
 		notificationUserService.markNotificationAsRead(userDetails, uuid);
+		return CommonResponse.ok();
+	}
+
+	// 전체 알림 읽음 처리하기
+	@PatchMapping("/All")
+	public CommonResponse<Void> markAllNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam Long uuid) {
+		notificationUserService.markAllNotificationAsRead(userDetails);
 		return CommonResponse.ok();
 	}
 }

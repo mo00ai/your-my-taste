@@ -12,8 +12,8 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.taste.domain.notification.dto.NotificationEvent;
-import com.example.taste.domain.notification.dto.NotificationRedis;
+import com.example.taste.domain.notification.dto.NotificationDto;
+import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.redis.RedisChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -84,28 +84,28 @@ public class RedisService {
 	}
 
 	//Notification publish
-	public void publishNotification(NotificationEvent event) {
+	public void publishNotification(NotificationEventDto event) {
 		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, event);
 	}
 
 	//Notification store
 	@Builder
-	public void storeNotification(Long userId, Long uuid, NotificationEvent event,
+	public void storeNotification(Long userId, Long contentId, NotificationEventDto event,
 		Duration duration, Boolean isRead) {
-		NotificationRedis dto = new NotificationRedis(uuid, event.getCategory(), event.getContent(),
+		NotificationDto dto = new NotificationDto(contentId, event.getCategory(), event.getContent(),
 			event.getRedirectUrl(),
 			isRead,
 			LocalDateTime.now());
-		String key = "notification:info:user:" + userId + ":id:" + uuid + ":" + event.getCategory().name();
+		String key = "notification:info:user:" + userId + ":id:" + contentId + ":" + event.getCategory().name();
 		redisTemplate.opsForValue().set(key, dto, duration);
 		// 모든 카테고리에 대해 count 증가
 		String countKey = "notification:count:user:" + userId + ":" + event.getCategory().name();
 		redisTemplate.opsForValue().increment(countKey);
 	}
 
-	public void updateNotification(NotificationRedis notification, String key) {
+	public void updateNotification(NotificationDto notification, String key) {
 		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
-		NotificationRedis dto = new NotificationRedis(notification.getUuid(), notification.getCategory(),
+		NotificationDto dto = new NotificationDto(notification.getContentId(), notification.getCategory(),
 			notification.getContent(),
 			notification.getRedirectUrl(), notification.isRead(), notification.getCreatedAt());
 		redisTemplate.opsForValue().set(key, dto, duration);
