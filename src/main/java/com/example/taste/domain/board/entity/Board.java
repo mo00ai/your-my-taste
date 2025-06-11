@@ -58,7 +58,7 @@ public class Board extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private BoardStatus status = BoardStatus.OPEN;
 
-	private int openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
+	private Integer openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
 
 	private LocalDateTime openTime;
 

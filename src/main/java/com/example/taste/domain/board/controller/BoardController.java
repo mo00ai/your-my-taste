@@ -94,9 +94,9 @@ public class BoardController {
 		return CommonResponse.ok(responseDtoList);
 	}
 
-	@GetMapping("/openRun")
+	@GetMapping("/openrun")
 	public CommonResponse<PageResponse<OpenRunBoardResponseDto>> findOpenRunBoardList(
-		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		@PageableDefault(sort = "openTime", direction = Sort.Direction.ASC) Pageable pageable) {
 		return CommonResponse.ok(boardService.findOpenRunBoardList(pageable));
 	}
 

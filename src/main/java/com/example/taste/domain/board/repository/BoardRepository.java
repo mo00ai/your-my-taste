@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 
 @Repository
@@ -49,5 +50,5 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		""", nativeQuery = true)
 	void closeExpiredTimeAttackPosts();
 
-	Page<Board> findByTypeEquals(BoardType type, Pageable pageable);
+	Page<Board> findByTypeEqualsAndStatusIsFalse(BoardType type, BoardStatus status, Pageable pageable);
 }

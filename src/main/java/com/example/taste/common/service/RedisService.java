@@ -148,8 +148,9 @@ public class RedisService {
 			.toList();
 	}
 
-	public Long getZSetSize(String key) {
-		return redisTemplate.opsForZSet().size(key);
+	public long getZSetSize(String key) {
+		Long size = redisTemplate.opsForZSet().size(key);
+		return size == null ? 0 : size;
 	}
 
 	public Long getRank(String key, Object value) {

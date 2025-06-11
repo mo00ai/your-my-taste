@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +53,7 @@ public class BoardService {
 	private final PkService pkService;
 	private final HashtagService hashtagService;
 	private final RedisService redisService;
+	private final SimpMessagingTemplate messagingTemplate;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
@@ -190,10 +192,20 @@ public class BoardService {
 	}
 
 	// 오픈런 게시글 목록 조회
+	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEquals(BoardType.O, pageable);
-		Page<OpenRunBoardResponseDto> dtos = boards.map(OpenRunBoardResponseDto::from);
-		// todo : 조회 가능한 잔여 인원/시간 조회
+		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusIsFalse(BoardType.O, BoardStatus.CLOSED,
+			pageable);
+
+		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
+			Long zSetSize = null;
+			if (board.getStatus() == BoardStatus.FCFS) {
+				zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
+			}
+
+			return OpenRunBoardResponseDto.create(board, zSetSize);
+		});
+
 		return PageResponse.from(dtos);
 	}
 
@@ -209,7 +221,7 @@ public class BoardService {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
-		Long size = redisService.getZSetSize(key);
+		long size = redisService.getZSetSize(key);
 		if (size >= board.getOpenLimit()) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
@@ -217,6 +229,12 @@ public class BoardService {
 		// 순위가 없는 유저만 ZSet에 insert
 		if (!redisService.hasRankInZSet(key, userId)) {
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+			// 클라이언트에 잔여 인원 전송
+			String destination = "topic/openrun/board/" + board.getId();
+			long remainingSlot = board.getOpenLimit() - redisService.getZSetSize(key);
+			remainingSlot = remainingSlot > 0 ? remainingSlot : 0;
+			messagingTemplate.convertAndSend(destination, remainingSlot);
 		}
 
 		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
