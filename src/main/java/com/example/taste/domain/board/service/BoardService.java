@@ -14,8 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
-import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
