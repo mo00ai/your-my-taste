@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,6 +28,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
+import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
@@ -53,13 +55,14 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchCondCategory> categories;
 
-	private int ageMinRange;
-	private int ageMaxRange;
+	@Embedded
+	private AgeRange ageRange;
+	private LocalDateTime meetingTime;
+	private String region;
 
 	@Enumerated(EnumType.STRING)
-	private Gender gender;
-
-	private String region;
+	private Gender userGender;
+	private Integer userAge;
 
 	@Setter
 	@Enumerated(EnumType.STRING)
@@ -69,32 +72,30 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	@Builder
 	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
-		int ageMinRange,
-		int ageMaxRange, Gender gender, String region, MatchStatus matchStatus) {
+		AgeRange ageRange, Gender userGender, Integer userAge, String region, MatchStatus matchStatus) {
 		this.user = user;
 		this.stores = stores;
 		this.categories = categories;
-		this.ageMinRange = ageMinRange;
-		this.ageMaxRange = ageMaxRange;
-		this.gender = gender;
+		this.ageRange = ageRange;
 		this.region = region;
+		this.userGender = userGender;
+		this.userAge = userAge;
 		this.matchStatus = matchStatus;
 	}
 
 	@Builder
 	public UserMatchCond(UserMatchCondCreateRequestDto requestDto, User user) {
 		this.user = user;
-		this.ageMinRange = requestDto.getAgeMinRange();
-		this.ageMaxRange = requestDto.getAgeMaxRange();
-		this.gender = Gender.valueOf(requestDto.getGender());
+		this.ageRange = requestDto.getAgeRange();
 		this.region = requestDto.getRegion();
+		this.userGender = user.getGender();
+		this.userAge = user.getAge();
 		this.matchStatus = MatchStatus.IDLE;
 	}
 
 	public void update(UserMatchCondUpdateRequestDto requestDto) {
-		this.ageMinRange = requestDto.getAgeMinRange();
-		this.ageMaxRange = requestDto.getAgeMaxRange();
-		this.gender = Gender.valueOf(requestDto.getGender());
+		this.ageRange = requestDto.getAgeRange();
+		this.userGender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
 	}
 

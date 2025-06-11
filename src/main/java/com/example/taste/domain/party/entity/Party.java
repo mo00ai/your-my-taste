@@ -27,6 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
@@ -164,5 +165,12 @@ public class Party extends BaseCreatedAtEntity {
 
 	public boolean isFull() {
 		return this.partyStatus.equals(PartyStatus.FULL) || (this.nowMembers >= this.maxMembers);
+	}
+
+	public double calculateAverageMemberAge() {
+		return this.partyInvitationList.stream()
+			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))
+			.mapToInt(pi -> pi.getUser().getAge())
+			.average().orElse(0.0);
 	}
 }

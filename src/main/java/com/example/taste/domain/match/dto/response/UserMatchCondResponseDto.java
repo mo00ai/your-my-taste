@@ -29,7 +29,7 @@ public class UserMatchCondResponseDto {
 			.map(UserMatchCondCategoryResponseDto::new).toList();
 		this.ageMinRange = userMatchCond.getAgeMinRange();
 		this.ageMaxRange = userMatchCond.getAgeMaxRange();
-		this.gender = userMatchCond.getGender().toString();
+		this.gender = userMatchCond.getUserGender().toString();
 		this.region = userMatchCond.getRegion();
 		this.matchStatus = userMatchCond.getMatchStatus().toString();
 	}

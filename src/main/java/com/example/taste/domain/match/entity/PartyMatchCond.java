@@ -2,6 +2,7 @@ package com.example.taste.domain.match.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
+import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.store.entity.Store;
@@ -37,8 +39,9 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	@OneToOne(optional = true)
 	private Store store;
 	private LocalDateTime meetingTime;
-	private int ageMinRange;
-	private int ageMaxRange;
+
+	@Embedded
+	private AgeRange ageRange;
 
 	@Enumerated(EnumType.STRING)
 	private Gender gender;
@@ -52,8 +55,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	public PartyMatchCond(Party party, int ageMinRange, int ageMaxRange, Gender gender, String region,
 		MatchStatus matchStatus) {
 		this.party = party;
-		this.ageMinRange = ageMinRange;
-		this.ageMaxRange = ageMaxRange;
+		this.ageRange = new AgeRange(ageMinRange, ageMaxRange);
 		this.gender = gender;
 		this.region = region;
 		this.matchStatus = matchStatus;
@@ -64,8 +66,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 		this.party = party;
 		this.store = party.getStore();
 		this.meetingTime = party.getMeetingTime();
-		this.ageMinRange = requestDto.getAgeMinRange();
-		this.ageMaxRange = requestDto.getAgeMaxRange();
+		this.ageRange = requestDto.getAgeRange();
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
 		this.matchStatus = MatchStatus.MATCHING;

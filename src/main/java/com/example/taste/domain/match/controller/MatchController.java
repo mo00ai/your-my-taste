@@ -31,4 +31,6 @@ public class MatchController {
 		matchService.registerPartyMatch(requestDto);
 		return CommonResponse.ok();
 	}
+
+	// TODO: 매칭 취소 API
 }
