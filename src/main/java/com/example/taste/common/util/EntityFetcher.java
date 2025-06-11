@@ -9,6 +9,7 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVI
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,15 @@ public class EntityFetcher {
 	public User getUserOrThrow(Long id) {
 		return userRepository.findById(id)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+	}
+
+	public User getActiveUserOrThrow(Long id) {
+		User user = userRepository.findById(id)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		if (user.getDeletedAt() != null) {
+			throw new CustomException(DEACTIVATED_USER);
+		}
+		return user;
 	}
 
 	public Store getStoreOrThrow(Long id) {

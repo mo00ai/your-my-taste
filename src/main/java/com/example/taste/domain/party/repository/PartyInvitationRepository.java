@@ -34,7 +34,7 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		@Param("userId") Long userId, @Param("invitationStatus") InvitationStatus invitationStatus,
 		@Param("partyStatus") PartyStatus partyStatus);
 
-	List<PartyInvitation> findByPartyIdAndInvitationStatus(Long partyId, InvitationStatus invitationStatus);
+	List<PartyInvitation> findAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
 
 	@Query("SELECT pi.party.id FROM PartyInvitation pi WHERE pi.user.id = :userId")
 	List<Long> findAllPartyIdByUser(@Param("user") User user);
@@ -52,4 +52,6 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		+ "AND pi.invitationType = :type AND pi.invitationStatus = :status")
 	void deletePartyMatchWhileMatching(@Param("party") Party party,
 		@Param("type") InvitationType type, @Param("status") InvitationStatus status);
+
+	void deleteAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
 }

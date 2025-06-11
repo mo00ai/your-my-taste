@@ -6,7 +6,6 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUI
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
-import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 
 import java.util.List;
 
@@ -82,7 +81,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 유저 가져오기, 탈퇴 유저인 경우 예외 발생
-		User user = getActiveUserOrElseThrow(requestDto.getUserId());
+		User user = entityFetcher.getActiveUserOrThrow(requestDto.getUserId());
 
 		// 파티 초대 정보가 있다면 (초대 중, 이미 존재, 거절)
 		PartyInvitation partyInvitation =
@@ -97,14 +96,7 @@ public class PartyInvitationService {
 			party, user, InvitationType.INVITATION, InvitationStatus.WAITING));
 	}
 
-	private User getActiveUserOrElseThrow(Long userId) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		if (user.getDeletedAt() != null) {
-			throw new CustomException(DEACTIVATED_USER);
-		}
-		return user;
-	}
-
+	// 유저가 파티에 가입 신청
 	public void joinIntoParty(Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
@@ -117,7 +109,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 탈퇴한 유저인 경우 예외 발생
-		User user = getActiveUserOrElseThrow(userId);
+		User user = entityFetcher.getActiveUserOrThrow(userId);
 
 		partyInvitationRepository.save(new PartyInvitation(
 			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
@@ -138,7 +130,7 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 		List<PartyInvitation> partyInvitationList =
-			partyInvitationRepository.findByPartyIdAndInvitationStatus(partyId, InvitationStatus.WAITING);
+			partyInvitationRepository.findAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 		return partyInvitationList.stream()
 			.map(PartyInvitationResponseDto::new).toList();
 	}
@@ -206,12 +198,14 @@ public class PartyInvitationService {
 		Party party = partyInvitation.getParty();
 		validateRecruitingParty(party);
 
-		// TODO: 파티가 다 찬 경우 나머지 초대 상태를 비활성화
 		if (!party.isFull()) {
 			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 			partyInvitation.getParty().joinMember();
+
+			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);

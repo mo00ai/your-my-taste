@@ -28,6 +28,7 @@ import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.service.PartyInvitationService;
 import com.example.taste.domain.party.service.PartyService;
 
+// TODO: 파티 만료 시 파티 초대 등등 연관 정보 삭제하는 기능 필요
 @RestController
 @RequestMapping("/parties")
 @RequiredArgsConstructor
