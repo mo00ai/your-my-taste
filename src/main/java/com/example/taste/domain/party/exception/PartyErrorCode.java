@@ -24,6 +24,8 @@ public enum PartyErrorCode implements BaseCode {
 		HttpStatus.BAD_REQUEST, "PI002", "파티 초대 정보가 이미 존재합니다."),
 	INVALID_PARTY_INVITATION(
 		HttpStatus.BAD_REQUEST, "PI003", "유효한 파티 초대 타입 및 상태가 아닙니다."),
+	UNAUTHORIZED_PARTY_INVITATION(
+		HttpStatus.BAD_REQUEST, "PI004", "자신의 파티 초대가 아닙니다."),
 	;
 
 	private final HttpStatus httpStatus;

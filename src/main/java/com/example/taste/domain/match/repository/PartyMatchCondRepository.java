@@ -9,4 +9,6 @@ public interface PartyMatchCondRepository extends JpaRepository<PartyMatchCond, 
 	boolean existsPartyMatchCondByParty(Party Party);
 
 	void deleteByParty(Party party);
+
+	PartyMatchCond findPartyMatchCondByParty(Party party);
 }

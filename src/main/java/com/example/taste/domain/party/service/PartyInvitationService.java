@@ -5,6 +5,7 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PA
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUITING_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 
 import java.util.List;
@@ -16,8 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.entity.PartyMatchCond;
 import com.example.taste.domain.match.entity.UserMatchCond;
-import com.example.taste.domain.match.repository.UserMatchCondRepository;
+import com.example.taste.domain.match.repository.PartyMatchCondRepository;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
@@ -36,7 +38,7 @@ import com.example.taste.domain.user.entity.User;
 public class PartyInvitationService {
 	private final EntityFetcher entityFetcher;
 	private final PartyInvitationRepository partyInvitationRepository;
-	private final UserMatchCondRepository userMatchCondRepository;
+	private final PartyMatchCondRepository partyMatchCondRepository;
 
 	@Transactional
 	public void leaveParty(Long userId, Long partyId) {
@@ -143,8 +145,7 @@ public class PartyInvitationService {
 
 	// 호스트가 수동(초대/가입) 파티 초대 수락	// TODO: 일부만 트랜잭션 걸도록 수정 - @윤예진
 	@Transactional
-	public void confirmManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
-		InvitationActionRequestDto requestDto) {
+	public void confirmManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId) {
 		// 초대 스테이터스가 대기가 아닌 경우
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
@@ -192,11 +193,14 @@ public class PartyInvitationService {
 
 	// 유저가 수동(초대/가입) 파티 초대 수락
 	@Transactional
-	public void confirmUserPartyInvitation(
-		Long partyInvitationId, InvitationActionRequestDto requestDto) {
+	public void confirmUserManualPartyInvitation(
+		Long userId, Long partyInvitationId) {
 		// 초대 스테이터스가 대기가 아닌 경우
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 내 초대가 아닌 경우
+		validOwnerOfPartyInvitation(partyInvitation, userId);
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
@@ -215,11 +219,14 @@ public class PartyInvitationService {
 	}
 
 	// 유저가 수동(초대/가입) 파티 초대 거절/취소
-	public void rejectUserPartyInvitation(
-		Long partyInvitationId, InvitationActionRequestDto requestDto) {
+	public void rejectUserManualPartyInvitation(
+		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 내 초대가 아닌 경우
+		validOwnerOfPartyInvitation(partyInvitation, userId);
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
@@ -232,8 +239,7 @@ public class PartyInvitationService {
 	// 호스트가 랜덤 파티 초대 수락
 	@Transactional
 	public void confirmRandomPartyInvitation(
-		Long hostId, Long partyId,
-		Long partyInvitationId, InvitationActionRequestDto requestDto) {
+		Long hostId, Long partyId, Long partyInvitationId) {
 		// 초대 스테이터스가 대기가 아닌 경우
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
@@ -247,15 +253,13 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
-		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
-
 		// 매칭 상태가 WAITING_HOST 가 아닌 경우
+		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
 		if (!userMatchCond.isStatus(MatchStatus.WAITING_HOST)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 
 		if (!party.isFull()) {
-			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 			userMatchCond.setMatchStatus(MatchStatus.WAITING_USER);
 			partyInvitation.getParty().joinMember();
 
@@ -289,6 +293,64 @@ public class PartyInvitationService {
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
 	}
 
+	// 유저가 랜덤 파티 초대 수락
+	@Transactional
+	public void confirmUserRandomPartyInvitation(
+		Long userId, Long partyInvitationId) {
+		// 초대 스테이터스가 대기가 아닌 경우
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 내 초대가 아닌 경우
+		validOwnerOfPartyInvitation(partyInvitation, userId);
+
+		// 파티 모집 중이 아닌 경우
+		Party party = partyInvitation.getParty();
+		validateRecruitingParty(party);
+
+		// 매칭 상태가 WAITING_USER 가 아닌 경우
+		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
+		if (!userMatchCond.isStatus(MatchStatus.WAITING_HOST)) {
+			throw new CustomException(INVALID_PARTY_INVITATION);
+		}
+
+		if (!party.isFull()) {
+			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
+			userMatchCond.setMatchStatus(MatchStatus.IDLE);
+
+			if (party.isFull()) {
+				party.setPartyStatus(PartyStatus.FULL);
+				PartyMatchCond partyMatchCond =
+					partyMatchCondRepository.findPartyMatchCondByParty(party);
+				partyMatchCond.setMatchStatus(MatchStatus.IDLE);
+			}
+		} else {
+			party.setPartyStatus(PartyStatus.FULL);
+			PartyMatchCond partyMatchCond =
+				partyMatchCondRepository.findPartyMatchCondByParty(party);
+			partyMatchCond.setMatchStatus(MatchStatus.IDLE);
+			throw new CustomException(NOT_RECRUITING_PARTY);
+		}
+	}
+
+	// 유저가 랜덤 파티 초대 거절/취소
+	public void rejectUserRandomPartyInvitation(
+		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
+		// 초대 스테이터스가 대기가 아닌 경우
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 내 초대가 아닌 경우
+		validOwnerOfPartyInvitation(partyInvitation, userId);
+
+		// 파티 모집 중이 아닌 경우
+		Party party = partyInvitation.getParty();
+		validateRecruitingParty(party);
+
+		partyInvitation.setInvitationStatus(
+			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
+	}
+
 	private void validateManualType(String type) {
 		if ((!type.equals(InvitationType.REQUEST.toString()) ||
 			!type.equals(InvitationType.INVITATION.toString()))) {
@@ -305,6 +367,12 @@ public class PartyInvitationService {
 	private void validateRecruitingParty(Party party) {
 		if (!party.getPartyStatus().equals(PartyStatus.RECRUITING)) {
 			throw new CustomException(NOT_RECRUITING_PARTY);
+		}
+	}
+
+	private void validOwnerOfPartyInvitation(PartyInvitation partyInvitation, Long userId) {
+		if (!partyInvitation.getUser().getId().equals(userId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 	}
 }

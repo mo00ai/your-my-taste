@@ -67,11 +67,12 @@ public class PartyInvitationController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyId, @PathVariable Long partyInvitationId,
 		@RequestBody @Valid InvitationActionRequestDto requestDto) {
+		// 랜덤 매칭
 		if (InvitationType.valueOf(requestDto.getInvitationType()).equals(InvitationType.RANDOM)) {
 			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
 				case CONFIRMED:
 					partyInvitationService.confirmRandomPartyInvitation(
-						userDetails.getId(), partyId, partyInvitationId, requestDto);
+						userDetails.getId(), partyId, partyInvitationId);
 					break;
 				case CANCELED, REJECTED:
 					partyInvitationService.rejectRandomPartyInvitation(
@@ -80,11 +81,13 @@ public class PartyInvitationController {
 				default:
 					throw new CustomException(INVALID_PARTY_INVITATION);
 			}
-		} else {
+		}
+		// 파티 초대, 유저 가입
+		else {
 			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
 				case CONFIRMED:
 					partyInvitationService.confirmManualPartyInvitation(
-						userDetails.getId(), partyId, partyInvitationId, requestDto);
+						userDetails.getId(), partyId, partyInvitationId);
 					break;
 				case CANCELED, REJECTED:
 					partyInvitationService.rejectManualPartyInvitation(
@@ -103,21 +106,35 @@ public class PartyInvitationController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyInvitationId,
 		@RequestBody @Valid InvitationActionRequestDto requestDto) {
-		if (!(requestDto.getInvitationType().equals(InvitationType.REQUEST.toString()) ||
-			requestDto.getInvitationType().equals(InvitationType.INVITATION.toString()))) {
-			throw new CustomException(INVALID_PARTY_INVITATION);
+		// 랜덤 매칭
+		if (InvitationType.valueOf(requestDto.getInvitationType()).equals(InvitationType.RANDOM)) {
+			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
+				case CONFIRMED:
+					partyInvitationService.confirmUserRandomPartyInvitation(
+						userDetails.getId(), partyInvitationId);
+					break;
+				case CANCELED, REJECTED:
+					partyInvitationService.rejectUserRandomPartyInvitation(
+						userDetails.getId(), partyInvitationId, requestDto);
+					break;
+				default:
+					throw new CustomException(INVALID_PARTY_INVITATION);
+			}
 		}
-
-		switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
-			case CONFIRMED:
-				partyInvitationService.confirmUserPartyInvitation(
-					partyInvitationId, requestDto);
-				break;
-			case CANCELED:
-			case REJECTED:
-				partyInvitationService.rejectUserPartyInvitation(
-					partyInvitationId, requestDto);
-				break;
+		// 파티 초대, 유저 가입
+		else {
+			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
+				case CONFIRMED:
+					partyInvitationService.confirmUserManualPartyInvitation(
+						userDetails.getId(), partyInvitationId);
+					break;
+				case CANCELED, REJECTED:
+					partyInvitationService.rejectUserManualPartyInvitation(
+						userDetails.getId(), partyInvitationId, requestDto);
+					break;
+				default:
+					throw new CustomException(INVALID_PARTY_INVITATION);
+			}
 		}
 
 		return CommonResponse.ok();
