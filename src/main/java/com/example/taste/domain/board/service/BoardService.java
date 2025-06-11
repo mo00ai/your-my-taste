@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
@@ -20,6 +22,7 @@ import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
+import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.mapper.BoardMapper;
@@ -129,11 +132,18 @@ public class BoardService {
 		 */
 		List<Long> userFollowList = new ArrayList<>();
 
-		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, sort, order,
-			pageable);
+		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, pageable);
 		return searchBoardList.stream()
 			.map(BoardResponseDto::new)
 			.toList();
+	}
+
+	// 키워드 기반 게시물 목록 조회
+	public PageResponse<BoardListResponseDto> searchBoards(BoardSearchCondition conditionDto, Pageable pageable) {
+		Page<BoardListResponseDto> page = boardRepository.searchBoardsByKeyword(conditionDto,
+			pageable);
+		return PageResponse.from(page);
+
 	}
 
 	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,11 +24,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
+import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
@@ -122,5 +125,16 @@ public class BoardController {
 	) {
 		likeService.unlikeBoard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_UNLIKED);
+	}
+
+	@GetMapping("/search")
+	public CommonResponse<PageResponse<BoardListResponseDto>> searchBoards(
+		@Valid BoardSearchCondition conditionDto,
+		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		PageResponse<BoardListResponseDto> result = boardService.searchBoards(conditionDto,
+			pageable);
+		return CommonResponse.ok(result);
+
 	}
 }
