@@ -1,5 +1,8 @@
 package com.example.taste.domain.board.entity;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.exception.BoardErrorCode;
+
 import lombok.Getter;
 
 @Getter
@@ -17,8 +20,7 @@ public enum BoardStatus {
 				return status;
 			}
 		}
-		// TODO 추후 글로벌 예외처리 예정
-		throw new IllegalArgumentException("해당하는 Status가 없습니다: " + input);
+		throw new CustomException(BoardErrorCode.BOARD_STATUS_NOT_FOUND);
 	}
 
 }
