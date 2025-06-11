@@ -164,6 +164,7 @@ public class PartyInvitationService {
 	}
 
 	// 호스트가 수동(초대/가입) 파티 초대 거절/취소
+	@Transactional
 	public void rejectManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
 		InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
@@ -214,6 +215,7 @@ public class PartyInvitationService {
 	}
 
 	// 유저가 수동(초대/가입) 파티 초대 거절/취소
+	@Transactional
 	public void rejectUserManualPartyInvitation(
 		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
@@ -268,6 +270,7 @@ public class PartyInvitationService {
 	}
 
 	// 호스트가 랜덤 파티 초대 거절
+	@Transactional
 	public void rejectRandomPartyInvitation(
 		Long hostId, Long partyId,
 		Long partyInvitationId, InvitationActionRequestDto requestDto) {
@@ -329,6 +332,7 @@ public class PartyInvitationService {
 	}
 
 	// 유저가 랜덤 파티 초대 거절/취소
+	@Transactional
 	public void rejectUserRandomPartyInvitation(
 		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
