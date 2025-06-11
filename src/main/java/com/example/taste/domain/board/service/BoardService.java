@@ -85,6 +85,7 @@ public class BoardService {
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
+			// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진
 
 		} else {
 			throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
@@ -154,7 +155,7 @@ public class BoardService {
 	}
 
 	// 게시물 목록 상세 조회
-	@Transactional(readOnly = true) // XXX 게시글 목록을 상세조회하는 메서드가 필요한가요?
+	@Transactional(readOnly = true)
 	public List<BoardResponseDto> findBoardsFromFollowingUsers(Long userId, String type, String status, String sort,
 		String order,
 		Pageable pageable) {
@@ -174,8 +175,6 @@ public class BoardService {
 	}
 
 	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
-	// XXX 지금은 팔로우중인 유저의 게시글만 조회하려는 거 같은데 전체 유저의 게시글 조회가 낫지 않을까요?
-	// XXX dto 이름을 BoardListResponseDto -> BoardResponseDto로 변경하는 건 어떄요?
 	@Transactional(readOnly = true)
 	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
 		List<Long> userFollowList = new ArrayList<>();
@@ -217,6 +216,7 @@ public class BoardService {
 		hashtagService.clearBoardHashtags(board);
 	}
 
+	// 선착순 queue에 데이터 insert
 	public void tryEnterFcfsQueue(Board board, Long userId) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 
