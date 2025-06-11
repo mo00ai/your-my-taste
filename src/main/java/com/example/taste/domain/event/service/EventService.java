@@ -20,7 +20,8 @@ import com.example.taste.domain.event.dto.response.EventResponseDto;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.repository.EventRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventService {
 	private final EntityFetcher entityFetcher;
-	private final UserService userService;
 	private final EventRepository eventRepository;
 
 	@Transactional

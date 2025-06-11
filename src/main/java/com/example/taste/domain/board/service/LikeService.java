@@ -9,7 +9,6 @@ import com.example.taste.domain.board.entity.Like;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.repository.LikeRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 public class LikeService {
 
 	private final LikeRepository likeRepository;
-	private final UserService userService;
 	private final BoardService boardService;
 	private final EntityFetcher entityFetcher;
 
