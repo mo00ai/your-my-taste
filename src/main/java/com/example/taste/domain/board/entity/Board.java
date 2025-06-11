@@ -146,8 +146,11 @@ public class Board extends SoftDeletableEntity {
 
 	// 게시글의 공개 종료시각 <= 현재시각이면 error
 	public void validateAndCloseIfExpired() {
-		if (!this.openTime.plusMinutes(this.openLimit)
-			.isAfter(LocalDateTime.now())) {
+		if (this.openTime == null || this.openLimit == null) {
+			return; // dto 에서 Null 방지하고 있지만 방어 코드
+		}
+
+		if (!this.openTime.plusMinutes(this.openLimit).isAfter(LocalDateTime.now())) {
 			updateStatusClosed();
 			throw new CustomException(CLOSED_BOARD);
 		}

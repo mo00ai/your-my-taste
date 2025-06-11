@@ -1,5 +1,6 @@
 package com.example.taste.domain.board.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,5 +51,5 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		""", nativeQuery = true)
 	void closeExpiredTimeAttackPosts();
 
-	Page<Board> findByTypeEqualsAndStatusEquals(BoardType type, BoardStatus status, Pageable pageable);
+	Page<Board> findByTypeEqualsAndStatusIn(BoardType type, Collection<BoardStatus> statuses, Pageable pageable);
 }

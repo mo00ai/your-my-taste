@@ -16,7 +16,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws")
-			.setAllowedOriginPatterns("*") // 실서비스에서는 보안상 프론트엔드 url 적용
+			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
 			.withSockJS();
 	}
 

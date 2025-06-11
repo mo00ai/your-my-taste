@@ -1,7 +1,6 @@
 package com.example.taste.domain.user.entity;
 
 import static com.example.taste.domain.pk.exception.PkErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,17 +175,5 @@ public class User extends SoftDeletableEntity {
 			this.userFavorList.remove(userFavor);
 			userFavor.remove();
 		}
-	}
-
-	public void increasePostingCnt() {
-		if (this.level == Level.NORMAL && this.postingCount >= 1) {
-			throw new CustomException(POSTING_COUNT_OVERFLOW);
-		}
-
-		if (this.level == Level.PK && this.postingCount >= 3) {
-			throw new CustomException(POSTING_COUNT_OVERFLOW);
-		}
-
-		this.postingCount++;
 	}
 }

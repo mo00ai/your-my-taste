@@ -2,6 +2,7 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,6 +56,7 @@ public class BoardService {
 	private final EntityFetcher entityFetcher;
 	private final RedisService redisService;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final UserRepository userRepository;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
@@ -75,7 +78,10 @@ public class BoardService {
 		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
 			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
 			// 포스팅 횟수 증가
-			user.increasePostingCnt();
+			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
+			if (updatedUserCnt == 0) {
+				throw new CustomException(POSTING_COUNT_OVERFLOW);
+			}
 			// 해시태그 적용
 			if (openRunBoardRequestDto.getHashtagList() != null && !openRunBoardRequestDto.getHashtagList().isEmpty()) {
 				hashtagService.applyHashtagsToBoard(entity, openRunBoardRequestDto.getHashtagList());
@@ -135,7 +141,9 @@ public class BoardService {
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
-		redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
+		if (board.getStatus() == BoardStatus.FCFS) {
+			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
+		}
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
 	}
@@ -193,16 +201,18 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusEquals(BoardType.O, BoardStatus.CLOSED,
+		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusIn(BoardType.O,
+			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK),
 			pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
-			Long zSetSize = null;
+			Long remainingSlot = null;
 			if (board.getStatus() == BoardStatus.FCFS) {
-				zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
+				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
+				remainingSlot = Math.max(0, board.getOpenLimit() - zSetSize);
 			}
 
-			return OpenRunBoardResponseDto.create(board, zSetSize);
+			return OpenRunBoardResponseDto.create(board, remainingSlot);
 		});
 
 		return PageResponse.from(dtos);
@@ -231,14 +241,14 @@ public class BoardService {
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			String destination = "topic/openrun/board/" + board.getId();
-			long remainingSlot = board.getOpenLimit() - redisService.getZSetSize(key);
-			remainingSlot = remainingSlot > 0 ? remainingSlot : 0;
+			String destination = "/topic/openrun/board/" + board.getId();
+			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
 		}
 
 		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
-		if (redisService.getRank(key, userId) >= board.getOpenLimit()) {
+		Long rank = redisService.getRank(key, userId);
+		if (rank != null && rank >= board.getOpenLimit()) {
 			redisService.removeFromZSet(key, userId);
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
