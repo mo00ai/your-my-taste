@@ -27,10 +27,10 @@ public class Category extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
-	private int displayOrder;
+	private Integer displayOrder;
 
 	@Builder
-	public Category(String name, int displayOrder) {
+	public Category(String name, Integer displayOrder) {
 		this.name = name;
 		this.displayOrder = displayOrder;
 	}

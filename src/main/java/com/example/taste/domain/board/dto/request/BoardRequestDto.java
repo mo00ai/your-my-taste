@@ -30,7 +30,6 @@ public abstract class BoardRequestDto {
 	@Size(max = 1000, message = "내용은 1000자 이내여야 합니다.")
 	private String contents;
 
-	// (NO) 라고 적으면 'N' 또는 'O' 가 아니라 "NO"만 허용하게 됨 - 황기하
 	@Pattern(regexp = "^[NO]$", message = "게시글 타입은 'N' 또는 'O'만 허용됩니다.")
 	private String type;
 
