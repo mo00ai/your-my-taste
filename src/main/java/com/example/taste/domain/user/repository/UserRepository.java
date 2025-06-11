@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("UPDATE User u SET u.postingCount = 0")
 	void resetPostingCnt();
 
-	@Modifying
+	@Modifying(clearAutomatically = true)
 	@Query("UPDATE User u SET u.postingCount = u.postingCount + 1 WHERE u.id = :userId AND u.postingCount < :limit")
 	int increasePostingCount(@Param("userId") Long userId, @Param("limit") int limit);
 }
