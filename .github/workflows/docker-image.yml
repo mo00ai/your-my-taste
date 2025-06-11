@@ -72,7 +72,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/your-my-taste
-            git pull origin main
+            git pull origin dev #추후에 main으로 수정할 예정(배포 전에)
             
             echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" > .env
             echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
