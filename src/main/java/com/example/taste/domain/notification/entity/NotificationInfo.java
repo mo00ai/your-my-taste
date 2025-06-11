@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +26,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationInfo extends BaseEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "noti_seq")
+	@SequenceGenerator(name = "noti_seq", sequenceName = "noti_seq", allocationSize = 100)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)

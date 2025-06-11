@@ -13,13 +13,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
-import com.example.taste.domain.notification.dto.NotificationDto;
+import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
@@ -34,9 +36,9 @@ public class NotificationUserService {
 
 	public GetNotificationCountResponseDto getNotificationCount(CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
-		String system = "notification:user:" + userId + ":" + NotificationCategory.SYSTEM + ":unreadCount";
-		String marketing = "notification:user:" + userId + ":" + NotificationCategory.MARKETING + ":unreadCount";
-		String subscribers = "notification:user:" + userId + ":" + NotificationCategory.SUBSCRIBERS + ":unreadCount";
+		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
+		String marketing = "notification:count:user:" + userId + ":" + NotificationCategory.MARKETING;
+		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBERS;
 		// TODO 유저가 원하지 않는 카테고리 알림을 여기서 삭제.
 		Long count = 0L;
 		count += getCount(system);
@@ -51,47 +53,55 @@ public class NotificationUserService {
 		return (value != null) ? (Long)value : 0L;
 	}
 
-	public Slice<NotificationDto> getNotificationList(CustomUserDetails userDetails,
+	//TODO sortedSet
+	public Slice<NotificationResponseDto> getNotificationList(CustomUserDetails userDetails,
 		int index) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:info:user:" + userId;
+		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
 		if (keys.isEmpty()) {
-			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
 		}
 
-		List<NotificationDto> notifications = new ArrayList<>();
+		List<NotificationEventDto> notifications = new ArrayList<>();
 		for (String key : keys) {
 			notifications.add(getNotificationOrThrow(key));
 		}
+
+		List<NotificationEventDto> sorted = notifications.stream()
+			.sorted(Comparator.comparing(NotificationEventDto::getCreatedAt).reversed())
+			.toList();
+
 		int pageSize = 10;
 		int here = index * pageSize;
-		int there = Math.min(here + pageSize + 1, notifications.size());
+		int there = Math.min(here + pageSize + 1, sorted.size());
 
-		if (here >= notifications.size()) {
+		if (here >= sorted.size()) {
 			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, pageSize), false);
 		}
 		Pageable pageable = PageRequest.of(index, pageSize);
 
-		List<NotificationDto> sub = notifications.subList(here, there).stream()
-			.sorted(Comparator.comparing(NotificationDto::getCreatedAt).reversed())
-			.collect(Collectors.toList());
+		List<NotificationEventDto> sub = sorted.subList(here, there);
 		Boolean hasNext = sub.size() > pageSize;
 
 		if (hasNext) {
 			sub = sub.subList(0, pageSize);
 		}
 
-		List<Long> idList = sub.stream().map(NotificationDto::getContentId).collect(Collectors.toList());
+		List<Long> idList = sub.stream().map(NotificationEventDto::getContentId).collect(Collectors.toList());
 		markSqlNotificationAsRead(userId, idList);
-		return new SliceImpl<>(sub, pageable, hasNext);
+		Slice<NotificationEventDto> slice = new SliceImpl<>(sub, pageable, hasNext);
+		return slice.map(NotificationResponseDto::new);
 	}
 
-	public Slice<NotificationDto> getMoreNotificationList(CustomUserDetails userDetails,
+	public Slice<NotificationResponseDto> getMoreNotificationList(CustomUserDetails userDetails,
 		int index) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:info:user:" + userId;
+		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
+		if (keys.isEmpty()) {
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
+		}
 		List<Long> redisContents = new ArrayList<>();
 		for (String key : keys) {
 			redisContents.add(extractContentIdFromKey(key));
@@ -99,25 +109,18 @@ public class NotificationUserService {
 		Pageable pageable = PageRequest.of(index, 10, Sort.by("createdAt"));
 		Slice<NotificationInfo> notificationInfos = notificationInfoRepository.getMoreNotificationInfoWithContents(
 			userId, redisContents, pageable);
-
-		notificationInfos.forEach(notificationInfo -> {
-			if (!notificationInfo.getIsRead()) {
-				String key = "notification:count:user:" + userId + ":" + notificationInfo.getCategory().name();
-				redisService.decreaseCount(key, 1L);
-				notificationInfo.readIt();
-			}
-		});
 		notificationInfoRepository.saveAll(notificationInfos.getContent());
 
-		return notificationInfos.map(NotificationDto::new);
+		return notificationInfos.map(NotificationResponseDto::new);
 	}
 
+	@Transactional
 	public void markNotificationAsRead(CustomUserDetails userDetails, Long uuid) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:info:user:" + userId + ":id:" + uuid;
+		String pattern = "notification:user:" + userId + ":id:" + uuid;
 		Set<String> keys = getKeys(pattern);
 		String key = keys.iterator().next();
-		NotificationDto dto = getNotificationOrThrow(key);
+		NotificationEventDto dto = getNotificationOrThrow(key);
 
 		if (!dto.isRead()) {
 			String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
@@ -132,14 +135,14 @@ public class NotificationUserService {
 
 	public void markAllNotificationAsRead(CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:info:user:" + userId;
+		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
 		if (keys.isEmpty()) {
 			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 		List<Long> redisContents = new ArrayList<>();
 		for (String key : keys) {
-			NotificationDto dto = getNotificationOrThrow(key);
+			NotificationEventDto dto = getNotificationOrThrow(key);
 			dto.readIt();
 			redisService.updateNotification(dto, key);
 			redisContents.add(dto.getContentId());
@@ -148,17 +151,13 @@ public class NotificationUserService {
 	}
 
 	private Set<String> getKeys(String pattern) {
-		Set<String> keys = redisService.getKeys(pattern);
-		if (keys.isEmpty()) {
-			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
-		}
-		return keys;
+		return redisService.getKeys(pattern);
 	}
 
-	private NotificationDto getNotificationOrThrow(String key) {
+	private NotificationEventDto getNotificationOrThrow(String key) {
 		Object obj = redisService.getKeyValue(key);
-		if (obj instanceof NotificationDto notification) {
-			return notification;
+		if (obj instanceof NotificationEventDto eventDto) {
+			return eventDto;
 		}
 		throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
 	}
@@ -174,5 +173,4 @@ public class NotificationUserService {
 		mysqlNotifications.forEach(NotificationInfo::readIt);
 		notificationInfoRepository.saveAll(mysqlNotifications);
 	}
-
 }

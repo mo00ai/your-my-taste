@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.exception.CustomException;
@@ -21,7 +22,6 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,18 +30,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class NotificationSubscriber implements MessageListener {
-	private final ObjectMapper objectMapper;
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
 	private final FollowRepository followRepository;
 	private final NotificationContentRepository contentRepository;
+	private final GenericJackson2JsonRedisSerializer serializer;
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		try {
 			String json = new String(message.getBody(), StandardCharsets.UTF_8);
-			NotificationEventDto event = objectMapper.readValue(json, NotificationEventDto.class);
-
+			System.out.println(json);
+			//NotificationEventDto event = objectMapper.readValue(json, NotificationEventDto.class);
+			NotificationEventDto event = serializer.deserialize(message.getBody(), NotificationEventDto.class);
 			switch (event.getCategory()) {
 				case INDIVIDUAL -> {
 					sendIndividual(event);

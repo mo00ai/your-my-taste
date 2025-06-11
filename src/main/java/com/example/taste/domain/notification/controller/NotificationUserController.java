@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
-import com.example.taste.domain.notification.dto.NotificationDto;
+import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.service.NotificationUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,13 +32,13 @@ public class NotificationUserController {
 
 	// 알림 목록 접근
 	@GetMapping("/list")
-	public CommonResponse<Slice<NotificationDto>> getNotificationList(
+	public CommonResponse<Slice<NotificationResponseDto>> getNotificationList(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
 	}
 
 	@GetMapping("/list/old")
-	public CommonResponse<Slice<NotificationDto>> getOldNotificationList(
+	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
 		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
 	}

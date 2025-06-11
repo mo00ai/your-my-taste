@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationDto {
+public class NotificationResponseDto {
 	private Long contentId;
 	private NotificationCategory category;
 	private String content;
@@ -23,15 +23,24 @@ public class NotificationDto {
 	private LocalDateTime createdAt;
 
 	public void readIt() {
-		this.isRead = b;
+		this.isRead = true;
 	}
 
-	public NotificationDto(NotificationInfo notificationInfo) {
+	public NotificationResponseDto(NotificationInfo notificationInfo) {
 		this.contentId = notificationInfo.getNotificationContent().getId();
 		this.category = notificationInfo.getCategory();
 		this.content = notificationInfo.getNotificationContent().getContent();
 		this.redirectUrl = notificationInfo.getNotificationContent().getRedirectionUrl();
 		this.isRead = notificationInfo.getIsRead();
 		this.createdAt = notificationInfo.getCreatedAt();
+	}
+
+	public NotificationResponseDto(NotificationEventDto eventDto) {
+		this.contentId = eventDto.getContentId();
+		this.category = eventDto.getCategory();
+		this.content = eventDto.getContent();
+		this.redirectUrl = eventDto.getRedirectUrl();
+		this.isRead = eventDto.isRead();
+		this.createdAt = eventDto.getCreatedAt();
 	}
 }

@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.entity.Board;
@@ -24,8 +23,11 @@ import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.entity.Comment;
+import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +39,12 @@ public class CommentService {
 		CustomUserDetails userDetails) {
 		Board board = entityFetcher.getBoardOrThrow(boardsId);
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		Comment parent = requestDto.getParent() == null ? null :
-			entityFetcher.getCommentOrThrow(requestDto.getParent());
-		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
+		Comment parent = null;
+		Comment root = null;
+		if (requestDto.getParent() != null) {
+			parent = entityFetcher.getCommentOrThrow(requestDto.getParent());
+			root = parent.getRoot() != null ? parent.getRoot() : parent;
+		}
 
 		Comment comment = Comment.builder()
 			.contents(requestDto.getContents())
@@ -55,21 +60,36 @@ public class CommentService {
 	}
 
 	@Transactional
-	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
+	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
+		CustomUserDetails userDetails) {
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId) {
+	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
 		comment.deleteContent(LocalDateTime.now());
 	}
 
 	@Transactional(readOnly = true)
 	public Page<GetCommentDto> getAllCommentOfBoard(Long boardId, int index) {
-		//계층형 쿼리
+
+		/** TODO 댓글 더보기를 depth 마다 다시 수행하도록 변경
+		 root 댓글 10 개 가져오기
+		 -> 원하는 댓글만 댓글 더보기-> 자식 대댓글만 표시
+		 -> 자식 대댓글에서 원하는 댓글만 더보기-> 해당 대댓글의 자식만 표시
+		 대댓글 보기는 별도의 메서드로 분리해야 하지 싶다.
+		 **/
 
 		// 연관관계를 통한 N+1 문제가 발생하지 않도록, root comment와 거기에 달린 comment들을 연관관계에 의존하지 않고 가져온다.
 		Pageable pageable = PageRequest.of(index - 1, 10);
