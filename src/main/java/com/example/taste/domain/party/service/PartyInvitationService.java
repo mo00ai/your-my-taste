@@ -124,9 +124,9 @@ public class PartyInvitationService {
 	}
 
 	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
-		// TODO: 파티가 모집 중이고(조건 추가), 대기 중인 초대만 가져오기 - @윤예진
 		List<PartyInvitation> partyInvitationList =
-			partyInvitationRepository.findByUserIdAndInvitationStatus(userId, InvitationStatus.WAITING);
+			partyInvitationRepository.findMyActivePartyInvitationList(
+				userId, InvitationStatus.WAITING, PartyStatus.RECRUITING);
 		return partyInvitationList.stream()
 			.map(UserInvitationResponseDto::new).toList();
 	}
@@ -206,6 +206,7 @@ public class PartyInvitationService {
 		Party party = partyInvitation.getParty();
 		validateRecruitingParty(party);
 
+		// TODO: 파티가 다 찬 경우 나머지 초대 상태를 비활성화
 		if (!party.isFull()) {
 			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 			partyInvitation.getParty().joinMember();

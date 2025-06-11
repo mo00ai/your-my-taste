@@ -13,6 +13,7 @@ import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
+import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.user.entity.User;
 
 @Repository
@@ -26,7 +27,12 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 	Optional<PartyInvitation> findByUserAndParty(
 		@Param("userId") Long userId, @Param("partyId") Long partyId);
 
-	List<PartyInvitation> findByUserIdAndInvitationStatus(Long userId, InvitationStatus invitationStatus);
+	@Query("SELECT pi FROM PartyInvitation pi "
+		+ "WHERE pi.user.id = :userId AND pi.invitationStatus = :invitationStatus "
+		+ "AND pi.party.partyStatus = :partyStatus")
+	List<PartyInvitation> findMyActivePartyInvitationList(
+		@Param("userId") Long userId, @Param("invitationStatus") InvitationStatus invitationStatus,
+		@Param("partyStatus") PartyStatus partyStatus);
 
 	List<PartyInvitation> findByPartyIdAndInvitationStatus(Long partyId, InvitationStatus invitationStatus);
 
