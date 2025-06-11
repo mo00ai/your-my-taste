@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpenRunBoardRequestDto extends BoardRequestDto {
 	@NotNull(message = "openLimit은 필수 입력값입니다.")
-	private int openLimit;
+	@Positive(message = "openLimit은 1 이상이어야 합니다.")
+	private Integer openLimit;
 
 	@FutureOrPresent(message = "openTime은 현재 시간 이후여야 합니다.")
 	@NotNull(message = "openTime은 필수 입력값입니다.")
