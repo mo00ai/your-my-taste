@@ -83,6 +83,18 @@ public class MatchCondService {
 		}
 	}
 
+	@Transactional
+	public void deleteUserMatchCond(Long matchingConditionId) {
+		MatchStatus matchStatus = userMatchCondRepository.findUserMatchCondById(matchingConditionId);
+
+		// 매칭 중이면 삭제 불가
+		if (!matchStatus.equals(MatchStatus.IDLE)) {
+			throw new CustomException(ACTIVE_MATCH_EXISTS);
+		}
+
+		userMatchCondRepository.deleteById(matchingConditionId);
+	}
+
 	private List<UserMatchCondStore> getValidCondStores(
 		List<Long> storeIdList, UserMatchCond matchCond) {
 		List<Store> storeList = storeRepository.findAllById(storeIdList);
@@ -105,17 +117,5 @@ public class MatchCondService {
 
 		return categoryList.stream()
 			.map((c) -> new UserMatchCondCategory(matchCond, c)).toList();
-	}
-
-	@Transactional
-	public void deleteUserMatchCond(Long matchingConditionId) {
-		MatchStatus matchStatus = userMatchCondRepository.findUserMatchCondById(matchingConditionId);
-
-		// 매칭 중이면 업데이트 불가
-		if (!matchStatus.equals(MatchStatus.IDLE)) {
-			throw new CustomException(ACTIVE_MATCH_EXISTS);
-		}
-
-		userMatchCondRepository.deleteById(matchingConditionId);
 	}
 }

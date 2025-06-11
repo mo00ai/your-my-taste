@@ -54,7 +54,7 @@ public class PartyInvitationService {
 	public void removePartyMember(Long hostId, Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -72,7 +72,7 @@ public class PartyInvitationService {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아닌 경우
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -107,7 +107,7 @@ public class PartyInvitationService {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트인 경우
-		if (isHostOfParty(party, userId)) {
+		if (party.isHostOfParty(userId)) {
 			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 		}
 
@@ -132,7 +132,7 @@ public class PartyInvitationService {
 	public List<PartyInvitationResponseDto> getPartyInvitations(Long hostId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 		List<PartyInvitation> partyInvitationList =
@@ -155,7 +155,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 호스트가 아닌 경우
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -182,7 +182,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 호스트가 아닌 경우
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -229,10 +229,6 @@ public class PartyInvitationService {
 
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
-	}
-
-	private boolean isHostOfParty(Party party, Long hostId) {
-		return party.getHostUser().getId().equals(hostId);
 	}
 
 	private void validateRequestOrInvitationType(String type) {

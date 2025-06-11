@@ -50,7 +50,7 @@ public class MatchCondController {
 	}
 
 	@DeleteMapping("/{matchingConditionId}")
-	public CommonResponse<Void> updateUserMatchCond(
+	public CommonResponse<Void> deleteUserMatchCond(
 		@PathVariable Long matchingConditionId) {
 		matchCondService.deleteUserMatchCond(matchingConditionId);
 		return CommonResponse.ok();

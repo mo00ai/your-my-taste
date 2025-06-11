@@ -1,5 +1,8 @@
 package com.example.taste.domain.match.service;
 
+import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
+import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
+
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
 import com.example.taste.domain.match.entity.PartyMatchCond;
@@ -37,18 +41,33 @@ public class MatchService {
 	private final PartyMatchCondRepository partyMatchCondRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
-	@Transactional
 	public void registerUserMatch(Long matchConditionId) {
 		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
+		// 이미 매칭 중이라면
+		if (userMatchCond.isMatching()) {
+			throw new CustomException(ACTIVE_MATCH_EXISTS);
+		}
 		userMatchCond.registerMatch();
+		userMatchCondRepository.save(userMatchCond);
 	}
 
-	public void registerPartyMatch(PartyMatchCondCreateRequestDto requestDto) {
+	public void registerPartyMatch(Long hostId, PartyMatchCondCreateRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(requestDto.getPartyId());
+
+		// 호스트가 아니라면
+		if (!party.isHostOfParty(hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		// 이미 매칭 중이라면
+		if (partyMatchCondRepository.existsPartyMatchCondByParty(party)) {
+			throw new CustomException(ACTIVE_MATCH_EXISTS);
+		}
+
 		partyMatchCondRepository.save(new PartyMatchCond(requestDto, party));
 	}
 
-	// 실행 후 1분마다 실행
+	// 실행 후 1분마다 실행 // MEMO : 유저가 매칭 여러개 동시에 돌리는 경우엔 partyInvitation 정보에 파티 매칭 정보도 적어놔야하나
 	@Scheduled(fixedDelay = 60000)
 	public void runMatching() {
 		// 유저를 기준으로 맞는 파티 매칭
@@ -142,6 +161,32 @@ public class MatchService {
 			matchedList.add(new PartyInvitation(
 				selectedParty.getParty(), matchingUser.getUser(), InvitationType.RANDOM, InvitationStatus.WAITING));
 		}
+	}
+
+	@Transactional
+	public void cancelUserMatch(Long userMatchCondId) {
+		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(userMatchCondId);
+		if (userMatchCond.getMatchStatus().equals(MatchStatus.WAITING_HOST)) {
+			// 지금 삭제하려는 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
+			partyInvitationRepository.deleteUserMatchWhileMatching(
+				userMatchCond, InvitationType.RANDOM, InvitationStatus.WAITING);
+		}
+		userMatchCondRepository.deleteById(userMatchCondId);
+	}
+
+	public void cancelPartyMatch(Long hostId, Long partyId) {
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+
+		// 호스트가 아니라면
+		if (!party.isHostOfParty(hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		// 수락 대기 중인 파티 초대가 있을 경우
+		partyInvitationRepository.deletePartyMatchWhileMatching(
+			party, InvitationType.RANDOM, InvitationStatus.WAITING);
+
+		partyMatchCondRepository.deleteByParty(party);
 	}
 
 	// 아무 매칭 조건도 설정하지 않았을 때

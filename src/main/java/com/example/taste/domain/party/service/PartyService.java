@@ -88,7 +88,7 @@ public class PartyService {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아니라면
-		if (!isHostOfParty(party, hostId)) {
+		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
@@ -102,9 +102,5 @@ public class PartyService {
 		// 장소 바꾸는 경우
 		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
 		party.update(requestDto);
-	}
-
-	private boolean isHostOfParty(Party party, Long hostId) {
-		return party.getHostUser().getId().equals(hostId);
 	}
 }

@@ -37,7 +37,7 @@ import com.example.taste.domain.user.enums.Gender;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_match_cond")
+@Table(name = "user_match_cond")        // MEMO : 유저 매칭 정보로 변경할까? 헷갈림
 public class UserMatchCond extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -104,5 +104,9 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	public void registerMatch() {
 		this.matchStatus = MatchStatus.MATCHING;
 		this.matchStartedAt = LocalDateTime.now();
+	}
+
+	public boolean isMatching() {
+		return !this.matchStatus.equals(MatchStatus.IDLE);
 	}
 }
