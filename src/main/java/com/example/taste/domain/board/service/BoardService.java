@@ -49,9 +49,9 @@ public class BoardService {
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final StoreService storeService;
-	private final EntityFetcher entityFetcher;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
+	private final EntityFetcher entityFetcher;
 	private final RedisService redisService;
 	private final SimpMessagingTemplate messagingTemplate;
 
@@ -161,7 +161,7 @@ public class BoardService {
 		Pageable pageable) {
 
 		/**
-		 * TODO 구현할 기능
+		 * TODO 구현할 기능 
 		 * 현재 사용자id로 팔로우중인 사람들의 게시물 리스트 조회
 		 * userService 코드 필요
 		 */

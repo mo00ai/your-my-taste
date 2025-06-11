@@ -23,6 +23,8 @@ import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class EventService {

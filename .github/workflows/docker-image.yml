@@ -1,0 +1,95 @@
+name: Docker Image CI/CD
+
+on:
+  push:
+    branches: [ "main","dev" ]
+  pull_request:
+    branches: [ "main","dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    # GitHub 저장소 코드 내려받기 (pr 날린 변경사항)
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    # Java 17 환경 세팅 (빌드용)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Gradle 빌드 캐시에 저장해서 저장 속도 개선
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    # gradlew 실행 권한 부여
+    - name: Grant execute permission for Gradle
+      run: chmod +x ./gradlew
+
+    # 애플리케이션 jar 파일 빌드
+    - name: Build JAR
+      run: ./gradlew bootJar
+
+    # 도커 허브에 로그인 (만든 access token 사용)
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # 도커 이미지 생성 (현재 디렉토리 기준, 빌드된 jar 포함)
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.DOCKER_IMAGE }} .
+
+    # 만든 도커 이미지를 도커 허브에 업로드
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_IMAGE }}
+
+    # ec2 ssh 접속할 수 있도록 .pem 키를 메모리에 등록
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_KEY }}
+        
+    # ec2 배포
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd ~/your-my-taste
+          git pull origin main
+    
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" > .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+          echo "DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}" >> .env
+          echo "DEV_REDIS_PORT=${{ secrets.DEV_REDIS_PORT }}" >> .env
+          echo "S3_BUCKET=${{ secrets.S3_BUCKET }}" >> .env
+          echo "S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}" >> .env
+          echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
+          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
+          echo "OCR_KEY=${{ secrets.OCR_KEY }}" >> .env
+          echo "NAVER_MAP_CLIENT_ID=${{ secrets.NAVER_MAP_CLIENT_ID }}" >> .env
+          echo "NAVER_MAP_CLIENT_SECRET=${{ secrets.NAVER_MAP_CLIENT_SECRET }}" >> .env
+          echo "NAVER_DATALAB_CLIENT_ID=${{ secrets.NAVER_DATALAB_CLIENT_ID }}" >> .env
+          echo "NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}" >> .env
+    
+          docker-compose down
+          docker-compose pull
+          docker-compose up -d --build
