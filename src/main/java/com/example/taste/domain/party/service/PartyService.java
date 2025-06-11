@@ -1,5 +1,6 @@
 package com.example.taste.domain.party.service;
 
+import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 
@@ -55,14 +56,12 @@ public class PartyService {
 					.map(PartyResponseDto::new)
 					.toList();
 			case MY:
-				// 유저가 참가, 호스트인 파티 모두 보여줌 // TODO: 유저가 호스트면 status 상관없이 보여줄지?
+				// 유저가 참가, 호스트인 파티 모두 보여줌
 				return partyRepository.findAllByRecruitingUserIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();
 			default:
-				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
-					.map(PartyResponseDto::new)
-					.toList();
+				throw new CustomException(INVALID_INPUT_VALUE);
 		}
 	}
 
