@@ -45,7 +45,7 @@ public class PartyController {
 	}
 
 	@GetMapping
-	public CommonResponse<List<PartyResponseDto>> getParties( // MEMO : 정렬 기준 추가
+	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "ALL")
 		@ValidEnum(target = PartyFilter.class) String filter) {
