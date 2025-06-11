@@ -85,7 +85,7 @@ public class MatchCondService {
 
 	@Transactional
 	public void deleteUserMatchCond(Long matchingConditionId) {
-		MatchStatus matchStatus = userMatchCondRepository.findUserMatchCondById(matchingConditionId);
+		MatchStatus matchStatus = userMatchCondRepository.findUserMatchStatusById(matchingConditionId);
 
 		// 매칭 중이면 삭제 불가
 		if (!matchStatus.equals(MatchStatus.IDLE)) {

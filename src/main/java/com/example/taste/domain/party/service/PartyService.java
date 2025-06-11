@@ -48,7 +48,6 @@ public class PartyService {
 	// TODO: 정렬 기준 추가
 	public List<PartyResponseDto> getParties(Long userId, String filter) {
 		PartyFilter partyFilter = PartyFilter.of(filter);
-
 		switch (partyFilter) {
 			case ALL:
 				// 유저가 열고 있는 파티 제외하고 모든 파티 보여줌

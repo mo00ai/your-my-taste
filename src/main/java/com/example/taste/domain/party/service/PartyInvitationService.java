@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.repository.UserMatchCondRepository;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
@@ -24,19 +26,17 @@ import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
+import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
-import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationService {
 	private final EntityFetcher entityFetcher;
-	private final UserRepository userRepository;
-	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
+	private final UserMatchCondRepository userMatchCondRepository;
 
 	@Transactional
 	public void leaveParty(Long userId, Long partyId) {
@@ -141,14 +141,13 @@ public class PartyInvitationService {
 			.map(PartyInvitationResponseDto::new).toList();
 	}
 
-	// 호스트가 파티 초대 수락	// TODO: 일부만 트랜잭션 걸도록 수정 - @윤예진
+	// 호스트가 수동(초대/가입) 파티 초대 수락	// TODO: 일부만 트랜잭션 걸도록 수정 - @윤예진
 	@Transactional
-	public void confirmPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
+	public void confirmManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
 		InvitationActionRequestDto requestDto) {
-		// 초대 및 수락 타입이 아닌 경우
-		validateRequestOrInvitationType(requestDto.getInvitationType());
 		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(requestDto.getInvitationStatus());
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 파티 모집 중이 아닌 경우
@@ -158,24 +157,25 @@ public class PartyInvitationService {
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
-
-		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 
 		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 		if (!party.isFull()) {
 			partyInvitation.getParty().joinMember();
+			if (party.isFull()) {
+				party.setPartyStatus(PartyStatus.FULL);
+			}
 		} else {
+			party.setPartyStatus(PartyStatus.FULL);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
 
-	// 호스트가 파티 초대 거절/취소
-	public void rejectPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
+	// 호스트가 수동(초대/가입) 파티 초대 거절/취소
+	public void rejectManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
 		InvitationActionRequestDto requestDto) {
-		// 초대 및 수락 타입이 아닌 경우
-		validateRequestOrInvitationType(requestDto.getInvitationType());
 		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(requestDto.getInvitationStatus());
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 파티 모집 중이 아닌 경우
@@ -185,61 +185,119 @@ public class PartyInvitationService {
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
-
-		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
 
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
 	}
 
-	// 유저가 파티 초대 수락
+	// 유저가 수동(초대/가입) 파티 초대 수락
 	@Transactional
 	public void confirmUserPartyInvitation(
-		Long id, Long partyInvitationId, InvitationActionRequestDto requestDto) {
-		// 초대 및 수락 타입이 아닌 경우
-		validateRequestOrInvitationType(requestDto.getInvitationType());
+		Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(requestDto.getInvitationStatus());
-
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
-		Party party = partyInvitation.getParty();
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
 		// 파티 모집 중이 아닌 경우
+		Party party = partyInvitation.getParty();
 		validateRecruitingParty(party);
 
-		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 		if (!party.isFull()) {
+			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 			partyInvitation.getParty().joinMember();
+			if (party.isFull()) {
+				party.setPartyStatus(PartyStatus.FULL);
+			}
 		} else {
+			party.setPartyStatus(PartyStatus.FULL);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
 
-	// 유저가 파티 초대 거절/취소
+	// 유저가 수동(초대/가입) 파티 초대 거절/취소
 	public void rejectUserPartyInvitation(
-		Long id, Long partyInvitationId, InvitationActionRequestDto requestDto) {
-		// 초대 및 수락 타입이 아닌 경우
-		validateRequestOrInvitationType(requestDto.getInvitationType());
+		Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(requestDto.getInvitationStatus());
-
 		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
-		Party party = partyInvitation.getParty();
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
 		// 파티 모집 중이 아닌 경우
+		Party party = partyInvitation.getParty();
 		validateRecruitingParty(party);
 
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
 	}
 
-	private void validateRequestOrInvitationType(String type) {
+	// 호스트가 랜덤 파티 초대 수락
+	@Transactional
+	public void confirmRandomPartyInvitation(
+		Long hostId, Long partyId,
+		Long partyInvitationId, InvitationActionRequestDto requestDto) {
+		// 초대 스테이터스가 대기가 아닌 경우
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 파티 모집 중이 아닌 경우
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+		validateRecruitingParty(party);
+
+		// 호스트가 아닌 경우
+		if (!party.isHostOfParty(hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
+
+		// 매칭 상태가 WAITING_HOST 가 아닌 경우
+		if (!userMatchCond.isStatus(MatchStatus.WAITING_HOST)) {
+			throw new CustomException(INVALID_PARTY_INVITATION);
+		}
+
+		if (!party.isFull()) {
+			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
+			userMatchCond.setMatchStatus(MatchStatus.WAITING_USER);
+			partyInvitation.getParty().joinMember();
+
+			if (party.isFull()) {
+				party.setPartyStatus(PartyStatus.FULL);
+			}
+		} else {
+			party.setPartyStatus(PartyStatus.FULL);
+			throw new CustomException(NOT_RECRUITING_PARTY);
+		}
+	}
+
+	// 호스트가 랜덤 파티 초대 거절
+	public void rejectRandomPartyInvitation(
+		Long hostId, Long partyId,
+		Long partyInvitationId, InvitationActionRequestDto requestDto) {
+		// 초대 스테이터스가 대기가 아닌 경우
+		PartyInvitation partyInvitation = entityFetcher.getPartyInvitationOrThrow(partyInvitationId);
+		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
+
+		// 파티 모집 중이 아닌 경우
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+		validateRecruitingParty(party);
+
+		// 호스트가 아닌 경우
+		if (!party.isHostOfParty(hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		partyInvitation.setInvitationStatus(
+			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
+	}
+
+	private void validateManualType(String type) {
 		if ((!type.equals(InvitationType.REQUEST.toString()) ||
 			!type.equals(InvitationType.INVITATION.toString()))) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
 
-	private void validateWaitingInvitationType(String status) {
-		if (!status.equals(InvitationStatus.WAITING.toString())) {
+	private void validateWaitingInvitationType(InvitationStatus status) {
+		if (!status.equals(InvitationStatus.WAITING)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}

@@ -109,4 +109,8 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	public boolean isMatching() {
 		return !this.matchStatus.equals(MatchStatus.IDLE);
 	}
+
+	public boolean isStatus(MatchStatus status) {
+		return this.matchStatus.equals(status);
+	}
 }

@@ -67,21 +67,32 @@ public class PartyInvitationController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyId, @PathVariable Long partyInvitationId,
 		@RequestBody @Valid InvitationActionRequestDto requestDto) {
-		if (!(requestDto.getInvitationType().equals(InvitationType.REQUEST.toString()) ||
-			requestDto.getInvitationType().equals(InvitationType.INVITATION.toString()))) {
-			throw new CustomException(INVALID_PARTY_INVITATION);
-		}
-
-		switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
-			case CONFIRMED:
-				partyInvitationService.confirmPartyInvitation(
-					userDetails.getId(), partyId, partyInvitationId, requestDto);
-				break;
-			case CANCELED:
-			case REJECTED:
-				partyInvitationService.rejectPartyInvitation(
-					userDetails.getId(), partyId, partyInvitationId, requestDto);
-				break;
+		if (InvitationType.valueOf(requestDto.getInvitationType()).equals(InvitationType.RANDOM)) {
+			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
+				case CONFIRMED:
+					partyInvitationService.confirmRandomPartyInvitation(
+						userDetails.getId(), partyId, partyInvitationId, requestDto);
+					break;
+				case CANCELED, REJECTED:
+					partyInvitationService.rejectRandomPartyInvitation(
+						userDetails.getId(), partyId, partyInvitationId, requestDto);
+					break;
+				default:
+					throw new CustomException(INVALID_PARTY_INVITATION);
+			}
+		} else {
+			switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
+				case CONFIRMED:
+					partyInvitationService.confirmManualPartyInvitation(
+						userDetails.getId(), partyId, partyInvitationId, requestDto);
+					break;
+				case CANCELED, REJECTED:
+					partyInvitationService.rejectManualPartyInvitation(
+						userDetails.getId(), partyId, partyInvitationId, requestDto);
+					break;
+				default:
+					throw new CustomException(INVALID_PARTY_INVITATION);
+			}
 		}
 
 		return CommonResponse.ok();
@@ -100,12 +111,12 @@ public class PartyInvitationController {
 		switch (InvitationStatus.valueOf(requestDto.getInvitationStatus())) {
 			case CONFIRMED:
 				partyInvitationService.confirmUserPartyInvitation(
-					userDetails.getId(), partyInvitationId, requestDto);
+					partyInvitationId, requestDto);
 				break;
 			case CANCELED:
 			case REJECTED:
 				partyInvitationService.rejectUserPartyInvitation(
-					userDetails.getId(), partyInvitationId, requestDto);
+					partyInvitationId, requestDto);
 				break;
 		}
 

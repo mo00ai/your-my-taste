@@ -13,7 +13,7 @@ import com.example.taste.domain.user.entity.User;
 public interface UserMatchCondRepository extends JpaRepository<UserMatchCond, Long> {
 	List<UserMatchCond> findAllByUser(User user);
 
-	MatchStatus findUserMatchCondById(Long id);
+	MatchStatus findUserMatchStatusById(Long id);
 
 	List<UserMatchCond> findAllByMatchStatus(MatchStatus matchStatus);
 }
