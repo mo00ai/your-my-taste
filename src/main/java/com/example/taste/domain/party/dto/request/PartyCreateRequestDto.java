@@ -1,6 +1,6 @@
 package com.example.taste.domain.party.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -27,7 +27,7 @@ public class PartyCreateRequestDto {
 
 	@DateRange
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-	private LocalDateTime meetingTime;
+	private LocalDate meetingDate;
 
 	@NotNull(message = "최대 인원은 필수 입력값입니다.")
 	@Range(min = 2, max = 16, message = "파티 인원은 2 ~ 16명 사이입니다.")

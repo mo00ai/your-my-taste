@@ -1,6 +1,6 @@
 package com.example.taste.domain.match.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -38,7 +38,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 
 	@OneToOne(optional = true)
 	private Store store;
-	private LocalDateTime meetingTime;
+	private LocalDate meetingDate;
 
 	@Embedded
 	private AgeRange ageRange;
@@ -65,7 +65,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	public PartyMatchCond(PartyMatchCondCreateRequestDto requestDto, Party party) {
 		this.party = party;
 		this.store = party.getStore();
-		this.meetingTime = party.getMeetingTime();
+		this.meetingDate = party.getMeetingDate();
 		this.ageRange = requestDto.getAgeRange();
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();

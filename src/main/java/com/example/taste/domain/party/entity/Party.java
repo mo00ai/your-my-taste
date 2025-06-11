@@ -1,6 +1,6 @@
 package com.example.taste.domain.party.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -62,7 +62,7 @@ public class Party extends BaseCreatedAtEntity {
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
 
-	private LocalDateTime meetingTime;
+	private LocalDate meetingDate;
 
 	@Column(nullable = false)
 	private int maxMembers;
@@ -73,14 +73,14 @@ public class Party extends BaseCreatedAtEntity {
 	@Builder
 	public Party(User hostUser, List<PartyInvitation> partyInvitationList, String title,
 		String description, PartyStatus partyStatus, Store store,
-		LocalDateTime meetingTime, int maxMembers, int nowMembers, Boolean enableRandomMatching) {
+		LocalDate meetingDate, int maxMembers, int nowMembers, Boolean enableRandomMatching) {
 		this.hostUser = hostUser;
 		this.partyInvitationList = partyInvitationList;
 		this.title = title;
 		this.description = description;
 		this.partyStatus = partyStatus;
 		this.store = store;
-		this.meetingTime = meetingTime;
+		this.meetingDate = meetingDate;
 		this.maxMembers = maxMembers;
 		this.nowMembers = nowMembers;
 		this.enableRandomMatching = enableRandomMatching != null ? enableRandomMatching : false;
@@ -92,8 +92,8 @@ public class Party extends BaseCreatedAtEntity {
 		this.title = requestDto.getTitle();
 		this.description =
 			requestDto.getDescription() != null ? requestDto.getDescription() : null;
-		this.meetingTime =
-			requestDto.getMeetingTime() != null ? requestDto.getMeetingTime() : null;
+		this.meetingDate =
+			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
 		this.enableRandomMatching =
@@ -108,8 +108,8 @@ public class Party extends BaseCreatedAtEntity {
 		this.title = requestDto.getTitle();
 		this.description =
 			requestDto.getDescription() != null ? requestDto.getDescription() : null;
-		this.meetingTime =
-			requestDto.getMeetingTime() != null ? requestDto.getMeetingTime() : null;
+		this.meetingDate =
+			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
 		this.nowMembers = 1;
@@ -126,8 +126,8 @@ public class Party extends BaseCreatedAtEntity {
 		if (requestDto.getDescription() != null) {
 			this.description = requestDto.getDescription();
 		}
-		if (requestDto.getMeetingTime() != null) {
-			this.meetingTime = requestDto.getMeetingTime();
+		if (requestDto.getMeetingDate() != null) {
+			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나?
@@ -144,8 +144,8 @@ public class Party extends BaseCreatedAtEntity {
 		if (requestDto.getDescription() != null) {
 			this.description = requestDto.getDescription();
 		}
-		if (requestDto.getMeetingTime() != null) {
-			this.meetingTime = requestDto.getMeetingTime();
+		if (requestDto.getMeetingDate() != null) {
+			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나?

@@ -11,7 +11,7 @@ public class UserMatchCondCreateRequestDto {
 	private String title;
 	private AgeRange ageRange;
 	// private String gender;
-	private String meetingTime;
+	private String meetingDate;
 	private String region;
 	private List<String> categories;
 	private List<Long> stores;

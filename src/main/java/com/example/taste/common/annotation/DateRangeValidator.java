@@ -40,5 +40,4 @@ public class DateRangeValidator implements ConstraintValidator<DateRange, LocalD
 		return (value.isAfter(minBound) || value.isEqual(minBound))
 			&& (value.isBefore(maxBound) || value.isEqual(maxBound));
 	}
-
 }

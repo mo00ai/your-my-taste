@@ -14,7 +14,7 @@ public class PartyDetailResponseDto {
 	private String partyStatus;
 	private Long storeId;
 	private String storeName;
-	private String meetingTime;
+	private String meetingDate;
 	private int maxMembers;
 	private int nowMembers;
 	private boolean enableRandomMatching;
@@ -28,8 +28,8 @@ public class PartyDetailResponseDto {
 		this.partyStatus = party.getPartyStatus().toString();
 		this.storeId = party.getStore().getId();
 		this.storeName = party.getStore().getName();
-		this.meetingTime = party.getMeetingTime().format(
-			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+		this.meetingDate = party.getMeetingDate().format(
+			DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		this.maxMembers = party.getMaxMembers();
 		this.nowMembers = party.getNowMembers();            // 파티장 포함
 		this.enableRandomMatching = party.isEnableRandomMatching();

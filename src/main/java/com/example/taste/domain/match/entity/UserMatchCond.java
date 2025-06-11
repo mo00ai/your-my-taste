@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	@Embedded
 	private AgeRange ageRange;
-	private LocalDateTime meetingTime;
+	private LocalDate meetingDate;
 	private String region;
 
 	@Enumerated(EnumType.STRING)
@@ -72,11 +73,13 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	@Builder
 	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
-		AgeRange ageRange, Gender userGender, Integer userAge, String region, MatchStatus matchStatus) {
+		AgeRange ageRange, LocalDate meetingDate, Gender userGender, Integer userAge, String region,
+		MatchStatus matchStatus) {
 		this.user = user;
 		this.stores = stores;
 		this.categories = categories;
 		this.ageRange = ageRange;
+		this.meetingDate = meetingDate;
 		this.region = region;
 		this.userGender = userGender;
 		this.userAge = userAge;
@@ -95,7 +98,6 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 
 	public void update(UserMatchCondUpdateRequestDto requestDto) {
 		this.ageRange = requestDto.getAgeRange();
-		this.userGender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
 	}
 

@@ -24,8 +24,8 @@ public class PartyDetailUpdateRequestDto {
 	private String description;
 
 	@DateRange
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-	private LocalDateTime meetingTime;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+	private LocalDateTime meetingDate;
 
 	@Range(min = 2, max = 16, message = "파티 인원은 2 ~ 16명 사이입니다.")
 	private Integer maxMembers;

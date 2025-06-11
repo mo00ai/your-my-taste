@@ -13,7 +13,7 @@ public class PartyResponseDto {
 	private PartyStatus partyStatus;
 	private Long storeId;
 	private String storeName;
-	private String meetingTime;
+	private String meetingDate;
 	private int maxMembers;
 	private int nowMembers;
 	private boolean enableRandomMatching;
@@ -23,8 +23,8 @@ public class PartyResponseDto {
 		this.partyStatus = party.getPartyStatus();
 		this.storeId = party.getStore() != null ? party.getStore().getId() : null;
 		this.storeName = party.getStore() != null ? party.getStore().getName() : null;
-		this.meetingTime = party.getMeetingTime() != null ?
-			party.getMeetingTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null;
+		this.meetingDate = party.getMeetingDate() != null ?
+			party.getMeetingDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
 		this.maxMembers = party.getMaxMembers();
 		this.nowMembers = party.getNowMembers();
 		this.enableRandomMatching = party.isEnableRandomMatching();
