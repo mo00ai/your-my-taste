@@ -50,5 +50,5 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		""", nativeQuery = true)
 	void closeExpiredTimeAttackPosts();
 
-	Page<Board> findByTypeEqualsAndStatusIsFalse(BoardType type, BoardStatus status, Pageable pageable);
+	Page<Board> findByTypeEqualsAndStatusEquals(BoardType type, BoardStatus status, Pageable pageable);
 }

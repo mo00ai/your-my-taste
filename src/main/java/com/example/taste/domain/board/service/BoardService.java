@@ -193,7 +193,7 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusIsFalse(BoardType.O, BoardStatus.CLOSED,
+		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusEquals(BoardType.O, BoardStatus.CLOSED,
 			pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
