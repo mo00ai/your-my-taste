@@ -31,6 +31,7 @@ import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
@@ -61,7 +62,8 @@ public class BoardController {
 	public CommonResponse<BoardResponseDto> findBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long boardId) {
-		BoardResponseDto responseDto = boardService.findBoard(boardId);
+		Long userId = userDetails.getId();
+		BoardResponseDto responseDto = boardService.findBoard(boardId, userId);
 		return CommonResponse.ok(responseDto);
 	}
 
@@ -91,6 +93,12 @@ public class BoardController {
 			pageable);
 		// TODO 반환
 		return CommonResponse.ok(responseDtoList);
+	}
+
+	@GetMapping("/openrun")
+	public CommonResponse<PageResponse<OpenRunBoardResponseDto>> findOpenRunBoardList(
+		@PageableDefault(sort = "openTime", direction = Sort.Direction.ASC) Pageable pageable) {
+		return CommonResponse.ok(boardService.findOpenRunBoardList(pageable));
 	}
 
 	@PatchMapping("/{boardId}")
