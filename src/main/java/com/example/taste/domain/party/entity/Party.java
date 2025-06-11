@@ -115,7 +115,7 @@ public class Party extends BaseCreatedAtEntity {
 		this.nowMembers = 1;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
-		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면)
+		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면) - @윤예진
 	}
 
 	public void update(PartyDetailUpdateRequestDto requestDto, Store store) {
@@ -130,7 +130,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나?
+			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
@@ -148,7 +148,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나?
+			this.maxMembers = requestDto.getMaxMembers();    //TODO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나 - @윤예진
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();

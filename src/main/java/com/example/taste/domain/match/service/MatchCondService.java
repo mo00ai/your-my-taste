@@ -63,7 +63,7 @@ public class MatchCondService {
 	@Transactional
 	public void updateUserMatchCond(
 		Long matchConditionId, UserMatchCondUpdateRequestDto requestDto) {
-		UserMatchCond matchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);       // TODO: entity fetcher
+		UserMatchCond matchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
 
 		// 매칭 중이면 업데이트 불가
 		if (!matchCond.getMatchStatus().equals(MatchStatus.IDLE)) {

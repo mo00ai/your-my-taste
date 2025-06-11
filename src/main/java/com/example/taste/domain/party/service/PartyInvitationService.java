@@ -122,7 +122,7 @@ public class PartyInvitationService {
 	}
 
 	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
-		// TODO: 파티가 모집 중이고(조건 추가), 대기 중인 초대만 가져오기
+		// TODO: 파티가 모집 중이고(조건 추가), 대기 중인 초대만 가져오기 - @윤예진
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findByUserIdAndInvitationStatus(userId, InvitationStatus.WAITING);
 		return partyInvitationList.stream()
@@ -141,7 +141,7 @@ public class PartyInvitationService {
 			.map(PartyInvitationResponseDto::new).toList();
 	}
 
-	// 호스트가 파티 초대 수락	// TODO: 일부만 트랜잭션 걸도록 수정
+	// 호스트가 파티 초대 수락	// TODO: 일부만 트랜잭션 걸도록 수정 - @윤예진
 	@Transactional
 	public void confirmPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
 		InvitationActionRequestDto requestDto) {

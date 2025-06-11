@@ -7,14 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.vo.AgeRange;
 
-@Getter    // TODO: JSON NULLABLE
+@Getter    // TODO: JSON NULLABLE - @윤예진
 public class UserMatchCondResponseDto {
 	private Long id;
 	private List<UserMatchCondStoreResponseDto> stores;
 	private List<UserMatchCondCategoryResponseDto> categories;
-	private int ageMinRange;
-	private int ageMaxRange;
+	private AgeRange ageRange;
 	private String gender;
 	private String region;
 	private String matchStatus;
@@ -27,8 +27,7 @@ public class UserMatchCondResponseDto {
 			.map(UserMatchCondStoreResponseDto::new).toList();
 		this.categories = userMatchCond.getCategories().stream()
 			.map(UserMatchCondCategoryResponseDto::new).toList();
-		this.ageMinRange = userMatchCond.getAgeMinRange();
-		this.ageMaxRange = userMatchCond.getAgeMaxRange();
+		this.ageRange = userMatchCond.getAgeRange();
 		this.gender = userMatchCond.getUserGender().toString();
 		this.region = userMatchCond.getRegion();
 		this.matchStatus = userMatchCond.getMatchStatus().toString();
