@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKER_IMAGE}
+    container_name: taste-app
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DEV_REDIS_HOST: ${DEV_REDIS_HOST}
+      DEV_REDIS_PORT: ${DEV_REDIS_PORT}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_REGION: ${S3_REGION}
+      OCR_KEY: ${OCR_KEY}
+      NAVER_MAP_CLIENT_ID: ${NAVER_MAP_CLIENT_ID}
+      NAVER_MAP_CLIENT_SECRET: ${NAVER_MAP_CLIENT_SECRET}
+      NAVER_DATALAB_CLIENT_ID: ${NAVER_DATALAB_CLIENT_ID}
+      NAVER_DATALAB_CLIENT_SECRET: ${NAVER_DATALAB_CLIENT_SECRET}
+
+  db:
+    image: mysql:8.0
+    container_name: taste-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7.0
+    container_name: taste-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mysql_data:
+  redis_data:

@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public enum BoardStatus {
 	// OPEN, CLOSED,  FCFS, TIMEATTACK
-	OPEN,        // 오픈
-	CLOSED,        // 클로즈
-	FCFS,        // 선착순 N명
-	TIMEATTACK,    // 제한시간
+	OPEN,        // 전체공개
+	CLOSED,        // 비공개
+	FCFS,        // 선착순 N명에게 공개예정
+	TIMEATTACK,    // 특정 기간동안 공개예정
 	;
 
 	public static BoardStatus from(String input) {
