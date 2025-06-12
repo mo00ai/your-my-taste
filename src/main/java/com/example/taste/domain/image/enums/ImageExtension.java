@@ -1,9 +1,10 @@
 package com.example.taste.domain.image.enums;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import lombok.Getter;
+
+@Getter
 public enum ImageExtension {
 	JPG("jpg", "image/jpeg"),
 	JPEG("jpeg", "image/jpeg"),
@@ -17,27 +18,12 @@ public enum ImageExtension {
 		this.mimeType = mimeType;
 	}
 
-	public String getExtension() {
-		return extension;
+	public static boolean isValidExtension(String extension) {
+		return Arrays.stream(values()).anyMatch(image -> image.extension.equalsIgnoreCase(extension));
 	}
 
-	public String getMimeType() {
-		return mimeType;
+	public static boolean isValidMimeType(String mimeType) {
+		return Arrays.stream(values()).anyMatch(image -> image.mimeType.equalsIgnoreCase(mimeType));
 	}
 
-	public static boolean isValidExtension(String ext) {
-		return Arrays.stream(values()).anyMatch(t -> t.extension.equalsIgnoreCase(ext));
-	}
-
-	public static boolean isValidMimeType(String mime) {
-		return Arrays.stream(values()).anyMatch(t -> t.mimeType.equalsIgnoreCase(mime));
-	}
-
-	public static List<String> getAllExtensions() {
-		return Arrays.stream(values()).map(ImageExtension::getExtension).collect(Collectors.toList());
-	}
-
-	public static List<String> getAllMimeTypes() {
-		return Arrays.stream(values()).map(ImageExtension::getMimeType).collect(Collectors.toList());
-	}
 }
