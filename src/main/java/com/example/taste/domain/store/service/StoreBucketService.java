@@ -1,22 +1,18 @@
 package com.example.taste.domain.store.service;
 
-import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_ACCESS_DENIED;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NAME_OVERFLOW;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
+import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.transaction.Transactional;
-
-import lombok.RequiredArgsConstructor;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
@@ -28,17 +24,16 @@ import com.example.taste.domain.store.entity.StoreBucket;
 import com.example.taste.domain.store.entity.StoreBucketItem;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
-import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class StoreBucketService {
 	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
-	private final UserRepository userRepository;
-	private final StoreRepository storeRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
@@ -60,16 +55,15 @@ public class StoreBucketService {
 		Store store = entityFetcher.getStoreOrThrow(request.getStoreId());
 
 		for (Long bucketId : request.getBucketIds()) {
-			StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
-				.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+			StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
 
 			// 로그인 유저의 버킷인지 확인
-			if (!Objects.equals(storeBucket.getUser().getId(), userId)) {
+			if (!storeBucket.getUser().isSameUser(userId)) {
 				throw new CustomException(BUCKET_ACCESS_DENIED);
 			}
 
 			// 이미 버킷에 가게가 저장되어 있는지 확인
-			if (storeBucketItemRepository.findByStoreAndStoreBucket(store, storeBucket).isPresent()) {
+			if (storeBucketItemRepository.existsByStoreBucketAndStore(storeBucket, store)) {
 				continue;
 			}
 
@@ -81,37 +75,37 @@ public class StoreBucketService {
 		}
 	}
 
-	public List<StoreBucketResponse> getBucketsByUserId(Long targetUserId) {
-		User targetUser = entityFetcher.getUserOrThrow(targetUserId);
+	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
+		User targetUser = entityFetcher.getUndeletedUserOrThrow(targetUserId); // 삭제되지 않은 유저만 조회
 
 		// 공개된 버킷만 반환
-		return storeBucketRepository.findAllByUserAndIsOpened(targetUser, true).stream()
-			.map(StoreBucketResponse::from)
-			.toList();
+		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable)
+			.map(StoreBucketResponse::from);
+
+		return PageResponse.from(dtos);
 	}
 
-	public List<BucketItemResponse> getBucketItems(Long bucketId, Long userId) {
-		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
-			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+	public PageResponse<BucketItemResponse> getBucketItems(Long bucketId, Long userId, Pageable pageable) {
+		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
 
 		// 타유저의 버킷 && 비공개 버킷이면 접근 불가
-		if (!Objects.equals(storeBucket.getUser().getId(), userId) && !storeBucket.isOpened()) {
+		if (!storeBucket.getUser().isSameUser(userId) && !storeBucket.isOpened()) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		return storeBucketItemRepository.findAllByStoreBucket(storeBucket).stream()
-			.map(BucketItemResponse::from)
-			.toList();
+		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable)
+			.map(BucketItemResponse::from);
+
+		return PageResponse.from(dtos);
 	}
 
 	@Transactional
 	public StoreBucketResponse updateBucketName(Long bucketId, String name, Long userId) {
 		User user = entityFetcher.getUserOrThrow(userId);
-		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
-			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
@@ -124,24 +118,23 @@ public class StoreBucketService {
 
 	@Transactional
 	public void deleteBucket(Long bucketId, Long userId) {
-		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
-			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
+		storeBucketItemRepository.deleteAllByStoreBucket(storeBucket);
 		storeBucketRepository.delete(storeBucket);
 	}
 
 	@Transactional
 	public void removeBucketItem(Long bucketId, RemoveBucketItemRequest request, Long userId) {
-		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
-			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
@@ -154,7 +147,7 @@ public class StoreBucketService {
 
 		// bucketItem이 전달받은 bucketId 하위에 존재하는지 확인
 		boolean hasInvalidItem = items.stream()
-			.anyMatch(item -> !Objects.equals(item.getStoreBucket().getId(), bucketId));
+			.anyMatch(item -> !item.getStoreBucket().isSameBucket(bucketId));
 
 		if (hasInvalidItem) {
 			throw new CustomException(INVALID_INPUT_VALUE);
@@ -164,11 +157,15 @@ public class StoreBucketService {
 	}
 
 	public String makeUnduplicateName(String newName, User user) {
-		// "newName" 으로 시작하는 버킷 모두 조회
-		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, newName);
+		// 괄호 숫자 패턴이 붙어 있는 경우, baseName 추출 -> newName이 "맛집(1)"이면 "맛집"만 추출해서 비교
+		String baseName = newName.replaceFirst("\\((\\d+)\\)$", "");
 
-		// newName이 특수문자를 포함하는 경우를 대비해서 quote로 감싸서 패턴 생성
-		Pattern pattern = Pattern.compile("^" + Pattern.quote(newName) + "\\((\\d+)\\)$");
+		// baseName 으로 시작하는 버킷 모두 조회
+		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, baseName);
+
+		// "baseName(숫자)" 형태의 정규식 생성
+		// baseName 정규식에 사용되는 특수문자를 포함하는 경우를 대비해서 quote 사용
+		Pattern pattern = Pattern.compile("^" + Pattern.quote(baseName) + "\\((\\d+)\\)$");
 		boolean isEquals = false;
 		int suffix = 0;
 
@@ -179,14 +176,11 @@ public class StoreBucketService {
 				isEquals = true;
 			}
 
-			// "버킷(숫자)" 형식이면 숫자 추출
+			// name이 baseName(숫자) 형태와 일치하면 true
 			Matcher matcher = pattern.matcher(name);
 			if (matcher.matches()) {
-				try {
-					suffix = Math.max(suffix, Integer.parseInt(matcher.group(1)));
-				} catch (NumberFormatException e) {
-					throw new CustomException(BUCKET_NAME_OVERFLOW);
-				}
+				// group(1)은 pattern 에서 (\\d+)에 해당하는 숫자 부분만 추출
+				suffix = Math.max(suffix, Integer.parseInt(matcher.group(1)));
 			}
 		}
 
@@ -195,7 +189,12 @@ public class StoreBucketService {
 			return newName;
 		}
 
+		// suffix가 Integer의 최대값이면 baseName(-2147483648)가 반환됨
+		if (suffix == Integer.MAX_VALUE) {
+			throw new CustomException(BUCKET_NAME_OVERFLOW);
+		}
+
 		// 이름 중복 시, 뒤에 suffix 붙인 값 반환
-		return newName + "(" + (suffix + 1) + ")";
+		return baseName + "(" + (suffix + 1) + ")";
 	}
 }
