@@ -3,9 +3,7 @@ package com.example.taste.domain.review.service;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +22,7 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.review.dto.OcrRequestDto;
 import com.example.taste.domain.review.dto.OcrResponseDto;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.store.entity.Store;
@@ -66,19 +65,18 @@ public class OCRService {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-OCR-SECRET", secretKey);
 
-		//TODO json을 굳이 map을 써서 맵핑할 필요 없음
-		Map<String, Object> requestMap = new HashMap<>();
-		requestMap.put("version", "V2");
-		requestMap.put("requestId", UUID.randomUUID().toString());
-		requestMap.put("timestamp", System.currentTimeMillis());
+		OcrRequestDto ocrRequestDto = OcrRequestDto.builder()
+			.version("V2")
+			.requestId(UUID.randomUUID().toString())
+			.timestamp(System.currentTimeMillis())
+			.images(List.of(OcrRequestDto.Images.builder()
+				.format("png")
+				.data(base64Image)
+				.name("receipt_data")
+				.build()))
+			.build();
 
-		Map<String, Object> imageMap = new HashMap<>();
-		imageMap.put("format", "png");
-		imageMap.put("data", base64Image);
-		imageMap.put("name", "receipt_data");
-
-		requestMap.put("images", List.of(imageMap));
-		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
+		HttpEntity<OcrRequestDto> entity = new HttpEntity<>(ocrRequestDto, headers);
 		ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
 
 		// 성공 응답 아니면 예외
