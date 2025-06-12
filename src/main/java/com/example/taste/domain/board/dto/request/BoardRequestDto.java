@@ -2,11 +2,13 @@ package com.example.taste.domain.board.dto.request;
 
 import java.util.List;
 
+import com.example.taste.common.annotation.ValidEnum;
+import com.example.taste.domain.board.entity.BoardStatus;
+import com.example.taste.domain.board.entity.BoardType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -30,9 +32,9 @@ public abstract class BoardRequestDto {
 	@Size(max = 1000, message = "내용은 1000자 이내여야 합니다.")
 	private String contents;
 
-	@Pattern(regexp = "^[NO]$", message = "게시글 타입은 'N' 또는 'O'만 허용됩니다.")
+	@ValidEnum(target = BoardType.class)
 	private String type;
-
+	@ValidEnum(target = BoardStatus.class)
 	private String status;
 
 	private Long storeId;
