@@ -199,19 +199,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			builder.and(board.user.nickname.containsIgnoreCase(condition.getAuthorName()));
 		}
 		// 기간 검색 필터
-		if (condition.getCreatedFrom() != null && condition.getCreatedTo() != null) {
+		if (condition.getDateRange().getCreatedFrom() != null && condition.getDateRange().getCreatedTo() != null) {
 			builder.and(board.createdAt.between(
-				condition.getCreatedFrom().atStartOfDay(),
-				condition.getCreatedTo().atTime(23, 59, 59)
+				condition.getDateRange().getCreatedFrom().atStartOfDay(),
+				condition.getDateRange().getCreatedTo().atTime(23, 59, 59)
 			));
 		} else {
 			// 생성일 이후
-			if (condition.getCreatedFrom() != null) {    // goe(): A >= ?
-				builder.and(board.createdAt.goe(condition.getCreatedFrom().atStartOfDay()));
+			if (condition.getDateRange().getCreatedFrom() != null) {    // goe(): A >= ?
+				builder.and(board.createdAt.goe(condition.getDateRange().getCreatedFrom().atStartOfDay()));
 			}
 			// 생성일 이전
-			if (condition.getCreatedTo() != null) {    // loe(): A <= ?
-				builder.and(board.createdAt.loe(condition.getCreatedTo().atTime(23, 59, 59)));
+			if (condition.getDateRange().getCreatedTo() != null) {    // loe(): A <= ?
+				builder.and(board.createdAt.loe(condition.getDateRange().getCreatedTo().atTime(23, 59, 59)));
 			}
 
 		}

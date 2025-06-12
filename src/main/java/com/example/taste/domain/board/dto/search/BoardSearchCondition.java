@@ -1,14 +1,11 @@
 package com.example.taste.domain.board.dto.search;
 
-import java.time.LocalDate;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.validation.Valid;
 import lombok.Data;
 
 @Data
@@ -28,9 +25,7 @@ public class BoardSearchCondition {
 	@ValidEnum(target = BoardStatus.class)
 	private String status;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
 	// 날짜 범위
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate createdFrom;
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate createdTo;
+	@Valid
+	private CreatedDateRange dateRange;
 
 }

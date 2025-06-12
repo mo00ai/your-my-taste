@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.config.security.CustomUserDetails;
@@ -142,6 +144,10 @@ public class BoardController {
 		@ModelAttribute @Valid BoardSearchCondition conditionDto,
 		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
+		int MAX_SIZE = 50;
+		if (pageable.getPageSize() > MAX_SIZE) {
+			throw new CustomException(ErrorCode.INVALID_PAGE_SIZE);
+		}
 		PageResponse<BoardListResponseDto> result = boardService.searchBoards(conditionDto,
 			pageable);
 		return CommonResponse.ok(result);
