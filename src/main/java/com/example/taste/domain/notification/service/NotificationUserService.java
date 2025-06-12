@@ -119,7 +119,6 @@ public class NotificationUserService {
 		Pageable pageable = PageRequest.of(index, 10, Sort.by("createdAt"));
 		Slice<NotificationInfo> notificationInfos = notificationInfoRepository.getMoreNotificationInfoWithContents(
 			userId, redisContents, pageable);
-		notificationInfoRepository.saveAll(notificationInfos.getContent());
 
 		return notificationInfos.map(NotificationResponseDto::new);
 	}
