@@ -1,6 +1,7 @@
 package com.example.taste.domain.image.service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,10 +40,10 @@ public class S3Service {
 
 		s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
-		String url = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + uploadFilename;
+		URL s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucketName).key(uploadFilename));
 
 		return Map.of(
-			"url", url,
+			"url", s3Url.toString(),
 			"uploadFileName", uploadFilename,
 			"originalFileName", originalFilename
 		);

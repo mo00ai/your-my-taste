@@ -20,6 +20,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
@@ -83,6 +84,10 @@ public class RedisConfig {
 
 		redisObjectMapper.activateDefaultTyping(typeValidator, ObjectMapper.DefaultTyping.NON_FINAL_AND_ENUMS);
 
+		// enum 타입 역직렬화
+		redisObjectMapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
+		redisObjectMapper.configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true);
+
 		return redisObjectMapper;
 	}
 
@@ -106,5 +111,11 @@ public class RedisConfig {
 				System.out.println("[INFO] Redis notify-keyspace-events set to: " + config + "Ex");
 			}
 		};
+	}
+
+	// 역직렬화용으로 사용
+	@Bean
+	public GenericJackson2JsonRedisSerializer redisSerializer() {
+		return new GenericJackson2JsonRedisSerializer(createRedisObjectMapper());
 	}
 }

@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	List<User> findByPointGreaterThan(int i);
 
+	// notification 용 전체 유저 id 검색 메서드
+	@Query("select u.id from User u where u.deletedAt is null")
+	List<Long> findAllUserId();
+
 	@Modifying(clearAutomatically = true)
 	@Query("UPDATE User u SET u.postingCount = 0")
 	void resetPostingCnt();

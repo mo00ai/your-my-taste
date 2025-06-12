@@ -5,11 +5,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.redis.RedisChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +94,31 @@ public class RedisService {
 		}
 	}
 
+	//Notification publish
+	public void publishNotification(NotificationEventDto event) {
+		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, event);
+	}
+
+	//Notification store
+	public void storeNotification(Long userId, Long contentId, NotificationEventDto eventDto,
+		Duration duration) {
+		eventDto.setContentId(contentId);
+		String key = "notification:user:" + userId + ":id:" + contentId + ":" + eventDto.getCategory().name();
+		redisTemplate.opsForValue().set(key, eventDto, duration);
+		// 모든 카테고리에 대해 count 증가
+		String countKey = "notification:count:user:" + userId + ":" + eventDto.getCategory().name();
+		redisTemplate.opsForValue().increment(countKey);
+	}
+
+	public void updateNotification(NotificationEventDto eventDto, String key) {
+		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
+		redisTemplate.opsForValue().set(key, eventDto, duration);
+	}
+
+	public void decreaseCount(String key, Long amount) {
+		redisTemplate.opsForValue().decrement(key, amount);
+	}
+
 	/**
 	 * 사용자가 필요한 get 메서드가 더 있다면 직접 만들어서 사용하세요(형변환 등)
 	 */
@@ -124,6 +152,15 @@ public class RedisService {
 
 	public Set<Object> getZSetRangeByScore(String key, Long min, Long max) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
+	}
+
+	//TODO scan 방식 고려
+	public Set<String> getKeys(String pattern) {
+		Set<String> keys = redisTemplate.keys(pattern);
+		if (keys != null && !keys.isEmpty()) {
+			return keys;
+		}
+		return Collections.emptySet();
 	}
 
 	public <T> List<T> getOpsForList(String key, Class<T> clazz) {

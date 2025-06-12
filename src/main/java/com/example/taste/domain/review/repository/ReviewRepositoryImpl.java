@@ -11,7 +11,6 @@ import com.example.taste.domain.image.entity.QImage;
 import com.example.taste.domain.review.entity.QReview;
 import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.store.entity.QStore;
-import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -35,13 +34,13 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<Review> getAllReview(Store store, Pageable pageable, int score) {
+	public Page<Review> getAllReview(Long storeId, Pageable pageable, int score) {
 		QImage qImage = QImage.image;
 		QReview qReview = QReview.review;
 
 		long total = queryFactory.selectFrom(qReview)
 			.where(
-				qReview.store.eq(store),
+				qReview.store.id.eq(storeId),
 				qReview.isPresented.isTrue(),
 				score == 0 ? null : qReview.score.eq(score)
 			)
@@ -50,7 +49,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 		List<Review> reviews = queryFactory.selectFrom(qReview)
 			.leftJoin(qReview.image, qImage).fetchJoin()
 			.where(
-				qReview.store.eq(store),
+				qReview.store.id.eq(storeId),
 				qReview.isPresented.isTrue(),
 				score == 0 ? null : qReview.score.eq(score)
 			)
