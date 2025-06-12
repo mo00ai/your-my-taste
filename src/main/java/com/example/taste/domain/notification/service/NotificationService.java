@@ -54,6 +54,7 @@ public class NotificationService {
 		infoRepository.saveAll(notificationInfos);
 	}
 
+	/*
 	// 단체알림 reference by id (다른 방식으로 구현)
 	@Transactional
 	public void sendBunchUsingReference(NotificationContent content, NotificationEventDto event, List<Long> allUserId) {
@@ -68,4 +69,5 @@ public class NotificationService {
 		}
 		infoRepository.saveAll(notificationInfos);
 	}
+	 */
 }
