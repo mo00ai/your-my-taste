@@ -25,7 +25,6 @@ import com.example.taste.domain.store.entity.StoreBucketItem;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,6 @@ public class StoreBucketService {
 	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
-	private final UserRepository userRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
 		User user = entityFetcher.getUserOrThrow(userId);

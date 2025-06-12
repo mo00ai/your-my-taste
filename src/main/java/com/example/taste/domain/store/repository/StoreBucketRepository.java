@@ -12,5 +12,5 @@ import com.example.taste.domain.user.entity.User;
 public interface StoreBucketRepository extends JpaRepository<StoreBucket, Long> {
 	List<StoreBucket> findByUserAndNameStartingWith(User user, String name);
 
-	Page<StoreBucket> findAllByUserAndIsOpened(User targetUser, boolean b, Pageable pageable);
+	Page<StoreBucket> findAllByUserAndIsOpened(User targetUser, boolean isOpened, Pageable pageable);
 }

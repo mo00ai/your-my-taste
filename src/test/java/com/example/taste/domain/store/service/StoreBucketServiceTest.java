@@ -77,7 +77,7 @@ class StoreBucketServiceTest {
 		Image image2 = ImageFixture.create();
 
 		User user1 = userRepository.save(UserFixture.create(image1));
-		User user2 = userRepository.save(UserFixture.createAnother(image2));
+		User user2 = userRepository.save(UserFixture.create(image2));
 
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
@@ -147,7 +147,7 @@ class StoreBucketServiceTest {
 		Image image1 = ImageFixture.create();
 		Image image2 = ImageFixture.create();
 		User user1 = userRepository.save(UserFixture.create(image1));
-		User user2 = userRepository.save(UserFixture.createAnother(image2));
+		User user2 = userRepository.save(UserFixture.create(image2));
 
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
@@ -196,7 +196,7 @@ class StoreBucketServiceTest {
 		Image image1 = ImageFixture.create();
 		Image image2 = ImageFixture.create();
 		User user1 = userRepository.save(UserFixture.create(image1));
-		User user2 = userRepository.save(UserFixture.createAnother(image2));
+		User user2 = userRepository.save(UserFixture.create(image2));
 
 		StoreBucket storeBucket1 = storeBucketRepository.save(StoreBucketFixture.createOpenedBucket(user1));
 		StoreBucket storeBucket2 = storeBucketRepository.save(StoreBucketFixture.createOpenedBucket(user2));

@@ -1,16 +1,19 @@
 package com.example.taste.domain.store.service;
 
-import java.util.List;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.StoreRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +36,9 @@ public class StoreService {
 
 	@Transactional
 	public void deleteStore(Long id) {
-		if (storeRepository.existsById(id)) {
-			storeRepository.deleteById(id);
+		int deletedCnt = storeRepository.deleteByIdReturningCount(id);
+		if (deletedCnt == 0) {
+			throw new CustomException(STORE_NOT_FOUND);
 		}
 	}
 

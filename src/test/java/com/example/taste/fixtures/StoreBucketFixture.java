@@ -24,7 +24,7 @@ public class StoreBucketFixture {
 		return StoreBucket.builder()
 			.user(user)
 			.name(name)
-			.isOpened(false)
+			.isOpened(true)
 			.build();
 	}
 }
