@@ -67,6 +67,7 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	// 시스템 알림. 모든 유저에게 전송.
+	@SuppressWarnings("checkstyle:RegexpMultiline")
 	private void sendSystem(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		// 페이징 방식
@@ -90,6 +91,12 @@ public class NotificationSubscriber implements MessageListener {
 		notificationService.sendBunchUsingReference(event, userIds);
 		endLogging = System.currentTimeMillis();
 		log.info("reference by id 타임 체크", (endLogging - startLogging));
+		 */
+
+		/**
+		 * * @deprecated ID만 필요할 때는 JPA 프록시 참조를 얻기 위해
+		 *   entityManager.getReference(User.class, id) 또는
+		 *   userRepository.getReferenceById(id) 사용을 권장합니다.
 		 */
 
 		// TODO 두 방식 걸리는 시간 비교할 것.

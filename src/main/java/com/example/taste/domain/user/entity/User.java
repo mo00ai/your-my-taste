@@ -176,9 +176,4 @@ public class User extends SoftDeletableEntity {
 			userFavor.remove();
 		}
 	}
-
-	//Notification용 생성자
-	public User(Long id) {
-		this.id = id;
-	}
 }
