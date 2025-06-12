@@ -2,6 +2,7 @@ package com.example.taste.config;
 
 import static com.example.taste.common.constant.ImageConst.*;
 import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.domain.image.exception.ImageErrorCode.*;
 
 import java.io.IOException;
 import java.util.List;
