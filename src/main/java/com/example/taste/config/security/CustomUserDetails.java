@@ -37,7 +37,6 @@ public class CustomUserDetails implements UserDetails {
 		return user.getId();
 	}
 
-	// TODO: 값 확인
 	@Override
 	public boolean isAccountNonExpired() {
 		return true;

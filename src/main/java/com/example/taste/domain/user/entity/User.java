@@ -17,6 +17,17 @@ import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
 
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -77,6 +77,20 @@ public class RedisService {
 		}
 	}
 
+	public void addToZSet(String key, Object value, Long score) {
+		redisTemplate.opsForZSet().add(key, value, score);
+	}
+
+	public void removeFromZSet(String key, Object value) {
+		redisTemplate.opsForZSet().remove(key, value);
+	}
+
+	public void deleteZSetKey(String key) {
+		if (redisTemplate.hasKey(key)) {
+			redisTemplate.delete(key);
+		}
+	}
+
 	/**
 	 * 사용자가 필요한 get 메서드가 더 있다면 직접 만들어서 사용하세요(형변환 등)
 	 */
@@ -112,4 +126,38 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public <T> List<T> getOpsForList(String key, Class<T> clazz) {
+		List<Object> objectList = redisTemplate.opsForList().range(key, 0, -1);
+
+		if (objectList == null) {
+			return List.of();
+		}
+
+		return objectList.stream()
+			.map(item -> {
+				try {
+					return objectMapper.convertValue(item, clazz);
+				} catch (Exception e) {
+					log.warn("레디스 내 Ojbect -> PkLogCacheDto로 변환 실패");
+					return null;
+					//CustomException을 날리진 않음
+					//convert 실패 처리 하나 때문에 모든 스케줄러 로직이 멈출 순 없으니까
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
+	public long getZSetSize(String key) {
+		Long size = redisTemplate.opsForZSet().size(key);
+		return size == null ? 0 : size;
+	}
+
+	public Long getRank(String key, Object value) {
+		return redisTemplate.opsForZSet().rank(key, value);
+	}
+
+	public boolean hasRankInZSet(String key, Object value) {
+		return redisTemplate.opsForZSet().score(key, value) != null;
+	}
 }

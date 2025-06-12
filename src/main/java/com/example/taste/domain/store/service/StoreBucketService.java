@@ -2,7 +2,6 @@ package com.example.taste.domain.store.service;
 
 import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
 import com.example.taste.domain.store.dto.request.RemoveBucketItemRequest;
@@ -34,14 +34,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class StoreBucketService {
-
+	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		// 버킷명 중복 확인
 		String name = makeUnduplicateName(request.getName(), user);
@@ -56,8 +56,7 @@ public class StoreBucketService {
 
 	@Transactional
 	public void addBucketItem(AddBucketItemRequest request, Long userId) {
-		Store store = storeRepository.findById(request.getStoreId())
-			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		Store store = entityFetcher.getStoreOrThrow(request.getStoreId());
 
 		for (Long bucketId : request.getBucketIds()) {
 			StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
@@ -82,8 +81,7 @@ public class StoreBucketService {
 	}
 
 	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
-		User targetUser = userRepository.findById(targetUserId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND)); // TODO 삭제되지 않은 유저 조회 @김채진
+		User targetUser = entityFetcher.getUserOrThrow(targetUserId); // TODO 삭제되지 않은 유저 조회 @김채진
 
 		// 공개된 버킷만 반환
 		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable)
@@ -109,7 +107,7 @@ public class StoreBucketService {
 
 	@Transactional
 	public StoreBucketResponse updateBucketName(Long bucketId, String name, Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		User user = entityFetcher.getUserOrThrow(userId);
 		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
@@ -135,7 +133,6 @@ public class StoreBucketService {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		storeBucketItemRepository.deleteAllByStoreBucket(storeBucket);
 		storeBucketRepository.delete(storeBucket);
 	}
 

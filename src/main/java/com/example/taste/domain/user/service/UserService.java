@@ -1,19 +1,34 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.image.enums.ImageType;
+import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.pk.entity.PkLog;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
@@ -25,18 +40,22 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
+import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+	private final EntityFetcher entityFetcher;
+	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final UserJdbcRepository userJdbcRepository;
+	private final PkLogJdbcRepository pkLogJdbcRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -54,19 +73,39 @@ public class UserService {
 
 	// 유저 정보 업데이트
 	@Transactional
-	public void updateUser(Long userId, UserUpdateRequestDto requestDto) {
-		User user = userRepository.findById(userId).orElseThrow();
+	public void updateUser(Long userId, UserUpdateRequestDto requestDto, MultipartFile file) {
+		User user = entityFetcher.getUserOrThrow(userId);
 		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
 		requestDto.setNewPassword(passwordEncoder.encode(requestDto.getNewPassword()));
 		user.update(requestDto);
+
+		// 프로필 이미지 저장
+		if (file != null) {
+			Image oldImage = user.getImage();
+
+			if (oldImage != null) {
+				try {
+					imageService.update(oldImage.getId(), ImageType.USER, file);
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+					log.info("유저 이미지 업데이트에 실패하였습니다 (email: " + user.getEmail() + ")");
+				}
+			} else {
+				try {
+					Image image = imageService.saveImage(file, ImageType.USER);
+					user.setImage(image);
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+					log.info("유저 이미지 저장에 실패하였습니다 (email: " + user.getEmail() + ")");
+				}
+			}
+		}
 	}
 
 	// 유저 탈퇴
 	@Transactional
 	public void deleteUser(Long userId, UserDeleteRequestDto requestDto) {
-		User user = userRepository.findById(userId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
@@ -75,7 +114,7 @@ public class UserService {
 
 	@Transactional
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
-		User user = userRepository.findById(userId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
 
 		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
@@ -135,16 +174,16 @@ public class UserService {
 
 	@Transactional
 	public void followUser(Long userId, Long followingUserId) {
-		User user = userRepository.findById(userId).orElseThrow();
-		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		User user = entityFetcher.getUserOrThrow(userId);
+		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
 		user.follow(user, followingUser);
 		followingUser.followed();
 	}
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
-		User follower = userRepository.findById(followerUserId).orElseThrow();
-		User followingUser = userRepository.findById(followingUserId).orElseThrow();
+		User follower = entityFetcher.getUserOrThrow(followerUserId);
+		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
 		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId);
 
 		follower.unfollow(follow);
@@ -168,9 +207,29 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public User findById(long userId) {
-		// TODO 삭제된 유저도 고려필요할거 같은데 추후
-		return userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+	public List<User> findPkRankingUsers() {
+		return userRepository.findAllByOrderByPointDesc(PageRequest.of(0, 100));
+	}
+
+	@Transactional
+	public void resetUsersPoint() {
+
+		List<User> usersWithPoints = userRepository.findByPointGreaterThan(0);
+
+		if (!usersWithPoints.isEmpty()) {
+
+			List<PkLog> resetLogs = usersWithPoints.stream()
+				.map(user -> PkLog.builder()
+					.pkType(PkType.RESET)
+					.point(0)
+					.user(user)
+					.createdAt(LocalDateTime.now())
+					.build())
+				.toList();
+
+			pkLogJdbcRepository.batchInsert(resetLogs);
+		}
+
+		userJdbcRepository.resetAllUserPoints();
 	}
 }
