@@ -28,6 +28,7 @@ import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
@@ -180,11 +181,18 @@ public class BoardService {
 		 */
 		List<Long> userFollowList = new ArrayList<>();
 
-		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, sort, order,
-			pageable);
+		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, pageable);
 		return searchBoardList.stream()
 			.map(BoardResponseDto::new)
 			.toList();
+	}
+
+	// 키워드 기반 게시물 목록 조회
+	public PageResponse<BoardListResponseDto> searchBoards(BoardSearchCondition conditionDto, Pageable pageable) {
+		Page<BoardListResponseDto> page = boardRepository.searchBoardsByKeyword(conditionDto,
+			pageable);
+		return PageResponse.from(page);
+
 	}
 
 	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)

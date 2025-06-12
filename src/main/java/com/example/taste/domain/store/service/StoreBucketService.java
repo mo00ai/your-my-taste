@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
@@ -25,8 +26,8 @@ import com.example.taste.domain.store.entity.StoreBucketItem;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,6 +36,7 @@ public class StoreBucketService {
 	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
+	private final UserRepository userRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
 		User user = entityFetcher.getUserOrThrow(userId);
@@ -74,6 +76,24 @@ public class StoreBucketService {
 			storeBucketItemRepository.save(storeBucketItem);
 		}
 	}
+
+	// 내 버킷 조회 - (키워드로 검색)
+	public PageResponse<StoreBucketResponse> getMyBuckets(Long userId, String keyword, Pageable pageable) {
+
+		User me = entityFetcher.getUserOrThrow(userId);
+		Page<StoreBucket> bucketPage = storeBucketRepository.searchMyBuckets(me, keyword, pageable);
+		return PageResponse.from(bucketPage.map(StoreBucketResponse::from));
+	}
+
+	// 내 팔로워 버킷 조회 - (키워드로 검색)
+	public PageResponse<StoreBucketResponse> getBucketsOfMyFollowings(Long userId, String keyword, Pageable pageable) {
+		List<Long> followingIds = userRepository.findFollowingIds(userId);
+		Page<StoreBucket> bucketPage = storeBucketRepository.searchFollowingsBucketsWithKeyword(followingIds, keyword,
+			pageable);
+		return PageResponse.from(bucketPage.map(StoreBucketResponse::from));
+	}
+
+	// 남의 버킷 조회 - 공개된 것만(특정 유저의 맛집 리스트 조회(유저 프로필로 접근)
 
 	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
 		User targetUser = entityFetcher.getUndeletedUserOrThrow(targetUserId); // 삭제되지 않은 유저만 조회
