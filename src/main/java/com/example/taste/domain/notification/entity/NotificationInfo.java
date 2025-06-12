@@ -2,6 +2,7 @@ package com.example.taste.domain.notification.entity;
 
 import com.example.taste.common.entity.BaseEntity;
 import com.example.taste.domain.notification.NotificationCategory;
+import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,10 +26,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationInfo extends BaseEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "noti_seq")
+	@SequenceGenerator(name = "noti_seq", sequenceName = "noti_seq", allocationSize = 100)
 	private Long id;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "notification_target", nullable = false)
+	private User user;
+
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private NotificationCategory category;
 
 	@Column(nullable = false)
@@ -35,13 +43,18 @@ public class NotificationInfo extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "notification_content_id", nullable = false)
-	@Enumerated(EnumType.STRING)
 	private NotificationContent notificationContent;
 
 	@Builder
-	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent) {
+	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent,
+		User user) {
 		this.category = category;
+		this.user = user;
 		this.isRead = isRead != null ? isRead : false; // 초기값 세팅
 		this.notificationContent = notificationContent;
+	}
+
+	public void readIt() {
+		this.isRead = true;
 	}
 }

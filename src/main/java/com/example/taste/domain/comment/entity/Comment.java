@@ -52,7 +52,7 @@ public class Comment extends BaseEntity {
 	private List<Comment> children = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_id")
 	private User user;
 
 	public void setBoard(Board board) {
@@ -88,6 +88,8 @@ public class Comment extends BaseEntity {
 	}
 
 	public void deleteContent(LocalDateTime deleteTime) {
+		this.contents = "삭제된 댓글입니다.";
+		this.user = null;
 		this.deletedAt = deleteTime;
 	}
 }
