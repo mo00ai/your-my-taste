@@ -29,6 +29,9 @@ public class boardAop {
 	)
 
 	public void afterCreation(JoinPoint point, Object result) {
+		if (result == null) {
+			return;
+		}
 		// service 가 받은 매개변수들
 		Object[] args = point.getArgs();
 		// 중에 1번째가 userId임
