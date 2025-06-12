@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +31,8 @@ import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
-import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
@@ -135,9 +136,10 @@ public class BoardController {
 		return CommonResponse.success(BOARD_UNLIKED);
 	}
 
+	// 키워드 조건 기반 검색
 	@GetMapping("/search")
 	public CommonResponse<PageResponse<BoardListResponseDto>> searchBoards(
-		@Valid BoardSearchCondition conditionDto,
+		@ModelAttribute @Valid BoardSearchCondition conditionDto,
 		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		PageResponse<BoardListResponseDto> result = boardService.searchBoards(conditionDto,
