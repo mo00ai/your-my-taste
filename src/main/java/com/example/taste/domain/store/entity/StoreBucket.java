@@ -1,5 +1,7 @@
 package com.example.taste.domain.store.entity;
 
+import java.util.Objects;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -52,5 +54,9 @@ public class StoreBucket {
 	public StoreBucket updateName(String name) {
 		this.name = name;
 		return this;
+	}
+
+	public boolean isSameBucket(Long bucketId) {
+		return Objects.equals(this.id, bucketId);
 	}
 }
