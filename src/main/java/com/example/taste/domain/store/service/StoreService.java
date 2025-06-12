@@ -1,22 +1,39 @@
 package com.example.taste.domain.store.service;
 
-import java.util.List;
+import static com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto.*;
 
-import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
+import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
+import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.exception.StoreErrorCode;
+import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class StoreService {
 	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
+	private final CategoryRepository categoryRepository;
+
+	@Transactional
+	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
+		Store saved = storeRepository.save(toStoreEntity(naverLocalSearchResponseDto));
+		return new StoreSimpleResponseDto(saved);
+	}
 
 	public StoreResponse getStore(Long id) {
 		Store store = entityFetcher.getStoreOrThrow(id);
@@ -41,4 +58,65 @@ public class StoreService {
 	public Store findById(Long storeId) {
 		return entityFetcher.getStoreOrThrow(storeId);
 	}
+
+	// 카테고리명 추출
+	private String extractCategory(String input) {
+		String[] tokens = input.split(">");
+		for (int i = 0; i < tokens.length; i++) {
+			if (tokens[i].contains("음식점")) {
+				if (i + 1 < tokens.length) {
+					return tokens[i + 1];
+				}
+				break;
+			}
+		}
+		return tokens[0];
+	}
+
+	private Store toStoreEntity(NaverLocalSearchResponseDto dto) {
+		Item item = dto.getItems().get(0);
+		// 카테고리명 추출
+		String categoryName = extractCategory(item.getCategory());
+		// 카테고리 저장 or 조회
+		Category category = getOrCreateCategory(categoryName);
+		// 태그 제외한 가게명
+		String storeName = stripHtmlTags(item.getTitle());
+		BigDecimal longitude = new BigDecimal(item.getMapx()).divide(new BigDecimal("10000000"), 7,
+			RoundingMode.HALF_UP);
+		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000"), 7,
+			RoundingMode.HALF_UP);
+		if (storeRepository.existsByNameAndMapxAndMapy(storeName, longitude, latitude)) {
+			throw new CustomException(StoreErrorCode.STORE_ALREADY_EXISTS);
+		}
+		return Store.builder()
+			.category(category)
+			.name(stripHtmlTags(item.getTitle()))
+			.address(item.getAddress())
+			.roadAddress(item.getRoadAddress())
+			.mapx(longitude)
+			.mapy(latitude)
+			.build();
+
+	}
+
+	// 모든 HTML 태그 제거
+	private String stripHtmlTags(String input) {
+		if (input == null)
+			return null;
+		return input.replaceAll("<[^>]*>", "");
+	}
+
+	public Category getOrCreateCategory(String name) {
+		// 카테고리 있다면 바로 가져오고
+		return categoryRepository.findByName(name)
+			.orElseGet(() -> {    // 없다면 생성
+				Integer maxOrder = categoryRepository.findMaxDisplayOrder().orElse(0);
+				Category newCategory = Category.builder()
+					.name(name)
+					.displayOrder(maxOrder + 1)
+					.build();
+				return categoryRepository.save(newCategory);
+			});
+	}
+
 }

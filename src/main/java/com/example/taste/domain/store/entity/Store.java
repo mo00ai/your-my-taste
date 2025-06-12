@@ -47,10 +47,10 @@ public class Store extends BaseEntity {
 
 	private String roadAddress;
 
-	@Column(nullable = false)
+	@Column(precision = 10, scale = 7, nullable = false)
 	private BigDecimal mapx;
 
-	@Column(nullable = false)
+	@Column(precision = 10, scale = 7, nullable = false)
 	private BigDecimal mapy;
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
