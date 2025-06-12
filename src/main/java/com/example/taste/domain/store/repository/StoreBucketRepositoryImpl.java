@@ -89,6 +89,7 @@ public class StoreBucketRepositoryImpl implements StoreBucketRepositoryCustom {
 			return null;
 		}
 		return store.name.containsIgnoreCase(keyword)    // 가게명에 키워드 포함되어 있거나
-			.or(store.description.containsIgnoreCase(keyword));    // 가게의 설명에 포함되어 있거나
+			.or(store.description.containsIgnoreCase(keyword))    // 가게의 설명에 포함되어 있거나
+			.or(store.category.name.containsIgnoreCase(keyword)); // 카테고리명 포함 여부 추가
 	}
 }
