@@ -1,5 +1,6 @@
 package com.example.taste.domain.store.service;
 
+<<<<<<< HEAD
 import static com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
@@ -8,6 +9,12 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+=======
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
+
+import java.util.List;
+
+>>>>>>> dev
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,8 +59,10 @@ public class StoreService {
 
 	@Transactional
 	public void deleteStore(Long id) {
-		Store store = entityFetcher.getStoreOrThrow(id);
-		storeRepository.delete(store);
+		int deletedCnt = storeRepository.deleteByIdReturningCount(id);
+		if (deletedCnt == 0) {
+			throw new CustomException(STORE_NOT_FOUND);
+		}
 	}
 
 	@Transactional(readOnly = true)

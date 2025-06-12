@@ -1,7 +1,5 @@
 package com.example.taste.domain.store.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -55,16 +53,18 @@ public class StoreBucketController {
 
 	//특정 유저의 맛집 리스트 조회(유저 프로필로 접근)
 	@GetMapping("/users/{targetUserId}/store-buckets")
-	public CommonResponse<List<StoreBucketResponse>> getBucketsByUserId(@PathVariable Long targetUserId) {
-		return CommonResponse.ok(storeBucketService.getBucketsByUserId(targetUserId));
+	public CommonResponse<PageResponse<StoreBucketResponse>> getBucketsByUserId(@PathVariable Long targetUserId,
+		@PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+		return CommonResponse.ok(storeBucketService.getBucketsByUserId(targetUserId, pageable));
 	}
 
 	// 맛집리스트에 있는 맛집 목록 조회(맛집 리스트 조회)
 	@GetMapping("/store-buckets/{bucketId}/store-bucket-items")
-	public CommonResponse<List<BucketItemResponse>> getBucketItems(@PathVariable Long bucketId,
+	public CommonResponse<PageResponse<BucketItemResponse>> getBucketItems(@PathVariable Long bucketId,
+		Pageable pageable,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
-		return CommonResponse.ok(storeBucketService.getBucketItems(bucketId, userId));
+		return CommonResponse.ok(storeBucketService.getBucketItems(bucketId, userId, pageable));
 	}
 
 	// 맛집리스트명 수정

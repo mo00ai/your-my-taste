@@ -40,6 +40,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("UPDATE User u SET u.postingCount = u.postingCount + 1 WHERE u.id = :userId AND u.postingCount < :limit")
 	int increasePostingCount(@Param("userId") Long userId, @Param("limit") int limit);
 
+<<<<<<< HEAD
 	@Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId")
 	List<Long> findFollowingIds(@Param("userId") Long userId);
+=======
+	Optional<User> findByIdAndDeletedAtIsNull(Long id);
+>>>>>>> dev
 }

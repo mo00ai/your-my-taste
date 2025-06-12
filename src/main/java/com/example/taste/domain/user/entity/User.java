@@ -4,6 +4,18 @@ import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.common.exception.CustomException;
@@ -175,5 +187,9 @@ public class User extends SoftDeletableEntity {
 			this.userFavorList.remove(userFavor);
 			userFavor.remove();
 		}
+	}
+
+	public boolean isSameUser(Long userId) {
+		return Objects.equals(this.id, userId);
 	}
 }
