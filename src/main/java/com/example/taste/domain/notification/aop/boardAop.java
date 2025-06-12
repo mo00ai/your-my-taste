@@ -31,13 +31,14 @@ public class boardAop {
 		Object[] args = point.getArgs();
 		Long userId = (Long)args[0];
 		User user = entityFetcher.getUserOrThrow(userId);
+		Long boardId = (long)result;
 
 		NotificationEventDto dto = NotificationEventDto.builder()
 			.category(NotificationCategory.SUBSCRIBERS)
 			.content(user.getNickname() + "님의 새 글이 등록되었습니다.")
 			.createdAt(LocalDateTime.now())
 			.read(false)
-			.redirectUrl("/board") // 일단 그냥 board에 redirect. 이건 회의좀 해봐야 함.
+			.redirectUrl("/board/" + boardId) // 일단 그냥 board에 redirect. 이건 회의좀 해봐야 함.
 			.userId(userId)
 			.build();
 
