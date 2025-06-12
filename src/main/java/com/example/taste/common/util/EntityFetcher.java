@@ -1,16 +1,13 @@
 package com.example.taste.common.util;
 
-import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_FOUND;
-import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
-import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
-import static com.example.taste.domain.image.exception.ImageErrorCode.IMAGE_NOT_FOUND;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
-import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
-import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
-
-import lombok.RequiredArgsConstructor;
+import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+import static com.example.taste.domain.event.exception.EventErrorCode.*;
+import static com.example.taste.domain.favor.exception.FavorErrorCode.*;
+import static com.example.taste.domain.image.exception.ImageErrorCode.*;
+import static com.example.taste.domain.party.exception.PartyErrorCode.*;
+import static com.example.taste.domain.pk.exception.PkErrorCode.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import org.springframework.stereotype.Component;
 
@@ -36,9 +33,13 @@ import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.entity.StoreBucket;
+import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -54,15 +55,26 @@ public class EntityFetcher {
 	private final EventRepository eventRepository;
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
+	private final StoreBucketRepository storeBucketRepository;
 
 	public User getUserOrThrow(Long id) {
 		return userRepository.findById(id)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 	}
 
+	public User getUndeletedUserOrThrow(Long id) {
+		return userRepository.findByIdAndDeletedAtIsNull(id)
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+	}
+
 	public Store getStoreOrThrow(Long id) {
 		return storeRepository.findById(id)
 			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+	}
+
+	public StoreBucket getStoreBucketOrThrow(Long id) {
+		return storeBucketRepository.findById(id)
+			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 	}
 
 	public Review getReviewOrThrow(Long id) {
