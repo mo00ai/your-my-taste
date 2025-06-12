@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 	 * Custom Exception 처리 - Service 계층에서 발생한 비즈니스 예외 처리
 	 */
 	@ExceptionHandler(CustomException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleCustomException(CustomException ex) {
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleCustomException(CustomException ex) {
 		log.error("CustomException: {}", ex.getMessage());
 
 		BaseCode errorCode = ex.getBaseCode();
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
 	 * Valid 예외 처리 - Controller의 @Valid 검증 실패 시 발생 컨트롤러에서 개별적으로 처리하지 않은 경우에만 여기서 처리됨
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleMethodArgumentNotValidException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleMethodArgumentNotValidException(
 		MethodArgumentNotValidException ex) {
 		log.error("MethodArgumentNotValidException: {}", ex.getMessage());
 		List<ErrorResponse.FieldError> fieldErrors = processFieldErrors(ex.getBindingResult());
@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
 	 * Validated 예외 처리 - Controller의 @Validated 검증 실패 시 발생 컨트롤러에서 개별적으로 처리하지 않은 경우에만 여기서 처리됨
 	 */
 	@ExceptionHandler(ConstraintViolationException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleConstraintViolationException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleConstraintViolationException(
 		ConstraintViolationException ex) {
 		log.error("ConstraintViolationException: {}", ex.getMessage());
 
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
 	 * Repository(JPA) 계층 예외 처리 - EntityNotFoundException 처리
 	 */
 	@ExceptionHandler(EntityNotFoundException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleEntityNotFoundException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleEntityNotFoundException(
 		EntityNotFoundException ex) {
 		log.error("EntityNotFoundException: {}", ex.getMessage());
 
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
 	 * Repository(JPA) 계층 예외 처리 - DataAccessException 처리 (SQL 예외, Lock 획득 실패 등 DB 관련 예외)
 	 */
 	@ExceptionHandler(DataAccessException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleDataAccessException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleDataAccessException(
 		DataAccessException ex) {
 		log.error("DataAccessException: {}", ex.getMessage());
 
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
 	 * 지원하지 않는 HTTP 메소드 호출 시 발생하는 예외 처리
 	 */
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleHttpRequestMethodNotSupportedException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleHttpRequestMethodNotSupportedException(
 		HttpRequestMethodNotSupportedException ex) {
 		log.error("HttpRequestMethodNotSupportedException: {}", ex.getMessage());
 
@@ -111,7 +111,7 @@ public class GlobalExceptionHandler {
 	 * 요청 파라미터 타입 불일치 예외 처리
 	 */
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleMethodArgumentTypeMismatchException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleMethodArgumentTypeMismatchException(
 		MethodArgumentTypeMismatchException ex) {
 		log.error("MethodArgumentTypeMismatchException: {}", ex.getMessage());
 
@@ -123,7 +123,7 @@ public class GlobalExceptionHandler {
 	 * 필수 요청 파라미터 누락 예외 처리
 	 */
 	@ExceptionHandler(MissingServletRequestParameterException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleMissingServletRequestParameterException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleMissingServletRequestParameterException(
 		MissingServletRequestParameterException ex) {
 		log.error("MissingServletRequestParameterException: {}", ex.getMessage());
 
@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
 	 * JSON 파싱 오류 등의 예외 처리
 	 */
 	@ExceptionHandler(HttpMessageNotReadableException.class)
-	protected ResponseEntity<CommonResponse<Void>> handleHttpMessageNotReadableException(
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleHttpMessageNotReadableException(
 		HttpMessageNotReadableException ex) {
 		log.error("HttpMessageNotReadableException: {}", ex.getMessage());
 
@@ -147,7 +147,7 @@ public class GlobalExceptionHandler {
 	 * 그 외 모든 예외 처리
 	 */
 	@ExceptionHandler(Exception.class)
-	protected ResponseEntity<CommonResponse<Void>> handleException(Exception ex) {
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleException(Exception ex) {
 		log.error("Exception: {}", ex.getMessage(), ex);
 
 		return new ResponseEntity<>(CommonResponse.error(ErrorCode.INTERNAL_SERVER_ERROR),

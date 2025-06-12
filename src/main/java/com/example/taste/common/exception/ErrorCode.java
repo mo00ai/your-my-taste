@@ -15,20 +15,10 @@ public enum ErrorCode implements BaseCode {
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "내부 서버 오류가 발생했습니다."),
 	INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 타입의 값입니다."),
 
-	//DB
-	DB_LOCK_CONFLICT(HttpStatus.CONFLICT, "L002", "데이터베이스 락 상태로 요청을 처리할 수 없습니다."),
-
 	//AUTH
 	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "A001", "인증되지 않은 사용자입니다."),
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A002", "접근 권한이 없습니다."),
 	INVALID_ROLE(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 권한입니다."),
-
-	//ImageAspect
-	INVALID_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "I001", "이미지 파일의 크기는 최대 2MB까지 업로드 가능합니다."),
-	INVALID_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "I002", "이미지 파일은 .jpg .jpeg .png만 업로드 할 수 있습니다."),
-	INVALID_MIME_TYPE(HttpStatus.BAD_REQUEST, "I003", "파일 내용이 이미지가 아닙니다."),
-	INVALID_IMAGE_COUNT(HttpStatus.BAD_REQUEST, "I004", "맛집 추천 게시글의 이미지 개수는 5개까지 가능합니다."),
-	ONLY_ONE_IMAGE_ALLOWED(HttpStatus.BAD_REQUEST, "I005", "이미지 개수는 1개까지 가능합니다."),
 
 	//File
 	FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "F001", "파일을 읽는 중 서버 오류가 발생했습니다."),
