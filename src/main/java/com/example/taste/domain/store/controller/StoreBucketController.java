@@ -1,7 +1,8 @@
 package com.example.taste.domain.store.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
@@ -48,15 +50,17 @@ public class StoreBucketController {
 	}
 
 	@GetMapping("/users/{targetUserId}/store-buckets")
-	public CommonResponse<List<StoreBucketResponse>> getBucketsByUserId(@PathVariable Long targetUserId) {
-		return CommonResponse.ok(storeBucketService.getBucketsByUserId(targetUserId));
+	public CommonResponse<PageResponse<StoreBucketResponse>> getBucketsByUserId(@PathVariable Long targetUserId,
+		@PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+		return CommonResponse.ok(storeBucketService.getBucketsByUserId(targetUserId, pageable));
 	}
 
 	@GetMapping("/store-buckets/{bucketId}/store-bucket-items")
-	public CommonResponse<List<BucketItemResponse>> getBucketItems(@PathVariable Long bucketId,
+	public CommonResponse<PageResponse<BucketItemResponse>> getBucketItems(@PathVariable Long bucketId,
+		Pageable pageable,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
-		return CommonResponse.ok(storeBucketService.getBucketItems(bucketId, userId));
+		return CommonResponse.ok(storeBucketService.getBucketItems(bucketId, userId, pageable));
 	}
 
 	@PatchMapping("/store-buckets/{bucketId}")
