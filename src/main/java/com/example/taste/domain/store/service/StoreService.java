@@ -1,11 +1,13 @@
 package com.example.taste.domain.store.service;
 
 import static com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,16 +108,24 @@ public class StoreService {
 		return input.replaceAll("<[^>]*>", "");
 	}
 
+	@Transactional
 	public Category getOrCreateCategory(String name) {
 		// 카테고리 있다면 바로 가져오고
 		return categoryRepository.findByName(name)
 			.orElseGet(() -> {    // 없다면 생성
-				Integer maxOrder = categoryRepository.findMaxDisplayOrder().orElse(0);
-				Category newCategory = Category.builder()
-					.name(name)
-					.displayOrder(maxOrder + 1)
-					.build();
-				return categoryRepository.save(newCategory);
+				try {
+					Integer maxOrder = categoryRepository.findMaxDisplayOrder().orElse(0);
+					Category newCategory = Category.builder()
+						.name(name)
+						.displayOrder(maxOrder + 1)
+						.build();
+					return categoryRepository.save(newCategory);
+				} catch (DataIntegrityViolationException e) { // 데이터 무결성 제약 조건을 위반했을 때 발생하는 에러
+					// 이미 다른 트랜잭션에서 INSERT 했을 가능성 → 다시 조회
+					return categoryRepository.findByName(name)
+						.orElseThrow(() -> new CustomException(CATEGORY_CREATION_CONFLICT));
+				}
+
 			});
 	}
 
