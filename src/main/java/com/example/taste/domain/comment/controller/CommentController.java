@@ -43,6 +43,7 @@ public class CommentController {
 	@PatchMapping("/{commentId}")
 	public CommonResponse<UpdateCommentResponseDto> updateComment(
 		@RequestBody UpdateCommentRequestDto requestDto,
+		@PathVariable Long boardId,
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails));
@@ -52,6 +53,7 @@ public class CommentController {
 	@DeleteMapping("/{commentId}")
 	public CommonResponse<Void> deleteComment(
 		@PathVariable Long commentId,
+		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		commentService.deleteComment(commentId, userDetails);
 		return CommonResponse.ok();
@@ -67,6 +69,7 @@ public class CommentController {
 	// 댓글 하나 조회
 	@GetMapping("/{commentId}")
 	public CommonResponse<GetCommentDto> getComment(
+		@PathVariable Long boardId,
 		@PathVariable Long commentId) {
 		return CommonResponse.ok(commentService.getComment(commentId));
 	}

@@ -35,10 +35,10 @@ public class CommentService {
 	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
 
-	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId,
+	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardId,
 		CustomUserDetails userDetails) {
 		// 댓글 달 보드
-		Board board = entityFetcher.getBoardOrThrow(boardsId);
+		Board board = entityFetcher.getBoardOrThrow(boardId);
 		// 댓글 달 유저
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 
