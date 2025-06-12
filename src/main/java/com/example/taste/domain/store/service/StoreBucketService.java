@@ -1,22 +1,19 @@
 package com.example.taste.domain.store.service;
 
-import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_ACCESS_DENIED;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NAME_OVERFLOW;
-import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
+import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.transaction.Transactional;
-
-import lombok.RequiredArgsConstructor;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
@@ -31,6 +28,9 @@ import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +81,23 @@ public class StoreBucketService {
 		}
 	}
 
+	// 내 버킷 조회 - (키워드로 검색)
+	public PageResponse<StoreBucketResponse> getMyBuckets(Long userId, String keyword, Pageable pageable) {
+
+		User me = entityFetcher.getUserOrThrow(userId);
+		Page<StoreBucket> bucketPage = storeBucketRepository.searchMyBuckets(me, keyword, pageable);
+		return PageResponse.from(bucketPage.map(StoreBucketResponse::from));
+	}
+
+	// 내 팔로워 버킷 조회 - (키워드로 검색)
+	public PageResponse<StoreBucketResponse> getBucketsOfMyFollowings(Long userId, String keyword, Pageable pageable) {
+		List<Long> followingIds = userRepository.findFollowingIds(userId);
+		Page<StoreBucket> bucketPage = storeBucketRepository.searchFollowingsBucketsWithKeyword(followingIds, keyword,
+			pageable);
+		return PageResponse.from(bucketPage.map(StoreBucketResponse::from));
+	}
+
+	// 남의 버킷 조회 - 공개된 것만(특정 유저의 맛집 리스트 조회(유저 프로필로 접근)
 	public List<StoreBucketResponse> getBucketsByUserId(Long targetUserId) {
 		User targetUser = entityFetcher.getUserOrThrow(targetUserId);
 
