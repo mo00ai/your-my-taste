@@ -44,13 +44,17 @@ public class ReviewService {
 	@Transactional
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
 		List<MultipartFile> files, ImageType imageType, CustomUserDetails userDetails) throws IOException {
+		// 이미지 요청이 왔으면 등록, 없으면 null
 		Image image = null;
 		if (files != null && !files.isEmpty()) {
 			image = imageService.saveImage(files.get(0), imageType);
 		}
+		// 리뷰 등록할 가게
 		Store store = entityFetcher.getStoreOrThrow(storeId);
+		// 리뷰 작성할 유저
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 
+		// 영수증 인증 결과 조회
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		Object value = redisService.getKeyValue(key);
 		Boolean valid = Boolean.parseBoolean(String.valueOf(value));
@@ -72,12 +76,16 @@ public class ReviewService {
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		MultipartFile multipartFile, ImageType imageType, CustomUserDetails userDetails) throws IOException {
+
+		// 수정할 리뷰
 		Review review = entityFetcher.getReviewOrThrow(reviewId);
+		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 
+		// 리뷰 수정 요소들. 요청에서 내용이 오지 않으면 기존 내용 유지.
 		String contents = null;
 		if (requestDto.getContents() != null && !requestDto.getContents().isEmpty()) {
 			contents = requestDto.getContents();
@@ -93,6 +101,7 @@ public class ReviewService {
 			score = requestDto.getScore();
 		}
 
+		// 영수증 인증 결과 조회
 		String key = "reviewValidation:user:" + review.getUser().getId() + ":store:" + review.getStore().getId();
 		Object value = redisService.getKeyValue(key);
 		Boolean valid = Boolean.parseBoolean(String.valueOf(value));
@@ -107,8 +116,11 @@ public class ReviewService {
 
 	@Transactional(readOnly = true)
 	public Page<GetReviewResponseDto> getAllReview(Long storeId, int index, int score) {
+		// 가게의 모든 리뷰 조회
 		Store store = entityFetcher.getStoreOrThrow(storeId);
+		// index는 기본값 1, 최소값 검증은 controller에서
 		Pageable pageable = PageRequest.of(index - 1, 10);
+		// score 입력값이 있으면, 해당 score의 리뷰만 조회함. 0인 경우(혹은 입력이 없는 경우) 모든 리뷰 조회
 		Page<Review> reviews = reviewRepository.getAllReview(store.getId(), pageable, score);
 		return reviews.map(GetReviewResponseDto::new);
 	}
@@ -121,10 +133,12 @@ public class ReviewService {
 	@Transactional
 	public void deleteReview(Long reviewId, CustomUserDetails userDetails) {
 		Review review = entityFetcher.getReviewOrThrow(reviewId);
+		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
+		// 연관성 먼저 삭제
 		review.getStore().removeReview(review);
 		reviewRepository.delete(review);
 	}

@@ -42,20 +42,31 @@ public class OCRService {
 	@Value("${ocr_key}")
 	private String secretKey;
 
+	// 영수증 인증 생성
 	public void createValidation(Long storeId, MultipartFile image, CustomUserDetails userDetails) throws
 		IOException {
+
+		// api 요청 보내기 전에 유저, 가게부터 확인
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		Store store = entityFetcher.getStoreOrThrow(storeId);
+
 		if (image == null) {
 			throw new CustomException(ReviewErrorCode.NO_IMAGE_REQUESTED);
 		}
+
+		// 이미지는 인코딩해서 api에 전달
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
+		// TODO url 리팩토링
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("").build();
 		String apiUrl = "https://dwyd1vrxhu.apigw.ntruss.com/custom/v1/42612/f7152a2fe3e8899aaf3d099f7c46439dfd24c7a5c926edaed8d9a471ae0b563e/document/receipt";
 
+		//TODO webclient-> webflux
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-OCR-SECRET", secretKey);
 
+		//TODO json을 굳이 map을 써서 맵핑할 필요 없음
 		Map<String, Object> requestMap = new HashMap<>();
 		requestMap.put("version", "V2");
 		requestMap.put("requestId", UUID.randomUUID().toString());
@@ -67,18 +78,19 @@ public class OCRService {
 		imageMap.put("name", "receipt_data");
 
 		requestMap.put("images", List.of(imageMap));
-
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestMap, headers);
-		// webclient-> webflux
 		ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
 
+		// 성공 응답 아니면 예외
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			throw new CustomException(ReviewErrorCode.OCR_CALL_FAILED);
 		}
 
+		// 응답 맵핑해서 사용
 		ObjectMapper objectMapper = new ObjectMapper();
 		OcrResponseDto ocrResponsedto = objectMapper.readValue(response.getBody(), OcrResponseDto.class);
 
+		// 가게 이름 (ex: 프랭크 버거)
 		String storeName = Optional.ofNullable(ocrResponsedto.getImages()).filter(images -> !images.isEmpty())
 			.map(images -> images.get(0))
 			.map(i -> i.getReceipt())
@@ -88,6 +100,7 @@ public class OCRService {
 			.map(name -> name.getText())
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.STORE_NAME_NOT_FOUND));
 
+		// 가게 이름 상세 (ex: 성수점, 덕명점 1호 어쩌구...)
 		String storeSubName = Optional.ofNullable(ocrResponsedto.getImages())
 			.filter(images -> !images.isEmpty())
 			.map(images -> images.get(0))
@@ -98,10 +111,7 @@ public class OCRService {
 			.map(subName -> subName.getText())
 			.orElse(null);  // 없으면 null 반환
 
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		Store store = entityFetcher.getStoreOrThrow(storeId);
-
-		// 가게 이름 어떻게 저장하나
+		// TODO 가게 이름 저장하는 방식에 맞춰 수정할 것.
 		Boolean ocrResult = store.getName().equals(storeName);
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		redisService.setKeyValue(key, ocrResult, Duration.ofMinutes(5));

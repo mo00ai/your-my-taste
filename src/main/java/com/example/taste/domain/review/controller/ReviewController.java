@@ -31,6 +31,8 @@ import com.example.taste.domain.review.dto.UpdateReviewResponseDto;
 import com.example.taste.domain.review.service.OCRService;
 import com.example.taste.domain.review.service.ReviewService;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -40,6 +42,7 @@ public class ReviewController {
 	private final ReviewService reviewService;
 	private final OCRService ocrService;
 
+	//리뷰 생성
 	@ImageValid
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<CreateReviewResponseDto> createReview(
@@ -52,6 +55,7 @@ public class ReviewController {
 			reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW, userDetails));
 	}
 
+	// 리뷰 업데이트
 	@ImageValid
 	@PatchMapping(value = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<UpdateReviewResponseDto> updateReview(
@@ -67,18 +71,21 @@ public class ReviewController {
 			reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW, userDetails));
 	}
 
+	// 가게의 모든 리뷰 조회
 	@GetMapping()
 	public CommonResponse<Page<GetReviewResponseDto>> getAllReview(@PathVariable Long storeId,
-		@RequestParam(defaultValue = "1", required = false) int index,
-		@RequestParam(required = false, defaultValue = "0") int score) {
+		@RequestParam(defaultValue = "1", required = false) @Min(1) int index,
+		@RequestParam(required = false, defaultValue = "0") @Min(0) @Max(5) int score) {
 		return CommonResponse.ok(reviewService.getAllReview(storeId, index, score));
 	}
 
+	// 리뷰 단건 상세
 	@GetMapping("/{reviewId}")
-	public CommonResponse<GetReviewResponseDto> getAllReviewOfUser(@PathVariable Long reviewId) {
+	public CommonResponse<GetReviewResponseDto> getReview(@PathVariable Long reviewId) {
 		return CommonResponse.ok(reviewService.getReview(reviewId));
 	}
 
+	// 리뷰 삭제 (hard)
 	@DeleteMapping("/{reviewId}")
 	public CommonResponse<Void> deleteReview(@PathVariable Long reviewId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -86,6 +93,7 @@ public class ReviewController {
 		return CommonResponse.ok();
 	}
 
+	// 영수증 인증
 	@PostMapping("/validate")
 	public CommonResponse<Void> createValidation(@PathVariable Long storeId,
 		@RequestPart("image") MultipartFile image,
