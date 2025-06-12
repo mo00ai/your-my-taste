@@ -33,7 +33,7 @@ public class CreateReviewResponseDto {
 		this.id = review.getId();
 		this.contents = review.getContents();
 		this.score = review.getScore();
-		this.imageUrl = review.getImage().getUrl();
+		this.imageUrl = review.getImage() != null ? review.getImage().getUrl() : null;
 		this.isPresented = review.isPresented();
 		this.createdAt = review.getCreatedAt();
 	}

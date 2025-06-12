@@ -59,10 +59,11 @@ public class BoardService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
+	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
 		IOException {
 		User user = entityFetcher.getUserOrThrow(userId);
 		Store store = storeService.findById(requestDto.getStoreId());
+		Long boardId = 0L; // aop 용
 
 		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
 			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
@@ -74,6 +75,8 @@ public class BoardService {
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
+
+			boardId = entity.getId();
 
 		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
 			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
@@ -91,12 +94,14 @@ public class BoardService {
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
-			// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진
+			// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진 - AOP 로 자동 처리 합니다.
+
+			boardId = entity.getId();
 
 		} else {
 			throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
 		}
-
+		return boardId;
 	}
 
 	@Transactional

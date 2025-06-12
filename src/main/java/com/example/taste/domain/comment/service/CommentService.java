@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
@@ -27,25 +26,35 @@ import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.exception.UserErrorCode;
-import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
-	private final UserRepository userRepository;
-	//private final BoardRepository boardRepository;
 
-	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId) {
-		Board board = Board.builder().build();
-		// 임시 유저, 세션에서 가져올것
-		User user = userRepository.findById(1L)
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-		Comment parent = requestDto.getParent() == null ? null :
-			entityFetcher.getCommentOrThrow(requestDto.getParent());
-		Comment root = parent == null ? null : parent.getRoot() == null ? parent : parent.getRoot();
+	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardId,
+		CustomUserDetails userDetails) {
+		// 댓글 달 보드
+		Board board = entityFetcher.getBoardOrThrow(boardId);
+		// 댓글 달 유저
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+
+		// TODO 댓글 조회 방식을 바꾸면 이것도 바꿀 가능성 있음
+		// 부모댓글, root 댓글 설정
+		Comment parent = null;
+		Comment root = null;
+
+		// 요청에서 부모 댓글을 명시한 경우
+		if (requestDto.getParent() != null) {
+			// 부모 댓글을 찾아서 부여
+			parent = entityFetcher.getCommentOrThrow(requestDto.getParent());
+			// 부모 댓글의 root 가 null 이 아닌 경우(부모 댓글이 root 가 아닌 경우) 부모 댓글의 root 를 가져와 root 로 설정
+			// 아니면 부모 댓글을 root 로 설정
+			root = parent.getRoot() != null ? parent.getRoot() : parent;
+		}
 
 		Comment comment = Comment.builder()
 			.contents(requestDto.getContents())
@@ -61,24 +70,49 @@ public class CommentService {
 	}
 
 	@Transactional
-	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId) {
+	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
+		CustomUserDetails userDetails) {
+		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		// 유저 검증
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
+		// 댓글에서 수정할 내용은 contents 밖에 없음
+		// contents 가 빈 문자열인 경우 아예 예외처리(dto 에서)
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId) {
+	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
+		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		// 유저 검증
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		if (!comment.getUser().equals(user)) {
+			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
+		}
+		// comment 객체의 deleteContent 메서드 호출.
+		// deletedAt 시간을 세팅, contents 를 삭제 메시지로 초기화, user 를 null 로 세팅
 		comment.deleteContent(LocalDateTime.now());
 	}
 
-	public Page<GetCommentDto> getAllCommentOfBoard(Long boardsId, int index) {
+	@Transactional(readOnly = true)
+	public Page<GetCommentDto> getAllCommentOfBoard(Long boardId, int index) {
+
+		/** TODO 댓글 더보기를 depth 마다 다시 수행하도록 변경
+		 root 댓글 10 개 가져오기
+		 -> 원하는 댓글만 댓글 더보기-> 자식 대댓글만 표시
+		 -> 자식 대댓글에서 원하는 댓글만 더보기-> 해당 대댓글의 자식만 표시
+		 대댓글 보기는 별도의 메서드로 분리해야 하지 싶다.
+		 **/
+
 		// 연관관계를 통한 N+1 문제가 발생하지 않도록, root comment와 거기에 달린 comment들을 연관관계에 의존하지 않고 가져온다.
-		Board board = Board.builder().build();
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		// board에 달린 댓글 중에서 root인 댓글들만 가져온다.(root == null 인 케이스)
-		Page<Comment> comments = commentRepository.findAllRootByBoard(board, pageable);
+		Page<Comment> comments = commentRepository.findAllRootByBoard(boardId, pageable);
 		//모든 댓글 중에서 위의 comments들을 root로 가진 댓글들만 가져온다(n+1 회피)
 		List<Comment> replies = commentRepository.findAllReplies(comments);
 		// 이런 식이면 댓글을 가져오고 거기의 child를 찾아 가져오고, 그 댓글의 child를 다시 가져오고...
@@ -120,8 +154,8 @@ public class CommentService {
 		return new PageImpl<>(rootsList, comments.getPageable(), comments.getTotalElements());
 	}
 
+	@Transactional(readOnly = true)
 	public GetCommentDto getComment(Long commentId) {
-		return new GetCommentDto(commentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
+		return new GetCommentDto(entityFetcher.getCommentOrThrow(commentId));
 	}
 }
