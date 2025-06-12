@@ -1,11 +1,14 @@
 package com.example.taste.domain.notification.redis;
 
+import jakarta.annotation.PostConstruct;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import com.example.taste.common.constant.RedisChannel;
 
 @Component
 @RequiredArgsConstructor
