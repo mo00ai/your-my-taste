@@ -29,7 +29,7 @@ import com.example.taste.domain.user.enums.Gender;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MatchEngineService {
+public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워커 서비스
 	private final EntityFetcher entityFetcher;
 	private final UserMatchCondRepository userMatchCondRepository;
 	private final PartyMatchCondRepository partyMatchCondRepository;
