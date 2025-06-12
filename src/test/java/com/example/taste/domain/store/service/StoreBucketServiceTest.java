@@ -9,8 +9,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.repository.ImageRepository;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
@@ -102,13 +106,14 @@ class StoreBucketServiceTest {
 		User user = userRepository.save(UserFixture.create(image));
 		StoreBucket closedBucket = storeBucketRepository.save(StoreBucketFixture.createClosedBucket(user));
 		StoreBucket openBucket = storeBucketRepository.save(StoreBucketFixture.createOpenedBucket(user));
+		Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
 
 		// when
-		List<StoreBucketResponse> responses = storeBucketService.getBucketsByUserId(user.getId());
+		PageResponse<StoreBucketResponse> responses = storeBucketService.getBucketsByUserId(user.getId(), pageable);
 
 		// then
-		assertThat(responses).hasSize(1);
-		assertThat(responses.get(0).getId()).isEqualTo(openBucket.getId());
+		assertThat(responses.getContent()).hasSize(1);
+		assertThat(responses.getContent().get(0).getId()).isEqualTo(openBucket.getId());
 	}
 
 	@Test
@@ -124,13 +129,15 @@ class StoreBucketServiceTest {
 		StoreBucket closedBucket = storeBucketRepository.save(StoreBucketFixture.createClosedBucket(user));
 		em.clear();
 		StoreBucketItem item = storeBucketItemRepository.save(StoreBucketItemFixture.create(closedBucket, store));
+		Pageable pageable = PageRequest.of(0, 10);
 
 		// when
-		List<BucketItemResponse> responses = storeBucketService.getBucketItems(closedBucket.getId(), user.getId());
+		PageResponse<BucketItemResponse> responses = storeBucketService.getBucketItems(closedBucket.getId(),
+			user.getId(), pageable);
 
 		// then
-		assertThat(responses).hasSize(1);
-		assertThat(responses.get(0).getId()).isEqualTo(item.getId());
+		assertThat(responses.getContent()).hasSize(1);
+		assertThat(responses.getContent().get(0).getId()).isEqualTo(item.getId());
 	}
 
 	@Test
@@ -148,10 +155,11 @@ class StoreBucketServiceTest {
 		StoreBucket closedBucket = storeBucketRepository.save(StoreBucketFixture.createClosedBucket(user1));
 		em.clear();
 		StoreBucketItem item = storeBucketItemRepository.save(StoreBucketItemFixture.create(closedBucket, store));
+		Pageable pageable = PageRequest.of(0, 10);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			storeBucketService.getBucketItems(closedBucket.getId(), user2.getId());
+			storeBucketService.getBucketItems(closedBucket.getId(), user2.getId(), pageable);
 		});
 	}
 

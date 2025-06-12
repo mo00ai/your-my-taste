@@ -46,7 +46,6 @@ public class StoreBucketServiceUnitTest {
 	void addBucketItem_whenUserNotBucketOwner_thenThrowException() {
 		// given
 		Long requestUserId = 1L;
-		Long bucketOwnerId = 2L;
 		Long storeId = 1L;
 		Long bucketId = 1L;
 
@@ -58,7 +57,7 @@ public class StoreBucketServiceUnitTest {
 		given(storeRepository.findById(request.getStoreId())).willReturn(Optional.of(store));
 		given(storeBucketRepository.findById(bucketId)).willReturn(Optional.of(storeBucket));
 		given(storeBucket.getUser()).willReturn(user);
-		given(storeBucket.getUser().getId()).willReturn(bucketOwnerId);
+		given(storeBucket.getUser().isSameUser(requestUserId)).willReturn(false);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -77,14 +76,12 @@ public class StoreBucketServiceUnitTest {
 		Store store = mock(Store.class);
 		StoreBucket storeBucket = mock(StoreBucket.class);
 		User user = mock(User.class);
-		StoreBucketItem storeBucketItem = mock(StoreBucketItem.class);
 
 		given(storeRepository.findById(request.getStoreId())).willReturn(Optional.of(store));
 		given(storeBucketRepository.findById(bucketId)).willReturn(Optional.of(storeBucket));
 		given(storeBucket.getUser()).willReturn(user);
-		given(storeBucket.getUser().getId()).willReturn(userId);
-		given(storeBucketItemRepository.findByStoreAndStoreBucket(store, storeBucket)).willReturn(
-			Optional.of(storeBucketItem));
+		given(storeBucket.getUser().isSameUser(userId)).willReturn(true);
+		given(storeBucketItemRepository.existsByStoreBucketAndStore(storeBucket, store)).willReturn(true);
 
 		// when
 		storeBucketService.addBucketItem(request, userId);

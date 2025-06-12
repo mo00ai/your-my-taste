@@ -35,8 +35,9 @@ public class StoreService {
 
 	@Transactional
 	public void deleteStore(Long id) {
-		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
-		storeRepository.delete(store);
+		if (storeRepository.existsById(id)) {
+			storeRepository.deleteById(id);
+		}
 	}
 
 	@Transactional(readOnly = true)

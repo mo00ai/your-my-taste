@@ -5,13 +5,15 @@ import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
 import com.example.taste.domain.store.dto.request.RemoveBucketItemRequest;
@@ -62,12 +64,12 @@ public class StoreBucketService {
 				.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 			// 로그인 유저의 버킷인지 확인
-			if (!Objects.equals(storeBucket.getUser().getId(), userId)) {
+			if (!storeBucket.getUser().isSameUser(userId)) {
 				throw new CustomException(BUCKET_ACCESS_DENIED);
 			}
 
 			// 이미 버킷에 가게가 저장되어 있는지 확인
-			if (storeBucketItemRepository.findByStoreAndStoreBucket(store, storeBucket).isPresent()) {
+			if (storeBucketItemRepository.existsByStoreBucketAndStore(storeBucket, store)) {
 				continue;
 			}
 
@@ -79,27 +81,30 @@ public class StoreBucketService {
 		}
 	}
 
-	public List<StoreBucketResponse> getBucketsByUserId(Long targetUserId) {
-		User targetUser = userRepository.findById(targetUserId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
+		User targetUser = userRepository.findById(targetUserId)
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND)); // TODO 삭제되지 않은 유저 조회 @김채진
 
 		// 공개된 버킷만 반환
-		return storeBucketRepository.findAllByUserAndIsOpened(targetUser, true).stream()
-			.map(StoreBucketResponse::from)
-			.toList();
+		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable)
+			.map(StoreBucketResponse::from);
+
+		return PageResponse.from(dtos);
 	}
 
-	public List<BucketItemResponse> getBucketItems(Long bucketId, Long userId) {
+	public PageResponse<BucketItemResponse> getBucketItems(Long bucketId, Long userId, Pageable pageable) {
 		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 타유저의 버킷 && 비공개 버킷이면 접근 불가
-		if (!Objects.equals(storeBucket.getUser().getId(), userId) && !storeBucket.isOpened()) {
+		if (!storeBucket.getUser().isSameUser(userId) && !storeBucket.isOpened()) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		return storeBucketItemRepository.findAllByStoreBucket(storeBucket).stream()
-			.map(BucketItemResponse::from)
-			.toList();
+		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable)
+			.map(BucketItemResponse::from);
+
+		return PageResponse.from(dtos);
 	}
 
 	@Transactional
@@ -109,7 +114,7 @@ public class StoreBucketService {
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
@@ -126,7 +131,7 @@ public class StoreBucketService {
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
@@ -140,7 +145,7 @@ public class StoreBucketService {
 			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
-		if (!Objects.equals(userId, storeBucket.getUser().getId())) {
+		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
@@ -153,7 +158,7 @@ public class StoreBucketService {
 
 		// bucketItem이 전달받은 bucketId 하위에 존재하는지 확인
 		boolean hasInvalidItem = items.stream()
-			.anyMatch(item -> !Objects.equals(item.getStoreBucket().getId(), bucketId));
+			.anyMatch(item -> !item.getStoreBucket().isSameBucket(bucketId));
 
 		if (hasInvalidItem) {
 			throw new CustomException(INVALID_INPUT_VALUE);
