@@ -107,13 +107,13 @@ public class NotificationUserService {
 		//redis가 가지고 있는 유저의 모든 알림을 조회
 		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
-		if (keys.isEmpty()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 0), false);
-		}
+
 		//가져온 리스트에서 contentsId만 조회
 		List<Long> redisContents = new ArrayList<>();
-		for (String key : keys) {
-			redisContents.add(extractContentIdFromKey(key));
+		if (!keys.isEmpty()) {
+			for (String key : keys) {
+				redisContents.add(extractContentIdFromKey(key));
+			}
 		}
 		//해당 contentsId 를 가지지 않은 모든 sql 알림을 조회.
 		Pageable pageable = PageRequest.of(index - 1, 10, Sort.by("createdAt"));
