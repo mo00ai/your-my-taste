@@ -21,6 +21,7 @@ import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentController {
 	private final CommentService commentService;
 
+	// 댓글 생성
 	@PostMapping
 	public CommonResponse<CreateCommentResponseDto> createComment(
 		@RequestBody CreateCommentRequestDto requestDto,
@@ -37,6 +39,7 @@ public class CommentController {
 		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails));
 	}
 
+	// 댓글 수정
 	@PatchMapping("/{commentId}")
 	public CommonResponse<UpdateCommentResponseDto> updateComment(
 		@RequestBody UpdateCommentRequestDto requestDto,
@@ -45,6 +48,7 @@ public class CommentController {
 		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails));
 	}
 
+	// 댓글 삭제(소프트)
 	@DeleteMapping("/{commentId}")
 	public CommonResponse<Void> deleteComment(
 		@PathVariable Long commentId,
@@ -53,12 +57,14 @@ public class CommentController {
 		return CommonResponse.ok();
 	}
 
+	// 게시글에 모든 댓글 조회
 	@GetMapping
 	public CommonResponse<Page<GetCommentDto>> getAllCommentOfBoard(
-		@PathVariable Long boardId, @RequestParam(defaultValue = "1", required = false) int index) {
+		@PathVariable Long boardId, @RequestParam(defaultValue = "1", required = false) @Min(1) int index) {
 		return CommonResponse.ok(commentService.getAllCommentOfBoard(boardId, index));
 	}
 
+	// 댓글 하나 조회
 	@GetMapping("/{commentId}")
 	public CommonResponse<GetCommentDto> getComment(
 		@PathVariable Long commentId) {

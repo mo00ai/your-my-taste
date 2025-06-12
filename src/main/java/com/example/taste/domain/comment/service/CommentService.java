@@ -37,12 +37,22 @@ public class CommentService {
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardsId,
 		CustomUserDetails userDetails) {
+		// 댓글 달 보드
 		Board board = entityFetcher.getBoardOrThrow(boardsId);
+		// 댓글 달 유저
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+
+		// TODO 댓글 조회 방식을 바꾸면 이것도 바꿀 가능성 있음
+		// 부모댓글, root 댓글 설정
 		Comment parent = null;
 		Comment root = null;
+
+		// 요청에서 부모 댓글을 명시한 경우
 		if (requestDto.getParent() != null) {
+			// 부모 댓글을 찾아서 부여
 			parent = entityFetcher.getCommentOrThrow(requestDto.getParent());
+			// 부모 댓글의 root 가 null 이 아닌 경우(부모 댓글이 root 가 아닌 경우) 부모 댓글의 root 를 가져와 root 로 설정
+			// 아니면 부모 댓글을 root 로 설정
 			root = parent.getRoot() != null ? parent.getRoot() : parent;
 		}
 
@@ -62,22 +72,30 @@ public class CommentService {
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
 		CustomUserDetails userDetails) {
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		// 유저 검증
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!comment.getUser().equals(user)) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
+		// 댓글에서 수정할 내용은 contents 밖에 없음
+		// contents 가 빈 문자열인 경우 아예 예외처리(dto 에서)
 		comment.updateContents(requestDto.getContents());
 		return new UpdateCommentResponseDto(comment);
 	}
 
 	@Transactional
 	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		// 유저 검증
+		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!comment.getUser().equals(user)) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
+		// comment 객체의 deleteContent 메서드 호출.
+		// deletedAt 시간을 세팅, contents 를 삭제 메시지로 초기화, user 를 null 로 세팅
 		comment.deleteContent(LocalDateTime.now());
 	}
 
