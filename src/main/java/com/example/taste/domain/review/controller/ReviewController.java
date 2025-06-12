@@ -63,7 +63,7 @@ public class ReviewController {
 		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
 		return CommonResponse.ok(
-			reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW, userDetails));
+			reviewService.updateReview(requestDto, reviewId, files, ImageType.REVIEW, userDetails));
 	}
 
 	// 가게의 모든 리뷰 조회

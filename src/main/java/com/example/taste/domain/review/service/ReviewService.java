@@ -75,7 +75,7 @@ public class ReviewService {
 
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
-		MultipartFile multipartFile, ImageType imageType, CustomUserDetails userDetails) throws IOException {
+		List<MultipartFile> files, ImageType imageType, CustomUserDetails userDetails) throws IOException {
 
 		// 수정할 리뷰
 		Review review = entityFetcher.getReviewOrThrow(reviewId);
@@ -92,8 +92,8 @@ public class ReviewService {
 		}
 
 		Image image = null;
-		if (multipartFile != null) {
-			image = imageService.saveImage(multipartFile, imageType);
+		if (files != null && !files.isEmpty()) {
+			image = imageService.saveImage(files.get(0), imageType);
 		}
 
 		Integer score = null;
