@@ -53,6 +53,19 @@ public class OCRService {
 			throw new CustomException(ReviewErrorCode.NO_IMAGE_REQUESTED);
 		}
 
+		String originalFilename = image.getOriginalFilename();
+		if (originalFilename == null || !originalFilename.contains(".")) {
+			throw new CustomException(ReviewErrorCode.BAD_OCR_IMAGE);
+		}
+		int dotindex = originalFilename.indexOf('.');
+		if (dotindex == -1 || dotindex == originalFilename.length() - 1) {
+			throw new CustomException(ReviewErrorCode.BAD_OCR_IMAGE);
+		}
+		String imageFormat = originalFilename.substring(dotindex + 1).toLowerCase();
+		if (imageFormat.isBlank()) {
+			throw new CustomException(ReviewErrorCode.BAD_OCR_IMAGE);
+		}
+
 		// 이미지는 인코딩해서 api에 전달
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
 		// TODO url 리팩토링
@@ -70,7 +83,7 @@ public class OCRService {
 			.requestId(UUID.randomUUID().toString())
 			.timestamp(System.currentTimeMillis())
 			.images(List.of(OcrRequestDto.Images.builder()
-				.format("png")
+				.format(imageFormat)
 				.data(base64Image)
 				.name("receipt_data")
 				.build()))
