@@ -61,7 +61,7 @@ public class MatchService {
 	public void cancelUserMatch(Long userMatchCondId) {
 		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(userMatchCondId);
 		if (userMatchCond.getMatchStatus().equals(MatchStatus.WAITING_HOST)) {
-			// 지금 삭제하려는 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
+			// 지금 삭제하려는 유저의 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
 			partyInvitationRepository.deleteUserMatchWhileMatching(
 				userMatchCond, InvitationType.RANDOM, InvitationStatus.WAITING);
 		}
