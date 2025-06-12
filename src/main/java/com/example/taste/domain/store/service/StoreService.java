@@ -1,6 +1,5 @@
 package com.example.taste.domain.store.service;
 
-<<<<<<< HEAD
 import static com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
@@ -9,26 +8,21 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
-=======
-import static com.example.taste.domain.store.exception.StoreErrorCode.*;
-
-import java.util.List;
-
->>>>>>> dev
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -40,8 +34,16 @@ public class StoreService {
 
 	@Transactional
 	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
-		Store saved = storeRepository.save(toStoreEntity(naverLocalSearchResponseDto));
-		return new StoreSimpleResponseDto(saved);
+		try {
+			Store saved = storeRepository.save(toStoreEntity(naverLocalSearchResponseDto));
+			return new StoreSimpleResponseDto(saved);
+		} catch (DataIntegrityViolationException e) {    // 데이터의 삽입/수정이 무결성 제약 조건을 위반(Spring이 제공하는 상위 무결성 예외)
+			if (e.getCause() instanceof ConstraintViolationException) {    // 제약 조건이 위배(Hibernate가 DB에서 던지는 하위 예외)
+				throw new CustomException(STORE_ALREADY_EXISTS);
+			}
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 	public StoreResponse getStore(Long id) {
@@ -97,7 +99,7 @@ public class StoreService {
 		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000"), 7,
 			RoundingMode.HALF_UP);
 		if (storeRepository.existsByNameAndMapxAndMapy(storeName, longitude, latitude)) {
-			throw new CustomException(StoreErrorCode.STORE_ALREADY_EXISTS);
+			throw new CustomException(STORE_ALREADY_EXISTS);
 		}
 		return Store.builder()
 			.category(category)
