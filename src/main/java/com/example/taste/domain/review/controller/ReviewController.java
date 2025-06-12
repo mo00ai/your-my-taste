@@ -18,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.image.enums.ImageType;
-import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.review.dto.CreateReviewRequestDto;
 import com.example.taste.domain.review.dto.CreateReviewResponseDto;
 import com.example.taste.domain.review.dto.GetReviewResponseDto;
@@ -64,9 +62,6 @@ public class ReviewController {
 		@RequestPart(value = "files", required = false) List<MultipartFile> files,
 		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
-		if (files == null || files.isEmpty()) {
-			throw new CustomException(ImageErrorCode.IMAGE_NOT_FOUND);
-		}
 		return CommonResponse.ok(
 			reviewService.updateReview(requestDto, reviewId, files.get(0), ImageType.REVIEW, userDetails));
 	}
