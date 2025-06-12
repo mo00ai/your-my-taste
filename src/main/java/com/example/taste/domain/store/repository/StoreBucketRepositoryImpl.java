@@ -42,8 +42,10 @@ public class StoreBucketRepositoryImpl implements StoreBucketRepositoryCustom {
 			.fetch();    // 리스트 반환
 
 		Long total = queryFactory
-			.select(storeBucket.count())
+			.select(storeBucket.countDistinct())
 			.from(storeBucket)
+			.join(storeBucketItem).on(storeBucket.eq(storeBucketItem.storeBucket))
+			.join(store).on(storeBucketItem.store.eq(store))
 			.where(
 				storeBucket.user.eq(user),
 				hasKeyword(keyword)
