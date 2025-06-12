@@ -22,7 +22,7 @@ public class EnumValidator implements ConstraintValidator<ValidEnum, String> {
 		Object[] enumValues = this.annotation.target().getEnumConstants();
 		if (enumValues != null) {
 			for (Object enumValue : enumValues) {
-				if (value.equals(enumValue.toString())) {
+				if (value.equalsIgnoreCase(enumValue.toString())) {    // 대소문자 구분 x
 					return true;
 				}
 			}
