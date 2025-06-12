@@ -200,15 +200,18 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		}
 		// 기간 검색 필터
 		if (condition.getCreatedFrom() != null && condition.getCreatedTo() != null) {
-			builder.and(board.createdAt.between(condition.getCreatedFrom(), condition.getCreatedTo()));
+			builder.and(board.createdAt.between(
+				condition.getCreatedFrom().atStartOfDay(),
+				condition.getCreatedTo().atTime(23, 59, 59)
+			));
 		} else {
 			// 생성일 이후
 			if (condition.getCreatedFrom() != null) {    // goe(): A >= ?
-				builder.and(board.createdAt.goe(condition.getCreatedFrom()));
+				builder.and(board.createdAt.goe(condition.getCreatedFrom().atStartOfDay()));
 			}
 			// 생성일 이전
 			if (condition.getCreatedTo() != null) {    // loe(): A <= ?
-				builder.and(board.createdAt.loe(condition.getCreatedTo()));
+				builder.and(board.createdAt.loe(condition.getCreatedTo().atTime(23, 59, 59)));
 			}
 
 		}

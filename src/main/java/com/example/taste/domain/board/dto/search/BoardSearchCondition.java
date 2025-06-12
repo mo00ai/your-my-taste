@@ -1,19 +1,17 @@
 package com.example.taste.domain.board.dto.search;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BoardSearchCondition {
 	// 키워드로 제목+내용을 동시에 검색하는 경우
@@ -29,8 +27,10 @@ public class BoardSearchCondition {
 	private String type;    // "N", "O"
 	@ValidEnum(target = BoardStatus.class)
 	private String status;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
-
-	private LocalDateTime createdFrom;
-	private LocalDateTime createdTo;
+	// 날짜 범위
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate createdFrom;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate createdTo;
 
 }
