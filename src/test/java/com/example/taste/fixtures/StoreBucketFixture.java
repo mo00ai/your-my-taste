@@ -19,4 +19,12 @@ public class StoreBucketFixture {
 			.isOpened(false)
 			.build();
 	}
+
+	public static StoreBucket createOpenedBucketWithName(User user, String name) {
+		return StoreBucket.builder()
+			.user(user)
+			.name(name)
+			.isOpened(false)
+			.build();
+	}
 }

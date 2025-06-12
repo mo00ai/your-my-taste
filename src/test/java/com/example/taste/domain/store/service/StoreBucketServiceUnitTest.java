@@ -1,8 +1,10 @@
 package com.example.taste.domain.store.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.entity.StoreBucket;
@@ -21,6 +24,9 @@ import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.fixtures.ImageFixture;
+import com.example.taste.fixtures.StoreBucketFixture;
+import com.example.taste.fixtures.UserFixture;
 
 @ExtendWith(MockitoExtension.class)
 public class StoreBucketServiceUnitTest {
@@ -37,7 +43,7 @@ public class StoreBucketServiceUnitTest {
 	private StoreBucketItemRepository storeBucketItemRepository;
 
 	@Test
-	void 로그인유저_버킷아니면_CustomException() {
+	void addBucketItem_whenUserNotBucketOwner_thenThrowException() {
 		// given
 		Long requestUserId = 1L;
 		Long bucketOwnerId = 2L;
@@ -61,7 +67,7 @@ public class StoreBucketServiceUnitTest {
 	}
 
 	@Test
-	void 버킷에_가게가_존재하면_continue() {
+	void addBucketItem_whenStoreExistsInBucket_thenDoNotSave() {
 		// given
 		Long storeId = 1L;
 		Long bucketId = 1L;
@@ -85,5 +91,170 @@ public class StoreBucketServiceUnitTest {
 
 		// then
 		verify(storeBucketItemRepository, never()).save(any(StoreBucketItem.class));
+	}
+
+	@Test
+	void makeUnduplicateName_whenNoBucketNameStartWithInput_thenReturnInput() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(new ArrayList<>());
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName);
+	}
+
+	@Test
+	void makeUnduplicateName_whenInputHasRegexSymbol_thenReturnInput() {
+		// given
+		String newName = "맛집+";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집집"));
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(new ArrayList<>());
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName);
+	}
+
+	@Test
+	void makeUnduplicateName_whenInputHasWordInParenthesis_thenReturnInput() {
+		// given
+		String newName = "맛집(a)";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(1)"));
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(new ArrayList<>());
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName);
+	}
+
+	@Test
+	void makeUnduplicateName_whenNameDuplicate_thenReturnNameWithSuffix() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집"));
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName + "(1)");
+	}
+
+	@Test
+	void makeUnduplicateName_whenMultipleDuplicates_thenIncrementSuffix() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집"));
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(1)"));
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName + "(2)");
+	}
+
+	@Test
+	void makeUnduplicateName_whenBucketsExistWithSuffixNotEquals_thenReturnInput() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(1)"));
+
+		// stub
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName);
+	}
+
+	@Test
+	void makeUnduplicateName_whenSuffixIsMaxValue_thenThrowException() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = List.of(
+			StoreBucketFixture.createOpenedBucketWithName(user, "맛집"),
+			StoreBucketFixture.createOpenedBucketWithName(user, "맛집(" + Integer.MAX_VALUE + ")")
+		);
+
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(buckets);
+
+		// when, then
+		assertThrows(CustomException.class, () -> {
+			storeBucketService.makeUnduplicateName(newName, user);
+		});
+	}
+
+	@Test
+	void makeUnduplicateName_whenManyDuplicates_thenIncrementSuffix() {
+		// given
+		String newName = "맛집";
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집"));
+		for (int i = 1; i <= 1000; i++) {
+			buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(" + i + ")"));
+		}
+
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, newName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName + "(1001)");
+	}
+
+	@Test
+	void makeUnduplicateName_whenInputHasSuffixAndDuplicate_thenIncrementSuffix() {
+		// given
+		String newName = "맛집(1)";
+		String baseName = newName.replaceFirst("\\((\\d+)\\)$", "");
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집"));
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(1)"));
+
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, baseName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(baseName + "(2)");
+	}
+
+	@Test
+	void makeUnduplicateName_whenInputHasSuffixAndBaseNameNotExists_thenIncrementSuffix() {
+		// given
+		String newName = "맛집(1)";
+		String baseName = newName.replaceFirst("\\((\\d+)\\)$", "");
+		Image image = ImageFixture.create();
+		User user = UserFixture.create(image);
+		List<StoreBucket> buckets = new ArrayList<>();
+		buckets.add(StoreBucketFixture.createOpenedBucketWithName(user, "맛집(1)"));
+
+		given(storeBucketRepository.findByUserAndNameStartingWith(user, baseName)).willReturn(buckets);
+
+		// when, then
+		assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(baseName + "(2)");
 	}
 }

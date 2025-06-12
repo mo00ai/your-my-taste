@@ -67,7 +67,7 @@ class StoreBucketServiceTest {
 	}
 
 	@Test
-	void addBucketItem_에러발생시_롤백() {
+	void addBucketItem_rollsBackOnError() {
 		// given
 		Image image1 = ImageFixture.create();
 		Image image2 = ImageFixture.create();
@@ -96,7 +96,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 비공개_버킷은_반환X() {
+	void getBucketsByUserId_excludesPrivateBuckets() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));
@@ -113,7 +113,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 본인의_버킷은_비공개여도_접근가능() {
+	void getBucketItems_includeOwnPrivateBucket() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));
@@ -135,7 +135,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 타유저의_비공개버킷_조회시_CustomException() {
+	void getBucketItems_whenAccessingOthersPrivateBucket_thenThrowsException() {
 		// given
 		Image image1 = ImageFixture.create();
 		Image image2 = ImageFixture.create();
@@ -157,7 +157,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 버킷_삭제시_버킷아이템도_삭제() {
+	void deleteBucket_cascadesDeleteBucketItems() {
 
 		// given
 		Image image = ImageFixture.create();
@@ -180,7 +180,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 유효하지않은_버킷아이템이_포함되면_에러() {
+	void removeBucketItem_whenContainsOtherUsersItem_thenThrowsException() {
 		// given
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
@@ -206,7 +206,7 @@ class StoreBucketServiceTest {
 
 	@Test
 	@Transactional
-	void 버킷아이템이_유효하면_remove_성공() {
+	void removeBucketItem_whenRequestIsValid_thenSuccess() {
 		// given
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
@@ -227,17 +227,4 @@ class StoreBucketServiceTest {
 		assertThat(storeBucketItemRepository.existsById(item1.getId())).isFalse();
 		assertThat(storeBucketItemRepository.existsById(item2.getId())).isFalse();
 	}
-
-	// @Test
-	// @Transactional
-	// void 버킷명이_중복이_아니면_입력값대로_버킷명_반환() {
-	// 	// given
-	// 	Image image = imageRepository.save(ImageFixture.create());
-	// 	User user = userRepository.save(UserFixture.create(image));
-	// 	StoreBucket storeBucket = storeBucketRepository.save(StoreBucketFixture.createOpenedBucket(user));
-	// 	String newName = "기본 리스트1";
-	//
-	// 	// when, then
-	// 	assertThat(storeBucketService.makeUnduplicateName(newName, user)).isEqualTo(newName);
-	// }
 }

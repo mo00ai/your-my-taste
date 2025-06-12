@@ -163,11 +163,15 @@ public class StoreBucketService {
 	}
 
 	public String makeUnduplicateName(String newName, User user) {
-		// "newName" 으로 시작하는 버킷 모두 조회
-		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, newName);
+		// 괄호 숫자 패턴이 붙어 있는 경우, baseName 추출 -> newName이 "맛집(1)"이면 "맛집"만 추출해서 비교
+		String baseName = newName.replaceFirst("\\((\\d+)\\)$", "");
 
-		// newName이 특수문자를 포함하는 경우를 대비해서 quote로 감싸서 패턴 생성
-		Pattern pattern = Pattern.compile("^" + Pattern.quote(newName) + "\\((\\d+)\\)$");
+		// baseName 으로 시작하는 버킷 모두 조회
+		List<StoreBucket> buckets = storeBucketRepository.findByUserAndNameStartingWith(user, baseName);
+
+		// "baseName(숫자)" 형태의 정규식 생성
+		// baseName 정규식에 사용되는 특수문자를 포함하는 경우를 대비해서 quote 사용
+		Pattern pattern = Pattern.compile("^" + Pattern.quote(baseName) + "\\((\\d+)\\)$");
 		boolean isEquals = false;
 		int suffix = 0;
 
@@ -178,14 +182,11 @@ public class StoreBucketService {
 				isEquals = true;
 			}
 
-			// "버킷(숫자)" 형식이면 숫자 추출
+			// name이 baseName(숫자) 형태와 일치하면 true
 			Matcher matcher = pattern.matcher(name);
 			if (matcher.matches()) {
-				try {
-					suffix = Math.max(suffix, Integer.parseInt(matcher.group(1)));
-				} catch (NumberFormatException e) {
-					throw new CustomException(BUCKET_NAME_OVERFLOW);
-				}
+				// group(1)은 pattern 에서 (\\d+)에 해당하는 숫자 부분만 추출
+				suffix = Math.max(suffix, Integer.parseInt(matcher.group(1)));
 			}
 		}
 
@@ -194,7 +195,12 @@ public class StoreBucketService {
 			return newName;
 		}
 
+		// suffix가 Integer의 최대값이면 baseName(-2147483648)가 반환됨
+		if (suffix == Integer.MAX_VALUE) {
+			throw new CustomException(BUCKET_NAME_OVERFLOW);
+		}
+
 		// 이름 중복 시, 뒤에 suffix 붙인 값 반환
-		return newName + "(" + (suffix + 1) + ")";
+		return baseName + "(" + (suffix + 1) + ")";
 	}
 }
