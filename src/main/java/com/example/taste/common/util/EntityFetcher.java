@@ -1,6 +1,5 @@
 package com.example.taste.common.util;
 
-<<<<<<< HEAD
 import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_FOUND;
 import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
 import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
@@ -9,21 +8,12 @@ import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
+import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
-import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import lombok.RequiredArgsConstructor;
-=======
-import static com.example.taste.domain.board.exception.BoardErrorCode.*;
-import static com.example.taste.domain.event.exception.EventErrorCode.*;
-import static com.example.taste.domain.favor.exception.FavorErrorCode.*;
-import static com.example.taste.domain.image.exception.ImageErrorCode.*;
-import static com.example.taste.domain.party.exception.PartyErrorCode.*;
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
-import static com.example.taste.domain.store.exception.StoreErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
->>>>>>> dev
 
 import org.springframework.stereotype.Component;
 
@@ -56,8 +46,6 @@ import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
