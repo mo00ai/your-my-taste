@@ -11,7 +11,6 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
-import com.example.taste.domain.notification.redis.NotificationPublisher;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
 import com.example.taste.domain.user.entity.User;
 
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 
 	private final NotificationInfoRepository infoRepository;
-	private final NotificationPublisher notificationPublisher;
 	private final RedisService redisService;
 
 	// 개별 알림

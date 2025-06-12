@@ -64,7 +64,7 @@ public class NotificationUserService {
 		Set<String> keys = getKeys(pattern);
 		//조회된 키가 없으면 빈 슬라이스 반환
 		if (keys.isEmpty()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 0), false);
 		}
 
 		// 키를 이용해 모든 알림을 가져옴
@@ -84,7 +84,7 @@ public class NotificationUserService {
 		int there = Math.min(here + pageSize + 1, sorted.size());
 
 		if (here >= sorted.size()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, pageSize), false);
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, pageSize), false);
 		}
 		Pageable pageable = PageRequest.of(index, pageSize);
 
@@ -108,7 +108,7 @@ public class NotificationUserService {
 		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
 		if (keys.isEmpty()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 0), false);
 		}
 		//가져온 리스트에서 contentsId만 조회
 		List<Long> redisContents = new ArrayList<>();
@@ -116,7 +116,7 @@ public class NotificationUserService {
 			redisContents.add(extractContentIdFromKey(key));
 		}
 		//해당 contentsId 를 가지지 않은 모든 sql 알림을 조회.
-		Pageable pageable = PageRequest.of(index, 10, Sort.by("createdAt"));
+		Pageable pageable = PageRequest.of(index - 1, 10, Sort.by("createdAt"));
 		Slice<NotificationInfo> notificationInfos = notificationInfoRepository.getMoreNotificationInfoWithContents(
 			userId, redisContents, pageable);
 

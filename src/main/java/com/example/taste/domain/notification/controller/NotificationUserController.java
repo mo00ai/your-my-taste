@@ -14,6 +14,7 @@ import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.service.NotificationUserService;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,29 +34,28 @@ public class NotificationUserController {
 	// 알림 목록 접근
 	@GetMapping("/list")
 	public CommonResponse<Slice<NotificationResponseDto>> getNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam @Min(0) int index) {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
 	}
 
 	// 알림 추가 접근
 	@GetMapping("/list/old")
 	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam @Min(0) int index) {
 		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
 	}
 
 	// 알림 읽음 처리하기
 	@PatchMapping
 	public CommonResponse<Void> markNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam Long uuid) {
-		notificationUserService.markNotificationAsRead(userDetails, uuid);
+		@RequestParam Long contentsId) {
+		notificationUserService.markNotificationAsRead(userDetails, contentsId);
 		return CommonResponse.ok();
 	}
 
 	// 전체 알림 읽음 처리하기
 	@PatchMapping("/All")
-	public CommonResponse<Void> markAllNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam Long uuid) {
+	public CommonResponse<Void> markAllNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		notificationUserService.markAllNotificationAsRead(userDetails);
 		return CommonResponse.ok();
 	}
