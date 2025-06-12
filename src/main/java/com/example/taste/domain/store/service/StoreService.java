@@ -1,6 +1,5 @@
 package com.example.taste.domain.store.service;
 
-import static com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 
 import java.math.BigDecimal;
@@ -91,7 +90,7 @@ public class StoreService {
 		if (dto.getItems().isEmpty()) {
 			throw new CustomException(STORE_NOT_FOUND);
 		}
-		Item item = dto.getItems().get(0);
+		NaverLocalSearchResponseDto.Item item = dto.getItems().get(0);
 		// 카테고리명 추출
 		String categoryName = extractCategory(item.getCategory());
 		// 카테고리 저장 or 조회
