@@ -91,9 +91,12 @@ public class ReviewService {
 			contents = requestDto.getContents();
 		}
 
-		Image image = null;
 		if (files != null && !files.isEmpty()) {
-			image = imageService.saveImage(files.get(0), imageType);
+			if (review.getImage() != null) {
+				imageService.update(review.getImage().getId(), imageType, files.get(0));
+			} else {
+				review.updateImage(imageService.saveImage(files.get(0), imageType));
+			}
 		}
 
 		Integer score = null;
@@ -109,7 +112,6 @@ public class ReviewService {
 		// 엔티티 메서드 안에서 null protection
 		review.updateContents(contents);
 		review.updateScore(score);
-		review.updateImage(image);
 		review.setValidation(valid);
 		return new UpdateReviewResponseDto(review);
 	}
