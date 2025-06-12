@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.QBoard;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.comment.entity.QComment;
@@ -19,7 +18,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<Comment> findAllRootByBoard(Board board, Pageable pageable) {
+	public Page<Comment> findAllRootByBoard(Long boardId, Pageable pageable) {
 		QBoard qBoard = QBoard.board;
 		QComment qComment = QComment.comment;
 
@@ -27,7 +26,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 			.leftJoin(qComment.board, qBoard)
 			.fetchJoin()
 			.where(
-				qComment.board.eq(board),
+				qComment.board.id.eq(boardId),
 				qComment.root.isNull()
 			)
 			.orderBy(qComment.createdAt.asc())

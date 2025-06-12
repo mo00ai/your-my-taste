@@ -44,7 +44,7 @@ public class Review extends BaseEntity {
 	private Integer score;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "image_id", nullable = false)
+	@JoinColumn(name = "image_id")
 	private Image image;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -73,14 +73,20 @@ public class Review extends BaseEntity {
 	}
 
 	public void updateContents(String contents) {
-		this.contents = contents;
+		if (contents != null) {
+			this.contents = contents;
+		}
 	}
 
 	public void updateScore(Integer score) {
-		this.score = score;
+		if (score != null) {
+			this.score = score;
+		}
 	}
 
 	public void updateImage(Image image) {
-		this.image = image;
+		if (image != null) {
+			this.image = image;
+		}
 	}
 }
