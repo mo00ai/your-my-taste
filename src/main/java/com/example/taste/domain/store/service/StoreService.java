@@ -87,6 +87,10 @@ public class StoreService {
 	}
 
 	private Store toStoreEntity(NaverLocalSearchResponseDto dto) {
+		// 결과 리스트 유효성 검사
+		if (dto.getItems().isEmpty()) {
+			throw new CustomException(STORE_NOT_FOUND);
+		}
 		Item item = dto.getItems().get(0);
 		// 카테고리명 추출
 		String categoryName = extractCategory(item.getCategory());
