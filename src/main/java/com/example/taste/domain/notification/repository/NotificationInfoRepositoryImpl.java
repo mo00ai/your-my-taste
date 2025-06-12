@@ -39,20 +39,19 @@ public class NotificationInfoRepositoryImpl implements NotificationInfoRepositor
 		if (hasNext) {
 			notificationInfos.remove(notificationInfos.size() - 1);
 		}
-
 		return new SliceImpl<>(notificationInfos, pageable, hasNext);
 	}
 
 	@Override
-	public List<NotificationInfo> getNotificationInfoWithContents(Long userId, List<Long> redisNotifications) {
+	public List<NotificationInfo> getNotificationInfoWithContents(Long userId, List<Long> contentsIds) {
 		QNotificationInfo qNotificationInfo = QNotificationInfo.notificationInfo;
 		QNotificationContent qNotificationContent = QNotificationContent.notificationContent;
 		return queryFactory.selectFrom(qNotificationInfo)
 			.leftJoin(qNotificationInfo.notificationContent, qNotificationContent)
 			.fetchJoin()
 			.where(
-				redisNotifications.isEmpty() ? null :
-					qNotificationInfo.notificationContent.id.in(redisNotifications),
+				contentsIds.isEmpty() ? null :
+					qNotificationInfo.notificationContent.id.in(contentsIds),
 				qNotificationInfo.user.id.eq(userId)
 			)
 			.fetch();

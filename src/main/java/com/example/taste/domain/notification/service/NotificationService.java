@@ -1,7 +1,6 @@
 package com.example.taste.domain.notification.service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
-import com.example.taste.domain.notification.dto.NotificationRequestDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
+import com.example.taste.domain.notification.redis.NotificationPublisher;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
 import com.example.taste.domain.user.entity.User;
 
@@ -23,9 +22,10 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 
 	private final NotificationInfoRepository infoRepository;
-
+	private final NotificationPublisher notificationPublisher;
 	private final RedisService redisService;
 
+	// 개별 알림
 	@Transactional // 둘 중 하나라도 저장 실패시 전부 롤백 하도록
 	public void sendIndividual(NotificationContent content, NotificationEventDto event, User user) {
 
@@ -38,6 +38,7 @@ public class NotificationService {
 			.build());
 	}
 
+	// 단체알림(마케팅, 시스템)
 	@Transactional
 	public void sendBunch(NotificationContent content, NotificationEventDto event, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
@@ -51,9 +52,9 @@ public class NotificationService {
 				.build());
 		}
 		infoRepository.saveAll(notificationInfos);
-		infoRepository.flush();
 	}
 
+	// 단체알림 reference by id (다른 방식으로 구현)
 	@Transactional
 	public void sendBunchUsingReference(NotificationContent content, NotificationEventDto event, List<Long> allUserId) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
@@ -66,18 +67,5 @@ public class NotificationService {
 				.build());
 		}
 		infoRepository.saveAll(notificationInfos);
-	}
-
-	// 시스템 혹은 마케팅 알림
-	@Transactional
-	public void publishNotification(NotificationRequestDto dto) {
-		NotificationEventDto eventDto = new NotificationEventDto(
-			dto.getCategory(),
-			dto.getContents(),
-			dto.getRedirectUrl(),
-			LocalDateTime.now()
-			, false
-			, null);
-		redisService.publishNotification(eventDto);
 	}
 }

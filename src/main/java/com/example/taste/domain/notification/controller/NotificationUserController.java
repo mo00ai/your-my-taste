@@ -37,6 +37,7 @@ public class NotificationUserController {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
 	}
 
+	// 알림 추가 접근
 	@GetMapping("/list/old")
 	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam int index) {

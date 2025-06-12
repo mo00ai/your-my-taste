@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +33,7 @@ public class NotificationUserService {
 	private final RedisService redisService;
 	private final NotificationInfoRepository notificationInfoRepository;
 
+	// 알림 개수 조회
 	public GetNotificationCountResponseDto getNotificationCount(CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
 		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
@@ -53,25 +53,32 @@ public class NotificationUserService {
 		return (value != null) ? (Long)value : 0L;
 	}
 
+	//최근 알림 조회(redis)
 	//TODO sortedSet
 	public Slice<NotificationResponseDto> getNotificationList(CustomUserDetails userDetails,
 		int index) {
 		Long userId = userDetails.getId();
+		// userId를 이용해 저장된 모든 알림을 가져옴
 		String pattern = "notification:user:" + userId;
+		// 모든 키
 		Set<String> keys = getKeys(pattern);
+		//조회된 키가 없으면 빈 슬라이스 반환
 		if (keys.isEmpty()) {
 			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
 		}
 
+		// 키를 이용해 모든 알림을 가져옴
 		List<NotificationEventDto> notifications = new ArrayList<>();
 		for (String key : keys) {
 			notifications.add(getNotificationOrThrow(key));
 		}
 
+		// 가져온 알림을 정렬
 		List<NotificationEventDto> sorted = notifications.stream()
 			.sorted(Comparator.comparing(NotificationEventDto::getCreatedAt).reversed())
 			.toList();
 
+		//슬라이스
 		int pageSize = 10;
 		int here = index * pageSize;
 		int there = Math.min(here + pageSize + 1, sorted.size());
@@ -88,24 +95,27 @@ public class NotificationUserService {
 			sub = sub.subList(0, pageSize);
 		}
 
-		List<Long> idList = sub.stream().map(NotificationEventDto::getContentId).collect(Collectors.toList());
-		markSqlNotificationAsRead(userId, idList);
 		Slice<NotificationEventDto> slice = new SliceImpl<>(sub, pageable, hasNext);
 		return slice.map(NotificationResponseDto::new);
 	}
 
+	// 오래된 알림 조회(mysql)
+	@Transactional(readOnly = true)
 	public Slice<NotificationResponseDto> getMoreNotificationList(CustomUserDetails userDetails,
 		int index) {
 		Long userId = userDetails.getId();
+		//redis가 가지고 있는 유저의 모든 알림을 조회
 		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
 		if (keys.isEmpty()) {
 			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index, 0), false);
 		}
+		//가져온 리스트에서 contentsId만 조회
 		List<Long> redisContents = new ArrayList<>();
 		for (String key : keys) {
 			redisContents.add(extractContentIdFromKey(key));
 		}
+		//해당 contentsId 를 가지지 않은 모든 sql 알림을 조회.
 		Pageable pageable = PageRequest.of(index, 10, Sort.by("createdAt"));
 		Slice<NotificationInfo> notificationInfos = notificationInfoRepository.getMoreNotificationInfoWithContents(
 			userId, redisContents, pageable);
@@ -114,40 +124,50 @@ public class NotificationUserService {
 		return notificationInfos.map(NotificationResponseDto::new);
 	}
 
+	// 알림 읽음 처리
+	// 유저가 알림을 클릭하면 호출
 	@Transactional
-	public void markNotificationAsRead(CustomUserDetails userDetails, Long uuid) {
+	public void markNotificationAsRead(CustomUserDetails userDetails, Long contentID) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:user:" + userId + ":id:" + uuid;
+		// redis 알림 읽음 처리
+		String pattern = "notification:user:" + userId + ":id:" + contentID;
 		Set<String> keys = getKeys(pattern);
-		String key = keys.iterator().next();
-		NotificationEventDto dto = getNotificationOrThrow(key);
+		if (!keys.isEmpty()) {
+			String key = keys.iterator().next();
+			NotificationEventDto dto = getNotificationOrThrow(key);
 
-		if (!dto.isRead()) {
-			String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
-			redisService.decreaseCount(countKey, 1L);
+			if (!dto.isRead()) {
+				String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
+				redisService.decreaseCount(countKey, 1L);
+			}
+			dto.readIt();
+			redisService.updateNotification(dto, key);
 		}
-		dto.readIt();
-		redisService.updateNotification(dto, key);
+
+		// mysql 알림 읽음 처리
 		List<Long> list = new ArrayList<>();
-		list.add(dto.getContentId());
+		list.add(contentID);
 		markSqlNotificationAsRead(userId, list);
 	}
 
+	// 모든 알림 읽음 처리
 	public void markAllNotificationAsRead(CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
 		String pattern = "notification:user:" + userId;
 		Set<String> keys = getKeys(pattern);
-		if (keys.isEmpty()) {
-			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
+
+		// redis 알림 읽음 처리
+		if (!keys.isEmpty()) {
+			for (String key : keys) {
+				NotificationEventDto dto = getNotificationOrThrow(key);
+				dto.readIt();
+				redisService.updateNotification(dto, key);
+			}
 		}
-		List<Long> redisContents = new ArrayList<>();
-		for (String key : keys) {
-			NotificationEventDto dto = getNotificationOrThrow(key);
-			dto.readIt();
-			redisService.updateNotification(dto, key);
-			redisContents.add(dto.getContentId());
-		}
-		markSqlNotificationAsRead(userId, redisContents);
+
+		// mysql 알림 읽음 처리
+		List<Long> emptyList = new ArrayList<>();
+		markSqlNotificationAsRead(userId, emptyList);
 	}
 
 	private Set<String> getKeys(String pattern) {
@@ -167,9 +187,9 @@ public class NotificationUserService {
 		return Long.parseLong(parts[parts.length - 2]);
 	}
 
-	private void markSqlNotificationAsRead(Long userId, List<Long> readNotificationIds) {
+	private void markSqlNotificationAsRead(Long userId, List<Long> contentsIds) {
 		List<NotificationInfo> mysqlNotifications = notificationInfoRepository.getNotificationInfoWithContents(userId,
-			readNotificationIds);
+			contentsIds);
 		mysqlNotifications.forEach(NotificationInfo::readIt);
 		notificationInfoRepository.saveAll(mysqlNotifications);
 	}

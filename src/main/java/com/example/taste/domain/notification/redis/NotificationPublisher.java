@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationPublisher {
 	private final RedisService redisService;
 
+	//알림 방행
 	public void publish(NotificationEventDto event) {
 		redisService.publishNotification(event);
 	}

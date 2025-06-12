@@ -36,29 +36,29 @@ public class NotificationSubscriber implements MessageListener {
 	private final NotificationContentRepository contentRepository;
 	private final GenericJackson2JsonRedisSerializer serializer;
 
+	// 알림 발행시 자동으로 실행
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
-		try {
-			String json = new String(message.getBody(), StandardCharsets.UTF_8);
-			System.out.println(json);
-			//NotificationEventDto event = objectMapper.readValue(json, NotificationEventDto.class);
-			NotificationEventDto event = serializer.deserialize(message.getBody(), NotificationEventDto.class);
-			switch (event.getCategory()) {
-				case INDIVIDUAL -> {
-					sendIndividual(event);
-				}
-				case SYSTEM, MARKETING -> {
-					sendSystem(event);
-				}
-				case SUBSCRIBERS -> {
-					sendSubscriber(event);
-				}
+		// 받은 메시지를 json 스타일로 맵핑
+		String json = new String(message.getBody(), StandardCharsets.UTF_8);
+		// json 을 역직렬화 하여 dto 로 맵핑
+		// redis 은 커스텀 objectMapper 를 사용해 직렬화 하였으므로 역직렬화때도 같은 objectMapper 를 써야 함
+		NotificationEventDto event = serializer.deserialize(message.getBody(), NotificationEventDto.class);
+		// 받은 알림의 카테고리에 따라 다른 동작
+		switch (event.getCategory()) {
+			case INDIVIDUAL -> {
+				sendIndividual(event);
 			}
-		} catch (Exception e) {
-			log.error("Notification 오류", e);
+			case SYSTEM, MARKETING -> {
+				sendSystem(event);
+			}
+			case SUBSCRIBERS -> {
+				sendSubscriber(event);
+			}
 		}
 	}
 
+	// 개인에게 보내는 알림
 	private void sendIndividual(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		User user = userRepository.findById(event.getUserId())
@@ -66,10 +66,12 @@ public class NotificationSubscriber implements MessageListener {
 		notificationService.sendIndividual(content, event, user);
 	}
 
+	// 시스템 알림. 모든 유저에게 전송.
 	private void sendSystem(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		// 페이징 방식
 		long startLogging = System.currentTimeMillis();
+		// 유저를 100명 단위로 끊어와 보냄
 		int page = 0;
 		int size = 100;
 		Page<User> users;
@@ -88,18 +90,26 @@ public class NotificationSubscriber implements MessageListener {
 		notificationService.sendBunchUsingReference(event, userIds);
 		endLogging = System.currentTimeMillis();
 		log.info("reference by id 타임 체크", (endLogging - startLogging));
-
 		 */
+
+		// TODO 두 방식 걸리는 시간 비교할 것.
 	}
 
+	// 구독자 알림
 	private void sendSubscriber(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
+		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
+		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
+		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
 		List<Follow> followList = followRepository.findAllByFollowing(event.getUserId());
+		// 팔로우 하는 모든 유저를 가져옴
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
 			followers.add(follow.getFollower());
 		}
 		notificationService.sendBunch(content, event, followers);
+
+		// TODO 위의 시스템 알림에서 두 방식을 비교한 뒤 더 합리적인 방식을 여기에도 적용
 	}
 
 	public NotificationContent saveContent(NotificationEventDto event) {

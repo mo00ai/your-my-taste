@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum NotificationErrorCode implements BaseCode {
 	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "리뷰를 찾을 수 없습니다."),
-	BAD_JSON_MAPPING(HttpStatus.BAD_REQUEST, "N002",
-		"Beep boop notification went crazy. Contact the dumbass who’s in charge."),
 	;
 
 	private final HttpStatus httpStatus;

@@ -11,5 +11,5 @@ public interface NotificationInfoRepositoryCustom {
 	Slice<NotificationInfo> getMoreNotificationInfoWithContents(Long userId, List<Long> redisNotifications,
 		Pageable pageable);
 
-	List<NotificationInfo> getNotificationInfoWithContents(Long userId, List<Long> redisNotifications);
+	List<NotificationInfo> getNotificationInfoWithContents(Long userId, List<Long> contentsIds);
 }
