@@ -1,6 +1,6 @@
 package com.example.taste.config;
 
-import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.constant.RedisConst.DEFAULT;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -15,11 +15,15 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.example.taste.common.constant.RedisChannel;
+import com.example.taste.domain.match.redis.MatchSubscriber;
+import com.example.taste.domain.notification.redis.NotificationSubscriber;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -93,9 +97,17 @@ public class RedisConfig {
 
 	// redis event 리스너
 	@Bean
-	public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory) {
+	public RedisMessageListenerContainer redisMessageListenerContainer(
+		RedisConnectionFactory connectionFactory,
+		MatchSubscriber matchSubscriber,
+		NotificationSubscriber notificationSubscriber) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
+
+		// MEMO : 필요한 채널과 리스너를 파라미터와 이곳에 추가해주세요.
+		container.addMessageListener(matchSubscriber, new ChannelTopic(RedisChannel.MATCH_CHANNEL));
+		container.addMessageListener(notificationSubscriber, new ChannelTopic(RedisChannel.NOTIFICATION_CHANNEL));
+
 		return container;
 	}
 

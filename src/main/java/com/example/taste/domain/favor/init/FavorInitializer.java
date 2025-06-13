@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 
-@Component    // TODO: 추후 프로필 추가하여 개발 환경과 배포 환경에서 분리 필요
+@Component    // TODO: 추후 프로필 추가하여 개발 환경과 배포 환경에서 분리 필요 - @윤예진
 @RequiredArgsConstructor
 public class FavorInitializer {
 	private final FavorRepository favorRepository;
