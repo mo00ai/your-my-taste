@@ -42,7 +42,7 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		@Param("party") Party party,
 		@Param("type") InvitationType type, @Param("status") InvitationStatus status);
 
-	@Query("SELECT pi.party.id FROM PartyInvitation pi WHERE pi.user.id = :userId")
+	@Query("SELECT pi.party.id FROM PartyInvitation pi WHERE pi.user = :user")
 	List<Long> findAllPartyIdByUser(@Param("user") User user);
 
 	@Query("DELETE FROM PartyInvitation pi "
