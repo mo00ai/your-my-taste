@@ -92,8 +92,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 		this.user = user;
 		this.title = requestDto.getTitle();
 		this.ageRange = requestDto.getAgeRange();
-		this.meetingDate = requestDto.getMeetingDate() != null ?
-			LocalDate.parse(requestDto.getMeetingDate()) : null;
+		this.meetingDate = requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
 		this.region = requestDto.getRegion();
 		this.userGender = user.getGender();
 		this.userAge = user.getAge();
@@ -108,7 +107,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 			this.ageRange = requestDto.getAgeRange();
 		}
 		if (requestDto.getMeetingDate() != null) {
-			this.meetingDate = LocalDate.parse(requestDto.getMeetingDate());
+			this.meetingDate = requestDto.getMeetingDate();
 		}
 		if (requestDto.getRegion() != null)
 			this.region = requestDto.getRegion();
