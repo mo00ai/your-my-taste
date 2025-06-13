@@ -21,7 +21,7 @@ import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
-import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.enums.PartyFilter;
@@ -46,8 +46,7 @@ public class PartyController {
 	@GetMapping
 	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(defaultValue = "ALL")
-		@ValidEnum(target = PartyFilter.class) String filter) {
+		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter) {
 		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
 	}
 
@@ -61,7 +60,7 @@ public class PartyController {
 	@PatchMapping("/{partyId}")
 	public CommonResponse<Void> updatePartyDetail(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Long partyId, @RequestBody @Valid PartyDetailUpdateRequestDto requestDto) {
+		@PathVariable Long partyId, @RequestBody @Valid PartyUpdateRequestDto requestDto) {
 		partyService.updatePartyDetail(userDetails.getId(), partyId, requestDto);
 		return CommonResponse.ok();
 	}

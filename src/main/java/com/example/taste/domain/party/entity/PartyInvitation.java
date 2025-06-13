@@ -15,12 +15,12 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.user.entity.User;
@@ -40,14 +40,18 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	private Party party;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_match_info_id")
+	private UserMatchInfo userMatchInfo;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private InvitationType invitationType;
 
-	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private InvitationStatus invitationStatus;
@@ -62,5 +66,9 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 
 	public void leave() {
 		this.invitationStatus = InvitationStatus.EXITED;
+	}
+
+	public void updateInvitationStatus(InvitationStatus status) {
+		this.invitationStatus = status;
 	}
 }
