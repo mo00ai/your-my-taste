@@ -1,5 +1,7 @@
 package com.example.taste.domain.match.entity;
 
+import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.vo.AgeRange;
@@ -73,7 +76,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	@Builder
 	public UserMatchInfo(UserMatchInfoCreateRequestDto requestDto, User user) {
 		if (user == null) {
-			throw new IllegalArgumentException("필수 필드값이 누락되었습니다");
+			throw new CustomException(INVALID_INPUT_VALUE, "필수 파라미터 값이 누락되었습니다.");
 		}
 		this.user = user;
 		this.title = requestDto.getTitle();

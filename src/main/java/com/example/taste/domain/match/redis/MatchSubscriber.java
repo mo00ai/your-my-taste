@@ -1,5 +1,7 @@
 package com.example.taste.domain.match.redis;
 
+import static com.example.taste.common.exception.ErrorCode.REDIS_OPERATION_FAILED;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,6 +9,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.match.service.MatchEngineService;
@@ -38,7 +41,7 @@ public class MatchSubscriber implements MessageListener {
 				matchEngineService.runMatchingForParty();
 			}
 			default -> {
-				throw new IllegalArgumentException("올바르지 않은 매칭 작업 타입이 발행 후 소비되었습니다.");
+				throw new CustomException(REDIS_OPERATION_FAILED, "올바르지 않은 매칭 작업 타입 값이 발행 후 소비되었습니다.");
 			}
 		}
 	}

@@ -1,9 +1,13 @@
 package com.example.taste.domain.match.vo;
 
+import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
+
 import jakarta.validation.constraints.Positive;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import com.example.taste.common.exception.CustomException;
 
 @Getter
 @NoArgsConstructor
@@ -16,7 +20,8 @@ public class AgeRange {
 
 	public AgeRange(Integer minAge, Integer maxAge) {
 		if (minAge == null || maxAge == null || (minAge > maxAge) || minAge % 10 != 0 || maxAge % 10 != 0) {
-			throw new IllegalArgumentException("minAge <= maxAge 이어야하며, minAge 와 maxAge 는 십자리 수 단위로만 가능합니다.");
+			throw new CustomException(INVALID_INPUT_VALUE,
+				"minAge <= maxAge 이어야하며, minAge 와 maxAge 는 십자리 수 단위로만 가능합니다.");
 		}
 		this.minAge = minAge;
 		this.maxAge = maxAge;
