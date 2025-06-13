@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,6 +100,24 @@ public class CommentService {
 		comment.deleteContent(LocalDateTime.now());
 	}
 
+	// 루트 가져오기
+	@Transactional(readOnly = true)
+	public Page<GetCommentDto> getAllRootCommentOfBoard(Long boardId, int index) {
+		Pageable pageable = PageRequest.of(index - 1, 10);
+		Page<Comment> rootComments = commentRepository.findAllRootByBoard(boardId, pageable);
+		Page<GetCommentDto> dtos = rootComments.map(GetCommentDto::new);
+		return dtos;
+	}
+
+	// 대댓글 가져오기
+	public Slice<GetCommentDto> getChildComment(Long commentId, int index) {
+		Pageable pageable = PageRequest.of(index - 1, 10);
+		Slice<Comment> rootComments = commentRepository.findChildComment(commentId, pageable);
+		Slice<GetCommentDto> dtos = rootComments.map(GetCommentDto::new);
+		return dtos;
+	}
+
+	//이거는 나중에 클래스 사용해서 매핑하는 방식으로 리팩토링 해볼 것.
 	@Transactional(readOnly = true)
 	public Page<GetCommentDto> getAllCommentOfBoard(Long boardId, int index) {
 

@@ -50,7 +50,7 @@ public class NotificationUserService {
 
 	private Long getCount(String key) {
 		Object value = redisService.getKeyValue(key);
-		return (value != null) ? (Long)value : 0L;
+		return (value instanceof Number) ? ((Number)value).longValue() : 0L;
 	}
 
 	//최근 알림 조회(redis)
@@ -59,12 +59,12 @@ public class NotificationUserService {
 		int index) {
 		Long userId = userDetails.getId();
 		// userId를 이용해 저장된 모든 알림을 가져옴
-		String pattern = "notification:user:" + userId;
+		String pattern = "notification:user:" + userId + "*";
 		// 모든 키
 		Set<String> keys = getKeys(pattern);
 		//조회된 키가 없으면 빈 슬라이스 반환
 		if (keys.isEmpty()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 0), false);
+			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 10), false);
 		}
 
 		// 키를 이용해 모든 알림을 가져옴
@@ -80,7 +80,7 @@ public class NotificationUserService {
 
 		//슬라이스
 		int pageSize = 10;
-		int here = index * pageSize;
+		int here = (index - 1) * pageSize;
 		int there = Math.min(here + pageSize + 1, sorted.size());
 
 		if (here >= sorted.size()) {
@@ -105,7 +105,7 @@ public class NotificationUserService {
 		int index) {
 		Long userId = userDetails.getId();
 		//redis가 가지고 있는 유저의 모든 알림을 조회
-		String pattern = "notification:user:" + userId;
+		String pattern = "notification:user:" + userId + "*";
 		Set<String> keys = getKeys(pattern);
 
 		//가져온 리스트에서 contentsId만 조회
@@ -129,7 +129,7 @@ public class NotificationUserService {
 	public void markNotificationAsRead(CustomUserDetails userDetails, Long contentID) {
 		Long userId = userDetails.getId();
 		// redis 알림 읽음 처리
-		String pattern = "notification:user:" + userId + ":id:" + contentID;
+		String pattern = "notification:user:" + userId + ":id:" + contentID + "*";
 		Set<String> keys = getKeys(pattern);
 		if (!keys.isEmpty()) {
 			String key = keys.iterator().next();
@@ -152,7 +152,7 @@ public class NotificationUserService {
 	// 모든 알림 읽음 처리
 	public void markAllNotificationAsRead(CustomUserDetails userDetails) {
 		Long userId = userDetails.getId();
-		String pattern = "notification:user:" + userId;
+		String pattern = "notification:user:" + userId + "*";
 		Set<String> keys = getKeys(pattern);
 
 		// redis 알림 읽음 처리
