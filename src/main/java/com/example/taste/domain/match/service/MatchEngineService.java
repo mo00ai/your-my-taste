@@ -105,7 +105,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		partyStream = partyStream.filter(p -> !invitedPartyIdList.contains(p.getParty().getId()));
 
 		// 가게 필터링
-		if (matchingUser.getStores() != null && !matchingUser.getStores().isEmpty()) {
+		if (matchingUser.getStoreList() != null && !matchingUser.getStoreList().isEmpty()) {
 			partyStream = matchStore(matchingUser, partyStream);
 		}
 
@@ -167,13 +167,13 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 				.findFirst()
 				.orElse(null);
 		}
-		
+
 		if (selectedParty == null) {
 			log.warn("[runMatchingForParty] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMatchInfo ID: {}",
 				matchingUser.getUser().getId(), matchingUser.getId());
 			return null;
 		}
-		matchingUser.setMatchStatus(MatchStatus.WAITING_HOST);
+		matchingUser.updateMatchStatus(MatchStatus.WAITING_HOST);
 		return new PartyInvitation(
 			selectedParty.getParty(), matchingUser.getUser(), InvitationType.RANDOM, InvitationStatus.WAITING);
 	}
@@ -181,14 +181,14 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	// 아무 매칭 조건도 설정하지 않았을 때
 	private boolean hasNoPreferenceSet(UserMatchInfo info) {
 		return info.getMeetingDate() == null
-			&& (info.getCategories() == null || info.getCategories().isEmpty())
+			&& (info.getCategoryList() == null || info.getCategoryList().isEmpty())
 			&& (info.getRegion() == null || info.getRegion().isBlank())
 			&& info.getAgeRange() == null;
 	}
 
 	private Stream<PartyMatchInfo> matchStore(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
 		return partyStream.filter(p -> p.getStore() != null
-			&& matchingUser.getStores().stream()
+			&& matchingUser.getStoreList().stream()
 			.map(UserMatchInfoStore::getStore)
 			.toList().contains(p.getStore()));
 	}
@@ -232,11 +232,11 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지
 	private int calculateCategoryScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
-		if (matchingUser.getCategories() == null || party.getStore().getCategory() == null) {
+		if (matchingUser.getCategoryList() == null || party.getStore().getCategory() == null) {
 			return 0;
 		}
 
-		if (matchingUser.getCategories().stream()
+		if (matchingUser.getCategoryList().stream()
 			.map(UserMatchInfoCategory::getCategory)
 			.toList()
 			.contains(party.getStore().getCategory())) {

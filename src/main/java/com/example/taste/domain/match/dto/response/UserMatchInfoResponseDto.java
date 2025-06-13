@@ -25,9 +25,9 @@ public class UserMatchInfoResponseDto {
 	@Builder
 	public UserMatchInfoResponseDto(UserMatchInfo userMatchInfo) {
 		this.id = userMatchInfo.getId();
-		this.stores = userMatchInfo.getStores().stream()
+		this.stores = userMatchInfo.getStoreList().stream()
 			.map(UserMatchInfoStoreResponseDto::new).toList();
-		this.categories = userMatchInfo.getCategories().stream()
+		this.categories = userMatchInfo.getCategoryList().stream()
 			.map(UserMatchInfoCategoryResponseDto::new).toList();
 		this.ageRange = userMatchInfo.getAgeRange();
 		this.gender = userMatchInfo.getUserGender().toString();

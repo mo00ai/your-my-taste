@@ -45,12 +45,13 @@ public class MatchInfoService {
 
 		// 맛집 리스트 세팅
 		if (requestDto.getStores() != null) {
-			userMatchInfo.setStores(getValidUserMatchInfoStores(requestDto.getStores(), userMatchInfo));
+			userMatchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStores(), userMatchInfo));
 		}
 
 		// 카테고리 리스트 세팅
 		if (requestDto.getCategories() != null) {
-			userMatchInfo.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), userMatchInfo));
+			userMatchInfo.updateCategoryList(
+				getValidUserMatchInfoCategories(requestDto.getCategories(), userMatchInfo));
 		}
 	}
 
@@ -79,12 +80,12 @@ public class MatchInfoService {
 
 		// 맛집 리스트 세팅
 		if (requestDto.getStores() != null) {
-			matchInfo.setStores(getValidUserMatchInfoStores(requestDto.getStores(), matchInfo));
+			matchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStores(), matchInfo));
 		}
 
 		// 카테고리 리스트 세팅
 		if (requestDto.getCategories() != null) {
-			matchInfo.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), matchInfo));
+			matchInfo.updateCategoryList(getValidUserMatchInfoCategories(requestDto.getCategories(), matchInfo));
 		}
 	}
 

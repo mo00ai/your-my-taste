@@ -21,7 +21,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -50,13 +49,11 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	private String title;
 
-	@Setter
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoStore> stores;
+	private List<UserMatchInfoStore> storeList;
 
-	@Setter
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoCategory> categories;
+	private List<UserMatchInfoCategory> categoryList;
 
 	@Embedded
 	private AgeRange ageRange;
@@ -67,19 +64,18 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	private Gender userGender;
 	private Integer userAge;
 
-	@Setter
 	@Enumerated(EnumType.STRING)
 	private MatchStatus matchStatus;
 
 	private LocalDateTime matchStartedAt;
 
 	@Builder
-	public UserMatchInfo(User user, List<UserMatchInfoStore> stores, List<UserMatchInfoCategory> categories,
+	public UserMatchInfo(User user, List<UserMatchInfoStore> storeList, List<UserMatchInfoCategory> categoryList,
 		AgeRange ageRange, LocalDate meetingDate, Gender userGender, Integer userAge, String region,
 		MatchStatus matchStatus) {
 		this.user = user;
-		this.stores = stores;
-		this.categories = categories;
+		this.storeList = storeList;
+		this.categoryList = categoryList;
 		this.ageRange = ageRange;
 		this.meetingDate = meetingDate;
 		this.region = region;
@@ -117,7 +113,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	public void registerMatch() {
 		this.matchStatus = MatchStatus.MATCHING;
-		this.matchStartedAt = LocalDateTime.now();
+		this.matchStartedAt = LocalDateTime.now();    // TODO: 매칭 되거나하면 null 로 변경
 	}
 
 	public boolean isMatching() {
@@ -130,5 +126,23 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	public boolean isOwner(User user) {
 		return this.getUser().equals(user);
+	}
+
+	public void updateStoreList(List<UserMatchInfoStore> storeList) {
+		if (storeList != null) {
+			this.storeList.clear();
+			this.storeList.addAll(storeList);
+		}
+	}
+
+	public void updateCategoryList(List<UserMatchInfoCategory> categoryListList) {
+		if (categoryListList != null) {
+			this.categoryList.clear();
+			this.categoryList.addAll(categoryListList);
+		}
+	}
+
+	public void updateMatchStatus(MatchStatus matchStatus) {
+		this.matchStatus = matchStatus;
 	}
 }
