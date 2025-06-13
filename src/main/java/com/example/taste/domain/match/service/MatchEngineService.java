@@ -95,7 +95,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private PartyInvitation runMatchEngine(
 		UserMatchInfo matchingUser, List<PartyMatchInfo> matchingPartyList) {
 		int bestScore = 0;
-		List<Long> bestScorePartyMatchInfoIdList = new ArrayList<>(List.of(0L));
+		List<Long> bestScorePartyMatchInfoIdList = new ArrayList<>();
 
 		// 1. 필터링
 		Stream<PartyMatchInfo> partyStream = matchingPartyList.stream();
@@ -146,7 +146,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		// 1) 필터링-가중치 계산 이후에도 모든 파티가 0점인 경우, 2)최고 점수인 파티가 여러 개인 경우
 		PartyMatchInfo selectedParty = null;
 		// 모든 점수가 0인 경우 랜덤 선택
-		if (bestScore == 0) {
+		if (bestScore == 0 && !filteredPartyList.isEmpty()) {
 			selectedParty = filteredPartyList.get(
 				ThreadLocalRandom.current().nextInt(0, filteredPartyList.size()));
 		}
