@@ -85,21 +85,19 @@ public class OCRService {
 				.build()))
 			.build();
 
-		Mono<OcrResponseDto> response = null;
-		try {
-			response = webClient
-				.post()
-				.uri(uri)
-				.header("X-OCR-SECRET", secretKey)
-				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(ocrRequestDto)
-				.retrieve()
-				.bodyToMono(OcrResponseDto.class);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		Mono<OcrResponseDto> response = webClient
+			.post()
+			.uri(uri)
+			.header("X-OCR-SECRET", secretKey)
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(ocrRequestDto)
+			.retrieve()
+			.onStatus(s -> s.is4xxClientError() || s.is5xxServerError(),
+				r -> r.bodyToMono(String.class)
+					.flatMap(e -> Mono.error(new CustomException(ReviewErrorCode.OCR_CALL_FAILED))))
+			.bodyToMono(OcrResponseDto.class);
 
-		OcrResponseDto ocrResponseDto = response.block();
+		OcrResponseDto ocrResponseDto = response.block(Duration.ofSeconds(10));
 
 		ocrResponseDto.getImages();
 		// 가게 이름 (ex: 프랭크 버거)
