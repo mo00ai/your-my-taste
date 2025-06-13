@@ -73,48 +73,17 @@ public class Party extends BaseCreatedAtEntity {
 	private boolean enableRandomMatching = false;
 
 	@Builder
-	public Party(User hostUser, List<PartyInvitation> partyInvitationList, String title,
-		String description, PartyStatus partyStatus, Store store,
-		LocalDate meetingDate, int maxMembers, int nowMembers, Boolean enableRandomMatching) {
-		this.hostUser = hostUser;
-		this.partyInvitationList = partyInvitationList;
-		this.title = title;
-		this.description = description;
-		this.partyStatus = partyStatus;
-		this.store = store;
-		this.meetingDate = meetingDate;
-		this.maxMembers = maxMembers;
-		this.nowMembers = nowMembers;
-		this.enableRandomMatching = enableRandomMatching != null ? enableRandomMatching : false;
-	}
-
-	@Builder
-	public Party(PartyCreateRequestDto requestDto, User hostUser) {
-		this.hostUser = hostUser;
-		this.title = requestDto.getTitle();
-		this.description =
-			requestDto.getDescription() != null ? requestDto.getDescription() : null;
-		this.meetingDate =
-			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
-		this.maxMembers =
-			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
-		this.enableRandomMatching =
-			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
-		this.partyStatus = PartyStatus.RECRUITING;
-	}
-
-	@Builder
 	public Party(PartyCreateRequestDto requestDto, User hostUser, Store store) {
 		this.hostUser = hostUser;
-		this.store = store;
 		this.title = requestDto.getTitle();
 		this.description =
 			requestDto.getDescription() != null ? requestDto.getDescription() : null;
+		this.store = store;
 		this.meetingDate =
 			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
+		this.nowMembers = 1;
 		this.maxMembers =
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
-		this.nowMembers = 1;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
 		this.partyStatus = PartyStatus.RECRUITING;

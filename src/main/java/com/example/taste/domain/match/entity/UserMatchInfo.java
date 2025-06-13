@@ -70,21 +70,6 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	private LocalDateTime matchStartedAt;
 
 	@Builder
-	public UserMatchInfo(User user, List<UserMatchInfoStore> storeList, List<UserMatchInfoCategory> categoryList,
-		AgeRange ageRange, LocalDate meetingDate, Gender userGender, Integer userAge, String region,
-		MatchStatus matchStatus) {
-		this.user = user;
-		this.storeList = storeList;
-		this.categoryList = categoryList;
-		this.ageRange = ageRange;
-		this.meetingDate = meetingDate;
-		this.region = region;
-		this.userGender = userGender;
-		this.userAge = userAge;
-		this.matchStatus = matchStatus;
-	}
-
-	@Builder
 	public UserMatchInfo(UserMatchInfoCreateRequestDto requestDto, User user) {
 		if (user == null) {
 			throw new IllegalArgumentException("필수 필드값이 누락되었습니다");

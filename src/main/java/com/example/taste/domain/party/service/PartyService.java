@@ -24,6 +24,7 @@ import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
+import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.User;
@@ -41,7 +42,12 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 	public void createParty(Long hostId, PartyCreateRequestDto requestDto) {
 		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
-		Party party = partyRepository.save(new Party(requestDto, hostUser));
+		Store store = null;
+		if (requestDto.getStoreId() != null) {
+			store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
+		}
+
+		Party party = partyRepository.save(new Party(requestDto, hostUser, store));
 		partyInvitationRepository.save(new PartyInvitation(
 			party, hostUser, InvitationType.INVITATION, InvitationStatus.CONFIRMED));
 	}
