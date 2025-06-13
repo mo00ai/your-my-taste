@@ -329,14 +329,14 @@ public class PartyInvitationService {
 				party.setPartyStatus(PartyStatus.FULL);
 				PartyMatchInfo partyMatchInfo =
 					partyMatchInfoRepository.findPartyMatchInfoByParty(party);
-				partyMatchInfo.setMatchStatus(MatchStatus.IDLE);
+				partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
 			PartyMatchInfo partyMatchInfo =
 				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
-			partyMatchInfo.setMatchStatus(MatchStatus.IDLE);
+			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}

@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
@@ -49,7 +48,6 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 
 	private String region;
 
-	@Setter
 	@Enumerated(EnumType.STRING)
 	private MatchStatus matchStatus;
 
@@ -74,5 +72,9 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 		this.gender = Gender.valueOf(requestDto.getGender());
 		this.region = requestDto.getRegion();
 		this.matchStatus = MatchStatus.MATCHING;
+	}
+
+	public void updateMatchStatus(MatchStatus matchStatus) {
+		this.matchStatus = matchStatus;
 	}
 }
