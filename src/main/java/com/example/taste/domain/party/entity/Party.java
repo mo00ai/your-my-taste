@@ -129,7 +129,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.description = requestDto.getDescription();
 		}
 		if (requestDto.getMeetingDate() != null) {
-			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
+			this.meetingDate = requestDto.getMeetingDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
@@ -147,7 +147,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.description = requestDto.getDescription();
 		}
 		if (requestDto.getMeetingDate() != null) {
-			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
+			this.meetingDate = requestDto.getMeetingDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
