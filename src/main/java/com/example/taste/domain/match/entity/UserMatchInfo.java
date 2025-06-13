@@ -48,6 +48,8 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	private String title;
+
 	@Setter
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchInfoStore> stores;
@@ -89,7 +91,10 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	@Builder
 	public UserMatchInfo(UserMatchInfoCreateRequestDto requestDto, User user) {
 		this.user = user;
+		this.title = requestDto.getTitle();
 		this.ageRange = requestDto.getAgeRange();
+		this.meetingDate = requestDto.getMeetingDate() != null ?
+			LocalDate.parse(requestDto.getMeetingDate()) : null;
 		this.region = requestDto.getRegion();
 		this.userGender = user.getGender();
 		this.userAge = user.getAge();
@@ -97,8 +102,17 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	}
 
 	public void update(UserMatchInfoUpdateRequestDto requestDto) {
-		this.ageRange = requestDto.getAgeRange();
-		this.region = requestDto.getRegion();
+		if (requestDto.getTitle() != null) {
+			this.title = requestDto.getTitle();
+		}
+		if (requestDto.getAgeRange() != null) {
+			this.ageRange = requestDto.getAgeRange();
+		}
+		if (requestDto.getMeetingDate() != null) {
+			this.meetingDate = LocalDate.parse(requestDto.getMeetingDate());
+		}
+		if (requestDto.getRegion() != null)
+			this.region = requestDto.getRegion();
 	}
 
 	public void registerMatch() {
