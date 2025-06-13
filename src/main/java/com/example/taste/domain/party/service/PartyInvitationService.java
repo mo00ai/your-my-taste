@@ -263,7 +263,6 @@ public class PartyInvitationService {
 		if (!party.isFull()) {
 			userMatchInfo.updateMatchStatus(MatchStatus.WAITING_USER);
 			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
-			partyInvitation.getParty().joinMember();
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
@@ -324,6 +323,7 @@ public class PartyInvitationService {
 
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+			party.joinMember();
 			userMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 
 			if (party.isFull()) {
