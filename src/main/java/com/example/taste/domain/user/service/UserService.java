@@ -88,14 +88,14 @@ public class UserService {
 			if (oldImage != null) {
 				try {
 					imageService.update(oldImage.getId(), ImageType.USER, file);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요 - @윤예진
 					log.info("유저 이미지 업데이트에 실패하였습니다 (email: " + user.getEmail() + ")");
 				}
 			} else {
 				try {
 					Image image = imageService.saveImage(file, ImageType.USER);
 					user.setImage(image);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요 - @윤예진
 					log.info("유저 이미지 저장에 실패하였습니다 (email: " + user.getEmail() + ")");
 				}
 			}

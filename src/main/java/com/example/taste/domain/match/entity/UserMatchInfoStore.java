@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.entity;
+package com.example.taste.domain.match.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,28 +14,28 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.example.taste.domain.store.entity.Category;
+import com.example.taste.domain.store.entity.Store;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_match_cond_category")
-public class UserMatchCondCategory {
+@Table(name = "user_match_info_store")
+public class UserMatchInfoStore {
 	@Id
 	@GeneratedValue
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private UserMatchCond userMatchCond;
+	private UserMatchInfo userMatchInfo;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Category category;
+	private Store store;
 
 	@Builder
-	public UserMatchCondCategory(UserMatchCond userMatchCond, Category category) {
-		this.userMatchCond = userMatchCond;
-		this.category = category;
+	public UserMatchInfoStore(UserMatchInfo userMatchInfo, Store store) {
+		this.userMatchInfo = userMatchInfo;
+		this.store = store;
 	}
 }
