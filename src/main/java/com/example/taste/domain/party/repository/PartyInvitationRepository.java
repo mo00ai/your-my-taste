@@ -53,11 +53,5 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		@Param("invitationType") InvitationType type,
 		@Param("invitationStatus") InvitationStatus status);
 
-	@Query("DELETE FROM PartyInvitation pi "
-		+ "WHERE pi.party = :party "
-		+ "AND pi.invitationType = :type AND pi.invitationStatus = :status")
-	void deletePartyMatchWhileMatching(@Param("party") Party party,
-		@Param("type") InvitationType type, @Param("status") InvitationStatus status);
-
 	void deleteAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
 }
