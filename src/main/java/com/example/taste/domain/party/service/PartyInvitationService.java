@@ -317,7 +317,7 @@ public class PartyInvitationService {
 
 		// 매칭 상태가 WAITING_USER 가 아닌 경우
 		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
-		if (!userMatchInfo.isStatus(MatchStatus.WAITING_HOST)) {
+		if (!userMatchInfo.isStatus(MatchStatus.WAITING_USER)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 
