@@ -16,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.entity.PartyMatchCond;
 import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.repository.PartyMatchCondRepository;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
@@ -81,7 +83,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 유저 가져오기, 탈퇴 유저인 경우 예외 발생
-		User user = entityFetcher.getActiveUserOrThrow(requestDto.getUserId());
+		User user = entityFetcher.getUndeletedUserOrThrow(requestDto.getUserId());
 
 		// 파티 초대 정보가 있다면 (초대 중, 이미 존재, 거절)
 		PartyInvitation partyInvitation =
@@ -109,7 +111,7 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 탈퇴한 유저인 경우 예외 발생
-		User user = entityFetcher.getActiveUserOrThrow(userId);
+		User user = entityFetcher.getUndeletedUserOrThrow(userId);
 
 		partyInvitationRepository.save(new PartyInvitation(
 			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
@@ -275,7 +277,8 @@ public class PartyInvitationService {
 
 	// 호스트가 랜덤 파티 초대 거절
 	@Transactional
-	public void rejectRandomPartyInvitation(
+	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
+	public List<Long> rejectRandomPartyInvitation(
 		Long hostId, Long partyId,
 		Long partyInvitationId, InvitationActionRequestDto requestDto) {
 		// 초대 스테이터스가 대기가 아닌 경우
@@ -293,6 +296,8 @@ public class PartyInvitationService {
 
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
+
+		return List.of(partyInvitation.getUserMatchCond().getId());    // 매칭 대상이 될 유저 매칭 조건 ID
 	}
 
 	// 유저가 랜덤 파티 초대 수락

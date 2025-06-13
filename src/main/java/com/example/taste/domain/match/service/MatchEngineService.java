@@ -36,24 +36,29 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 유저 한 명에게 파티 추천
-	public void runMatchingForUser(Long userMatchCondId) {
+	public void runMatchingForUser(List<Long> userMatchCondIds) {
 		// MEMO : 다 불러와도 되나?
 		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크
-		UserMatchCond matchingUser = entityFetcher.getUserMatchCondOrThrow(userMatchCondId);
-		List<PartyMatchCond> matchingPartyList = partyMatchCondRepository.findAll();
+		List<UserMatchCond> matchingUserList =
+			userMatchCondRepository.findAllById(userMatchCondIds);
 
+		List<PartyMatchCond> matchingPartyList = partyMatchCondRepository.findAll();
 		// 매칭 중인 파티가 없는 경우
 		if (matchingPartyList.isEmpty()) {
 			return;
 		}
 
 		// 매칭 알고리즘
-		PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
-		if (partyInvitation != null) {
-			partyInvitationRepository.save(partyInvitation);
-			// TODO : 저장 후 파티장에게 매칭 성공 알림 발송 - @윤예진
+		List<PartyInvitation> matchedList = new ArrayList<>();
+
+		for (UserMatchCond matchingUser : matchingUserList) {
+			PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
+			if (partyInvitation != null) {
+				matchedList.add(partyInvitation);
+			}
 		}
-		// MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
+		partyInvitationRepository.saveAll(matchedList);
+		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진 // MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
 	}
 
 	// 파티를 기준으로 맞는 유저 매칭

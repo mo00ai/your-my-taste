@@ -3,6 +3,8 @@ package com.example.taste.domain.match.service;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,12 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
 import com.example.taste.domain.match.entity.PartyMatchCond;
 import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.enums.MatchJobType;
+import com.example.taste.domain.match.redis.MatchPublisher;
 import com.example.taste.domain.match.repository.PartyMatchCondRepository;
 import com.example.taste.domain.match.repository.UserMatchCondRepository;
 import com.example.taste.domain.party.entity.Party;
+import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.MatchStatus;
@@ -27,11 +33,13 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @RequiredArgsConstructor
 public class MatchService {
 	private final EntityFetcher entityFetcher;
+	private final MatchPublisher matchPublisher;
 	private final UserMatchCondRepository userMatchCondRepository;
 	private final PartyMatchCondRepository partyMatchCondRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
-	public void registerUserMatch(Long matchConditionId) {
+	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
+	public List<Long> registerUserMatch(Long matchConditionId) {
 		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
 		// 이미 매칭 중이라면
 		if (userMatchCond.isMatching()) {
@@ -39,8 +47,11 @@ public class MatchService {
 		}
 		userMatchCond.registerMatch();
 		userMatchCondRepository.save(userMatchCond);
+
+		return List.of(userMatchCond.getId());    // 매칭 대상이 될 유저 매칭 조건 ID
 	}
 
+	@MatchEventPublish(matchJobType = MatchJobType.PARTY_MATCH)
 	public void registerPartyMatch(Long hostId, PartyMatchCondCreateRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(requestDto.getPartyId());
 
@@ -68,7 +79,8 @@ public class MatchService {
 		userMatchCondRepository.deleteById(userMatchCondId);
 	}
 
-	public void cancelPartyMatch(Long hostId, Long partyId) {
+	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
+	public List<Long> cancelPartyMatch(Long hostId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아니라면
@@ -76,10 +88,16 @@ public class MatchService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
-		// 수락 대기 중인 파티 초대가 있을 경우
-		partyInvitationRepository.deletePartyMatchWhileMatching(
-			party, InvitationType.RANDOM, InvitationStatus.WAITING);
+		// 유저 수락 받지 않은(파티장 수락 대기, 수락한) 파티 초대가 있을 경우
+		List<PartyInvitation> beforeUserConfirmList =
+			partyInvitationRepository.findAllActivePartyInvitations(
+				party, InvitationType.RANDOM, InvitationStatus.WAITING);
 
-		partyMatchCondRepository.deleteByParty(party);
+		partyInvitationRepository.deleteAll(beforeUserConfirmList);        // 초대 정보 삭제
+		partyMatchCondRepository.deleteByParty(party);            // 파티 매칭 삭제
+
+		return beforeUserConfirmList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
+			.map(pi -> pi.getUserMatchCond().getId())
+			.toList();
 	}
 }
