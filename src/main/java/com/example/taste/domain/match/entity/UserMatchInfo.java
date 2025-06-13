@@ -86,6 +86,9 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	@Builder
 	public UserMatchInfo(UserMatchInfoCreateRequestDto requestDto, User user) {
+		if (user == null) {
+			throw new IllegalArgumentException("필수 필드값이 누락되었습니다");
+		}
 		this.user = user;
 		this.title = requestDto.getTitle();
 		this.ageRange = requestDto.getAgeRange();
