@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GetReviewResponseDto {
 	private Long id;
+	private Long userId;
 	private String contents;
 	private Integer score;
 	private String imageUrl;
@@ -19,9 +20,11 @@ public class GetReviewResponseDto {
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public GetReviewResponseDto(Long id, String contents, Integer score, String imageUrl, LocalDateTime createdAt,
+	public GetReviewResponseDto(Long id, Long userId, String contents, Integer score, String imageUrl,
+		LocalDateTime createdAt,
 		LocalDateTime updatedAt) {
 		this.id = id;
+		this.userId = userId;
 		this.contents = contents;
 		this.score = score;
 		this.imageUrl = imageUrl;
@@ -31,9 +34,10 @@ public class GetReviewResponseDto {
 
 	public GetReviewResponseDto(Review review) {
 		this.id = review.getId();
+		this.userId = review.getUser().getId();
 		this.contents = review.getContents();
 		this.score = review.getScore();
-		this.imageUrl = review.getImage().getUrl();
+		this.imageUrl = review.getImage() != null ? review.getImage().getUrl() : null;
 		this.createdAt = review.getCreatedAt();
 		this.updatedAt = review.getUpdatedAt();
 	}
