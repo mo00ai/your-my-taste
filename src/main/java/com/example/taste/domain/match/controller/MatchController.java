@@ -1,5 +1,7 @@
 package com.example.taste.domain.match.controller;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,7 +38,7 @@ public class MatchController {
 	@PostMapping("/parties/register")
 	public CommonResponse<Void> registerPartyMatch(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody PartyMatchInfoCreateRequestDto requestDto) {
+		@RequestBody @Valid PartyMatchInfoCreateRequestDto requestDto) {
 		matchService.registerPartyMatch(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}

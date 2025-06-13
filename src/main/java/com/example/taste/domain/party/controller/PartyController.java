@@ -46,8 +46,7 @@ public class PartyController {
 	@GetMapping
 	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(defaultValue = "ALL")
-		@ValidEnum(target = PartyFilter.class) String filter) {
+		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter) {
 		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
 	}
 

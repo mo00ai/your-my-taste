@@ -2,6 +2,8 @@ package com.example.taste.domain.match.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +32,7 @@ public class MatchInfoController {
 	@PostMapping
 	public CommonResponse<Void> createUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserMatchInfoCreateRequestDto requestDto) {
+		@RequestBody @Valid UserMatchInfoCreateRequestDto requestDto) {
 		matchInfoService.createUserMatchInfo(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}
@@ -44,7 +46,7 @@ public class MatchInfoController {
 	@PatchMapping("/{matchInfoId}")
 	public CommonResponse<Void> updateUserMatchInfo(
 		@PathVariable Long matchInfoId,
-		@RequestBody UserMatchInfoUpdateRequestDto requestDto) {
+		@RequestBody @Valid UserMatchInfoUpdateRequestDto requestDto) {
 		matchInfoService.updateUserMatchInfo(matchInfoId, requestDto);
 		return CommonResponse.ok();
 	}
