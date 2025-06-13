@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
-import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.entity.Party;
@@ -82,7 +82,7 @@ public class PartyService {
 
 	@Transactional
 	public void updatePartyDetail(
-		Long hostId, Long partyId, PartyDetailUpdateRequestDto requestDto) {
+		Long hostId, Long partyId, PartyUpdateRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
 		// 호스트가 아니라면

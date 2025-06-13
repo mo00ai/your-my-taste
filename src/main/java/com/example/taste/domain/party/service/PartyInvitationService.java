@@ -156,7 +156,7 @@ public class PartyInvitationService {
 		partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
 		if (!party.isFull()) {
 			partyInvitation.getParty().joinMember();
-			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제		// MEMO: 메소드 분리 후 트랜잭션 적용 필요?
+			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);

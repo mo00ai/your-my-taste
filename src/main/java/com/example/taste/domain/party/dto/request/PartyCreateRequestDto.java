@@ -25,11 +25,12 @@ public class PartyCreateRequestDto {
 	@Size(min = 0, max = 500, message = "파티 설명은 500자 이내입니다.")
 	private String description;
 
-	@DateRange
+	@NotNull(message = "모임 시간은 필수입니다.")
+	@DateRange(max = 30)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
 	private LocalDate meetingDate;
 
-	@NotNull(message = "최대 인원은 필수 입력값입니다.")
+	@NotNull(message = "최대 인원은 필수입니다.")
 	@Range(min = 2, max = 16, message = "파티 인원은 2 ~ 16명 사이입니다.")
 	private Integer maxMembers;
 

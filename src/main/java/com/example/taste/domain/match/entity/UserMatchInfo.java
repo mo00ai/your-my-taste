@@ -37,7 +37,7 @@ import com.example.taste.domain.user.enums.Gender;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_match_info")        // MEMO : 유저 매칭 정보로 변경할까? 헷갈림
+@Table(name = "user_match_info")
 public class UserMatchInfo extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

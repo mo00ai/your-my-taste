@@ -21,7 +21,6 @@ public class PartyDetailResponseDto {
 	private UserSimpleResponseDto host;
 	private List<UserSimpleResponseDto> members;
 
-	// MEMO: 이렇게 전달할지, 아니면 그냥 유저 리스트로 다 담아버리고 호스트 인덱스 알려주는 필드를 추가해서 알려줄지 - @윤예진
 	@Builder
 	public PartyDetailResponseDto(
 		Party party, UserSimpleResponseDto host, List<UserSimpleResponseDto> members) {

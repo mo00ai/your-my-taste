@@ -8,8 +8,10 @@ import lombok.Getter;
 
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.vo.AgeRange;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-@Getter    // TODO: JSON NULLABLE - @윤예진
+@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMatchInfoResponseDto {
 	private Long id;
 	private List<UserMatchInfoStoreResponseDto> stores;

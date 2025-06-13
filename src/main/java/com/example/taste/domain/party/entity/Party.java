@@ -27,7 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
-import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.store.entity.Store;
@@ -117,10 +117,10 @@ public class Party extends BaseCreatedAtEntity {
 		this.nowMembers = 1;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
-		this.partyStatus = PartyStatus.RECRUITING; // TODO: 이것도 여러가지 상황 체크 필요 (만약 생성하자마자 약속 시간 지났다면) - @윤예진
+		this.partyStatus = PartyStatus.RECRUITING;
 	}
 
-	public void update(PartyDetailUpdateRequestDto requestDto, Store store) {
+	public void update(PartyUpdateRequestDto requestDto, Store store) {
 		this.store = store;
 		if (requestDto.getTitle() != null) {
 			this.title = requestDto.getTitle();
@@ -139,7 +139,7 @@ public class Party extends BaseCreatedAtEntity {
 		}
 	}
 
-	public void update(PartyDetailUpdateRequestDto requestDto) {
+	public void update(PartyUpdateRequestDto requestDto) {
 		if (requestDto.getTitle() != null) {
 			this.title = requestDto.getTitle();
 		}
