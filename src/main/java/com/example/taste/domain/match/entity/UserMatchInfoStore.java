@@ -19,7 +19,7 @@ import com.example.taste.domain.store.entity.Store;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_match_cond_store")
+@Table(name = "user_match_info_store")
 public class UserMatchInfoStore {
 	@Id
 	@GeneratedValue

@@ -21,10 +21,10 @@ import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
 import com.example.taste.domain.match.service.MatchInfoService;
 
-@RequestMapping("/match-conditions")
+@RequestMapping("/match-infos")
 @RestController
 @RequiredArgsConstructor
-public class MatchCondController {
+public class MatchInfoController {
 	private final MatchInfoService matchInfoService;
 
 	@PostMapping

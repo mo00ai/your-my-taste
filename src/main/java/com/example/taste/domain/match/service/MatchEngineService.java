@@ -95,7 +95,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private PartyInvitation runMatchEngine(
 		UserMatchInfo matchingUser, List<PartyMatchInfo> matchingPartyList) {
 		int bestScore = 0;
-		List<Long> bestScorePartyCondIdList = new ArrayList<>(List.of(0L));
+		List<Long> bestScorePartyMatchInfoIdList = new ArrayList<>(List.of(0L));
 
 		// 1. 필터링
 		Stream<PartyMatchInfo> partyStream = matchingPartyList.stream();
@@ -132,28 +132,28 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 			// 동일 최고점 추가 (0이면 무시)
 			if (nowMatchingScore != 0 && nowMatchingScore == bestScore) {
-				bestScorePartyCondIdList.add(matchingParty.getId());
+				bestScorePartyMatchInfoIdList.add(matchingParty.getId());
 			}
 			// 갱신
 			else if (nowMatchingScore > bestScore) {
 				bestScore = nowMatchingScore;
-				bestScorePartyCondIdList.clear();
-				bestScorePartyCondIdList.add(matchingParty.getId());
+				bestScorePartyMatchInfoIdList.clear();
+				bestScorePartyMatchInfoIdList.add(matchingParty.getId());
 			}
 		}
 
 		// 최종 최고 점수 파티와 매칭
 		// 1) 필터링-가중치 계산 이후에도 모든 파티가 0점인 경우, 2)최고 점수인 파티가 여러 개인 경우
 		PartyMatchInfo selectedParty = null;
-		if (bestScore == 0 || bestScorePartyCondIdList.size() > 1) {
+		if (bestScore == 0 || bestScorePartyMatchInfoIdList.size() > 1) {
 			selectedParty = filteredParty.get(
 				ThreadLocalRandom.current().nextInt(0, filteredParty.size()));
 		}
-		if (bestScorePartyCondIdList.size() == 1) {
+		if (bestScorePartyMatchInfoIdList.size() == 1) {
 			selectedParty = filteredParty.get(0);
 		}
 		if (selectedParty == null) {
-			log.warn("[runMatchingForParty] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMathCond ID: {}",
+			log.warn("[runMatchingForParty] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMatchInfo ID: {}",
 				matchingUser.getUser().getId(), matchingUser.getId());
 			return null;
 		}
@@ -163,11 +163,11 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	// 아무 매칭 조건도 설정하지 않았을 때
-	private boolean hasNoConditions(UserMatchInfo cond) {
-		return cond.getMeetingDate() == null
-			&& (cond.getCategories() == null || cond.getCategories().isEmpty())
-			&& (cond.getRegion() == null || cond.getRegion().isBlank())
-			&& cond.getAgeRange() == null;
+	private boolean hasNoPreferenceSet(UserMatchInfo info) {
+		return info.getMeetingDate() == null
+			&& (info.getCategories() == null || info.getCategories().isEmpty())
+			&& (info.getRegion() == null || info.getRegion().isBlank())
+			&& info.getAgeRange() == null;
 	}
 
 	private Stream<PartyMatchInfo> matchStore(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
@@ -197,20 +197,20 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		return partyStream.filter(p -> {
 			AgeRange partyPrefAgeRange = p.getAgeRange();
 
-			boolean isUserFitPartyCond = true;
-			boolean isPartyFitUserCond = true;
+			boolean isUserFitPartyPref = true;
+			boolean isPartyFitUserPref = true;
 
 			// 파티의 나이 선호 조건이 있다면 --> 유저의 나이가 해당하는 지 체크
 			if (partyPrefAgeRange != null) {
-				isUserFitPartyCond = partyPrefAgeRange.includes(userAge);
+				isUserFitPartyPref = partyPrefAgeRange.includes(userAge);
 			}
 
 			// 유저의 나이 선호 조건이 있다면 --> 파티 구성원 평균 나이가 해당하는지 체크
 			if (userPrefAgeRange != null) {
-				isPartyFitUserCond = userPrefAgeRange.includes(p.getParty().calculateAverageMemberAge());
+				isPartyFitUserPref = userPrefAgeRange.includes(p.getParty().calculateAverageMemberAge());
 			}
 
-			return isUserFitPartyCond && isPartyFitUserCond;
+			return isUserFitPartyPref && isPartyFitUserPref;
 		});
 	}
 

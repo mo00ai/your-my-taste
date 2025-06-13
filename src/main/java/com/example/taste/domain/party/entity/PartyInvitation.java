@@ -46,7 +46,7 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_match_cond_id")
+	@JoinColumn(name = "user_match_info_id")
 	private UserMatchInfo userMatchInfo;
 
 	@Enumerated(EnumType.STRING)
