@@ -69,7 +69,7 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 		this.store = party.getStore();
 		this.meetingDate = party.getMeetingDate();
 		this.ageRange = requestDto.getAgeRange();
-		this.gender = Gender.valueOf(requestDto.getGender());
+		this.gender = requestDto.getGender() != null ? Gender.valueOf(requestDto.getGender()) : null;
 		this.region = requestDto.getRegion();
 		this.matchStatus = MatchStatus.MATCHING;
 	}
