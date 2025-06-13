@@ -117,6 +117,7 @@ public class CommentService {
 		return dtos;
 	}
 
+	//이거는 나중에 클래스 사용해서 매핑하는 방식으로 리팩토링 해볼 것.
 	@Transactional(readOnly = true)
 	public Page<GetCommentDto> getAllCommentOfBoard(Long boardId, int index) {
 
