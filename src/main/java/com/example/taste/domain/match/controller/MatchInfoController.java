@@ -45,16 +45,18 @@ public class MatchInfoController {
 
 	@PatchMapping("/{matchInfoId}")
 	public CommonResponse<Void> updateUserMatchInfo(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId,
 		@RequestBody @Valid UserMatchInfoUpdateRequestDto requestDto) {
-		matchInfoService.updateUserMatchInfo(matchInfoId, requestDto);
+		matchInfoService.updateUserMatchInfo(customUserDetails.getUser(), matchInfoId, requestDto);
 		return CommonResponse.ok();
 	}
 
 	@DeleteMapping("/{matchInfoId}")
 	public CommonResponse<Void> deleteUserMatchInfo(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId) {
-		matchInfoService.deleteUserMatchInfo(matchInfoId);
+		matchInfoService.deleteUserMatchInfo(customUserDetails.getUser(), matchInfoId);
 		return CommonResponse.ok();
 	}
 }

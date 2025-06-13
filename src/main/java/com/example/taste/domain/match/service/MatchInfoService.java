@@ -1,7 +1,7 @@
 package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
-import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
+import static com.example.taste.domain.match.exception.MatchErrorCode.FORBIDDEN_USER_MATCH_INFO;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
 
@@ -63,8 +63,12 @@ public class MatchInfoService {
 
 	@Transactional
 	public void updateUserMatchInfo(
-		Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
+		User user, Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
 		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
+		// 자신의 소유가 아닌 경우
+		if (!matchInfo.isOwner(user)) {
+			throw new CustomException(FORBIDDEN_USER_MATCH_INFO);
+		}
 
 		// 매칭 중이면 업데이트 불가
 		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
@@ -85,14 +89,15 @@ public class MatchInfoService {
 	}
 
 	@Transactional
-	public void deleteUserMatchInfo(Long matchInfoId) {
-		MatchStatus matchStatus = userMatchInfoRepository.findMatchStatusById(matchInfoId);
-		if (matchStatus == null) {
-			throw new CustomException(USER_MATCH_INFO_NOT_FOUND);
+	public void deleteUserMatchInfo(User user, Long matchInfoId) {
+		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(matchInfoId);
+		// 자신의 소유가 아닌 경우
+		if (!matchInfo.isOwner(user)) {
+			throw new CustomException(FORBIDDEN_USER_MATCH_INFO);
 		}
 
 		// 매칭 중이면 삭제 불가
-		if (!matchStatus.equals(MatchStatus.IDLE)) {
+		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 

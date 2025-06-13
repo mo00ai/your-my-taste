@@ -127,4 +127,8 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	public boolean isStatus(MatchStatus status) {
 		return this.matchStatus.equals(status);
 	}
+
+	public boolean isOwner(User user) {
+		return this.getUser().equals(user);
+	}
 }
