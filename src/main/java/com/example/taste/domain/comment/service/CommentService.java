@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,6 +98,23 @@ public class CommentService {
 		// comment 객체의 deleteContent 메서드 호출.
 		// deletedAt 시간을 세팅, contents 를 삭제 메시지로 초기화, user 를 null 로 세팅
 		comment.deleteContent(LocalDateTime.now());
+	}
+
+	// 루트 가져오기
+	@Transactional(readOnly = true)
+	public Page<GetCommentDto> getAllRootCommentOfBoard(Long boardId, int index) {
+		Pageable pageable = PageRequest.of(index - 1, 10);
+		Page<Comment> rootComments = commentRepository.findAllRootByBoard(boardId, pageable);
+		Page<GetCommentDto> dtos = rootComments.map(GetCommentDto::new);
+		return dtos;
+	}
+
+	// 대댓글 가져오기
+	public Slice<GetCommentDto> getChildComment(Long commentId, int index) {
+		Pageable pageable = PageRequest.of(index - 1, 10);
+		Slice<Comment> rootComments = commentRepository.findAllRootByBoard(commentId, pageable);
+		Slice<GetCommentDto> dtos = rootComments.map(GetCommentDto::new);
+		return dtos;
 	}
 
 	@Transactional(readOnly = true)

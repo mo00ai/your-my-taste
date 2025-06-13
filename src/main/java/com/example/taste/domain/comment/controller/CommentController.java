@@ -1,6 +1,7 @@
 package com.example.taste.domain.comment.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,11 +60,28 @@ public class CommentController {
 		return CommonResponse.ok();
 	}
 
+	/*
 	// 게시글에 모든 댓글 조회
 	@GetMapping
 	public CommonResponse<Page<GetCommentDto>> getAllCommentOfBoard(
 		@PathVariable Long boardId, @RequestParam(defaultValue = "1", required = false) @Min(1) int index) {
 		return CommonResponse.ok(commentService.getAllCommentOfBoard(boardId, index));
+	}
+	 */
+
+	//루트 댓글만 가져오기
+	@GetMapping
+	public CommonResponse<Page<GetCommentDto>> getAllRootCommentOfBoard(
+		@PathVariable Long boardId, @RequestParam(defaultValue = "1", required = false) @Min(1) int index) {
+		return CommonResponse.ok(commentService.getAllRootCommentOfBoard(boardId, index));
+	}
+
+	//대댓글 가져오기
+	@GetMapping("/{commentId}")
+	public CommonResponse<Slice<GetCommentDto>> getChildComment(
+		@PathVariable Long boardId, @PathVariable Long commentId,
+		@RequestParam(defaultValue = "1", required = false) @Min(1) int index) {
+		return CommonResponse.ok(commentService.getChildComment(commentId, index));
 	}
 
 	// 댓글 하나 조회
