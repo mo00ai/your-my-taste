@@ -85,7 +85,7 @@ public class MatchInfoService {
 
 	@Transactional
 	public void deleteUserMatchInfo(Long matchInfoId) {
-		MatchStatus matchStatus = userMatchInfoRepository.findUserMatchStatusById(matchInfoId);
+		MatchStatus matchStatus = userMatchInfoRepository.findMatchStatusById(matchInfoId);
 
 		// 매칭 중이면 삭제 불가
 		if (!matchStatus.equals(MatchStatus.IDLE)) {
