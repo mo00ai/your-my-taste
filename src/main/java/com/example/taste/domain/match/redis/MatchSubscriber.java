@@ -22,7 +22,13 @@ public class MatchSubscriber implements MessageListener {
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
-		MatchEvent event = redisService.deserializeMessageToObject(message, MatchEvent.class);
+		MatchEvent event;
+		try {
+			event = redisService.deserializeMessageToObject(message, MatchEvent.class);
+		} catch (RuntimeException e) {
+			log.error("매칭 작업 이벤트 역직렬화 실패", e);
+			return;
+		}
 		// 작업 타입에 따라 메소드 호출
 		switch (event.getMatchJobType()) {
 			case USER_MATCH -> {
