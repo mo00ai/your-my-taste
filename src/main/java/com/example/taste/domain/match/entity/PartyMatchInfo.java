@@ -56,18 +56,6 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 	private MatchStatus matchStatus;
 
 	@Builder
-	public PartyMatchInfo(Party party, int ageMinRange, int ageMaxRange, Gender gender, String region,
-		LocalDate meetingDate, Store store, MatchStatus matchStatus) {
-		this.party = party;
-		this.ageRange = new AgeRange(ageMinRange, ageMaxRange);
-		this.gender = gender;
-		this.region = region;
-		this.meetingDate = meetingDate;
-		this.store = store;
-		this.matchStatus = matchStatus;
-	}
-
-	@Builder
 	public PartyMatchInfo(PartyMatchInfoCreateRequestDto requestDto, Party party) {
 		this.party = party;
 		this.store = party.getStore();

@@ -66,16 +66,6 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 		this.invitationStatus = invitationStatus;
 	}
 
-	@Builder
-	public PartyInvitation(Party party, User user, UserMatchInfo userMatchInfo, InvitationType invitationType,
-		InvitationStatus invitationStatus) {
-		this.party = party;
-		this.user = user;
-		this.userMatchInfo = userMatchInfo;
-		this.invitationType = invitationType;
-		this.invitationStatus = invitationStatus;
-	}
-
 	public void leave() {
 		this.invitationStatus = InvitationStatus.EXITED;
 	}
