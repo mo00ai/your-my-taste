@@ -62,7 +62,6 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	// 파티를 기준으로 맞는 유저 매칭
-	// @Scheduled(fixedDelay = 60000) // TODO : 트리거 이외에 주기적으로 실행 필요
 	public void runMatchingForParty() {
 		// MEMO : 다 불러와도 되나?
 		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크

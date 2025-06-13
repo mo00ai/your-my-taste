@@ -7,14 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import com.example.taste.domain.match.enums.MatchJobType;
 
 @Data
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class MatchEvent implements Serializable {
 	private static final long serialVersionUID = 1L;
 
