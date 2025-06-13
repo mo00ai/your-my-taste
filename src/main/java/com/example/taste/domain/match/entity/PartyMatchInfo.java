@@ -16,6 +16,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.vo.AgeRange;
@@ -33,7 +36,8 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne(optional = false, orphanRemoval = true)
+	@OneToOne(optional = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Party party;
 
 	@OneToOne(optional = true)
