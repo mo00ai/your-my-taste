@@ -102,10 +102,10 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 		// 초대 이력이 없는 파티들만 필터링
 		List<Long> invitedPartyIdList = partyInvitationRepository.findAllPartyIdByUser(matchingUser.getUser());
-		partyStream = partyStream.filter(p -> invitedPartyIdList.contains(p.getParty().getId()));
+		partyStream = partyStream.filter(p -> !invitedPartyIdList.contains(p.getParty().getId()));
 
 		// 가게 필터링
-		if (matchingUser.getStores() != null && matchingUser.getStores().isEmpty()) {
+		if (matchingUser.getStores() != null && !matchingUser.getStores().isEmpty()) {
 			partyStream = matchStore(matchingUser, partyStream);
 		}
 
@@ -124,8 +124,8 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 		// 2. 가중치 계산
 		// 카테고리 일치, 날짜 범위
-		List<PartyMatchInfo> filteredParty = partyStream.toList();
-		for (PartyMatchInfo matchingParty : filteredParty) {
+		List<PartyMatchInfo> filteredPartyList = partyStream.toList();
+		for (PartyMatchInfo matchingParty : filteredPartyList) {
 			int nowMatchingScore = 0;
 			nowMatchingScore += calculateCategoryScore(matchingUser, matchingParty);
 			nowMatchingScore += calculateMeetingDateScore(matchingUser, matchingParty);
@@ -145,13 +145,29 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		// 최종 최고 점수 파티와 매칭
 		// 1) 필터링-가중치 계산 이후에도 모든 파티가 0점인 경우, 2)최고 점수인 파티가 여러 개인 경우
 		PartyMatchInfo selectedParty = null;
-		if (bestScore == 0 || bestScorePartyMatchInfoIdList.size() > 1) {
-			selectedParty = filteredParty.get(
-				ThreadLocalRandom.current().nextInt(0, filteredParty.size()));
+		// 모든 점수가 0인 경우 랜덤 선택
+		if (bestScore == 0) {
+			selectedParty = filteredPartyList.get(
+				ThreadLocalRandom.current().nextInt(0, filteredPartyList.size()));
 		}
-		if (bestScorePartyMatchInfoIdList.size() == 1) {
-			selectedParty = filteredParty.get(0);
+		// 최고 점수 파티가 하나인 경우
+		else if (bestScorePartyMatchInfoIdList.size() == 1) {
+			Long selectedId = bestScorePartyMatchInfoIdList.get(0);
+			selectedParty = filteredPartyList.stream()
+				.filter(p -> p.getId().equals(selectedId))
+				.findFirst()
+				.orElse(null);
 		}
+		// 최고점 파티가 여러 개인 경우 랜덤 선택
+		else if (bestScorePartyMatchInfoIdList.size() > 1) {
+			Long selectedId = bestScorePartyMatchInfoIdList.get(
+				ThreadLocalRandom.current().nextInt(0, bestScorePartyMatchInfoIdList.size()));
+			selectedParty = filteredPartyList.stream()
+				.filter(p -> p.getId().equals(selectedId))
+				.findFirst()
+				.orElse(null);
+		}
+		
 		if (selectedParty == null) {
 			log.warn("[runMatchingForParty] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMatchInfo ID: {}",
 				matchingUser.getUser().getId(), matchingUser.getId());
@@ -216,16 +232,25 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지
 	private int calculateCategoryScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
+		if (matchingUser.getCategories() == null || party.getStore().getCategory() == null) {
+			return 0;
+		}
+
 		if (matchingUser.getCategories().stream()
 			.map(UserMatchInfoCategory::getCategory)
 			.toList()
 			.contains(party.getStore().getCategory())) {
 			return 6;
 		}
+
 		return 0;
 	}
 
 	private int calculateMeetingDateScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
+		if (matchingUser.getMeetingDate() == null || party.getMeetingDate() == null) {
+			return 0;
+		}
+
 		int dateAbsGap = (int)Math.abs(
 			ChronoUnit.DAYS.between(matchingUser.getMeetingDate(), party.getMeetingDate()));
 
