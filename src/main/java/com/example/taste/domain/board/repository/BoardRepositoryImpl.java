@@ -42,31 +42,36 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<Board> searchBoardDetailList(List<Long> userIdList, String type, String status, Pageable pageable) {
-		BooleanBuilder builder = new BooleanBuilder();
-		if (userIdList != null && !userIdList.isEmpty()) {
-			builder.and(board.user.id.in(userIdList));
-		}
-		try {
-			if (type != null) {
-				BoardType boardType = BoardType.from(type);
-				builder.and(board.type.eq(boardType));
-			}
-			if (status != null) {
-				BoardStatus boardStatus = BoardStatus.from(status);
-				builder.and(board.status.eq(boardStatus));
-			}
-		} catch (IllegalArgumentException e) {
-			throw new CustomException(ErrorCode.INVALID_TYPE_VALUE);
-		}
-
-		return queryFactory
-			.selectFrom(board)
-			.where(builder)
+	public Page<BoardListResponseDto> findBoardListDtoByUserIdList(List<Long> userIds, Pageable pageable) {
+		List<BoardListResponseDto> contents = queryFactory
+			.select(Projections.constructor(BoardListResponseDto.class,
+				board.id,
+				board.title,
+				store.name,
+				user.nickname,
+				JPAExpressions
+					.select(boardImage.image.url)
+					.from(boardImage)
+					.where(boardImage.board.eq(board))
+					.orderBy(boardImage.id.desc())
+					.limit(1)
+			))
+			.from(board)
+			.leftJoin(board.user, user)
+			.leftJoin(board.store, store)
+			.where(board.user.id.in(userIds))
+			.orderBy(board.createdAt.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
-			.orderBy(getOrderSpecifier(pageable).toArray(new OrderSpecifier[0]))
 			.fetch();
+
+		Long total = queryFactory
+			.select(board.count())
+			.from(board)
+			.where(board.user.id.in(userIds))
+			.fetchOne();
+
+		return new PageImpl<>(contents, pageable, total != null ? total : 0L);
 	}
 
 	@Override

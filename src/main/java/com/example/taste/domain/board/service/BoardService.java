@@ -6,7 +6,6 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -168,25 +167,6 @@ public class BoardService {
 		}
 	}
 
-	// 게시물 목록 상세 조회
-	@Transactional(readOnly = true)
-	public List<BoardResponseDto> findBoardsFromFollowingUsers(Long userId, String type, String status, String sort,
-		String order,
-		Pageable pageable) {
-
-		/**
-		 * TODO 구현할 기능 
-		 * 현재 사용자id로 팔로우중인 사람들의 게시물 리스트 조회
-		 * userService 코드 필요
-		 */
-		List<Long> userFollowList = new ArrayList<>();
-
-		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, pageable);
-		return searchBoardList.stream()
-			.map(BoardResponseDto::new)
-			.toList();
-	}
-
 	// 키워드 기반 게시물 목록 조회
 	public PageResponse<BoardListResponseDto> searchBoards(BoardSearchCondition conditionDto, Pageable pageable) {
 		Page<BoardListResponseDto> page = boardRepository.searchBoardsByKeyword(conditionDto,
@@ -195,12 +175,15 @@ public class BoardService {
 
 	}
 
-	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
+	// 나와 내 팔로워 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url) TODO 쿼리수정해야함
 	@Transactional(readOnly = true)
-	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
-		List<Long> userFollowList = new ArrayList<>();
+	public PageResponse<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
+		List<Long> userFollowList = userRepository.findFollowingIds(userId);
+		userFollowList.add(userId);
 		// 쿼리로 바로 dto프로젝션
-		return boardRepository.findBoardListDtoByUserIdList(userFollowList, pageable);
+		Page<BoardListResponseDto> boardPage = boardRepository.findBoardListDtoByUserIdList(
+			userFollowList, pageable);
+		return PageResponse.from(boardPage);
 	}
 
 	// 게시글에 특정해시태그 삭제(단건 삭제)

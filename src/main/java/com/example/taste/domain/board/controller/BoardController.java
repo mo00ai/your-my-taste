@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,32 +69,13 @@ public class BoardController {
 		return CommonResponse.ok(responseDto);
 	}
 
-	// 단순 게시글 목록
-	@GetMapping("/simple")
-	public CommonResponse<?> findBoardList(
+	// 단순 게시글 목록(내 게시글 조회 or 팔로우한 사람의 게시글 조회)
+	@GetMapping("/feed")
+	public CommonResponse<PageResponse<BoardListResponseDto>> findBoardList(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PageableDefault(page = 0, size = 10) Pageable pageable
+		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		List<BoardListResponseDto> responseDtoList = boardService.findBoardList(userDetails.getId(), pageable);
-		return CommonResponse.ok(responseDtoList);
-	}
-
-	@GetMapping("/detailed")
-	public CommonResponse<?> findBoardDetailList(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(required = false) String type,
-		@RequestParam(required = false) String status,
-		@RequestParam(defaultValue = "createdAt") String sort,
-		@RequestParam(defaultValue = "desc") String order,
-		Pageable pageable
-	) {
-		// TODO 기능 미구현
-		List<BoardResponseDto> responseDtoList = boardService.findBoardsFromFollowingUsers(userDetails.getId(), type,
-			status, sort,
-			order,
-			pageable);
-		// TODO 반환
-		return CommonResponse.ok(responseDtoList);
+		return CommonResponse.ok(boardService.findBoardList(userDetails.getId(), pageable));
 	}
 
 	@GetMapping("/openrun")
