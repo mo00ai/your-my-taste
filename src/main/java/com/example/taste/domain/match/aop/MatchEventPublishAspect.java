@@ -8,7 +8,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.example.taste.domain.match.annotation.MatchEventPublish;
@@ -27,7 +27,7 @@ public class MatchEventPublishAspect {
 	public void publishMatchAfterReturn(JoinPoint joinPoint,
 		List<Long> userMatchInfoList, MatchEventPublish matchEventPublish) throws Throwable {
 		TransactionSynchronizationManager.registerSynchronization(
-			new TransactionSynchronizationAdapter() {
+			new TransactionSynchronization() {
 				// 반드시 커밋 이후에
 				@Override
 				public void afterCommit() {
