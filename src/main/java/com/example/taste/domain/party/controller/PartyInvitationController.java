@@ -74,7 +74,7 @@ public class PartyInvitationController {
 					partyInvitationService.confirmRandomPartyInvitation(
 						userDetails.getId(), partyId, partyInvitationId);
 					break;
-				case CANCELED, REJECTED:
+				case REJECTED:
 					partyInvitationService.rejectRandomPartyInvitation(
 						userDetails.getId(), partyId, partyInvitationId, requestDto);
 					break;
@@ -89,7 +89,7 @@ public class PartyInvitationController {
 					partyInvitationService.confirmManualPartyInvitation(
 						userDetails.getId(), partyId, partyInvitationId);
 					break;
-				case CANCELED, REJECTED:
+				case REJECTED:
 					partyInvitationService.rejectManualPartyInvitation(
 						userDetails.getId(), partyId, partyInvitationId, requestDto);
 					break;
@@ -113,7 +113,7 @@ public class PartyInvitationController {
 					partyInvitationService.confirmUserRandomPartyInvitation(
 						userDetails.getId(), partyInvitationId);
 					break;
-				case CANCELED, REJECTED:
+				case REJECTED:
 					partyInvitationService.rejectUserRandomPartyInvitation(
 						userDetails.getId(), partyInvitationId, requestDto);
 					break;
@@ -128,7 +128,7 @@ public class PartyInvitationController {
 					partyInvitationService.confirmUserManualPartyInvitation(
 						userDetails.getId(), partyInvitationId);
 					break;
-				case CANCELED, REJECTED:
+				case REJECTED:
 					partyInvitationService.rejectUserManualPartyInvitation(
 						userDetails.getId(), partyInvitationId, requestDto);
 					break;

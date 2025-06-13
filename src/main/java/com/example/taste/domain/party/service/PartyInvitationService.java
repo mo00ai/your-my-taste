@@ -6,6 +6,7 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUI
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
+import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
 
 import java.util.List;
 
@@ -85,12 +86,13 @@ public class PartyInvitationService {
 		// 유저 가져오기, 탈퇴 유저인 경우 예외 발생
 		User user = entityFetcher.getUndeletedUserOrThrow(requestDto.getUserId());
 
-		// 파티 초대 정보가 있다면 (초대 중, 이미 존재, 거절)
+		// 파티 초대 정보가 있다면 (초대 중, 확정)
 		PartyInvitation partyInvitation =
 			partyInvitationRepository.findByUserAndParty(requestDto.getUserId(), partyId)
 				.orElse(null);
 		if (partyInvitation != null
-			&& !partyInvitation.getInvitationStatus().equals(InvitationStatus.KICKED)) {
+			&& (partyInvitation.getInvitationStatus().equals(InvitationStatus.WAITING)
+			|| partyInvitation.getInvitationStatus().equals(InvitationStatus.CONFIRMED))) {
 			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 		}
 
@@ -112,6 +114,21 @@ public class PartyInvitationService {
 
 		// 탈퇴한 유저인 경우 예외 발생
 		User user = entityFetcher.getUndeletedUserOrThrow(userId);
+
+		// 초대 정보가 존재하는 경우
+		PartyInvitation partyInvitation = partyInvitationRepository.findByUserAndParty(userId, partyId).orElse(null);
+		if (partyInvitation != null) {
+			switch (partyInvitation.getInvitationStatus()) {
+				case KICKED, REJECTED -> {
+					throw new CustomException(UNAVAILABLE_TO_REQUEST_PARTY_INVITATION);
+				}
+				case EXITED -> { // 가입 신청 가능
+				}
+				default -> {    // WAITING, CONFIRMED
+					throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
+				}
+			}
+		}
 
 		partyInvitationRepository.save(new PartyInvitation(
 			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
