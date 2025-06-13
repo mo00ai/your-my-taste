@@ -27,7 +27,7 @@ public class PartyCreateRequestDto {
 
 	@NotNull(message = "모임 시간은 필수입니다.")
 	@DateRange(max = 30)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate meetingDate;
 
 	@NotNull(message = "최대 인원은 필수입니다.")
