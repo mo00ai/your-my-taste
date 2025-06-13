@@ -150,7 +150,7 @@ public class Party extends BaseCreatedAtEntity {
 			this.meetingDate = requestDto.getMeetingDate().toLocalDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation도 안바뀌게 락 걸어야하나 - @윤예진
+			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
