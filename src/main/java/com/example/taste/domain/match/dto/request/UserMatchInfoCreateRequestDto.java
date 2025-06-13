@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.dto.request;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 import com.example.taste.domain.match.vo.AgeRange;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
 public class UserMatchInfoCreateRequestDto {
@@ -21,7 +23,8 @@ public class UserMatchInfoCreateRequestDto {
 	private AgeRange ageRange;
 
 	@FutureOrPresent
-	private String meetingDate;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate meetingDate;
 
 	// MEMO : 주소 검증 필요
 	private String region;
