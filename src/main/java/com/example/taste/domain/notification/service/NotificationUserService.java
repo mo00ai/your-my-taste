@@ -84,7 +84,6 @@ public class NotificationUserService {
 		int there = Math.min(here + pageSize + 1, sorted.size());
 
 		if (here >= sorted.size()) {
-			System.out.println("here?");
 			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, pageSize), false);
 		}
 		Pageable pageable = PageRequest.of(index, pageSize);
