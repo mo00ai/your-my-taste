@@ -36,7 +36,7 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 
 	List<PartyInvitation> findAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
 
-	@Query("SELECT pi.party.id FROM PartyInvitation pi "
+	@Query("SELECT pi FROM PartyInvitation pi "
 		+ "WHERE pi.party = :party AND pi.invitationType = :type AND pi.invitationStatus = :status")
 	List<PartyInvitation> findAllActivePartyInvitations(
 		@Param("party") Party party,
