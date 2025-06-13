@@ -119,14 +119,11 @@ public class PartyInvitationService {
 		PartyInvitation partyInvitation = partyInvitationRepository.findByUserAndParty(userId, partyId).orElse(null);
 		if (partyInvitation != null) {
 			switch (partyInvitation.getInvitationStatus()) {
-				case KICKED, REJECTED -> {
-					throw new CustomException(UNAVAILABLE_TO_REQUEST_PARTY_INVITATION);
-				}
-				case EXITED -> { // 가입 신청 가능
-				}
-				default -> {    // WAITING, CONFIRMED
-					throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
-				}
+				case EXITED -> {
+				} // 가입 신청 가능
+				case KICKED, REJECTED -> throw new CustomException(UNAVAILABLE_TO_REQUEST_PARTY_INVITATION);
+				case WAITING, CONFIRMED -> throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
+				default -> throw new CustomException(INVALID_PARTY_INVITATION);
 			}
 		}
 
