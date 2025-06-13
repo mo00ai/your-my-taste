@@ -2,6 +2,7 @@ package com.example.taste.domain.match.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -50,10 +51,10 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	private String title;
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoStore> storeList;
+	private List<UserMatchInfoStore> storeList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoCategory> categoryList;
+	private List<UserMatchInfoCategory> categoryList = new ArrayList<>();
 
 	@Embedded
 	private AgeRange ageRange;
