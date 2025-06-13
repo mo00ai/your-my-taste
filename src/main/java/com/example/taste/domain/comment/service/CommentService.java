@@ -91,7 +91,7 @@ public class CommentService {
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		if (!comment.getUser().equals(user)) {
+		if (!comment.getUser().getId().equals(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
 		// comment 객체의 deleteContent 메서드 호출.

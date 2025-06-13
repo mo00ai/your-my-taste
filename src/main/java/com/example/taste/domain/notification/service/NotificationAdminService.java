@@ -16,6 +16,7 @@ public class NotificationAdminService {
 	private final NotificationPublisher notificationPublisher;
 
 	// 시스템 혹은 마케팅 알림
+
 	public void publishNotification(NotificationRequestDto dto) {
 		NotificationEventDto eventDto = NotificationEventDto.builder()
 			.category(dto.getCategory())

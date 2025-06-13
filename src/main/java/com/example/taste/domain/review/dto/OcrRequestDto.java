@@ -4,7 +4,11 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 @Data
 public class OcrRequestDto {
 	private String version;
@@ -12,6 +16,8 @@ public class OcrRequestDto {
 	private Long timestamp;
 	private List<Images> images;
 
+	@Getter
+	@NoArgsConstructor
 	public static class Images {
 		private String format;
 		private String data;
