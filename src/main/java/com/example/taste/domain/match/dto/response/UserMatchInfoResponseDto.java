@@ -33,5 +33,6 @@ public class UserMatchInfoResponseDto {
 		this.gender = userMatchInfo.getUserGender().toString();
 		this.region = userMatchInfo.getRegion();
 		this.matchStatus = userMatchInfo.getMatchStatus().toString();
+		this.matchStartedAt = userMatchInfo.getMatchStartedAt();
 	}
 }
