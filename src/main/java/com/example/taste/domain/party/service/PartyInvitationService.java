@@ -18,7 +18,7 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.entity.PartyMatchCond;
-import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.repository.PartyMatchCondRepository;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
@@ -255,13 +255,13 @@ public class PartyInvitationService {
 		}
 
 		// 매칭 상태가 WAITING_HOST 가 아닌 경우
-		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
-		if (!userMatchCond.isStatus(MatchStatus.WAITING_HOST)) {
+		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
+		if (!userMatchInfo.isStatus(MatchStatus.WAITING_HOST)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 
 		if (!party.isFull()) {
-			userMatchCond.setMatchStatus(MatchStatus.WAITING_USER);
+			userMatchInfo.setMatchStatus(MatchStatus.WAITING_USER);
 			partyInvitation.getParty().joinMember();
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
@@ -297,7 +297,7 @@ public class PartyInvitationService {
 		partyInvitation.setInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
 
-		return List.of(partyInvitation.getUserMatchCond().getId());    // 매칭 대상이 될 유저 매칭 조건 ID
+		return List.of(partyInvitation.getUserMatchInfo().getId());    // 매칭 대상이 될 유저 매칭 조건 ID
 	}
 
 	// 유저가 랜덤 파티 초대 수락
@@ -316,14 +316,14 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		// 매칭 상태가 WAITING_USER 가 아닌 경우
-		UserMatchCond userMatchCond = partyInvitation.getUserMatchCond();
-		if (!userMatchCond.isStatus(MatchStatus.WAITING_HOST)) {
+		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
+		if (!userMatchInfo.isStatus(MatchStatus.WAITING_HOST)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 
 		if (!party.isFull()) {
 			partyInvitation.setInvitationStatus(InvitationStatus.CONFIRMED);
-			userMatchCond.setMatchStatus(MatchStatus.IDLE);
+			userMatchInfo.setMatchStatus(MatchStatus.IDLE);
 
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);

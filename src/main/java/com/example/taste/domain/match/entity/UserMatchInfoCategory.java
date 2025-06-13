@@ -20,22 +20,22 @@ import com.example.taste.domain.store.entity.Category;
 @Getter
 @NoArgsConstructor
 @Table(name = "user_match_cond_category")
-public class UserMatchCondCategory {
+public class UserMatchInfoCategory {
 	@Id
 	@GeneratedValue
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private UserMatchCond userMatchCond;
+	private UserMatchInfo userMatchInfo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Category category;
 
 	@Builder
-	public UserMatchCondCategory(UserMatchCond userMatchCond, Category category) {
-		this.userMatchCond = userMatchCond;
+	public UserMatchInfoCategory(UserMatchInfo userMatchInfo, Category category) {
+		this.userMatchInfo = userMatchInfo;
 		this.category = category;
 	}
 }

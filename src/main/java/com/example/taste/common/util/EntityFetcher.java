@@ -4,7 +4,7 @@ import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_
 import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
 import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.image.exception.ImageErrorCode.IMAGE_NOT_FOUND;
-import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_COND_NOT_FOUND;
+import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
@@ -29,8 +29,8 @@ import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.repository.ImageRepository;
-import com.example.taste.domain.match.entity.UserMatchCond;
-import com.example.taste.domain.match.repository.UserMatchCondRepository;
+import com.example.taste.domain.match.entity.UserMatchInfo;
+import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
@@ -61,7 +61,7 @@ public class EntityFetcher {
 	private final EventRepository eventRepository;
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
-	private final UserMatchCondRepository userMatchCondRepository;
+	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final StoreBucketRepository storeBucketRepository;
 
 	public User getUserOrThrow(Long id) {
@@ -129,8 +129,8 @@ public class EntityFetcher {
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 	}
 
-	public UserMatchCond getUserMatchCondOrThrow(Long id) {
-		return userMatchCondRepository.findById(id)
-			.orElseThrow(() -> new CustomException(USER_MATCH_COND_NOT_FOUND));
+	public UserMatchInfo getUserMatchInfoOrThrow(Long id) {
+		return userMatchInfoRepository.findById(id)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
 	}
 }

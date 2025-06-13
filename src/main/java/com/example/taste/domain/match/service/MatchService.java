@@ -16,11 +16,11 @@ import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
 import com.example.taste.domain.match.entity.PartyMatchCond;
-import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.redis.MatchPublisher;
 import com.example.taste.domain.match.repository.PartyMatchCondRepository;
-import com.example.taste.domain.match.repository.UserMatchCondRepository;
+import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -34,21 +34,21 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 public class MatchService {
 	private final EntityFetcher entityFetcher;
 	private final MatchPublisher matchPublisher;
-	private final UserMatchCondRepository userMatchCondRepository;
+	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchCondRepository partyMatchCondRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> registerUserMatch(Long matchConditionId) {
-		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
+		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(matchConditionId);
 		// 이미 매칭 중이라면
-		if (userMatchCond.isMatching()) {
+		if (userMatchInfo.isMatching()) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
-		userMatchCond.registerMatch();
-		userMatchCondRepository.save(userMatchCond);
+		userMatchInfo.registerMatch();
+		userMatchInfoRepository.save(userMatchInfo);
 
-		return List.of(userMatchCond.getId());    // 매칭 대상이 될 유저 매칭 조건 ID
+		return List.of(userMatchInfo.getId());    // 매칭 대상이 될 유저 매칭 조건 ID
 	}
 
 	@MatchEventPublish(matchJobType = MatchJobType.PARTY_MATCH)
@@ -69,14 +69,14 @@ public class MatchService {
 	}
 
 	@Transactional
-	public void cancelUserMatch(Long userMatchCondId) {
-		UserMatchCond userMatchCond = entityFetcher.getUserMatchCondOrThrow(userMatchCondId);
-		if (userMatchCond.getMatchStatus().equals(MatchStatus.WAITING_HOST)) {
+	public void cancelUserMatch(Long userMatchInfoId) {
+		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
+		if (userMatchInfo.getMatchStatus().equals(MatchStatus.WAITING_HOST)) {
 			// 지금 삭제하려는 유저의 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
 			partyInvitationRepository.deleteUserMatchWhileMatching(
-				userMatchCond, InvitationType.RANDOM, InvitationStatus.WAITING);
+				userMatchInfo, InvitationType.RANDOM, InvitationStatus.WAITING);
 		}
-		userMatchCondRepository.deleteById(userMatchCondId);
+		userMatchInfoRepository.deleteById(userMatchInfoId);
 	}
 
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
@@ -97,7 +97,7 @@ public class MatchService {
 		partyMatchCondRepository.deleteByParty(party);            // 파티 매칭 삭제
 
 		return beforeUserConfirmList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
-			.map(pi -> pi.getUserMatchCond().getId())
+			.map(pi -> pi.getUserMatchInfo().getId())
 			.toList();
 	}
 }

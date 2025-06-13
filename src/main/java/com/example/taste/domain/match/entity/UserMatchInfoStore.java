@@ -20,22 +20,22 @@ import com.example.taste.domain.store.entity.Store;
 @Getter
 @NoArgsConstructor
 @Table(name = "user_match_cond_store")
-public class UserMatchCondStore {
+public class UserMatchInfoStore {
 	@Id
 	@GeneratedValue
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private UserMatchCond userMatchCond;
+	private UserMatchInfo userMatchInfo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Store store;
 
 	@Builder
-	public UserMatchCondStore(UserMatchCond userMatchCond, Store store) {
-		this.userMatchCond = userMatchCond;
+	public UserMatchInfoStore(UserMatchInfo userMatchInfo, Store store) {
+		this.userMatchInfo = userMatchInfo;
 		this.store = store;
 	}
 }

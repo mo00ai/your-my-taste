@@ -13,13 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
-import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
-import com.example.taste.domain.match.dto.response.UserMatchCondResponseDto;
-import com.example.taste.domain.match.entity.UserMatchCond;
-import com.example.taste.domain.match.entity.UserMatchCondCategory;
-import com.example.taste.domain.match.entity.UserMatchCondStore;
-import com.example.taste.domain.match.repository.UserMatchCondRepository;
+import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
+import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
+import com.example.taste.domain.match.entity.UserMatchInfo;
+import com.example.taste.domain.match.entity.UserMatchInfoCategory;
+import com.example.taste.domain.match.entity.UserMatchInfoStore;
+import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
@@ -33,37 +33,37 @@ public class MatchCondService {
 	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
-	private final UserMatchCondRepository userMatchCondRepository;
+	private final UserMatchInfoRepository userMatchInfoRepository;
 
 	// MEMO : 맛집, 카테고리, 지역 중 특정 조합만 허용할 건지?
 	@Transactional
-	public void createUserMatchCond(Long userId, UserMatchCondCreateRequestDto requestDto) {
+	public void createUserMatchInfo(Long userId, UserMatchInfoCreateRequestDto requestDto) {
 		User user = entityFetcher.getUserOrThrow(userId);
-		UserMatchCond matchCond = userMatchCondRepository.save(
-			new UserMatchCond(requestDto, user));
+		UserMatchInfo userMatchInfo = userMatchInfoRepository.save(
+			new UserMatchInfo(requestDto, user));
 
 		// 맛집 리스트 세팅
 		if (requestDto.getStores() != null) {
-			matchCond.setStores(getValidCondStores(requestDto.getStores(), matchCond));
+			userMatchInfo.setStores(getValidUserMatchInfoStores(requestDto.getStores(), userMatchInfo));
 		}
 
 		// 카테고리 리스트 세팅
 		if (requestDto.getCategories() != null) {
-			matchCond.setCategories(getValidCondCategories(requestDto.getCategories(), matchCond));
+			userMatchInfo.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), userMatchInfo));
 		}
 	}
 
-	public List<UserMatchCondResponseDto> findUserMatchCond(Long userId) {
+	public List<UserMatchInfoResponseDto> findUserMatchInfo(Long userId) {
 		User user = entityFetcher.getUserOrThrow(userId);
-		return userMatchCondRepository.findAllByUser(user).stream()
-			.map(UserMatchCondResponseDto::new)
+		return userMatchInfoRepository.findAllByUser(user).stream()
+			.map(UserMatchInfoResponseDto::new)
 			.toList();
 	}
 
 	@Transactional
-	public void updateUserMatchCond(
-		Long matchConditionId, UserMatchCondUpdateRequestDto requestDto) {
-		UserMatchCond matchCond = entityFetcher.getUserMatchCondOrThrow(matchConditionId);
+	public void updateUserMatchInfo(
+		Long matchConditionId, UserMatchInfoUpdateRequestDto requestDto) {
+		UserMatchInfo matchCond = entityFetcher.getUserMatchInfoOrThrow(matchConditionId);
 
 		// 매칭 중이면 업데이트 불가
 		if (!matchCond.getMatchStatus().equals(MatchStatus.IDLE)) {
@@ -74,29 +74,29 @@ public class MatchCondService {
 
 		// 맛집 리스트 세팅
 		if (requestDto.getStores() != null) {
-			matchCond.setStores(getValidCondStores(requestDto.getStores(), matchCond));
+			matchCond.setStores(getValidUserMatchInfoStores(requestDto.getStores(), matchCond));
 		}
 
 		// 카테고리 리스트 세팅
 		if (requestDto.getCategories() != null) {
-			matchCond.setCategories(getValidCondCategories(requestDto.getCategories(), matchCond));
+			matchCond.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), matchCond));
 		}
 	}
 
 	@Transactional
-	public void deleteUserMatchCond(Long matchingConditionId) {
-		MatchStatus matchStatus = userMatchCondRepository.findUserMatchStatusById(matchingConditionId);
+	public void deleteUserMatchInfo(Long matchingConditionId) {
+		MatchStatus matchStatus = userMatchInfoRepository.findUserMatchStatusById(matchingConditionId);
 
 		// 매칭 중이면 삭제 불가
 		if (!matchStatus.equals(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
-		userMatchCondRepository.deleteById(matchingConditionId);
+		userMatchInfoRepository.deleteById(matchingConditionId);
 	}
 
-	private List<UserMatchCondStore> getValidCondStores(
-		List<Long> storeIdList, UserMatchCond matchCond) {
+	private List<UserMatchInfoStore> getValidUserMatchInfoStores(
+		List<Long> storeIdList, UserMatchInfo matchInfo) {
 		List<Store> storeList = storeRepository.findAllById(storeIdList);
 
 		if (storeList.size() != storeIdList.size()) {
@@ -104,11 +104,11 @@ public class MatchCondService {
 		}
 
 		return storeList.stream()
-			.map((s) -> new UserMatchCondStore(matchCond, s)).toList();
+			.map((s) -> new UserMatchInfoStore(matchInfo, s)).toList();
 	}
 
-	private List<UserMatchCondCategory> getValidCondCategories(
-		List<String> categoryNameList, UserMatchCond matchCond) {
+	private List<UserMatchInfoCategory> getValidUserMatchInfoCategories(
+		List<String> categoryNameList, UserMatchInfo matchInfo) {
 		List<Category> categoryList = categoryRepository.findAllByNameIn(categoryNameList);
 
 		if (categoryList.size() != categoryNameList.size()) {
@@ -116,6 +116,6 @@ public class MatchCondService {
 		}
 
 		return categoryList.stream()
-			.map((c) -> new UserMatchCondCategory(matchCond, c)).toList();
+			.map((c) -> new UserMatchInfoCategory(matchInfo, c)).toList();
 	}
 }

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -46,10 +46,10 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 	List<Long> findAllPartyIdByUser(@Param("user") User user);
 
 	@Query("DELETE FROM PartyInvitation pi "
-		+ "WHERE pi.userMatchCond = :userMatchCond "
+		+ "WHERE pi.userMatchInfo = :userMatchInfo "
 		+ "AND pi.invitationType = :type AND pi.invitationStatus = :status")
 	void deleteUserMatchWhileMatching(
-		@Param("userMatchCond") UserMatchCond userMatchCond,
+		@Param("userMatchInfo") UserMatchInfo userMatchInfo,
 		@Param("invitationType") InvitationType type,
 		@Param("invitationStatus") InvitationStatus status);
 

@@ -14,7 +14,7 @@ public enum MatchErrorCode implements BaseCode {
 	ACTIVE_MATCH_EXISTS(HttpStatus.BAD_REQUEST, "M001", "현재 매칭이 진행 중에 있습니다."),
 
 	// 매칭 조건
-	USER_MATCH_COND_NOT_FOUND(HttpStatus.NOT_FOUND, "UMC001", "해당 매칭 조건을 찾을 수 없습니다."),
+	USER_MATCH_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "UMC001", "해당 매칭 정보를 찾을 수 없습니다."),
 	;
 
 	private final HttpStatus httpStatus;

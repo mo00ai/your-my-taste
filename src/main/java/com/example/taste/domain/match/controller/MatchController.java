@@ -22,14 +22,14 @@ public class MatchController {
 	private final MatchService matchService;
 
 	@PostMapping("/users/register")
-	public CommonResponse<Void> registerUserMatch(@RequestParam Long userMatchCondId) {
-		matchService.registerUserMatch(userMatchCondId);
+	public CommonResponse<Void> registerUserMatch(@RequestParam Long userMatchInfoId) {
+		matchService.registerUserMatch(userMatchInfoId);
 		return CommonResponse.ok();
 	}
 
 	@DeleteMapping("/users/cancel")
-	public CommonResponse<Void> cancelUserMatch(@RequestParam Long userMatchCondId) {
-		matchService.cancelUserMatch(userMatchCondId);
+	public CommonResponse<Void> cancelUserMatch(@RequestParam Long userMatchInfoId) {
+		matchService.cancelUserMatch(userMatchInfoId);
 		return CommonResponse.ok();
 	}
 

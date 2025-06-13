@@ -26,7 +26,7 @@ public class MatchSubscriber implements MessageListener {
 		// 작업 타입에 따라 메소드 호출
 		switch (event.getMatchJobType()) {
 			case USER_MATCH -> {
-				matchEngineService.runMatchingForUser(event.getUserMatchCondIds());
+				matchEngineService.runMatchingForUser(event.getUserMatchInfoIdList());
 			}
 			case PARTY_MATCH -> {
 				matchEngineService.runMatchingForParty();

@@ -21,7 +21,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
-import com.example.taste.domain.match.entity.UserMatchCond;
+import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.user.entity.User;
@@ -47,7 +47,7 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_match_cond_id")
-	private UserMatchCond userMatchCond;
+	private UserMatchInfo userMatchInfo;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -67,11 +67,11 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	}
 
 	@Builder
-	public PartyInvitation(Party party, User user, UserMatchCond userMatchCond, InvitationType invitationType,
+	public PartyInvitation(Party party, User user, UserMatchInfo userMatchInfo, InvitationType invitationType,
 		InvitationStatus invitationStatus) {
 		this.party = party;
 		this.user = user;
-		this.userMatchCond = userMatchCond;
+		this.userMatchInfo = userMatchInfo;
 		this.invitationType = invitationType;
 		this.invitationStatus = invitationStatus;
 	}

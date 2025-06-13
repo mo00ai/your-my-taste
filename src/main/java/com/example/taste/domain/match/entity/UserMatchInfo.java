@@ -27,8 +27,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
-import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
-import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.user.entity.User;
@@ -37,8 +37,8 @@ import com.example.taste.domain.user.enums.Gender;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_match_cond")        // MEMO : 유저 매칭 정보로 변경할까? 헷갈림
-public class UserMatchCond extends BaseCreatedAtEntity {
+@Table(name = "user_match_info")        // MEMO : 유저 매칭 정보로 변경할까? 헷갈림
+public class UserMatchInfo extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -49,12 +49,12 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	private User user;
 
 	@Setter
-	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchCondStore> stores;
+	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserMatchInfoStore> stores;
 
 	@Setter
-	@OneToMany(mappedBy = "userMatchCond", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchCondCategory> categories;
+	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserMatchInfoCategory> categories;
 
 	@Embedded
 	private AgeRange ageRange;
@@ -72,7 +72,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	private LocalDateTime matchStartedAt;
 
 	@Builder
-	public UserMatchCond(User user, List<UserMatchCondStore> stores, List<UserMatchCondCategory> categories,
+	public UserMatchInfo(User user, List<UserMatchInfoStore> stores, List<UserMatchInfoCategory> categories,
 		AgeRange ageRange, LocalDate meetingDate, Gender userGender, Integer userAge, String region,
 		MatchStatus matchStatus) {
 		this.user = user;
@@ -87,7 +87,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 	}
 
 	@Builder
-	public UserMatchCond(UserMatchCondCreateRequestDto requestDto, User user) {
+	public UserMatchInfo(UserMatchInfoCreateRequestDto requestDto, User user) {
 		this.user = user;
 		this.ageRange = requestDto.getAgeRange();
 		this.region = requestDto.getRegion();
@@ -96,7 +96,7 @@ public class UserMatchCond extends BaseCreatedAtEntity {
 		this.matchStatus = MatchStatus.IDLE;
 	}
 
-	public void update(UserMatchCondUpdateRequestDto requestDto) {
+	public void update(UserMatchInfoUpdateRequestDto requestDto) {
 		this.ageRange = requestDto.getAgeRange();
 		this.region = requestDto.getRegion();
 	}

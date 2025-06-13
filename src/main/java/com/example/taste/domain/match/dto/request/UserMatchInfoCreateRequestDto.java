@@ -7,7 +7,7 @@ import lombok.Getter;
 import com.example.taste.domain.match.vo.AgeRange;
 
 @Getter    // TODO: VALID 추가 - @윤예진
-public class UserMatchCondCreateRequestDto {
+public class UserMatchInfoCreateRequestDto {
 	private String title;
 	private AgeRange ageRange;
 	// private String gender;

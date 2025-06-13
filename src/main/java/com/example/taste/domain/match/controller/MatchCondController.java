@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
-import com.example.taste.domain.match.dto.request.UserMatchCondCreateRequestDto;
-import com.example.taste.domain.match.dto.request.UserMatchCondUpdateRequestDto;
-import com.example.taste.domain.match.dto.response.UserMatchCondResponseDto;
+import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
+import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
+import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
 import com.example.taste.domain.match.service.MatchCondService;
 
 @RequestMapping("/match-conditions")
@@ -28,31 +28,31 @@ public class MatchCondController {
 	private final MatchCondService matchCondService;
 
 	@PostMapping
-	public CommonResponse<Void> createUserMatchCond(
+	public CommonResponse<Void> createUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserMatchCondCreateRequestDto requestDto) {
-		matchCondService.createUserMatchCond(userDetails.getId(), requestDto);
+		@RequestBody UserMatchInfoCreateRequestDto requestDto) {
+		matchCondService.createUserMatchInfo(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}
 
 	@GetMapping
-	public CommonResponse<List<UserMatchCondResponseDto>> getUserMatchCond(
+	public CommonResponse<List<UserMatchInfoResponseDto>> getUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(matchCondService.findUserMatchCond(userDetails.getId()));
+		return CommonResponse.ok(matchCondService.findUserMatchInfo(userDetails.getId()));
 	}
 
-	@PatchMapping("/{matchingConditionId}")
-	public CommonResponse<Void> updateUserMatchCond(
-		@PathVariable Long matchingConditionId,
-		@RequestBody UserMatchCondUpdateRequestDto requestDto) {
-		matchCondService.updateUserMatchCond(matchingConditionId, requestDto);
+	@PatchMapping("/{matchInfoId}")
+	public CommonResponse<Void> updateUserMatchInfo(
+		@PathVariable Long matchInfoId,
+		@RequestBody UserMatchInfoUpdateRequestDto requestDto) {
+		matchCondService.updateUserMatchInfo(matchInfoId, requestDto);
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{matchingConditionId}")
-	public CommonResponse<Void> deleteUserMatchCond(
-		@PathVariable Long matchingConditionId) {
-		matchCondService.deleteUserMatchCond(matchingConditionId);
+	@DeleteMapping("/{matchInfoId}")
+	public CommonResponse<Void> deleteUserMatchInfo(
+		@PathVariable Long matchInfoId) {
+		matchCondService.deleteUserMatchInfo(matchInfoId);
 		return CommonResponse.ok();
 	}
 }

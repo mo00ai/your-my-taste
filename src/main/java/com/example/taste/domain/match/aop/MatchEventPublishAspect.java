@@ -23,9 +23,9 @@ public class MatchEventPublishAspect {
 
 	@AfterReturning(
 		pointcut = "@annotation(matchEventPublish)",
-		returning = "userMatchCondIds")
+		returning = "userMatchInfoList")
 	public void publishMatchAfterReturn(JoinPoint joinPoint,
-		List<Long> userMatchCondIds, MatchEventPublish matchEventPublish) throws Throwable {
+		List<Long> userMatchInfoList, MatchEventPublish matchEventPublish) throws Throwable {
 		TransactionSynchronizationManager.registerSynchronization(
 			new TransactionSynchronizationAdapter() {
 				// 반드시 커밋 이후에
@@ -33,11 +33,11 @@ public class MatchEventPublishAspect {
 				public void afterCommit() {
 					switch (matchEventPublish.matchJobType()) {
 						case USER_MATCH -> {
-							if (userMatchCondIds == null || userMatchCondIds.isEmpty()) {
+							if (userMatchInfoList == null || userMatchInfoList.isEmpty()) {
 								return;
 							}
 							matchPublisher.publish(
-								new MatchEvent(matchEventPublish.matchJobType(), userMatchCondIds));
+								new MatchEvent(matchEventPublish.matchJobType(), userMatchInfoList));
 						}
 						case PARTY_MATCH -> {
 							matchPublisher.publish(
