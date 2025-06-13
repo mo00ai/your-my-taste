@@ -1,6 +1,7 @@
 package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
+import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
 
@@ -86,6 +87,9 @@ public class MatchInfoService {
 	@Transactional
 	public void deleteUserMatchInfo(Long matchInfoId) {
 		MatchStatus matchStatus = userMatchInfoRepository.findMatchStatusById(matchInfoId);
+		if (matchStatus == null) {
+			throw new CustomException(USER_MATCH_INFO_NOT_FOUND);
+		}
 
 		// 매칭 중이면 삭제 불가
 		if (!matchStatus.equals(MatchStatus.IDLE)) {
