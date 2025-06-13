@@ -85,7 +85,7 @@ public class CommentController {
 	}
 
 	// 댓글 하나 조회
-	@GetMapping("/{commentId}")
+	@GetMapping("/comment/{commentId}")
 	public CommonResponse<GetCommentDto> getComment(
 		@PathVariable Long boardId,
 		@PathVariable Long commentId) {

@@ -22,7 +22,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 	public Page<Comment> findAllRootByBoard(Long boardId, Pageable pageable) {
 		QComment qComment = QComment.comment;
 		List<Comment> allRoot = queryFactory.selectFrom(qComment)
-			.fetchJoin()
 			.where(
 				qComment.board.id.eq(boardId),
 				qComment.root.isNull()

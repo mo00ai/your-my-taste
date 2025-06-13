@@ -112,7 +112,7 @@ public class CommentService {
 	// 대댓글 가져오기
 	public Slice<GetCommentDto> getChildComment(Long commentId, int index) {
 		Pageable pageable = PageRequest.of(index - 1, 10);
-		Slice<Comment> rootComments = commentRepository.findAllRootByBoard(commentId, pageable);
+		Slice<Comment> rootComments = commentRepository.findChildComment(commentId, pageable);
 		Slice<GetCommentDto> dtos = rootComments.map(GetCommentDto::new);
 		return dtos;
 	}
