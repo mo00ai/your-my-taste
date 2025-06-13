@@ -97,9 +97,9 @@ public class Party extends BaseCreatedAtEntity {
 		this.meetingDate =
 			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
 		this.maxMembers =
-			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
+			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
 		this.enableRandomMatching =
-			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
+			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
 		this.partyStatus = PartyStatus.RECRUITING;
 	}
 
@@ -113,10 +113,10 @@ public class Party extends BaseCreatedAtEntity {
 		this.meetingDate =
 			requestDto.getMeetingDate() != null ? requestDto.getMeetingDate() : null;
 		this.maxMembers =
-			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : null;
+			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
 		this.nowMembers = 1;
 		this.enableRandomMatching =
-			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : null;
+			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
 		this.partyStatus = PartyStatus.RECRUITING;
 	}
 
