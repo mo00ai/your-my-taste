@@ -52,7 +52,7 @@ public class Comment extends BaseEntity {
 	private List<Comment> children = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = true)
 	private User user;
 
 	public void setBoard(Board board) {
