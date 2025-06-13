@@ -19,40 +19,40 @@ import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
-import com.example.taste.domain.match.service.MatchCondService;
+import com.example.taste.domain.match.service.MatchInfoService;
 
 @RequestMapping("/match-conditions")
 @RestController
 @RequiredArgsConstructor
 public class MatchCondController {
-	private final MatchCondService matchCondService;
+	private final MatchInfoService matchInfoService;
 
 	@PostMapping
 	public CommonResponse<Void> createUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody UserMatchInfoCreateRequestDto requestDto) {
-		matchCondService.createUserMatchInfo(userDetails.getId(), requestDto);
+		matchInfoService.createUserMatchInfo(userDetails.getId(), requestDto);
 		return CommonResponse.ok();
 	}
 
 	@GetMapping
 	public CommonResponse<List<UserMatchInfoResponseDto>> getUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(matchCondService.findUserMatchInfo(userDetails.getId()));
+		return CommonResponse.ok(matchInfoService.findUserMatchInfo(userDetails.getId()));
 	}
 
 	@PatchMapping("/{matchInfoId}")
 	public CommonResponse<Void> updateUserMatchInfo(
 		@PathVariable Long matchInfoId,
 		@RequestBody UserMatchInfoUpdateRequestDto requestDto) {
-		matchCondService.updateUserMatchInfo(matchInfoId, requestDto);
+		matchInfoService.updateUserMatchInfo(matchInfoId, requestDto);
 		return CommonResponse.ok();
 	}
 
 	@DeleteMapping("/{matchInfoId}")
 	public CommonResponse<Void> deleteUserMatchInfo(
 		@PathVariable Long matchInfoId) {
-		matchCondService.deleteUserMatchInfo(matchInfoId);
+		matchInfoService.deleteUserMatchInfo(matchInfoId);
 		return CommonResponse.ok();
 	}
 }

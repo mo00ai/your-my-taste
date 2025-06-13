@@ -12,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.match.entity.PartyMatchCond;
+import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfoCategory;
 import com.example.taste.domain.match.entity.UserMatchInfoStore;
-import com.example.taste.domain.match.repository.PartyMatchCondRepository;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.entity.PartyInvitation;
@@ -32,7 +32,7 @@ import com.example.taste.domain.user.enums.Gender;
 public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워커 서비스
 	private final EntityFetcher entityFetcher;
 	private final UserMatchInfoRepository userMatchInfoRepository;
-	private final PartyMatchCondRepository partyMatchInfoRepository;
+	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 유저 한 명에게 파티 추천
@@ -42,7 +42,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		List<UserMatchInfo> matchingUserList =
 			userMatchInfoRepository.findAllById(userMatchInfoIdList);
 
-		List<PartyMatchCond> matchingPartyList = partyMatchInfoRepository.findAll();
+		List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
 		// 매칭 중인 파티가 없는 경우
 		if (matchingPartyList.isEmpty()) {
 			return;
@@ -73,7 +73,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 			return;
 		}
 
-		List<PartyMatchCond> matchingPartyList = partyMatchInfoRepository.findAll();
+		List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
 		// 매칭 중인 파티가 없는 경우
 		if (matchingPartyList.isEmpty()) {
 			return;
@@ -93,12 +93,12 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	private PartyInvitation runMatchEngine(
-		UserMatchInfo matchingUser, List<PartyMatchCond> matchingPartyList) {
+		UserMatchInfo matchingUser, List<PartyMatchInfo> matchingPartyList) {
 		int bestScore = 0;
 		List<Long> bestScorePartyCondIdList = new ArrayList<>(List.of(0L));
 
 		// 1. 필터링
-		Stream<PartyMatchCond> partyStream = matchingPartyList.stream();
+		Stream<PartyMatchInfo> partyStream = matchingPartyList.stream();
 
 		// 초대 이력이 없는 파티들만 필터링
 		List<Long> invitedPartyIdList = partyInvitationRepository.findAllPartyIdByUser(matchingUser.getUser());
@@ -124,8 +124,8 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 		// 2. 가중치 계산
 		// 카테고리 일치, 날짜 범위
-		List<PartyMatchCond> filteredParty = partyStream.toList();
-		for (PartyMatchCond matchingParty : filteredParty) {
+		List<PartyMatchInfo> filteredParty = partyStream.toList();
+		for (PartyMatchInfo matchingParty : filteredParty) {
 			int nowMatchingScore = 0;
 			nowMatchingScore += calculateCategoryScore(matchingUser, matchingParty);
 			nowMatchingScore += calculateMeetingDateScore(matchingUser, matchingParty);
@@ -144,7 +144,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 		// 최종 최고 점수 파티와 매칭
 		// 1) 필터링-가중치 계산 이후에도 모든 파티가 0점인 경우, 2)최고 점수인 파티가 여러 개인 경우
-		PartyMatchCond selectedParty = null;
+		PartyMatchInfo selectedParty = null;
 		if (bestScore == 0 || bestScorePartyCondIdList.size() > 1) {
 			selectedParty = filteredParty.get(
 				ThreadLocalRandom.current().nextInt(0, filteredParty.size()));
@@ -170,18 +170,18 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 			&& cond.getAgeRange() == null;
 	}
 
-	private Stream<PartyMatchCond> matchStore(UserMatchInfo matchingUser, Stream<PartyMatchCond> partyStream) {
+	private Stream<PartyMatchInfo> matchStore(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
 		return partyStream.filter(p -> p.getStore() != null
 			&& matchingUser.getStores().stream()
 			.map(UserMatchInfoStore::getStore)
 			.toList().contains(p.getStore()));
 	}
 
-	private Stream<PartyMatchCond> matchRegion(UserMatchInfo matchingUser, Stream<PartyMatchCond> partyStream) {
+	private Stream<PartyMatchInfo> matchRegion(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
 		return partyStream.filter(p -> p.getRegion() != null && p.getRegion().contains(matchingUser.getRegion()));
 	}
 
-	private Stream<PartyMatchCond> matchGender(UserMatchInfo matchingUser, Stream<PartyMatchCond> partyStream) {
+	private Stream<PartyMatchInfo> matchGender(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
 		return partyStream.filter(p -> {
 			if (p.getGender().equals(Gender.ANY)) {
 				return true;
@@ -190,7 +190,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		});
 	}
 
-	private Stream<PartyMatchCond> matchAgeRange(UserMatchInfo matchingUser, Stream<PartyMatchCond> partyStream) {
+	private Stream<PartyMatchInfo> matchAgeRange(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
 		int userAge = matchingUser.getUserAge();
 		AgeRange userPrefAgeRange = matchingUser.getAgeRange();
 
@@ -215,7 +215,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지
-	private int calculateCategoryScore(UserMatchInfo matchingUser, PartyMatchCond party) {
+	private int calculateCategoryScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
 		if (matchingUser.getCategories().stream()
 			.map(UserMatchInfoCategory::getCategory)
 			.toList()
@@ -225,7 +225,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		return 0;
 	}
 
-	private int calculateMeetingDateScore(UserMatchInfo matchingUser, PartyMatchCond party) {
+	private int calculateMeetingDateScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
 		int dateAbsGap = (int)Math.abs(
 			ChronoUnit.DAYS.between(matchingUser.getMeetingDate(), party.getMeetingDate()));
 

@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
-import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
-import com.example.taste.domain.match.entity.PartyMatchCond;
+import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
+import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.redis.MatchPublisher;
-import com.example.taste.domain.match.repository.PartyMatchCondRepository;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
@@ -35,12 +35,12 @@ public class MatchService {
 	private final EntityFetcher entityFetcher;
 	private final MatchPublisher matchPublisher;
 	private final UserMatchInfoRepository userMatchInfoRepository;
-	private final PartyMatchCondRepository partyMatchCondRepository;
+	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
-	public List<Long> registerUserMatch(Long matchConditionId) {
-		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(matchConditionId);
+	public List<Long> registerUserMatch(Long userMatchInfoId) {
+		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
 		// 이미 매칭 중이라면
 		if (userMatchInfo.isMatching()) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
@@ -52,7 +52,7 @@ public class MatchService {
 	}
 
 	@MatchEventPublish(matchJobType = MatchJobType.PARTY_MATCH)
-	public void registerPartyMatch(Long hostId, PartyMatchCondCreateRequestDto requestDto) {
+	public void registerPartyMatch(Long hostId, PartyMatchInfoCreateRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(requestDto.getPartyId());
 
 		// 호스트가 아니라면
@@ -61,11 +61,11 @@ public class MatchService {
 		}
 
 		// 이미 매칭 중이라면
-		if (partyMatchCondRepository.existsPartyMatchCondByParty(party)) {
+		if (partyMatchInfoRepository.existsPartyMatchInfoByParty(party)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
-		partyMatchCondRepository.save(new PartyMatchCond(requestDto, party));
+		partyMatchInfoRepository.save(new PartyMatchInfo(requestDto, party));
 	}
 
 	@Transactional
@@ -94,7 +94,7 @@ public class MatchService {
 				party, InvitationType.RANDOM, InvitationStatus.WAITING);
 
 		partyInvitationRepository.deleteAll(beforeUserConfirmList);        // 초대 정보 삭제
-		partyMatchCondRepository.deleteByParty(party);            // 파티 매칭 삭제
+		partyMatchInfoRepository.deleteByParty(party);            // 파티 매칭 삭제
 
 		return beforeUserConfirmList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
 			.map(pi -> pi.getUserMatchInfo().getId())

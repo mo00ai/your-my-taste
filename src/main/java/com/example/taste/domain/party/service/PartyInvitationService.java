@@ -17,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
-import com.example.taste.domain.match.entity.PartyMatchCond;
+import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
-import com.example.taste.domain.match.repository.PartyMatchCondRepository;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.dto.request.InvitationActionRequestDto;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
@@ -39,7 +39,7 @@ import com.example.taste.domain.user.entity.User;
 public class PartyInvitationService {
 	private final EntityFetcher entityFetcher;
 	private final PartyInvitationRepository partyInvitationRepository;
-	private final PartyMatchCondRepository partyMatchCondRepository;
+	private final PartyMatchInfoRepository partyMatchInfoRepository;
 
 	@Transactional
 	public void leaveParty(Long userId, Long partyId) {
@@ -327,16 +327,16 @@ public class PartyInvitationService {
 
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
-				PartyMatchCond partyMatchCond =
-					partyMatchCondRepository.findPartyMatchCondByParty(party);
-				partyMatchCond.setMatchStatus(MatchStatus.IDLE);
+				PartyMatchInfo partyMatchInfo =
+					partyMatchInfoRepository.findPartyMatchInfoByParty(party);
+				partyMatchInfo.setMatchStatus(MatchStatus.IDLE);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
-			PartyMatchCond partyMatchCond =
-				partyMatchCondRepository.findPartyMatchCondByParty(party);
-			partyMatchCond.setMatchStatus(MatchStatus.IDLE);
+			PartyMatchInfo partyMatchInfo =
+				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
+			partyMatchInfo.setMatchStatus(MatchStatus.IDLE);
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}

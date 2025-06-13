@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
-import com.example.taste.domain.match.dto.request.PartyMatchCondCreateRequestDto;
+import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.MatchStatus;
@@ -28,8 +28,8 @@ import com.example.taste.domain.user.enums.Gender;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "party_match_cond")
-public class PartyMatchCond extends BaseCreatedAtEntity {
+@Table(name = "party_match_info")
+public class PartyMatchInfo extends BaseCreatedAtEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -54,7 +54,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	private MatchStatus matchStatus;
 
 	@Builder
-	public PartyMatchCond(Party party, int ageMinRange, int ageMaxRange, Gender gender, String region,
+	public PartyMatchInfo(Party party, int ageMinRange, int ageMaxRange, Gender gender, String region,
 		MatchStatus matchStatus) {
 		this.party = party;
 		this.ageRange = new AgeRange(ageMinRange, ageMaxRange);
@@ -64,7 +64,7 @@ public class PartyMatchCond extends BaseCreatedAtEntity {
 	}
 
 	@Builder
-	public PartyMatchCond(PartyMatchCondCreateRequestDto requestDto, Party party) {
+	public PartyMatchInfo(PartyMatchInfoCreateRequestDto requestDto, Party party) {
 		this.party = party;
 		this.store = party.getStore();
 		this.meetingDate = party.getMeetingDate();

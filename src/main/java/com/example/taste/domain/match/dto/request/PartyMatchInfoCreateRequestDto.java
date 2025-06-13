@@ -5,7 +5,7 @@ import lombok.Getter;
 import com.example.taste.domain.match.vo.AgeRange;
 
 @Getter
-public class PartyMatchCondCreateRequestDto {
+public class PartyMatchInfoCreateRequestDto {
 	private Long partyId;
 	private AgeRange ageRange;
 	private String gender;

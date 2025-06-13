@@ -29,7 +29,7 @@ import com.example.taste.domain.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-public class MatchCondService {
+public class MatchInfoService {
 	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
@@ -62,24 +62,24 @@ public class MatchCondService {
 
 	@Transactional
 	public void updateUserMatchInfo(
-		Long matchConditionId, UserMatchInfoUpdateRequestDto requestDto) {
-		UserMatchInfo matchCond = entityFetcher.getUserMatchInfoOrThrow(matchConditionId);
+		Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
+		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
 
 		// 매칭 중이면 업데이트 불가
-		if (!matchCond.getMatchStatus().equals(MatchStatus.IDLE)) {
+		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
-		matchCond.update(requestDto);
+		matchInfo.update(requestDto);
 
 		// 맛집 리스트 세팅
 		if (requestDto.getStores() != null) {
-			matchCond.setStores(getValidUserMatchInfoStores(requestDto.getStores(), matchCond));
+			matchInfo.setStores(getValidUserMatchInfoStores(requestDto.getStores(), matchInfo));
 		}
 
 		// 카테고리 리스트 세팅
 		if (requestDto.getCategories() != null) {
-			matchCond.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), matchCond));
+			matchInfo.setCategories(getValidUserMatchInfoCategories(requestDto.getCategories(), matchInfo));
 		}
 	}
 
