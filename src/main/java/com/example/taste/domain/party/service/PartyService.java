@@ -56,22 +56,23 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 	public List<PartyResponseDto> getParties(Long userId, String filter) {
 		PartyFilter partyFilter = PartyFilter.of(filter);
 		switch (partyFilter) {
-			case ALL:
+			case ALL -> {
 				// 유저가 열고 있는 파티 제외하고 모든 파티 보여줌
 				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();
-			case MY:
+			}
+			case MY -> {
 				// 유저가 참가, 호스트인 파티 모두 보여줌
 				return partyRepository.findAllByRecruitingUserIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();
-			default:
-				throw new CustomException(INVALID_INPUT_VALUE);
+			}
+			default -> throw new CustomException(INVALID_INPUT_VALUE);
 		}
 	}
 
-	public PartyDetailResponseDto getPartyDetail(Long userId, Long partyId) {
+	public PartyDetailResponseDto getPartyDetail(Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		User host = party.getHostUser();
 
@@ -82,8 +83,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		List<UserSimpleResponseDto> membersDtoList =
 			members.stream().map(UserSimpleResponseDto::new).toList();
 
-		return new PartyDetailResponseDto(
-			party, hostDto, membersDtoList);
+		return new PartyDetailResponseDto(party, hostDto, membersDtoList);
 	}
 
 	@Transactional
@@ -106,5 +106,17 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		// 장소 바꾸는 경우
 		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
 		party.update(requestDto);
+	}
+
+	@Transactional
+	public void removeParty(Long hostId, Long partyId) {
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+
+		// 호스트가 아니라면
+		if (!party.isHostOfParty(hostId)) {
+			throw new CustomException(UNAUTHORIZED_PARTY);
+		}
+
+		partyRepository.delete(party);
 	}
 }

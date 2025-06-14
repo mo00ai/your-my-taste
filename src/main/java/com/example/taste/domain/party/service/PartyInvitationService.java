@@ -8,6 +8,7 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZ
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
 
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,14 @@ public class PartyInvitationService {
 		// 파티에서 현재 멤버 수 차감
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		party.leaveMember();
+
+		// 호스트가 나가는 경우(호스트 탈퇴 후에도 멤버가 남아있다면) 참가한지 오래된 유저에게 호스트 위임
+		if (party.getNowMembers() > 1 && party.isHostOfParty(userId)) {
+			User newHostUser = party.getPartyInvitationList().stream()
+				.sorted(Comparator.comparing(PartyInvitation::getCreatedAt))    // 오름차순 정렬
+				.findFirst().get().getUser();
+			party.updateHost(newHostUser);
+		}
 	}
 
 	// 강퇴

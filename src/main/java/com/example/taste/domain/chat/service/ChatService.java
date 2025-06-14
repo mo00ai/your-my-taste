@@ -40,7 +40,7 @@ public class ChatService {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 		// TODO: 탈퇴한 사용자 채팅은 어떻게 처리할건지 고민 - @윤예진
-		return chatRepository.findAllByParty().stream()
+		return chatRepository.findAllByParty(party).stream()
 			.map(ChatResponseDto::new)
 			.toList();
 	}
