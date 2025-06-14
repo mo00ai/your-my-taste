@@ -127,11 +127,6 @@ public class Board extends SoftDeletableEntity {
 		register(store, user);
 	}
 
-	// 해시태그 삭제
-	public void removeBoardHashtag(BoardHashtag boardHashtag) {
-		boardHashtagSet.remove(boardHashtag);
-	}
-
 	public void update(BoardUpdateRequestDto requestDto) {
 		if (requestDto.getTitle() != null) {
 			this.title = requestDto.getTitle();
