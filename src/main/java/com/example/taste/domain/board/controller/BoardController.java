@@ -128,9 +128,7 @@ public class BoardController {
 		if (pageable.getPageSize() > MAX_SIZE) {
 			throw new CustomException(ErrorCode.INVALID_PAGE_SIZE);
 		}
-		PageResponse<BoardListResponseDto> result = boardService.searchBoards(conditionDto,
-			pageable);
-		return CommonResponse.ok(result);
+		return CommonResponse.ok(boardService.searchBoards(conditionDto, pageable));
 
 	}
 }

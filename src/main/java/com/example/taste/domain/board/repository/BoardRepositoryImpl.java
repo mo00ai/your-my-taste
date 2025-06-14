@@ -175,7 +175,9 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		if (StringUtils.hasText(condition.getKeyword())) {
 			BooleanExpression titleContains = board.title.containsIgnoreCase(condition.getKeyword());
 			BooleanExpression contentContains = board.contents.containsIgnoreCase(condition.getKeyword());
-			builder.and(titleContains.or(contentContains));
+			BooleanExpression hashtagContains = board.boardHashtagSet.any().hashtag.name.containsIgnoreCase(
+				condition.getKeyword());
+			builder.and(titleContains.or(contentContains).or(hashtagContains));
 		} else {
 			// 키워드가 없는 경우에만 개별 검색 사용
 			// 제목으로 검색
