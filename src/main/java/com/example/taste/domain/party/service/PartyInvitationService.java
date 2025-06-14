@@ -54,6 +54,7 @@ public class PartyInvitationService {
 		party.leaveMember();
 	}
 
+	// 강퇴
 	@Transactional
 	public void removePartyMember(Long hostId, Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);

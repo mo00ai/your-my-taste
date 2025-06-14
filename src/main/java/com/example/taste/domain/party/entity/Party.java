@@ -142,6 +142,15 @@ public class Party extends BaseCreatedAtEntity {
 		return this.getHostUser().getId().equals(hostId);
 	}
 
+	public boolean isActiveMember(User user) {
+		for (PartyInvitation pi : this.partyInvitationList) {
+			if (pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED) && pi.getUser().equals(user)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public double calculateAverageMemberAge() {
 		return this.partyInvitationList.stream()
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))

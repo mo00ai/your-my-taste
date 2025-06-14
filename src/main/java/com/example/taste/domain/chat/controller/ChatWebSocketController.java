@@ -17,11 +17,11 @@ import com.example.taste.domain.chat.service.ChatService;
 
 @Controller
 @RequiredArgsConstructor
-public class ChatController {
+public class ChatWebSocketController {
 	private final ChatService chatService;
 
 	// 채팅방에 메세지 보내기
-	@MessageMapping("/parties/{partyId}/chat")
+	@MessageMapping("/pub/parties/{partyId}/chat/send")
 	@SendTo("/sub/parties/{partyId}/chat")
 	public ChatResponseDto sendMessage(@DestinationVariable("partyId") Long partyId,
 		@Payload ChatCreateRequestDto message, Principal principal) {
