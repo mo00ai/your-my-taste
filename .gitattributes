@@ -4,4 +4,5 @@
 *.java text eol=lf
 *.properties text eol=lf
 *.yml text eol=lf
+*.xml text eol=lf
 * text=auto
