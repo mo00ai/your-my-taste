@@ -119,7 +119,7 @@ public class HashtagService {
 	 */
 	public void clearBoardHashtags(Board board) {
 		// Board 엔티티의 removeBoardHashtag 메서드를 활용
-		List<BoardHashtag> hashtagsToRemove = new ArrayList<>(board.getBoardHashtagList());
+		List<BoardHashtag> hashtagsToRemove = new ArrayList<>(board.getBoardHashtagSet());
 		// 엔티티를 통해 삭제
 		hashtagsToRemove.forEach(board::removeBoardHashtag);
 
@@ -137,7 +137,7 @@ public class HashtagService {
 		String normalizedName = hashtagName.trim().toLowerCase();
 
 		// 해당 해시태그를 가진 BoardHashtag 찾기
-		BoardHashtag targetBoardHashtag = board.getBoardHashtagList().stream()
+		BoardHashtag targetBoardHashtag = board.getBoardHashtagSet().stream()
 			.filter(bh -> bh.getHashtag().getName().equals(normalizedName))
 			.findFirst()
 			.orElse(null);
@@ -158,7 +158,7 @@ public class HashtagService {
 		}
 
 		// 해당 해시태그 ID를 가진 BoardHashtag 찾기
-		BoardHashtag targetBoardHashtag = board.getBoardHashtagList().stream()
+		BoardHashtag targetBoardHashtag = board.getBoardHashtagSet().stream()
 			.filter(bh -> bh.getHashtag().getId().equals(hashtagId))
 			.findFirst()
 			.orElse(null);
