@@ -38,6 +38,7 @@ public class MatchService {
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
+	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> registerUserMatch(Long userMatchInfoId) {
 		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
@@ -51,6 +52,7 @@ public class MatchService {
 		return List.of(userMatchInfo.getId());    // 매칭 대상이 될 유저 매칭 조건 ID
 	}
 
+	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.PARTY_MATCH)
 	public void registerPartyMatch(Long hostId, PartyMatchInfoCreateRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(requestDto.getPartyId());
@@ -79,6 +81,7 @@ public class MatchService {
 		userMatchInfoRepository.deleteById(userMatchInfoId);
 	}
 
+	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> cancelPartyMatch(Long hostId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
