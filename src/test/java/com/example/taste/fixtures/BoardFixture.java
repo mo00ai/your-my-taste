@@ -57,7 +57,7 @@ public class BoardFixture {
 			.type(O)
 			.status(BoardStatus.TIMEATTACK)
 			.openLimit(10)
-			.openTime(LocalDateTime.of(2025, 6, 12, 0, 0))
+			.openTime(LocalDateTime.now().minusDays(1))
 			.store(store)
 			.user(user)
 			.end();
@@ -70,7 +70,7 @@ public class BoardFixture {
 			.type(O)
 			.status(BoardStatus.FCFS)
 			.openLimit(1)
-			.openTime(LocalDateTime.of(2025, 6, 12, 0, 0))
+			.openTime(LocalDateTime.now().minusDays(1))
 			.store(store)
 			.user(user)
 			.end();
