@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class WebSocketSubscriptionManager {
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 구독 상태 관리
+	@EventListener
 	public void handleChatSubscribeEvent(SessionSubscribeEvent event) {
 		try {
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -36,7 +38,7 @@ public class WebSocketSubscriptionManager {
 				Authentication authentication = (Authentication)event.getUser();
 				CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 
-				if (!partyInvitationRepository.existsMember(
+				if (!partyInvitationRepository.existsByUserIdAndPartyIdAndInvitationStatus(
 					userDetails.getUser().getId(), partyId, InvitationStatus.CONFIRMED)) {
 					throw new IllegalAccessException();
 				}
@@ -56,11 +58,8 @@ public class WebSocketSubscriptionManager {
 			Authentication authentication = (Authentication)event.getUser();
 			CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 
-			String errorMessage = String.format(
-				"자신의 활성화된 채팅방이 아닙니다. 유저 ID: %s, 구독 경로: %s",
-				userDetails.getId(), accessor.getDestination()
-			);
-			throw new RuntimeException(errorMessage, e);
+			log.warn("자신의 활성화된 채팅방이 아닙니다. 유저 ID: {}, 구독 경로: {}",
+				userDetails.getId(), accessor.getDestination());
 		}
 	}
 

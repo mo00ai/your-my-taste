@@ -13,6 +13,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -33,10 +35,14 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 			if (session == null) {
 				throw new CustomException(INVALID_SIGNATURE);
 			}
+			SecurityContext securityContext = (SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT");
+			if (securityContext == null || securityContext.getAuthentication() == null) {
+				throw new CustomException(INVALID_SIGNATURE);
+			}
 
-			// 기존 Http 세션이 있을 시 웹소켓 세션에 등록
-			session.getAttribute("SPRING_SECURITY_CONTEXT");
-			attributes.put("sessionId", session.getId());
+			Authentication authentication = securityContext.getAuthentication();
+			attributes.put("user", authentication.getPrincipal());
+			// attributes.put("sessionId", session.getId());
 		}
 		return true;
 	}

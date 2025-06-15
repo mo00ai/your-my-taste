@@ -7,6 +7,7 @@ import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -26,9 +27,10 @@ public class ChatWebSocketController {
 	private final ChatService chatService;
 
 	// 채팅방에 메세지 보내기
-	@MessageMapping("/parties/chat/send")
-	@SendTo("/sub/parties/chat")
+	@MessageMapping("/parties/{partyId}/chat/send")
+	@SendTo("/sub/parties/{partyId}/chat")
 	public ChatResponseDto sendMessage(
+		@DestinationVariable Long partyId,
 		@Payload ChatCreateRequestDto message, Principal principal) {
 		if (!(principal instanceof Authentication authentication)) {
 			throw new CustomException(INVALID_SIGNATURE);

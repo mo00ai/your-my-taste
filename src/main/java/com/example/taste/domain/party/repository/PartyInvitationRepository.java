@@ -58,10 +58,6 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		+ "AND pi.invitationType = :type AND pi.invitationStatus = :status")
 	void deleteAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
 
-	@Query(value = """
-		SELECT EXISTS (SELECT 1 FROM party_invitation
-		WHERE user_id = :userId AND party_id = :partyId AND invitation_status = :status)""",
-		nativeQuery = true)
-	boolean existsMember(
-		@Param("userId") Long userId, @Param("partyId") Long partyId, @Param("status") InvitationStatus status);
+	boolean existsByUserIdAndPartyIdAndInvitationStatus(
+		Long userId, Long partyId, InvitationStatus invitationStatus);
 }
