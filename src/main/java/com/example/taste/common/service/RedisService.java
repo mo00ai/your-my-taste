@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +17,8 @@ import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -123,6 +123,7 @@ public class RedisService {
 		redisTemplate.convertAndSend(RedisChannel.MATCH_CHANNEL, event);
 	}
 
+	// 알림 카운트 감소
 	public void decreaseCount(String key, Long amount) {
 		redisTemplate.opsForValue().decrement(key, amount);
 	}

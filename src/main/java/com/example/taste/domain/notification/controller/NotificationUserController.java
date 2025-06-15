@@ -54,7 +54,7 @@ public class NotificationUserController {
 	}
 
 	// 전체 알림 읽음 처리하기
-	@PatchMapping("/All")
+	@PatchMapping("/all")
 	public CommonResponse<Void> markAllNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		notificationUserService.markAllNotificationAsRead(userDetails);
 		return CommonResponse.ok();
