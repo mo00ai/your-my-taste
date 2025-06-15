@@ -10,8 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.chat.dto.ChatCreateRequestDto;
@@ -20,6 +22,8 @@ import com.example.taste.domain.user.entity.User;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "chat")
 public class Chat extends BaseCreatedAtEntity {
 	@Id

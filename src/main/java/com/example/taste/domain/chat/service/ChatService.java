@@ -1,5 +1,6 @@
 package com.example.taste.domain.chat.service;
 
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import com.example.taste.domain.chat.dto.ChatResponseDto;
 import com.example.taste.domain.chat.entity.Chat;
 import com.example.taste.domain.chat.repository.ChatRepository;
 import com.example.taste.domain.party.entity.Party;
+import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.user.entity.User;
 
 @Service
@@ -22,10 +24,12 @@ import com.example.taste.domain.user.entity.User;
 public class ChatService {
 	private final EntityFetcher entityFetcher;
 	private final ChatRepository chatRepository;
+	private final PartyRepository partyRepository;
 
 	// 보낸 메세지 저장
 	public ChatResponseDto saveMessage(User user, ChatCreateRequestDto dto) {
-		Party party = entityFetcher.getPartyOrThrow(dto.getPartyId());
+		Party party = partyRepository.findByIdWithInvitationsAndUsers(dto.getPartyId())
+			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 		if (!party.isActiveMember(user)) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}

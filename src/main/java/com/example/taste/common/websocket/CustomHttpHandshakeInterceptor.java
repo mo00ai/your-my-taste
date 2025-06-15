@@ -4,12 +4,17 @@ import static com.example.taste.common.exception.ErrorCode.INVALID_SIGNATURE;
 
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
@@ -24,14 +29,27 @@ public class CustomHttpHandshakeInterceptor extends HttpSessionHandshakeIntercep
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 		WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 		super.beforeHandshake(request, response, wsHandler, attributes);
-		Object session = attributes.get("SPRING_SECURITY_CONTEXT");
+		if (request instanceof ServletServerHttpRequest servletRequest) {
+			HttpServletRequest httpRequest = servletRequest.getServletRequest();
+			HttpSession session = httpRequest.getSession(false);
 
-		// 세션이 없다면 인증(로그인) 필요
-		if (session == null) {
-			throw new CustomException(INVALID_SIGNATURE);
+			if (session == null) {
+				throw new CustomException(INVALID_SIGNATURE);
+			}
+
+			SecurityContext context = (SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT");
+			if (context == null || context.getAuthentication() == null
+				|| !context.getAuthentication().isAuthenticated()) {
+				throw new CustomException(INVALID_SIGNATURE);
+			}
+
+			// 필요 시 사용자 정보 저장
+			attributes.put("user", context.getAuthentication().getPrincipal());
+			log.info("핸드쉐이킹 성공 UserID: {}", context.getAuthentication().getPrincipal());
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override

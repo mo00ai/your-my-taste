@@ -10,6 +10,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
+import com.example.taste.common.websocket.CustomHandshakeHandler;
 import com.example.taste.common.websocket.CustomHttpHandshakeInterceptor;
 import com.example.taste.common.websocket.WebSocketAuthInterceptor;
 
@@ -19,13 +20,14 @@ import com.example.taste.common.websocket.WebSocketAuthInterceptor;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	private final WebSocketAuthInterceptor authInterceptor;
 	private final CustomHttpHandshakeInterceptor customHttpHandshakeInterceptor;
+	private final CustomHandshakeHandler customHandshakeHandler;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
-			// .addInterceptors(handshakeInterceptor)
 			.addInterceptors(customHttpHandshakeInterceptor)
+			.setHandshakeHandler(customHandshakeHandler)
 			.withSockJS();
 	}
 
@@ -33,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/sub"); // 해당 경로 구독중인 유저에게 메세지 전달
 		registry.setApplicationDestinationPrefixes("/pub"); // 클라이언트가 서버로 메세지 전송할 때 prefix
-		registry.setUserDestinationPrefix("/user"); // 사용자별 메시지 전송을 위한 prefix
+		registry.setUserDestinationPrefix("/private"); // 사용자별 메시지 전송을 위한 prefix
 	}
 
 	@Override
