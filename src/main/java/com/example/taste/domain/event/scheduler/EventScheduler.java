@@ -23,6 +23,7 @@ public class EventScheduler {
 	private final PkService pkService;
 
 	@Scheduled(cron = "0 0 0 * * *")
+	// @Scheduled(cron = "0 */2 * * * *")
 	public void selectEventWinner() {
 
 		log.info("[Event] 이벤트 우승자 선정 스케줄러 시작");

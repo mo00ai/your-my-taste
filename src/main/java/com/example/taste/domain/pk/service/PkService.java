@@ -125,12 +125,17 @@ public class PkService {
 
 	public int getPointByPkType(PkType type) {
 
-		List<PkCriteriaResponseDto> criteriaList = pkCacheService.findAllPkCriteria();
+		// List<PkCriteriaResponseDto> criteriaList = pkCacheService.findAllPkCriteria();
+		//
+		// return criteriaList.stream()
+		// 	.filter(dto -> dto.getType().equals(type.name()))
+		// 	.map(PkCriteriaResponseDto::getPoint)
+		// 	.findFirst()
+		// 	.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
 
-		return criteriaList.stream()
-			.filter(dto -> dto.getType().equals(type.name()))
-			.map(PkCriteriaResponseDto::getPoint)
-			.findFirst()
+		return pkCriteriaRepository.findByType(type)
+			.filter(PkCriteria::isActive)
+			.map(PkCriteria::getPoint)
 			.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
 
 	}
