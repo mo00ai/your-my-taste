@@ -126,7 +126,7 @@ public class HashtagService {
 		}
 		String normalizedName = hashtagName.trim().toLowerCase();
 
-		boardHashtagRepository.findByBoardIdAndHashtag_Name(board.getId(), hashtagName)
+		boardHashtagRepository.findByBoardIdAndHashtag_Name(board.getId(), normalizedName)
 			.ifPresent(boardHashtagRepository::delete);
 	}
 
