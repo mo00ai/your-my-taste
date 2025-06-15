@@ -77,8 +77,18 @@ dependencies {
     // @ConfigurationProperties
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'com.h2database:h2'
+    testImplementation 'org.springframework.boot:spring-boot-test'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+compileJava { options.compilerArgs << '-parameters' }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "-parameters"
 }
