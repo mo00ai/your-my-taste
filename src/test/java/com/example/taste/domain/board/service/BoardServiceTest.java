@@ -134,7 +134,7 @@ class BoardServiceTest {
 		Thread.sleep(500);
 
 		// then
-		String receivedMessage = future.get();
+		String receivedMessage = future.get(5, TimeUnit.SECONDS);
 		assertNotNull(receivedMessage);
 		System.out.println("수신 메시지: " + receivedMessage);
 	}

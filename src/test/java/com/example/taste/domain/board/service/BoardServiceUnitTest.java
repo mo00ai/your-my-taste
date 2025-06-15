@@ -10,14 +10,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.image.service.BoardImageService;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.fixtures.BoardFixture;
 import com.example.taste.fixtures.CategoryFixture;
 import com.example.taste.fixtures.ImageFixture;
@@ -28,9 +35,24 @@ import com.example.taste.fixtures.UserFixture;
 public class BoardServiceUnitTest {
 	@InjectMocks
 	private BoardService boardService;
-
 	@Mock
 	private BoardRepository boardRepository;
+	@Mock
+	private BoardImageService boardImageService;
+	@Mock
+	private StoreService storeService;
+	@Mock
+	private PkService pkService;
+	@Mock
+	private HashtagService hashtagService;
+	@Mock
+	private EntityFetcher entityFetcher;
+	@Mock
+	private RedisService redisService;
+	@Mock
+	private SimpMessagingTemplate messagingTemplate;
+	@Mock
+	private UserRepository userRepository;
 
 	@Test
 	public void findBoard_whenNotOpenYet_ThrowException() {
@@ -44,6 +66,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
+		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -63,6 +86,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
+		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -82,6 +106,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
+		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {

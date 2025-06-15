@@ -44,11 +44,11 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 
 	@Query(value = """
 		    SELECT *
-			FROM Board
-		    WHERE status = 'TIMEATTACK'
+			FROM board
+		    WHERE status = :status
 		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
 		""", nativeQuery = true)
-	List<Board> findExpiredTimeAttackBoards();
+	List<Board> findExpiredTimeAttackBoards(@Param("status") String status);
 
 	@Modifying(clearAutomatically = true)
 	@Query(value = """
