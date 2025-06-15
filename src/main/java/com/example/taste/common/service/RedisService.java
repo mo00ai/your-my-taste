@@ -7,12 +7,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.common.constant.RedisChannel;
+import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
-import com.example.taste.domain.notification.redis.RedisChannel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -115,6 +118,12 @@ public class RedisService {
 		redisTemplate.opsForValue().set(key, eventDto, duration);
 	}
 
+	// 매칭 작업 이벤트 발행
+	public void publishMatchEvent(MatchEvent event) {
+		redisTemplate.convertAndSend(RedisChannel.MATCH_CHANNEL, event);
+	}
+
+	// 알림 카운트 감소
 	public void decreaseCount(String key, Long amount) {
 		redisTemplate.opsForValue().decrement(key, amount);
 	}
@@ -196,5 +205,14 @@ public class RedisService {
 
 	public boolean hasRankInZSet(String key, Object value) {
 		return redisTemplate.opsForZSet().score(key, value) != null;
+	}
+
+	public <T> T deserializeMessageToObject(Message message, Class<T> valueType) {
+		String publishedMessage = redisTemplate.getStringSerializer().deserialize(message.getBody());
+		try {
+			return objectMapper.readValue(publishedMessage, valueType);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -1,6 +1,6 @@
 package com.example.taste.domain.party.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -13,7 +13,7 @@ import com.example.taste.common.annotation.DateRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
-public class PartyDetailUpdateRequestDto {
+public class PartyUpdateRequestDto {
 	@Positive(message = "유효하지 않은 가게 ID 정보입니다.")
 	private Long storeId;
 
@@ -23,9 +23,9 @@ public class PartyDetailUpdateRequestDto {
 	@Size(min = 0, max = 500, message = "파티 설명은 500자 이내입니다.")
 	private String description;
 
-	@DateRange
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-	private LocalDateTime meetingTime;
+	@DateRange(max = 30)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private LocalDate meetingDate;
 
 	@Range(min = 2, max = 16, message = "파티 인원은 2 ~ 16명 사이입니다.")
 	private Integer maxMembers;

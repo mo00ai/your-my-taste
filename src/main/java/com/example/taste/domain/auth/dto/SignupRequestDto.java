@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -44,9 +45,11 @@ public class SignupRequestDto {
 	private List<UserFavorUpdateRequestDto> favorList;
 
 	@ValidEnum(target = Gender.class)
+	@NotBlank(message = "성별은 필수값입니다.")
 	private String gender;
 
 	@Range(min = 1, max = 100)
+	@NotNull(message = "나이는 필수값입니다.")
 	private Integer age;
 
 	@ValidEnum(target = Role.class)

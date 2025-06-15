@@ -1,11 +1,11 @@
 package com.example.taste.domain.store.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 
 import com.example.taste.common.exception.BaseCode;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public enum StoreErrorCode implements BaseCode {
 
 	// category
 	CATEGORY_CREATION_CONFLICT(HttpStatus.CONFLICT, "C001", "이미 생성된 카테고리지만 조회에 실패했습니다."),
+	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "C002", "카테고리 정보가 존재하지 않습니다."),
 	;
 
 	private final HttpStatus httpStatus;

@@ -1,13 +1,19 @@
 package com.example.taste.common.util;
 
-import static com.example.taste.domain.board.exception.BoardErrorCode.*;
-import static com.example.taste.domain.event.exception.EventErrorCode.*;
-import static com.example.taste.domain.favor.exception.FavorErrorCode.*;
-import static com.example.taste.domain.image.exception.ImageErrorCode.*;
-import static com.example.taste.domain.party.exception.PartyErrorCode.*;
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
-import static com.example.taste.domain.store.exception.StoreErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_FOUND;
+import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
+import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
+import static com.example.taste.domain.image.exception.ImageErrorCode.IMAGE_NOT_FOUND;
+import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
+import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_FOUND;
+import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
+import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
@@ -23,6 +29,8 @@ import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.repository.ImageRepository;
+import com.example.taste.domain.match.entity.UserMatchInfo;
+import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
@@ -39,8 +47,6 @@ import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
 @RequiredArgsConstructor
 public class EntityFetcher {
@@ -55,6 +61,7 @@ public class EntityFetcher {
 	private final EventRepository eventRepository;
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
+	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final StoreBucketRepository storeBucketRepository;
 
 	public User getUserOrThrow(Long id) {
@@ -122,4 +129,8 @@ public class EntityFetcher {
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 	}
 
+	public UserMatchInfo getUserMatchInfoOrThrow(Long id) {
+		return userMatchInfoRepository.findById(id)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
+	}
 }
