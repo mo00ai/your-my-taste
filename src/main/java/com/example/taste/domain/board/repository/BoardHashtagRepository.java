@@ -16,8 +16,8 @@ public interface BoardHashtagRepository extends JpaRepository<BoardHashtag, Long
 	// 해시태그 id으로 확인
 	Optional<BoardHashtag> findByBoardIdAndHashtagId(Long boardId, Long hashtagId);
 
-	@Modifying
-	@Query("delete from BoardHashtag bh where bh.board.id =:boardid	")
+	@Modifying(clearAutomatically = true)
+	@Query("delete from BoardHashtag bh where bh.board.id =:boardId	")
 	void deleteAllByBoardId(Long boardId);
-	
+
 }
