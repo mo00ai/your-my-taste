@@ -5,6 +5,6 @@ import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
 
-public interface BoardCreationStrategy {
-	Board createBoard(BoardRequestDto dto, Store store, User user);
+public interface BoardCreationStrategy<T extends BoardRequestDto> {
+	Board createBoard(T dto, Store store, User user);
 }
