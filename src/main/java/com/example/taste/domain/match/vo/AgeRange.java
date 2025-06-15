@@ -4,6 +4,7 @@ import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 
 import jakarta.validation.constraints.Positive;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,7 @@ public class AgeRange {
 	@Positive
 	private Integer maxAge;
 
+	@Builder
 	public AgeRange(Integer minAge, Integer maxAge) {
 		if (minAge == null || maxAge == null || (minAge > maxAge) || minAge % 10 != 0 || maxAge % 10 != 0) {
 			throw new CustomException(INVALID_INPUT_VALUE,

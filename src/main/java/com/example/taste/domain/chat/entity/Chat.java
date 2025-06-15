@@ -47,4 +47,8 @@ public class Chat extends BaseCreatedAtEntity {
 		this.party = party;
 		this.message = dto.getMessage();
 	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 }

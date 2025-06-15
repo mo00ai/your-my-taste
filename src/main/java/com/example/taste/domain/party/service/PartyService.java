@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
+import com.example.taste.domain.match.service.MatchService;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
@@ -25,31 +27,34 @@ import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼을 시, 파티 초대 정보, 파티 채팅 등 연관 정보 삭제하는 기능 추후 추가 - @윤예진
 	private final EntityFetcher entityFetcher;
-	private final UserRepository userRepository;
-	private final StoreRepository storeRepository;
+	private final MatchService matchService;
 	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
+	@Transactional
 	public void createParty(Long hostId, PartyCreateRequestDto requestDto) {
-		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
 		Store store = null;
 		if (requestDto.getStoreId() != null) {
 			store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
 		}
-
+		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		Party party = partyRepository.save(new Party(requestDto, hostUser, store));
 		partyInvitationRepository.save(new PartyInvitation(
 			party, hostUser, InvitationType.INVITATION, InvitationStatus.CONFIRMED));
+
+		// 파티 생성하며 랜덤 매칭도 같이 신청하는 경우
+		if (requestDto.getEnableRandomMatching()) {
+			matchService.registerPartyMatch(hostUser.getId(),
+				new PartyMatchInfoCreateRequestDto(party.getId(), requestDto.getPartyMatchInfo()));
+		}
 	}
 
 	// TODO: 정렬 기준 추가 - @윤예진

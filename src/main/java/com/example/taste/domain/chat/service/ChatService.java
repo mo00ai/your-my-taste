@@ -2,6 +2,7 @@ package com.example.taste.domain.chat.service;
 
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
+import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.example.taste.domain.chat.repository.ChatRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class ChatService {
 	private final EntityFetcher entityFetcher;
 	private final ChatRepository chatRepository;
 	private final PartyRepository partyRepository;
+	private final UserRepository userRepository;
 
 	// 보낸 메세지 저장
 	public ChatResponseDto saveMessage(User user, ChatCreateRequestDto dto) {
@@ -34,7 +37,10 @@ public class ChatService {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 		Chat chat = chatRepository.save(new Chat(dto, user, party));
-
+		// LAZY 로딩 회피용
+		User userWithImage = userRepository.findByIdWithImage(user.getId())
+			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+		chat.setUser(userWithImage);
 		return new ChatResponseDto(chat);
 	}
 
@@ -44,7 +50,7 @@ public class ChatService {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 		// TODO: 탈퇴한 사용자 채팅은 어떻게 처리할건지 고민 - @윤예진
-		return chatRepository.findAllByParty(party).stream()
+		return chatRepository.findAllByPartyIdOrderByCreatedAtAsc(party.getId()).stream()
 			.map(ChatResponseDto::new)
 			.toList();
 	}
