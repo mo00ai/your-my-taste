@@ -41,6 +41,7 @@ import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -95,7 +96,6 @@ public class BoardService {
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
-			// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진 - AOP 로 자동 처리 합니다.
 
 			boardId = entity.getId();
 
@@ -108,8 +108,13 @@ public class BoardService {
 	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		if (board.getType() == BoardType.N) {
+			return new BoardResponseDto(board);
+		}
+
+		if (board.getUser().isSameUser(userId) || user.getRole() == Role.ADMIN) {
 			return new BoardResponseDto(board);
 		}
 

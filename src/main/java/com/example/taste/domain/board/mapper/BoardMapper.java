@@ -15,7 +15,7 @@ public class BoardMapper {
 	 * 일반 게시글 DTO → Board 엔터티
 	 */
 	public static Board toEntity(NormalBoardRequestDto requestDto, Store store, User user) {
-		return Board.builder()
+		return Board.nBoardBuilder()
 			.title(requestDto.getTitle())
 			.contents(requestDto.getContents())
 			.type(BoardType.from(requestDto.getType()))
@@ -25,7 +25,7 @@ public class BoardMapper {
 	}
 
 	/**
-	 * 홍대병 게시글 DTO → Board 엔터티
+	 * 오픈런 게시글 DTO → Board 엔터티
 	 */
 	public static Board toEntity(OpenRunBoardRequestDto requestDto, Store store, User user) {
 		return Board.oBoardBuilder()
@@ -37,7 +37,7 @@ public class BoardMapper {
 			.openTime(requestDto.getOpenTime())
 			.store(store)
 			.user(user)
-			.build();
+			.end();
 	}
 
 	public static BoardListResponseDto toDto(Board entity) {

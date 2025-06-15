@@ -1,4 +1,4 @@
-package com.example.taste.common.response;
+package com.example.taste.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -15,9 +15,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		// 브라우저 환경용 - http://.../ws로 요청
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
 			.withSockJS();
+		// 포스트맨 테스트용 - ws://.../ws로 요청
+		registry.addEndpoint("/ws")
+			.setAllowedOriginPatterns("*");
 	}
 
 	@Override
