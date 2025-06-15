@@ -163,7 +163,7 @@ public class BoardService {
 
 	}
 
-	// 나와 내 팔로워 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url) TODO 쿼리수정해야함
+	// 나와 내 팔로워 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
 	@Transactional(readOnly = true)
 	public PageResponse<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
 		List<Long> userFollowList = userRepository.findFollowingIds(userId); // 내 팔로워
