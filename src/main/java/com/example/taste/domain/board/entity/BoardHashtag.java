@@ -1,5 +1,10 @@
 package com.example.taste.domain.board.entity;
 
+import java.util.Objects;
+
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.exception.BoardErrorCode;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,11 +16,9 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(of = "id", callSuper = false) // id값으로만 비교
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -50,4 +53,34 @@ public class BoardHashtag {
 		setBoard(board);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || !(o instanceof BoardHashtag)) {
+			return false;
+		}
+		BoardHashtag that = (BoardHashtag)o;
+
+		if (this.getBoard() == null || that.getBoard() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+
+		}
+		if (this.getHashtag() == null || that.getHashtag() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+
+		}
+
+		return Objects.equals(this.getBoard().getId(), that.getBoard().getId())
+			&& Objects.equals(this.getHashtag().getName(), that.getHashtag().getName());
+	}
+
+	@Override
+	public int hashCode() {
+		if (this.getBoard() == null || this.getHashtag() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+		}
+		return Objects.hash(this.getBoard().getId(), this.getHashtag().getName());
+	}
 }
