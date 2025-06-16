@@ -1,12 +1,10 @@
 package com.example.taste.domain.board.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +37,11 @@ public class HashtagService {
 			return;
 		}
 		// 기존 해시태그 조회
-		Map<String, Hashtag> existingHashtagMap = findExistingHashtags(normalizedHashtags);
+		List<Hashtag> existingHashtag = findExistingHashtags(normalizedHashtags);
 		// 새로운 해시태그 생성 및 저장
-		List<Hashtag> newHashtags = createAndSaveNewHashtags(normalizedHashtags, existingHashtagMap.keySet());
+		List<Hashtag> newHashtags = createAndSaveNewHashtags(normalizedHashtags, existingHashtag);
 		// 게시글에 해시태그 연결
-		linkHashtagsToBoard(board, existingHashtagMap, newHashtags);
+		linkHashtagsToBoard(board, existingHashtag, newHashtags);
 
 	}
 
@@ -60,14 +58,17 @@ public class HashtagService {
 
 	/**
 	 * 기존 해시태그를 조회합니다.(DB에 이미 존재하는 해시태그 조회)
-	 * 키는 해시태그 이름, 벨류는 엔티티
 	 */
-	private Map<String, Hashtag> findExistingHashtags(List<String> hashtagNames) {
-		return hashtagRepository.findByNameIn(hashtagNames).stream()
-			.collect(Collectors.toMap(Hashtag::getName, Function.identity()));
+	private List<Hashtag> findExistingHashtags(List<String> hashtagNames) {
+		return hashtagRepository.findByNameIn(hashtagNames);
+
 	}
 
-	private List<Hashtag> createAndSaveNewHashtags(List<String> normalizedHashtags, Set<String> existingNames) {
+	private List<Hashtag> createAndSaveNewHashtags(List<String> normalizedHashtags, List<Hashtag> existingHashtags) {
+		Set<String> existingNames = existingHashtags.stream()
+			.map(Hashtag::getName)
+			.collect(Collectors.toSet());
+
 		List<Hashtag> newHashtags = normalizedHashtags.stream()
 			.filter(name -> !existingNames.contains(name))
 			.map(name -> Hashtag.builder()
@@ -85,23 +86,15 @@ public class HashtagService {
 	/**
 	 * 게시글에 해시태그 연결
 	 */
-	private void linkHashtagsToBoard(Board board, Map<String, Hashtag> existingHashtagMap, List<Hashtag> newHashtags) {
-		List<BoardHashtag> boardHashtags = existingHashtagMap.values().stream()
+	private void linkHashtagsToBoard(Board board, List<Hashtag> existingHashtags, List<Hashtag> newHashtags) {
+
+		List<BoardHashtag> boardHashtags = Stream.of(existingHashtags, newHashtags)
+			.flatMap(List::stream)
 			.map(hashtag -> BoardHashtag.builder()
 				.board(board)
 				.hashtag(hashtag)
 				.build())
-			.collect(Collectors.toList());
-
-		// 새로 생성된 해시태그들도 추가
-		List<BoardHashtag> newBoardHashtags = newHashtags.stream()
-			.map(hashtag -> BoardHashtag.builder()
-				.board(board)
-				.hashtag(hashtag)
-				.build())
-			.collect(Collectors.toList());
-
-		boardHashtags.addAll(newBoardHashtags);
+			.toList();
 		// 기존 해시태그(DB)와 새로 추가된 해시태그 저장
 		if (!boardHashtags.isEmpty()) {
 			boardHashtagRepository.saveAll(boardHashtags);
@@ -110,18 +103,16 @@ public class HashtagService {
 
 	// 추후 valid 검증 추가 고려
 	private boolean isValidHashtag(String hashtag) {
-		return hashtag.length() >= 1 &&
+		return !hashtag.isEmpty() &&
 			hashtag.length() <= 50;
 	}
 
 	/**
 	 * 게시글에 해시태그 전부 삭제
 	 */
+	@Transactional
 	public void clearBoardHashtags(Board board) {
-		// Board 엔티티의 removeBoardHashtag 메서드를 활용
-		List<BoardHashtag> hashtagsToRemove = new ArrayList<>(board.getBoardHashtagList());
-		// 엔티티를 통해 삭제
-		hashtagsToRemove.forEach(board::removeBoardHashtag);
+		boardHashtagRepository.deleteAllByBoardId(board.getId());
 
 	}
 
@@ -130,22 +121,13 @@ public class HashtagService {
 	 */
 	@Transactional
 	public void removeHashtagFromBoard(Board board, String hashtagName) {
-		if (hashtagName == null || hashtagName.trim().isEmpty()) {
+		if (!StringUtils.hasText(hashtagName)) {
 			return;
 		}
-
 		String normalizedName = hashtagName.trim().toLowerCase();
 
-		// 해당 해시태그를 가진 BoardHashtag 찾기
-		BoardHashtag targetBoardHashtag = board.getBoardHashtagList().stream()
-			.filter(bh -> bh.getHashtag().getName().equals(normalizedName))
-			.findFirst()
-			.orElse(null);
-
-		if (targetBoardHashtag != null) {
-			// Board 엔티티의 removeBoardHashtag 메서드 사용
-			board.removeBoardHashtag(targetBoardHashtag);
-		}
+		boardHashtagRepository.findByBoardIdAndHashtag_Name(board.getId(), normalizedName)
+			.ifPresent(boardHashtagRepository::delete);
 	}
 
 	/**
@@ -156,16 +138,8 @@ public class HashtagService {
 		if (hashtagId == null) {
 			return;
 		}
-
-		// 해당 해시태그 ID를 가진 BoardHashtag 찾기
-		BoardHashtag targetBoardHashtag = board.getBoardHashtagList().stream()
-			.filter(bh -> bh.getHashtag().getId().equals(hashtagId))
-			.findFirst()
-			.orElse(null);
-
-		if (targetBoardHashtag != null) {
-			// Board 엔티티의 removeBoardHashtag 메서드 사용
-			board.removeBoardHashtag(targetBoardHashtag);
-		}
+		boardHashtagRepository.findByBoardIdAndHashtagId(board.getId(), hashtagId)
+			.ifPresent(boardHashtagRepository::delete);
 	}
+
 }

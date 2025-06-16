@@ -30,7 +30,6 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -42,31 +41,33 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<Board> searchBoardDetailList(List<Long> userIdList, String type, String status, Pageable pageable) {
-		BooleanBuilder builder = new BooleanBuilder();
-		if (userIdList != null && !userIdList.isEmpty()) {
-			builder.and(board.user.id.in(userIdList));
-		}
-		try {
-			if (type != null) {
-				BoardType boardType = BoardType.from(type);
-				builder.and(board.type.eq(boardType));
-			}
-			if (status != null) {
-				BoardStatus boardStatus = BoardStatus.from(status);
-				builder.and(board.status.eq(boardStatus));
-			}
-		} catch (IllegalArgumentException e) {
-			throw new CustomException(ErrorCode.INVALID_TYPE_VALUE);
-		}
-
-		return queryFactory
-			.selectFrom(board)
-			.where(builder)
+	public Page<BoardListResponseDto> findBoardListDtoByUserIdList(List<Long> userIds, Pageable pageable) {
+		List<BoardListResponseDto> contents = queryFactory
+			.select(Projections.constructor(BoardListResponseDto.class,
+				board.id,
+				board.title,
+				store.name,
+				user.nickname,
+				boardImage.image.url.max() // 마지막 이미지(id 높은)
+			))
+			.from(board)
+			.leftJoin(board.user, user)
+			.leftJoin(board.store, store)
+			.leftJoin(board.boardImageList, boardImage)
+			.where(board.user.id.in(userIds))
+			.groupBy(board.id, board.title, store.name, user.nickname)
+			.orderBy(board.createdAt.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
-			.orderBy(getOrderSpecifier(pageable).toArray(new OrderSpecifier[0]))
 			.fetch();
+
+		Long total = queryFactory
+			.select(board.count())
+			.from(board)
+			.where(board.user.id.in(userIds))
+			.fetchOne();
+
+		return new PageImpl<>(contents, pageable, total != null ? total : 0L);
 	}
 
 	@Override
@@ -77,17 +78,14 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				board.title,
 				store.name,
 				user.nickname,    // 작성자 이름
-				JPAExpressions        // 서브쿼리 게시글&이미지 테이블에서 이미지 조회 -> 없으면 null반환
-					.select(boardImage.image.url)
-					.from(boardImage)
-					.where(boardImage.board.eq(board))
-					.orderBy(boardImage.id.asc())
-					.limit(1)
+				boardImage.image.url.max()
 			))
 			.from(board)
 			.leftJoin(board.user, user)
 			.leftJoin(board.store, store)
+			.leftJoin(board.boardImageList, boardImage)
 			.where(buildSearchConditions(condition))
+			.groupBy(board.id, board.title, store.name, user.nickname)
 			.orderBy(getOrderSpecifier(pageable).toArray(new OrderSpecifier[0]))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -96,8 +94,6 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		Long total = queryFactory
 			.select(board.count())
 			.from(board)
-			.leftJoin(board.user, user)
-			.leftJoin(board.store, store)
 			.where(buildSearchConditions(condition))  // 동일한 조건 재사용
 			.fetchOne();
 
@@ -170,7 +166,9 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		if (StringUtils.hasText(condition.getKeyword())) {
 			BooleanExpression titleContains = board.title.containsIgnoreCase(condition.getKeyword());
 			BooleanExpression contentContains = board.contents.containsIgnoreCase(condition.getKeyword());
-			builder.and(titleContains.or(contentContains));
+			BooleanExpression hashtagContains = board.boardHashtagSet.any().hashtag.name.containsIgnoreCase(
+				condition.getKeyword());
+			builder.and(titleContains.or(contentContains).or(hashtagContains));
 		} else {
 			// 키워드가 없는 경우에만 개별 검색 사용
 			// 제목으로 검색

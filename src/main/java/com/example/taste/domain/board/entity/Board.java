@@ -4,11 +4,15 @@ import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
+import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
 import com.example.taste.domain.image.entity.BoardImage;
@@ -31,9 +35,11 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(of = "id", callSuper = false) // id값으로만 비교
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -72,7 +78,7 @@ public class Board extends SoftDeletableEntity {
 
 	// 게시글 해시태그 연관관계
 	@OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<BoardHashtag> boardHashtagList = new ArrayList<>();
+	private Set<BoardHashtag> boardHashtagSet = new HashSet<>();
 
 	// 이벤트 신청 게시글 연관관계
 	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
@@ -94,38 +100,31 @@ public class Board extends SoftDeletableEntity {
 	public void register(Store store, User user) {
 		this.store = store;
 		this.user = user;
-
-		if (!user.getBoardList().contains(this)) {
-			user.getBoardList().add(this);
-		}
+		// set구조 사용
+		user.getBoardSet().add(this);
 
 	}
 
-	@Builder(builderMethodName = "nBoardBuilder")
-	public Board(String title, String contents, BoardType type, BoardStatus status, Store store, User user) {
-		this.title = title;
-		this.contents = contents;
-		this.type = type != null ? type : BoardType.N;
-		this.status = status != null ? status : BoardStatus.OPEN;
+	@Builder(builderMethodName = "nBoardBuilder", buildMethodName = "buildNormal")
+	public Board(BoardRequestDto requestDto, Store store, User user) {
+		this.title = requestDto.getTitle();
+		this.contents = requestDto.getContents();
+		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.N;
+		this.status = requestDto.getStatus() != null ? BoardStatus.from(requestDto.getStatus()) : BoardStatus.OPEN;
 		register(store, user);
 	}
 
 	// 오버로딩된 빌더 생성자
-	@Builder(builderMethodName = "oBoardBuilder", buildMethodName = "end")
-	public Board(String title, String contents, BoardType type, BoardStatus status, Integer openLimit,
-		LocalDateTime openTime, Store store, User user) {
-		this.title = title;
-		this.contents = contents;
-		this.type = type != null ? type : BoardType.O;
-		this.status = status != null ? status : BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
-		this.openLimit = openLimit;
-		this.openTime = openTime;
+	@Builder(builderMethodName = "oBoardBuilder", buildMethodName = "buildOpenRun")
+	public Board(OpenRunBoardRequestDto requestDto, Store store, User user) {
+		this.title = requestDto.getTitle();
+		this.contents = requestDto.getContents();
+		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.O;
+		this.status = requestDto.getStatus() != null ? BoardStatus.from(requestDto.getStatus()) :
+			BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
+		this.openLimit = requestDto.getOpenLimit();
+		this.openTime = requestDto.getOpenTime();
 		register(store, user);
-	}
-
-	// 해시태그 삭제
-	public void removeBoardHashtag(BoardHashtag boardHashtag) {
-		boardHashtagList.remove(boardHashtag);
 	}
 
 	public void update(BoardUpdateRequestDto requestDto) {

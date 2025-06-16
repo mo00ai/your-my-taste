@@ -3,6 +3,7 @@ package com.example.taste.domain.board.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -11,10 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
@@ -61,7 +64,16 @@ public class BoardServiceUnitTest {
 		User user = UserFixture.create(image);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-		Board board = BoardFixture.createOBoardWithoutDto(store, user);
+
+		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
+		ReflectionTestUtils.setField(dto, "title", "제목입니다");
+		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
+		ReflectionTestUtils.setField(dto, "type", "O");
+		ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
+		ReflectionTestUtils.setField(dto, "openLimit", 10);
+		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
+
+		Board board = BoardFixture.createTimeAttackBoard(dto, store, user);
 		long boardId = 999L, userId = 999L;
 
 		// stub
@@ -81,7 +93,15 @@ public class BoardServiceUnitTest {
 		User user = UserFixture.create(image);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-		Board board = BoardFixture.createClosedOBoardWithoutDto(store, user);
+
+		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
+		ReflectionTestUtils.setField(dto, "title", "제목입니다");
+		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
+		ReflectionTestUtils.setField(dto, "type", "O");
+		ReflectionTestUtils.setField(dto, "status", "CLOSED");
+		ReflectionTestUtils.setField(dto, "openLimit", 10);
+		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
+		Board board = BoardFixture.createClosedOBoard(dto, store, user);
 		long boardId = 999L, userId = 999L;
 
 		// stub
@@ -101,7 +121,15 @@ public class BoardServiceUnitTest {
 		User user = UserFixture.create(image);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-		Board board = BoardFixture.createTimeLimitedOBoardWithoutDto(store, user);
+
+		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
+		ReflectionTestUtils.setField(dto, "title", "제목입니다");
+		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
+		ReflectionTestUtils.setField(dto, "type", "O");
+		ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
+		ReflectionTestUtils.setField(dto, "openLimit", 10);
+		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
+		Board board = BoardFixture.createTimeLimitedOBoard(dto, store, user);
 		long boardId = 999L, userId = 999L;
 
 		// stub
