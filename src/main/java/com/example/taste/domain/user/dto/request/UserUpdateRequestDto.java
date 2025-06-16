@@ -11,7 +11,7 @@ import lombok.Setter;
 public class UserUpdateRequestDto {
 	private String nickname;
 
-	// TODO: 주소 형식 검증 방법?
+	// TODO: 주소 형식 검증 방법 - @윤예진
 	private String address;
 
 	@NotBlank(message = "기존 비밀번호는 필수값입니다.")

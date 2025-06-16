@@ -21,7 +21,7 @@ import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
-import com.example.taste.domain.party.dto.request.PartyDetailUpdateRequestDto;
+import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.enums.PartyFilter;
@@ -46,38 +46,46 @@ public class PartyController {
 	@GetMapping
 	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(defaultValue = "ALL")
-		@ValidEnum(target = PartyFilter.class) String filter) {
+		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter) {
 		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
 	}
 
 	@GetMapping("/{partyId}")
 	public CommonResponse<PartyDetailResponseDto> getPartyDetail(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyId) {
-		return CommonResponse.ok(partyService.getPartyDetail(userDetails.getId(), partyId));
+		return CommonResponse.ok(partyService.getPartyDetail(partyId));
 	}
 
 	@PatchMapping("/{partyId}")
 	public CommonResponse<Void> updatePartyDetail(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Long partyId, @RequestBody @Valid PartyDetailUpdateRequestDto requestDto) {
+		@PathVariable Long partyId, @RequestBody @Valid PartyUpdateRequestDto requestDto) {
 		partyService.updatePartyDetail(userDetails.getId(), partyId, requestDto);
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{partyId}")
+	// 파티 나가기 (호스트 포함)
+	@DeleteMapping("/{partyId}/leave")
 	public CommonResponse<Void> leaveParty(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
 		partyInvitationService.leaveParty(userDetails.getId(), partyId);
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{partyId}/{userId}")
+	// 파티원 강퇴
+	@DeleteMapping("/{partyId}/members/{userId}")
 	public CommonResponse<Void> removePartyMember(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long userId, @PathVariable Long partyId) {
 		partyInvitationService.removePartyMember(userDetails.getId(), userId, partyId);
 		return CommonResponse.ok();
 	}
+
+	// 파티 삭제
+	// @DeleteMapping("/{partyId}")
+	// public CommonResponse<Void> removeParty(
+	// 	@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
+	// 	partyService.removeParty(userDetails.getId(), partyId);
+	// 	return CommonResponse.ok();
+	// }
 }

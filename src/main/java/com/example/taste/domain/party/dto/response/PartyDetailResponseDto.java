@@ -8,28 +8,35 @@ import lombok.Getter;
 
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PartyDetailResponseDto {
+	private Long partyId;
+	private String title;
+	private String description;
 	private String partyStatus;
 	private Long storeId;
 	private String storeName;
-	private String meetingTime;
+	private String meetingDate;
 	private int maxMembers;
 	private int nowMembers;
 	private boolean enableRandomMatching;
 	private UserSimpleResponseDto host;
 	private List<UserSimpleResponseDto> members;
 
-	// TODO: 이렇게 전달할지, 아니면 그냥 유저 리스트로 다 담아버리고 호스트 인덱스 알려주는 필드를 추가해서 알려줄지
 	@Builder
 	public PartyDetailResponseDto(
 		Party party, UserSimpleResponseDto host, List<UserSimpleResponseDto> members) {
+		this.partyId = party.getId();
+		this.title = party.getTitle();
+		this.description = party.getDescription();
 		this.partyStatus = party.getPartyStatus().toString();
-		this.storeId = party.getStore().getId();
-		this.storeName = party.getStore().getName();
-		this.meetingTime = party.getMeetingTime().format(
-			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+		this.storeId = party.getStore() != null ? party.getStore().getId() : null;
+		this.storeName = party.getStore() != null ? party.getStore().getName() : null;
+		this.meetingDate = party.getMeetingDate().format(
+			DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		this.maxMembers = party.getMaxMembers();
 		this.nowMembers = party.getNowMembers();            // 파티장 포함
 		this.enableRandomMatching = party.isEnableRandomMatching();

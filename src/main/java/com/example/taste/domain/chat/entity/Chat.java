@@ -10,14 +10,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.domain.chat.dto.ChatCreateRequestDto;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.user.entity.User;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "chat")
 public class Chat extends BaseCreatedAtEntity {
 	@Id
@@ -34,4 +40,15 @@ public class Chat extends BaseCreatedAtEntity {
 
 	@Column(nullable = false)
 	private String message;
+
+	@Builder
+	public Chat(ChatCreateRequestDto dto, User user, Party party) {
+		this.user = user;
+		this.party = party;
+		this.message = dto.getMessage();
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 }

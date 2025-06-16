@@ -12,17 +12,19 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.config.security.CustomUserDetails;
@@ -31,6 +33,7 @@ import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
@@ -66,32 +69,13 @@ public class BoardController {
 		return CommonResponse.ok(responseDto);
 	}
 
-	// 단순 게시글 목록
-	@GetMapping("/simple")
-	public CommonResponse<?> findBoardList(
+	// 단순 게시글 목록(내 게시글 조회 or 팔로우한 사람의 게시글 조회)
+	@GetMapping("/feed")
+	public CommonResponse<PageResponse<BoardListResponseDto>> findBoardList(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PageableDefault(page = 0, size = 10) Pageable pageable
+		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		List<BoardListResponseDto> responseDtoList = boardService.findBoardList(userDetails.getId(), pageable);
-		return CommonResponse.ok(responseDtoList);
-	}
-
-	@GetMapping("/detailed")
-	public CommonResponse<?> findBoardDetailList(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(required = false) String type,
-		@RequestParam(required = false) String status,
-		@RequestParam(defaultValue = "createdAt") String sort,
-		@RequestParam(defaultValue = "desc") String order,
-		Pageable pageable
-	) {
-		// TODO 기능 미구현
-		List<BoardResponseDto> responseDtoList = boardService.findBoardsFromFollowingUsers(userDetails.getId(), type,
-			status, sort,
-			order,
-			pageable);
-		// TODO 반환
-		return CommonResponse.ok(responseDtoList);
+		return CommonResponse.ok(boardService.findBoardList(userDetails.getId(), pageable));
 	}
 
 	@GetMapping("/openrun")
@@ -132,5 +116,19 @@ public class BoardController {
 	) {
 		likeService.unlikeBoard(userDetails.getId(), boardId);
 		return CommonResponse.success(BOARD_UNLIKED);
+	}
+
+	// 키워드 조건 기반 검색
+	@GetMapping("/search")
+	public CommonResponse<PageResponse<BoardListResponseDto>> searchBoards(
+		@ModelAttribute @Valid BoardSearchCondition conditionDto,
+		@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		int MAX_SIZE = 50;
+		if (pageable.getPageSize() > MAX_SIZE) {
+			throw new CustomException(ErrorCode.INVALID_PAGE_SIZE);
+		}
+		return CommonResponse.ok(boardService.searchBoards(conditionDto, pageable));
+
 	}
 }

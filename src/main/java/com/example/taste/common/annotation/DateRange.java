@@ -19,9 +19,9 @@ public @interface DateRange {
 
 	Class<? extends Payload>[] payload() default {};
 
-	int min() default 30;
+	int min() default 0;
 
-	int max() default 60 * 24 * 7;
+	int max() default 7;
 
-	ChronoUnit unit() default ChronoUnit.MINUTES;
+	ChronoUnit unit() default ChronoUnit.DAYS;
 }

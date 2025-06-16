@@ -1,7 +1,10 @@
 package com.example.taste.config.security;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -9,17 +12,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 	private final CustomUserDetailsService userDetailsService;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(AbstractHttpConfigurer::disable)
+			.cors(AbstractHttpConfigurer::disable)                    // TODO: 실제 배포에선 변경 필요 - @윤예진
 			// .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.sessionManagement(sm -> {
@@ -29,6 +32,8 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/auth/**").permitAll();
+
+				auth.requestMatchers("/ws/**").permitAll();            // MEMO: 웹소켓 테스트용
 				auth.requestMatchers("/admin/**").hasRole("ADMIN");
 				// ✅ 검색 API 요청 허용
 				auth.requestMatchers("/api/search/**").permitAll();
