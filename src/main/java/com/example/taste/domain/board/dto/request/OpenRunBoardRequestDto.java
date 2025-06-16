@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpenRunBoardRequestDto extends BoardRequestDto {
 	@Positive(message = "openLimit은 1 이상이어야 합니다.")
+	@NotNull(message = "openLimit은 필수 입력값입니다.")
 	private Integer openLimit;
 
 	@FutureOrPresent(message = "openTime은 현재 시간 이후여야 합니다.")
