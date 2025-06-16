@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
@@ -33,6 +34,7 @@ public class StoreService {
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
+	private final ReviewRepository reviewRepository;
 
 	@Transactional
 	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
@@ -52,24 +54,18 @@ public class StoreService {
 	public StoreResponse getStore(Long id) {
 		Store store = entityFetcher.getStoreOrThrow(id);
 
-		List<String> imageUrls = store.getReviewList().stream()
-			.sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
-			.filter(review -> review.getImage() != null)
-			.limit(3)
+		List<String> imageUrls = reviewRepository.findTop3OrderByCreatedAtDesc(store).stream()
 			.map(review -> review.getImage().getUrl())
 			.toList();
 
-		return StoreResponse.create(store, imageUrls);
+		return StoreResponse.create(store, imageUrls); // TODO 가게 정보에 리뷰 이미지 없을때/3개 미만/4개 이상일때 결과값 테스트코드 @김채진
 	}
 
 	@Transactional
 	public void deleteStore(Long id) {
 		Store store = entityFetcher.getStoreOrThrow(id);
-		storeBucketItemRepository.deleteAllByStore(store);
-		int deletedCnt = storeRepository.deleteByIdReturningCount(id);
-		if (deletedCnt == 0) {
-			throw new CustomException(STORE_NOT_FOUND);
-		}
+		storeBucketItemRepository.deleteAllByStore(store); // NOTE 유저에게 알림? @김채진
+		store.softDelete();
 	}
 
 	@Transactional(readOnly = true)
