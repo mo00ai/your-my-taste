@@ -39,6 +39,7 @@ import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -87,16 +88,19 @@ public class BoardService {
 			throw new CustomException(ImageErrorCode.FAILED_WRITE_FILE);
 		}
 
-		// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진 - AOP 로 자동 처리 합니다.
-
 		return boardId;
 	}
 
 	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		if (board.getType() == BoardType.N) {
+			return new BoardResponseDto(board);
+		}
+
+		if (board.getUser().isSameUser(userId) || user.getRole() == Role.ADMIN) {
 			return new BoardResponseDto(board);
 		}
 
@@ -185,9 +189,8 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusIn(BoardType.O,
-			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK),
-			pageable);
+		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType.O,
+			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
 			Long remainingSlot = null;
@@ -225,7 +228,7 @@ public class BoardService {
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			String destination = "/topic/openrun/board/" + board.getId();
+			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
 		}

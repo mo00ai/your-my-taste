@@ -10,7 +10,12 @@ public class OpenRunBoardCreationStrategy implements BoardCreationStrategy<OpenR
 	@Override
 	public Board createBoard(OpenRunBoardRequestDto requestDto, Store store, User user) {
 		return Board.oBoardBuilder()
-			.requestDto(requestDto)
+			.title(requestDto.getTitle())
+			.contents(requestDto.getContents())
+			.type(requestDto.getType())
+			.status(requestDto.getStatus())
+			.openLimit(requestDto.getOpenLimit())
+			.openTime(requestDto.getOpenTime())
 			.store(store)
 			.user(user)
 			.buildOpenRun();
