@@ -9,7 +9,7 @@ public class PkCriteriaFixture {
 		return PkCriteria.builder()
 			.active(true)
 			.type(PkType.POST)
-			.point(50)
+			.point(30)
 			.build();
 	}
 }

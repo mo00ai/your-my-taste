@@ -56,6 +56,8 @@ class PkServiceTest {
 
 		// when
 		pkService.savePkLog(user.getId(), PkType.POST);
+		em.flush();
+		em.refresh(user);
 
 		// then
 		assertThat(user.getPoint()).isEqualTo(30);
