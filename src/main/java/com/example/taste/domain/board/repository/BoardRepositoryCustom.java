@@ -7,11 +7,11 @@ import org.springframework.data.domain.Pageable;
 
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
-import com.example.taste.domain.board.entity.Board;
 
 public interface BoardRepositoryCustom {
 
-	List<Board> searchBoardDetailList(List<Long> userIdList, String type, String status, Pageable pageable);
+	// 게시글 목록 조회(내 게시글 또는 팔로우한 사람들 게시글)
+	Page<BoardListResponseDto> findBoardListDtoByUserIdList(List<Long> userIds, Pageable pageable);
 
 	// 키워드 기반 검색
 	Page<BoardListResponseDto> searchBoardsByKeyword(BoardSearchCondition condition, Pageable pageable);

@@ -2,6 +2,9 @@ package com.example.taste.domain.board.entity;
 
 import java.util.Objects;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.exception.BoardErrorCode;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -32,18 +35,6 @@ public class BoardHashtag {
 	private Board board;
 
 	// orphanRemoval = true를 위한 equals()와 hashCode()메서드 오버라이딩
-	@Override
-	public boolean equals(Object o) {
-		if (o == null || getClass() != o.getClass())
-			return false;
-		BoardHashtag that = (BoardHashtag)o;
-		return Objects.equals(board, that.board) && Objects.equals(hashtag, that.hashtag);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(board, hashtag);
-	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "hashtag_id", nullable = false)
@@ -51,9 +42,8 @@ public class BoardHashtag {
 
 	public void setBoard(Board board) {
 		this.board = board;
-		if (!board.getBoardHashtagList().contains(this)) {
-			board.getBoardHashtagList().add(this);
-		}
+		board.getBoardHashtagSet().add(this);
+
 	}
 
 	// 해시 태그 추가
@@ -63,4 +53,34 @@ public class BoardHashtag {
 		setBoard(board);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || !(o instanceof BoardHashtag)) {
+			return false;
+		}
+		BoardHashtag that = (BoardHashtag)o;
+
+		if (this.getBoard() == null || that.getBoard() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+
+		}
+		if (this.getHashtag() == null || that.getHashtag() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+
+		}
+
+		return Objects.equals(this.getBoard().getId(), that.getBoard().getId())
+			&& Objects.equals(this.getHashtag().getName(), that.getHashtag().getName());
+	}
+
+	@Override
+	public int hashCode() {
+		if (this.getBoard() == null || this.getHashtag() == null) {
+			throw new CustomException(BoardErrorCode.INVALID_BOARD_HASHTAG_STATE);
+		}
+		return Objects.hash(this.getBoard().getId(), this.getHashtag().getName());
+	}
 }

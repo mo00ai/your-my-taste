@@ -81,7 +81,8 @@ public class ReviewService {
 		Review review = entityFetcher.getReviewOrThrow(reviewId);
 		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		if (!review.getUser().equals(user)) {
+		if (!review.getUser().isSameUser(user.getId())) { // equals 비교 실패로 임시 수정했습니다!
+			// if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 
@@ -137,7 +138,8 @@ public class ReviewService {
 		Review review = entityFetcher.getReviewOrThrow(reviewId);
 		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		if (!review.getUser().equals(user)) {
+		if (!review.getUser().isSameUser(user.getId())) {    // equals 비교 실패로 임시 수정했습니다!
+			// if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 		// 연관성 먼저 삭제
