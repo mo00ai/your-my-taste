@@ -8,7 +8,12 @@ import com.example.taste.domain.user.entity.User;
 public class BoardFixture {
 	public static Board createTimeAttackBoard(OpenRunBoardRequestDto dto, Store store, User user) {
 		return Board.oBoardBuilder()
-			.requestDto(dto)
+			.title(dto.getTitle())
+			.contents(dto.getContents())
+			.status(dto.getStatus())
+			.type(dto.getType())
+			.openLimit(dto.getOpenLimit())
+			.openTime(dto.getOpenTime())
 			.store(store)
 			.user(user)
 			.buildOpenRun();
@@ -16,7 +21,12 @@ public class BoardFixture {
 
 	public static Board createClosedOBoard(OpenRunBoardRequestDto dto, Store store, User user) {
 		return Board.oBoardBuilder()
-			.requestDto(dto)
+			.title(dto.getTitle())
+			.contents(dto.getContents())
+			.status(dto.getStatus())
+			.type(dto.getType())
+			.openLimit(dto.getOpenLimit())
+			.openTime(dto.getOpenTime())
 			.store(store)
 			.user(user)
 			.buildOpenRun();
@@ -24,7 +34,12 @@ public class BoardFixture {
 
 	public static Board createTimeLimitedOBoard(OpenRunBoardRequestDto dto, Store store, User user) {
 		return Board.oBoardBuilder()
-			.requestDto(dto)
+			.title(dto.getTitle())
+			.contents(dto.getContents())
+			.status(dto.getStatus())
+			.type(dto.getType())
+			.openLimit(dto.getOpenLimit())
+			.openTime(dto.getOpenTime())
 			.store(store)
 			.user(user)
 			.buildOpenRun();
@@ -32,7 +47,12 @@ public class BoardFixture {
 
 	public static Board createFcfsOBoard(OpenRunBoardRequestDto dto, Store store, User user) {
 		return Board.oBoardBuilder()
-			.requestDto(dto)
+			.title(dto.getTitle())
+			.contents(dto.getContents())
+			.status(dto.getStatus())
+			.type(dto.getType())
+			.openLimit(dto.getOpenLimit())
+			.openTime(dto.getOpenTime())
 			.store(store)
 			.user(user)
 			.buildOpenRun();

@@ -26,6 +26,6 @@ public class BoardSearchCondition {
 	private String status;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
 	// 날짜 범위
 	@Valid
-	private CreatedDateRange dateRange;
+	private CreatedDateRange dateRange = new CreatedDateRange();
 
 }
