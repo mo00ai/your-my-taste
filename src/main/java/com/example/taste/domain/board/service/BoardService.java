@@ -6,7 +6,6 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -23,8 +22,6 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
-import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
@@ -32,15 +29,17 @@ import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
-import com.example.taste.domain.board.exception.BoardErrorCode;
-import com.example.taste.domain.board.mapper.BoardMapper;
+import com.example.taste.domain.board.factory.BoardCreationStrategyFactory;
 import com.example.taste.domain.board.repository.BoardRepository;
+import com.example.taste.domain.board.strategy.BoardCreationStrategy;
+import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -58,58 +57,50 @@ public class BoardService {
 	private final RedisService redisService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserRepository userRepository;
+	private final BoardCreationStrategyFactory strategyFactory;
 
 	@Transactional
-	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) throws
-		IOException {
+	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
 		User user = entityFetcher.getUserOrThrow(userId);
-		Store store = storeService.findById(requestDto.getStoreId());
+		Store store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
 		Long boardId = 0L; // aop 용
 
-		if (requestDto instanceof NormalBoardRequestDto normalRequestDto) {
-			Board entity = BoardMapper.toEntity(normalRequestDto, store, user);
-			if (normalRequestDto.getHashtagList() != null && !normalRequestDto.getHashtagList().isEmpty()) {
-				hashtagService.applyHashtagsToBoard(entity, normalRequestDto.getHashtagList());
-			}
-			boardRepository.save(entity);
-			pkService.savePkLog(userId, PkType.POST);
-			if (files != null && !files.isEmpty()) {
-				boardImageService.saveBoardImages(entity, files);
-			}
-
-			boardId = entity.getId();
-
-		} else if (requestDto instanceof OpenRunBoardRequestDto openRunBoardRequestDto) {
-			Board entity = BoardMapper.toEntity(openRunBoardRequestDto, store, user);
-			// 포스팅 횟수 증가
+		BoardCreationStrategy strategy = strategyFactory.getStrategy(BoardType.from(requestDto.getType()));
+		Board entity = strategy.createBoard(requestDto, store, user);
+		if (requestDto.getHashtagList() != null && !requestDto.getHashtagList().isEmpty()) {
+			hashtagService.applyHashtagsToBoard(entity, requestDto.getHashtagList());
+		}
+		Board saved = boardRepository.save(entity);
+		boardId = saved.getId();
+		// 오픈런 게시글 카운팅
+		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
 			if (updatedUserCnt == 0) {
 				throw new CustomException(POSTING_COUNT_OVERFLOW);
 			}
-			// 해시태그 적용
-			if (openRunBoardRequestDto.getHashtagList() != null && !openRunBoardRequestDto.getHashtagList().isEmpty()) {
-				hashtagService.applyHashtagsToBoard(entity, openRunBoardRequestDto.getHashtagList());
-			}
-			boardRepository.save(entity);
-			pkService.savePkLog(userId, PkType.POST);
+		}
+		pkService.savePkLog(userId, PkType.POST);
+		try {
 			if (files != null && !files.isEmpty()) {
 				boardImageService.saveBoardImages(entity, files);
 			}
-			// TODO 포스팅한 유저를 팔로우하고 있는 유저들에게 알림 전송 @김채진 - AOP 로 자동 처리 합니다.
-
-			boardId = entity.getId();
-
-		} else {
-			throw new CustomException(BoardErrorCode.BOARD_TYPE_NOT_FOUND);
+		} catch (IOException e) {
+			throw new CustomException(ImageErrorCode.FAILED_WRITE_FILE);
 		}
+
 		return boardId;
 	}
 
 	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
+		User user = entityFetcher.getUserOrThrow(userId);
 
 		if (board.getType() == BoardType.N) {
+			return new BoardResponseDto(board);
+		}
+
+		if (board.getUser().isSameUser(userId) || user.getRole() == Role.ADMIN) {
 			return new BoardResponseDto(board);
 		}
 
@@ -168,25 +159,6 @@ public class BoardService {
 		}
 	}
 
-	// 게시물 목록 상세 조회
-	@Transactional(readOnly = true)
-	public List<BoardResponseDto> findBoardsFromFollowingUsers(Long userId, String type, String status, String sort,
-		String order,
-		Pageable pageable) {
-
-		/**
-		 * TODO 구현할 기능 
-		 * 현재 사용자id로 팔로우중인 사람들의 게시물 리스트 조회
-		 * userService 코드 필요
-		 */
-		List<Long> userFollowList = new ArrayList<>();
-
-		List<Board> searchBoardList = boardRepository.searchBoardDetailList(userFollowList, type, status, pageable);
-		return searchBoardList.stream()
-			.map(BoardResponseDto::new)
-			.toList();
-	}
-
 	// 키워드 기반 게시물 목록 조회
 	public PageResponse<BoardListResponseDto> searchBoards(BoardSearchCondition conditionDto, Pageable pageable) {
 		Page<BoardListResponseDto> page = boardRepository.searchBoardsByKeyword(conditionDto,
@@ -195,12 +167,15 @@ public class BoardService {
 
 	}
 
-	// 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
+	// 나와 내 팔로워 게시물 목록 조회(게시글 제목, 작성자명, 가게명, 이미지 url)
 	@Transactional(readOnly = true)
-	public List<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
-		List<Long> userFollowList = new ArrayList<>();
+	public PageResponse<BoardListResponseDto> findBoardList(Long userId, Pageable pageable) {
+		List<Long> userFollowList = userRepository.findFollowingIds(userId); // 내 팔로워
+		userFollowList.add(userId);    // 나도 포함
 		// 쿼리로 바로 dto프로젝션
-		return boardRepository.findBoardListDtoByUserIdList(userFollowList, pageable);
+		Page<BoardListResponseDto> boardPage = boardRepository.findBoardListDtoByUserIdList(
+			userFollowList, pageable);
+		return PageResponse.from(boardPage);
 	}
 
 	// 게시글에 특정해시태그 삭제(단건 삭제)
@@ -214,9 +189,8 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusIn(BoardType.O,
-			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK),
-			pageable);
+		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType.O,
+			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
 			Long remainingSlot = null;
@@ -254,7 +228,7 @@ public class BoardService {
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			String destination = "/topic/openrun/board/" + board.getId();
+			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
 		}

@@ -31,13 +31,10 @@ import com.example.taste.fixtures.UserFixture;
 public class StoreBucketServiceUnitTest {
 	@InjectMocks
 	private StoreBucketService storeBucketService;
-
 	@Mock
 	private StoreBucketRepository storeBucketRepository;
-
 	@Mock
 	private StoreBucketItemRepository storeBucketItemRepository;
-
 	@Mock
 	private EntityFetcher entityFetcher;
 

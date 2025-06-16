@@ -5,16 +5,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
+import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.repository.ImageRepository;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
@@ -41,6 +42,7 @@ import com.example.taste.fixtures.UserFixture;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
+@ActiveProfiles("test")
 @SpringBootTest
 class StoreBucketServiceTest {
 
@@ -60,15 +62,8 @@ class StoreBucketServiceTest {
 	private CategoryRepository categoryRepository;
 	@Autowired
 	private EntityManager em;
-
-	@AfterEach
-	void cleanUp() {
-		storeBucketRepository.deleteAll();
-		storeRepository.deleteAll();
-		categoryRepository.deleteAll();
-		userRepository.deleteAll();
-		imageRepository.deleteAll();
-	}
+	@Autowired
+	private BoardRepository boardRepository;
 
 	@Test
 	void addBucketItem_rollsBackOnError() {
@@ -88,14 +83,27 @@ class StoreBucketServiceTest {
 		List<Long> bucketIds = List.of(storeBucket1.getId(), storeBucket2.getId());
 		AddBucketItemRequest request = new AddBucketItemRequest(store.getId(), bucketIds);
 
-		// when
-		assertThrows(CustomException.class, () -> {
-			storeBucketService.addBucketItem(request, user1.getId());
-		});
+		try {
+			// when
+			assertThrows(CustomException.class, () -> {
+				storeBucketService.addBucketItem(request, user1.getId());
+			});
 
-		// then
-		List<StoreBucketItem> items = storeBucketItemRepository.findAll();
-		assertThat(items).isEmpty();
+			// then
+			List<StoreBucketItem> items = storeBucketItemRepository.findAll();
+			assertThat(items).isEmpty();
+		} finally {
+			// cleanUp
+			storeBucketItemRepository.deleteAll();
+			storeBucketRepository.deleteAll();
+
+			boardRepository.deleteAll();
+			storeRepository.deleteAll();
+
+			categoryRepository.deleteAll();
+			userRepository.deleteAll();
+			imageRepository.deleteAll();
+		}
 	}
 
 	@Test
