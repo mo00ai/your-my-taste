@@ -37,11 +37,11 @@ import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -50,7 +50,6 @@ public class BoardService {
 
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
-	private final StoreService storeService;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
 	private final EntityFetcher entityFetcher;
@@ -58,6 +57,7 @@ public class BoardService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserRepository userRepository;
 	private final BoardCreationStrategyFactory strategyFactory;
+	private final EntityManager entityManager;
 
 	@Transactional
 	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -75,6 +75,8 @@ public class BoardService {
 		// 오픈런 게시글 카운팅
 		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
+			entityManager.refresh(user);
+
 			if (updatedUserCnt == 0) {
 				throw new CustomException(POSTING_COUNT_OVERFLOW);
 			}
