@@ -97,7 +97,8 @@ public class User extends SoftDeletableEntity {
 		cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserFavor> userFavorList = new ArrayList<>();
 
-	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "follower", fetch = FetchType.LAZY,
+		cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Follow> followingList = new ArrayList<>();
 
 	@Builder
@@ -148,8 +149,8 @@ public class User extends SoftDeletableEntity {
 		}
 	}
 
-	public void follow(User follower, User following) {
-		this.followingList.add(new Follow(follower, following));
+	public void follow(Follow follow) {
+		this.followingList.add(follow);
 		this.following++;
 	}
 

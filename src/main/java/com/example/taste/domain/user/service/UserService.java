@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +49,7 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+	private final EntityManager em;
 	private final EntityFetcher entityFetcher;
 	private final ImageService imageService;
 	private final UserRepository userRepository;
@@ -176,8 +179,9 @@ public class UserService {
 	public void followUser(Long userId, Long followingUserId) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
-		user.follow(user, followingUser);
-		followingUser.followed();
+		Follow follow = followRepository.save(new Follow(user, followingUser));
+		user.follow(follow);
+		followingUser.followed();    // TODO: 중복 팔로우 방지 추가
 	}
 
 	@Transactional

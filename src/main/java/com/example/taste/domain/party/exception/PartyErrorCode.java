@@ -28,7 +28,8 @@ public enum PartyErrorCode implements BaseCode {
 		HttpStatus.FORBIDDEN, "PI004", "자신의 파티 초대가 아닙니다."),
 	UNAVAILABLE_TO_REQUEST_PARTY_INVITATION(
 		HttpStatus.FORBIDDEN, "PI005", "파티 가입 신청을 할 수 없습니다."),
-	;
+	UNAVAILABLE_TO_INVITE_TO_PARTY(
+		HttpStatus.BAD_REQUEST, "PI005", "해당 유저에게 파티 초대를 할 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
