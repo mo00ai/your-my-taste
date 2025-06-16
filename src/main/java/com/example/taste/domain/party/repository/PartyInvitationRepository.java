@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -53,5 +54,12 @@ public interface PartyInvitationRepository extends JpaRepository<PartyInvitation
 		@Param("invitationType") InvitationType type,
 		@Param("invitationStatus") InvitationStatus status);
 
-	void deleteAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
+	@Modifying(clearAutomatically = true)
+	@Query("DELETE FROM PartyInvitation pi WHERE pi.invitationStatus = :status "
+		+ "AND pi.party.id = :partyId")
+	void deleteAllByPartyAndInvitationStatus(
+		@Param("partyId") Long partyId, @Param("status") InvitationStatus status);
+
+	boolean existsByUserIdAndPartyIdAndInvitationStatus(
+		Long userId, Long partyId, InvitationStatus invitationStatus);
 }

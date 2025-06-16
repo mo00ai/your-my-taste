@@ -61,7 +61,7 @@ public class Party extends BaseCreatedAtEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "store_id", nullable = false)
+	@JoinColumn(name = "store_id", nullable = true)
 	private Store store;
 
 	private LocalDate meetingDate;
@@ -142,10 +142,23 @@ public class Party extends BaseCreatedAtEntity {
 		return this.getHostUser().getId().equals(hostId);
 	}
 
+	public boolean isActiveMember(User user) {
+		for (PartyInvitation pi : this.partyInvitationList) {
+			if (pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED) && pi.getUser().equals(user)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public double calculateAverageMemberAge() {
 		return this.partyInvitationList.stream()
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))
 			.mapToInt(pi -> pi.getUser().getAge())
 			.average().orElse(0.0);
+	}
+
+	public void updateHost(User user) {
+		this.hostUser = user;
 	}
 }

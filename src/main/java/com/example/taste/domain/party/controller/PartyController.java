@@ -52,9 +52,8 @@ public class PartyController {
 
 	@GetMapping("/{partyId}")
 	public CommonResponse<PartyDetailResponseDto> getPartyDetail(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyId) {
-		return CommonResponse.ok(partyService.getPartyDetail(userDetails.getId(), partyId));
+		return CommonResponse.ok(partyService.getPartyDetail(partyId));
 	}
 
 	@PatchMapping("/{partyId}")
@@ -65,18 +64,28 @@ public class PartyController {
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{partyId}")
+	// 파티 나가기 (호스트 포함)
+	@DeleteMapping("/{partyId}/leave")
 	public CommonResponse<Void> leaveParty(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
 		partyInvitationService.leaveParty(userDetails.getId(), partyId);
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{partyId}/{userId}")
+	// 파티원 강퇴
+	@DeleteMapping("/{partyId}/members/{userId}")
 	public CommonResponse<Void> removePartyMember(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long userId, @PathVariable Long partyId) {
 		partyInvitationService.removePartyMember(userDetails.getId(), userId, partyId);
 		return CommonResponse.ok();
 	}
+
+	// 파티 삭제
+	// @DeleteMapping("/{partyId}")
+	// public CommonResponse<Void> removeParty(
+	// 	@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
+	// 	partyService.removeParty(userDetails.getId(), partyId);
+	// 	return CommonResponse.ok();
+	// }
 }

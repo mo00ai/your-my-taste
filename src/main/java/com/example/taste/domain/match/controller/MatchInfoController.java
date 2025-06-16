@@ -29,7 +29,7 @@ import com.example.taste.domain.match.service.MatchInfoService;
 public class MatchInfoController {
 	private final MatchInfoService matchInfoService;
 
-	@PostMapping
+	@PostMapping("/users")
 	public CommonResponse<Void> createUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserMatchInfoCreateRequestDto requestDto) {
@@ -37,13 +37,13 @@ public class MatchInfoController {
 		return CommonResponse.ok();
 	}
 
-	@GetMapping
+	@GetMapping("/users")
 	public CommonResponse<List<UserMatchInfoResponseDto>> getUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return CommonResponse.ok(matchInfoService.findUserMatchInfo(userDetails.getId()));
 	}
 
-	@PatchMapping("/{matchInfoId}")
+	@PatchMapping("/users/{matchInfoId}")
 	public CommonResponse<Void> updateUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId,
@@ -52,7 +52,7 @@ public class MatchInfoController {
 		return CommonResponse.ok();
 	}
 
-	@DeleteMapping("/{matchInfoId}")
+	@DeleteMapping("/users/{matchInfoId}")
 	public CommonResponse<Void> deleteUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId) {
