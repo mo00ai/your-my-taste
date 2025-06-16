@@ -258,7 +258,7 @@ public class BoardService {
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			String destination = "/topic/openrun/board/" + board.getId();
+			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
 		}

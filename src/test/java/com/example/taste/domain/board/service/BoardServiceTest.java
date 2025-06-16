@@ -190,7 +190,7 @@ class BoardServiceTest {
 				@Override
 				public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
 					// 연결되면 구독 시작
-					session.subscribe("/topic/openrun/board/" + boardId, new StompFrameHandler() {
+					session.subscribe("/sub/openrun/board/" + boardId, new StompFrameHandler() {
 						@Override
 						public Type getPayloadType(StompHeaders headers) {
 							return String.class;
