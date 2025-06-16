@@ -101,7 +101,7 @@ public class Board extends SoftDeletableEntity {
 
 	}
 
-	@Builder
+	@Builder(builderMethodName = "nBoardBuilder")
 	public Board(String title, String contents, BoardType type, BoardStatus status, Store store, User user) {
 		this.title = title;
 		this.contents = contents;
@@ -111,7 +111,7 @@ public class Board extends SoftDeletableEntity {
 	}
 
 	// 오버로딩된 빌더 생성자
-	@Builder(builderMethodName = "oBoardBuilder")
+	@Builder(builderMethodName = "oBoardBuilder", buildMethodName = "end")
 	public Board(String title, String contents, BoardType type, BoardStatus status, Integer openLimit,
 		LocalDateTime openTime, Store store, User user) {
 		this.title = title;

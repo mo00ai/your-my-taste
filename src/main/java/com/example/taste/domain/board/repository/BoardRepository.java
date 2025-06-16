@@ -42,14 +42,22 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		""")
 	List<BoardListResponseDto> findBoardListDtoByUserIdList(@Param("userIds") List<Long> userIds, Pageable pageable);
 
+	@Query(value = """
+		    SELECT *
+			FROM board
+		    WHERE status = :status
+		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
+		""", nativeQuery = true)
+	List<Board> findExpiredTimeAttackBoards(@Param("status") String status);
+
 	@Modifying(clearAutomatically = true)
 	@Query(value = """
 		    UPDATE board
-			SET status = 'CLOSED'
-		    WHERE status = 'TIMEATTACK'
-		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
+		    SET status = 'CLOSED'
+		    WHERE id IN (:ids)
 		""", nativeQuery = true)
-	void closeExpiredTimeAttackPosts();
+	int closeBoardsByIds(@Param("ids") List<Long> ids);
 
-	Page<Board> findByTypeEqualsAndStatusIn(BoardType type, Collection<BoardStatus> statuses, Pageable pageable);
+	Page<Board> findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType type, Collection<BoardStatus> statuses,
+		Pageable pageable);
 }

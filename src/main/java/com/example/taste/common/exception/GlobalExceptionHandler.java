@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -27,6 +28,20 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	/**
+	 * AccessDeniedException 처리 - hasRole('ADMIN') 예외처리
+	 */
+	@ExceptionHandler(AccessDeniedException.class)
+	protected ResponseEntity<CommonResponse<ErrorResponse>> handleHasRoleException(AccessDeniedException ex) {
+		log.error("AccessDeniedException: {}", ex.getMessage());
+
+		return new ResponseEntity<>(
+			CommonResponse.error(ErrorCode.INVALID_ROLE.getHttpStatus(), ErrorCode.INVALID_ROLE.getCode(),
+				ErrorCode.INVALID_ROLE.getMessage()),
+			ErrorCode.INVALID_ROLE.getHttpStatus()
+		);
+	}
 
 	/**
 	 * Custom Exception 처리 - Service 계층에서 발생한 비즈니스 예외 처리
