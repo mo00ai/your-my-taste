@@ -12,14 +12,14 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.notification.NotificationCategory;
+import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
@@ -52,18 +52,23 @@ public class NotificationSubscriber implements MessageListener {
 			case SYSTEM, MARKETING -> {
 				sendSystem(event);
 			}
-			case SUBSCRIBERS -> {
+			case SUBSCRIBE -> {
 				sendSubscriber(event);
 			}
+			case PK -> {}
+			case CHAT -> {}
+			case BOARD -> {}
+			case MATCH -> {}
+			case PARTY -> {}
+			case STORE -> {}
+			case COMMENT -> {}
 		}
 	}
 
 	// 개인에게 보내는 알림
 	private void sendIndividual(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
-		User user = userRepository.findById(event.getUserId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-		notificationService.sendIndividual(content, event, user);
+		notificationService.sendIndividual(content, event, event.getUser());
 	}
 
 	// 시스템 알림. 모든 유저에게 전송.
@@ -108,7 +113,7 @@ public class NotificationSubscriber implements MessageListener {
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
-		List<Follow> followList = followRepository.findAllByFollowing(event.getUserId());
+		List<Follow> followList = followRepository.findAllByFollowing(event.getUser().getId());
 		// 팔로우 하는 모든 유저를 가져옴
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
@@ -121,8 +126,15 @@ public class NotificationSubscriber implements MessageListener {
 
 	public NotificationContent saveContent(NotificationEventDto event) {
 		return contentRepository.save(NotificationContent.builder()
-			.content(event.getContent())
-			.redirectionUrl(event.getRedirectUrl())
+			.content(makeContent(event.getUser(), event.getCategory(), event.getType(), event.getAdditionalText()))
+			.redirectionEntity(event.getRedirectionEntity())
 			.build());
+	}
+
+	private String makeContent(User user, NotificationCategory category, NotificationType type, String content){
+		return user.getNickname() + " 이/가"
+			+ category.getCategoryText() + " 을/를"
+			+ type.getTypeString() + " 했습니다.\n"
+			+ content;
 	}
 }

@@ -27,10 +27,11 @@ public class NotificationResponseDto {
 	}
 
 	public NotificationResponseDto(NotificationInfo notificationInfo) {
+
 		this.contentId = notificationInfo.getNotificationContent().getId();
 		this.category = notificationInfo.getCategory();
 		this.content = notificationInfo.getNotificationContent().getContent();
-		this.redirectUrl = notificationInfo.getNotificationContent().getRedirectionUrl();
+		this.redirectUrl = notificationInfo.getNotificationContent().getRedirectionEntity();
 		this.isRead = notificationInfo.getIsRead();
 		this.createdAt = notificationInfo.getCreatedAt();
 	}
@@ -38,8 +39,8 @@ public class NotificationResponseDto {
 	public NotificationResponseDto(NotificationEventDto eventDto) {
 		this.contentId = eventDto.getContentId();
 		this.category = eventDto.getCategory();
-		this.content = eventDto.getContent();
-		this.redirectUrl = eventDto.getRedirectUrl();
+		this.content = notificationInfo.getNotificationContent().getContent();
+		this.redirectUrl = eventDto.getRedirectionEntity();
 		this.isRead = eventDto.isRead();
 		this.createdAt = eventDto.getCreatedAt();
 	}

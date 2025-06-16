@@ -38,7 +38,7 @@ public class NotificationUserService {
 		Long userId = userDetails.getId();
 		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
 		String marketing = "notification:count:user:" + userId + ":" + NotificationCategory.MARKETING;
-		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBERS;
+		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBE;
 		// TODO 유저가 원하지 않는 카테고리 알림을 여기서 삭제.
 		Long count = 0L;
 		count += getCount(system);
@@ -159,9 +159,15 @@ public class NotificationUserService {
 		if (!keys.isEmpty()) {
 			for (String key : keys) {
 				NotificationEventDto dto = getNotificationOrThrow(key);
+				if (!dto.isRead()) {
+					String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
+					redisService.decreaseCount(countKey, 1L);
+				}
 				dto.readIt();
 				redisService.updateNotification(dto, key);
 			}
+		} else {
+			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 
 		// mysql 알림 읽음 처리

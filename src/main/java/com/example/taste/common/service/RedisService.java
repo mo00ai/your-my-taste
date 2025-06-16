@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.example.taste.common.constant.RedisChannel;
 import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Slf4j
@@ -100,8 +101,8 @@ public class RedisService {
 	}
 
 	//Notification publish
-	public void publishNotification(NotificationEventDto event) {
-		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, event);
+	public void publishNotification(NotificationPublishDto publishDto) {
+		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, publishDto);
 	}
 
 	//Notification store
