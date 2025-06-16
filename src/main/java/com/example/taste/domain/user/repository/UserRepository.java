@@ -45,4 +45,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
+	@Query("SELECT u FROM User u JOIN FETCH u.image WHERE u.id = :id")
+	Optional<User> findByIdWithImage(@Param("id") Long id);
+
 }

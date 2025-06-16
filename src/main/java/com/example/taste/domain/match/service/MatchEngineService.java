@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
@@ -36,6 +37,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 유저 한 명에게 파티 추천
+	@Transactional
 	public void runMatchingForUser(List<Long> userMatchInfoIdList) {
 		// MEMO : 다 불러와도 되나?
 		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크
@@ -62,6 +64,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	// 파티를 기준으로 맞는 유저 매칭
+	@Transactional
 	public void runMatchingForParty() {
 		// MEMO : 다 불러와도 되나?
 		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크
@@ -175,7 +178,8 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		}
 		matchingUser.updateMatchStatus(MatchStatus.WAITING_HOST);
 		return new PartyInvitation(
-			selectedParty.getParty(), matchingUser.getUser(), InvitationType.RANDOM, InvitationStatus.WAITING);
+			selectedParty.getParty(), matchingUser.getUser(), matchingUser, InvitationType.RANDOM,
+			InvitationStatus.WAITING);
 	}
 
 	// 아무 매칭 조건도 설정하지 않았을 때

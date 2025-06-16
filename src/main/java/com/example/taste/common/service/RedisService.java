@@ -7,18 +7,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.constant.RedisChannel;
 import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationEventDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,13 +27,15 @@ public class RedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final RedisTemplate<String, String> stringRedisTemplate;
 	private final ObjectMapper objectMapper;
+	private final GenericJackson2JsonRedisSerializer serializer;
 
 	public RedisService(RedisTemplate<String, Object> redisTemplate,
 		RedisTemplate<String, String> stringRedisTemplate,
-		ObjectMapper objectMapper) {
+		ObjectMapper objectMapper, GenericJackson2JsonRedisSerializer serializer) {
 		this.redisTemplate = redisTemplate;
 		this.stringRedisTemplate = stringRedisTemplate;
 		this.objectMapper = objectMapper;
+		this.serializer = serializer;
 	}
 
 	public RedisConnection getRedisConnection() {
@@ -207,12 +209,17 @@ public class RedisService {
 		return redisTemplate.opsForZSet().score(key, value) != null;
 	}
 
-	public <T> T deserializeMessageToObject(Message message, Class<T> valueType) {
-		String publishedMessage = redisTemplate.getStringSerializer().deserialize(message.getBody());
-		try {
-			return objectMapper.readValue(publishedMessage, valueType);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+	public <T> T deserializeMesageToObject(Message message, Class<T> valueType) {
+		return this.serializer.deserialize(message.getBody(), valueType);
 	}
+
+	// MEMO : 추후 성능 비교해서 필요한 직렬화 구현체 사용 - @윤예진
+	// public <T> T deserializeMessageToObject(Message message, Class<T> valueType) {
+	// 	String publishedMessage = redisTemplate.getStringSerializer().deserialize(message.getBody());
+	// 	try {
+	// 		return objectMapper.readValue(publishedMessage, valueType);
+	// 	} catch (JsonProcessingException e) {
+	// 		throw new RuntimeException(e);
+	// 	}
+	// }
 }
