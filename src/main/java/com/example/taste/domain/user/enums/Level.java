@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Level {
-	NORMAL(1), PK(3);
+	NORMAL(2), PK(4);
 
 	private final int postingLimit;
 }
