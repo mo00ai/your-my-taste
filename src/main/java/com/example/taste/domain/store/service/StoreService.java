@@ -20,6 +20,7 @@ import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.CategoryRepository;
+import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 
 import jakarta.validation.ConstraintViolationException;
@@ -31,6 +32,7 @@ public class StoreService {
 	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
+	private final StoreBucketItemRepository storeBucketItemRepository;
 
 	@Transactional
 	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
@@ -62,6 +64,8 @@ public class StoreService {
 
 	@Transactional
 	public void deleteStore(Long id) {
+		Store store = entityFetcher.getStoreOrThrow(id);
+		storeBucketItemRepository.deleteAllByStore(store);
 		int deletedCnt = storeRepository.deleteByIdReturningCount(id);
 		if (deletedCnt == 0) {
 			throw new CustomException(STORE_NOT_FOUND);

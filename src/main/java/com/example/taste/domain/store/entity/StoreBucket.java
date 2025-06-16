@@ -2,9 +2,6 @@ package com.example.taste.domain.store.entity;
 
 import java.util.Objects;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import com.example.taste.domain.user.entity.User;
 
 import io.micrometer.common.util.StringUtils;
@@ -33,7 +30,6 @@ public class StoreBucket {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
