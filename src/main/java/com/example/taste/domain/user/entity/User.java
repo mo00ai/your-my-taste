@@ -1,10 +1,23 @@
 package com.example.taste.domain.user.entity;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.PK_POINT_OVERFLOW;
+import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
+import com.example.taste.common.entity.SoftDeletableEntity;
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.auth.dto.SignupRequestDto;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.taste.domain.user.enums.Gender;
+import com.example.taste.domain.user.enums.Level;
+import com.example.taste.domain.user.enums.Role;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,23 +32,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.auth.dto.SignupRequestDto;
-import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.event.entity.Event;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
-import com.example.taste.domain.user.enums.Gender;
-import com.example.taste.domain.user.enums.Level;
-import com.example.taste.domain.user.enums.Role;
 
 @Getter
 @Entity
@@ -88,7 +89,7 @@ public class User extends SoftDeletableEntity {
 	private int following = 0;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-	private List<Board> boardList = new ArrayList<>();
+	private Set<Board> boardSet = new HashSet<>();
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Event> eventList = new ArrayList<>();
