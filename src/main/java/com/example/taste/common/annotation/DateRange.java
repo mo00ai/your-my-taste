@@ -19,7 +19,7 @@ public @interface DateRange {
 
 	Class<? extends Payload>[] payload() default {};
 
-	int min() default 1;
+	int min() default 0;
 
 	int max() default 7;
 

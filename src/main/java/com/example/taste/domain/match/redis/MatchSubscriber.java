@@ -13,21 +13,19 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.match.service.MatchEngineService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class MatchSubscriber implements MessageListener {
 	private final RedisService redisService;
-	private final ObjectMapper objectMapper;
 	private final MatchEngineService matchEngineService;
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		MatchEvent event;
 		try {
-			event = redisService.deserializeMessageToObject(message, MatchEvent.class);
+			event = redisService.deserializeMesageToObject(message, MatchEvent.class);
 		} catch (RuntimeException e) {
 			log.error("매칭 작업 이벤트 역직렬화 실패", e);
 			return;

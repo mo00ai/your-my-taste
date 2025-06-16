@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import lombok.Getter;
 
+import com.example.taste.common.annotation.DateRange;
 import com.example.taste.domain.match.vo.AgeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -22,7 +22,7 @@ public class UserMatchInfoCreateRequestDto {
 	@Valid    // MEMO : Range 관련 validator 필요
 	private AgeRange ageRange;
 
-	@FutureOrPresent
+	@DateRange(max = 30)
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate meetingDate;
 

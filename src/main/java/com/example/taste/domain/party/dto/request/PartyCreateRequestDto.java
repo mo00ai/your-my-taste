@@ -2,6 +2,7 @@ package com.example.taste.domain.party.dto.request;
 
 import java.time.LocalDate;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.Range;
 
 import com.example.taste.common.annotation.DateRange;
+import com.example.taste.domain.match.dto.request.PartyMatchInfoSimpleCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
@@ -36,4 +38,7 @@ public class PartyCreateRequestDto {
 
 	@NotNull(message = "랜덤 매치 여부를 선택하세요.")
 	private Boolean enableRandomMatching;
+
+	@Valid
+	private PartyMatchInfoSimpleCreateRequestDto partyMatchInfo;
 }
