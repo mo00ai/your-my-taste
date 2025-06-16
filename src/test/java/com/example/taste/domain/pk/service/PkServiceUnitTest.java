@@ -34,7 +34,8 @@ class PkServiceUnitTest {
 	void findAllPkCriteria_success() {
 		// given
 		List<PkCriteriaResponseDto> mockList = List.of(
-			new PkCriteriaResponseDto(1L, "KIMCHI", 10, true)
+			new PkCriteriaResponseDto(1L, "POST", 30, true),
+			new PkCriteriaResponseDto(1L, "REVIEW", 20, true)
 		);
 		given(pkCacheService.findAllPkCriteria()).willReturn(mockList);
 
@@ -42,15 +43,16 @@ class PkServiceUnitTest {
 		List<PkCriteriaResponseDto> result = pkService.findAllPkCriteria();
 
 		// then
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getType()).isEqualTo("KIMCHI");
+		assertThat(result).hasSize(2);
+		assertThat(result.get(0).getType()).isEqualTo("POST");
 	}
 
 	@Test
 	void getPointByPkType_success() {
 		// given
 		List<PkCriteriaResponseDto> mockList = List.of(
-			new PkCriteriaResponseDto(1L, "KIMCHI", 10, true)
+			new PkCriteriaResponseDto(1L, "POST", 30, true),
+			new PkCriteriaResponseDto(1L, "REVIEW", 20, true)
 		);
 		given(pkCacheService.findAllPkCriteria()).willReturn(mockList);
 
@@ -58,7 +60,7 @@ class PkServiceUnitTest {
 		int point = pkService.getPointByPkType(PkType.POST);
 
 		// then
-		assertThat(point).isEqualTo(10);
+		assertThat(point).isEqualTo(30);
 	}
 
 	@Test
