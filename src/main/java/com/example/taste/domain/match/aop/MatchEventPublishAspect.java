@@ -41,7 +41,7 @@ public class MatchEventPublishAspect {
 						}
 						case PARTY_MATCH -> {
 							matchPublisher.publish(
-								new MatchEvent(matchEventPublish.matchJobType()));
+								new MatchEvent(matchEventPublish.matchJobType(), null));
 						}
 					}
 				}

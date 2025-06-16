@@ -8,6 +8,7 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZ
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
 
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -52,8 +53,17 @@ public class PartyInvitationService {
 		// 파티에서 현재 멤버 수 차감
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		party.leaveMember();
+
+		// 호스트가 나가는 경우(호스트 탈퇴 후에도 멤버가 남아있다면) 참가한지 오래된 유저에게 호스트 위임
+		if (party.getNowMembers() > 1 && party.isHostOfParty(userId)) {
+			User newHostUser = party.getPartyInvitationList().stream()
+				.sorted(Comparator.comparing(PartyInvitation::getCreatedAt))    // 오름차순 정렬
+				.findFirst().get().getUser();
+			party.updateHost(newHostUser);
+		}
 	}
 
+	// 강퇴
 	@Transactional
 	public void removePartyMember(Long hostId, Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
@@ -167,13 +177,16 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 
-		partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+		if (partyInvitation.getInvitationType().equals(InvitationType.INVITATION)
+			|| partyInvitation.getInvitationType().equals(InvitationType.REQUEST)) {
+			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+		}
 		if (!party.isFull()) {
 			partyInvitation.getParty().joinMember();
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
@@ -219,12 +232,12 @@ public class PartyInvitationService {
 
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
-			partyInvitation.getParty().joinMember();
+			partyInvitation.getParty().joinMember();            // TODO: 수락하기 전 invitation status 가 waiting 이 아니라면 예외처리
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
@@ -281,7 +294,7 @@ public class PartyInvitationService {
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
 				party.setPartyStatus(PartyStatus.FULL);
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
@@ -345,14 +358,14 @@ public class PartyInvitationService {
 				PartyMatchInfo partyMatchInfo =
 					partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 				partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 			}
 		} else {
 			party.setPartyStatus(PartyStatus.FULL);
 			PartyMatchInfo partyMatchInfo =
 				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
