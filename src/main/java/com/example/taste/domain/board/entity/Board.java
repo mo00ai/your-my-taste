@@ -12,7 +12,6 @@ import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
 import com.example.taste.domain.image.entity.BoardImage;
@@ -116,14 +115,15 @@ public class Board extends SoftDeletableEntity {
 
 	// 오버로딩된 빌더 생성자
 	@Builder(builderMethodName = "oBoardBuilder", buildMethodName = "buildOpenRun")
-	public Board(OpenRunBoardRequestDto requestDto, Store store, User user) {
-		this.title = requestDto.getTitle();
-		this.contents = requestDto.getContents();
-		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.O;
-		this.status = requestDto.getStatus() != null ? BoardStatus.from(requestDto.getStatus()) :
+	public Board(String title, String contents, String type, String status,
+		Integer openLimit, LocalDateTime openTime, Store store, User user) {
+		this.title = title;
+		this.contents = contents;
+		this.type = type != null ? BoardType.from(type) : BoardType.O;
+		this.status = status != null ? BoardStatus.from(status) :
 			BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
-		this.openLimit = requestDto.getOpenLimit();
-		this.openTime = requestDto.getOpenTime();
+		this.openLimit = openLimit;
+		this.openTime = openTime;
 		register(store, user);
 	}
 
