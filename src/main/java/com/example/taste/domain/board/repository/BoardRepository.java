@@ -1,6 +1,7 @@
 package com.example.taste.domain.board.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -21,14 +22,22 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	@Query("SELECT b FROM Board b WHERE b.id = :id and b.deletedAt is null ")
 	Optional<Board> findActiveBoard(@Param("id") Long boardId);
 
+	@Query(value = """
+		    SELECT *
+			FROM board
+		    WHERE status = :status
+		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
+		""", nativeQuery = true)
+	List<Board> findExpiredTimeAttackBoards(@Param("status") String status);
+
 	@Modifying(clearAutomatically = true)
 	@Query(value = """
 		    UPDATE board
-			SET status = 'CLOSED'
-		    WHERE status = 'TIMEATTACK'
-		    AND DATE_ADD(open_time, INTERVAL open_limit MINUTE) <= NOW()
+		    SET status = 'CLOSED'
+		    WHERE id IN (:ids)
 		""", nativeQuery = true)
-	void closeExpiredTimeAttackPosts();
+	int closeBoardsByIds(@Param("ids") List<Long> ids);
 
-	Page<Board> findByTypeEqualsAndStatusIn(BoardType type, Collection<BoardStatus> statuses, Pageable pageable);
+	Page<Board> findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType type, Collection<BoardStatus> statuses,
+		Pageable pageable);
 }

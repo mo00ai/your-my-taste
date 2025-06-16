@@ -39,6 +39,8 @@ public class SecurityConfig {
 				auth.requestMatchers("/api/search/**").permitAll();
 				// ✅ 지도 API 요청 허용
 				auth.requestMatchers("/api/map/**").permitAll();
+				// 소켓 연결 요청 허용
+				auth.requestMatchers("/ws/**", "/ws").permitAll();
 				auth.requestMatchers("/h2-console/**").permitAll();
 				auth.anyRequest().authenticated();
 			})

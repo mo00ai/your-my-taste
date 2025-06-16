@@ -33,6 +33,26 @@ public class UserFixture {
 		return user;
 	}
 
+	public static User createNoMorePosting(Image image) {
+		User user = User.builder()
+			.nickname("testUser")
+			.email("testUser+" + UUID.randomUUID() + "@example.com")
+			.password("encoded-password")
+			.address("서울특별시 00구 00동")
+			.gender(ANY)
+			.age(20)
+			.role(Role.USER)
+			.level(Level.NORMAL)
+			.postingCount(Level.NORMAL.getPostingLimit())
+			.point(0)
+			.follower(0)
+			.following(0)
+			.build();
+
+		user.setImage(image);
+		return user;
+	}
+
 	public static List<User> createUsers() {
 		List<User> users = new ArrayList<>();
 
