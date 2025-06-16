@@ -20,7 +20,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -54,7 +53,6 @@ public class Party extends BaseCreatedAtEntity {
 	private String title;
 	private String description;
 
-	@Setter
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private PartyStatus partyStatus;
@@ -119,7 +117,10 @@ public class Party extends BaseCreatedAtEntity {
 			this.meetingDate = requestDto.getMeetingDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
+			this.maxMembers = requestDto.getMaxMembers();
+			if (this.nowMembers < this.maxMembers) {
+				this.partyStatus = PartyStatus.RECRUITING;
+			}
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
@@ -160,5 +161,9 @@ public class Party extends BaseCreatedAtEntity {
 
 	public void updateHost(User user) {
 		this.hostUser = user;
+	}
+
+	public void updatePartyStatus(PartyStatus status) {
+		this.partyStatus = status;
 	}
 }

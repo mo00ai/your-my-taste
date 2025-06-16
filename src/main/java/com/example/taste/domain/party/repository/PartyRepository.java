@@ -19,8 +19,8 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
 	@Query(
 		"SELECT DISTINCT pi.party FROM PartyInvitation pi "
 			+ "JOIN FETCH pi.party.hostUser LEFT JOIN FETCH pi.party.store "
-			+ "WHERE pi.user.id = :userId AND pi.party.partyStatus = 'RECRUITING'")
-	List<Party> findAllByRecruitingUserIn(@Param("userId") Long userId);
+			+ "WHERE pi.user.id = :userId")
+	List<Party> findAllByUserIn(@Param("userId") Long userId);
 
 	@Query("SELECT p FROM Party p LEFT JOIN FETCH p.partyInvitationList pi "
 		+ "LEFT JOIN FETCH pi.user WHERE p.id = :partyId")

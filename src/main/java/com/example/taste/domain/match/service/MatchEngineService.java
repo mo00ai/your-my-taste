@@ -126,7 +126,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		partyStream = matchAgeRange(matchingUser, partyStream);
 
 		// 2. 가중치 계산
-		// 카테고리 일치, 날짜 범위
+		// 카테고리 일치, 날짜 범위	// TODO: 입맛으로 변경
 		List<PartyMatchInfo> filteredPartyList = partyStream.toList();
 		for (PartyMatchInfo matchingParty : filteredPartyList) {
 			int nowMatchingScore = 0;
