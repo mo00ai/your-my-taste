@@ -42,7 +42,7 @@ import com.example.taste.fixtures.UserFixture;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-@ActiveProfiles("test")
+@ActiveProfiles("test-int")
 @SpringBootTest
 class StoreBucketServiceTest {
 
