@@ -5,7 +5,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,9 +43,9 @@ class PkServiceTest {
 	@Autowired
 	private EntityManager em;
 
-	@BeforeEach
-	void setup() {
-
+	@BeforeAll
+	static void printProfile() {
+		System.out.println("🔍 SYSTEM spring.profiles.active: " + System.getProperty("spring.profiles.active"));
 	}
 
 	@Test
