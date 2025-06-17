@@ -3,7 +3,7 @@ package com.example.taste.domain.user.service;
 import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
 import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -65,14 +65,14 @@ public class UserService {
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
 		User user = userRepository.findByIdWithUserFavorList(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserMyProfileResponseDto(user);
 	}
 
 	// 다른 유저 프로필 조회
 	public UserProfileResponseDto getProfile(Long userId) {
 		User user = userRepository.findByIdWithUserFavorList(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserProfileResponseDto(user);
 	}
 

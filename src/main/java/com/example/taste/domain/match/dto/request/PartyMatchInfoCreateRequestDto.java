@@ -18,7 +18,6 @@ public class PartyMatchInfoCreateRequestDto {
 	private AgeRange ageRange;
 	@ValidEnum(target = Gender.class)
 	private String gender;
-	// MEMO : 주소 검증 필요
 	private String region;
 
 	@Builder

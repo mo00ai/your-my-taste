@@ -40,7 +40,6 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	@Transactional
 	public void runMatchingForUser(List<Long> userMatchInfoIdList) {
 		// MEMO : 다 불러와도 되나?
-		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크
 		List<UserMatchInfo> matchingUserList =
 			userMatchInfoRepository.findAllById(userMatchInfoIdList);
 
@@ -67,7 +66,6 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	@Transactional
 	public void runMatchingForParty() {
 		// MEMO : 다 불러와도 되나?
-		// MEMO : 있는지 체크하고 그다음에 불러오는 방식 vs (지금) 다 불러오고 체크
 		List<UserMatchInfo> matchingUserList =
 			userMatchInfoRepository.findAllByMatchStatus(MatchStatus.MATCHING);
 

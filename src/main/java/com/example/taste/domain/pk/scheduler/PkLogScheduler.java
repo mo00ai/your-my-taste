@@ -1,8 +1,11 @@
 package com.example.taste.domain.pk.scheduler;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
@@ -16,9 +19,6 @@ import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -44,7 +44,7 @@ public class PkLogScheduler {
 				Long userId = getUserIdFromKey(key);
 
 				User user = userRepository.findById(userId)
-					.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+					.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 				List<PkLogCacheDto> dtoList = redisService.getOpsForList(key, PkLogCacheDto.class);
 

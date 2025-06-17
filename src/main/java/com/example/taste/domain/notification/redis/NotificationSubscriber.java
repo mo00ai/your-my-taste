@@ -62,7 +62,7 @@ public class NotificationSubscriber implements MessageListener {
 	private void sendIndividual(NotificationEventDto event) {
 		NotificationContent content = saveContent(event);
 		User user = userRepository.findById(event.getUserId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
 		notificationService.sendIndividual(content, event, user);
 	}
 

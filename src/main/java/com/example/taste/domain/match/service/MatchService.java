@@ -18,7 +18,6 @@ import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto
 import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
-import com.example.taste.domain.match.redis.MatchPublisher;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
@@ -33,7 +32,6 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @RequiredArgsConstructor
 public class MatchService {
 	private final EntityFetcher entityFetcher;
-	private final MatchPublisher matchPublisher;
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;

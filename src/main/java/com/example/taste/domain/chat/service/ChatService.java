@@ -1,7 +1,7 @@
 package com.example.taste.domain.chat.service;
 
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class ChatService {
 		}
 		Chat chat = chatRepository.save(new Chat(dto, user, party));
 		User userWithImage = userRepository.findByIdWithImage(user.getId())
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		chat.setUser(userWithImage);
 		return new ChatResponseDto(chat);
 	}

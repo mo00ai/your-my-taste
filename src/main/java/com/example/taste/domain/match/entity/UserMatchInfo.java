@@ -54,10 +54,13 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	private String title;
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoStore> storeList = new ArrayList<>();
+	private List<UserMatchInfoFavor> favorList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchInfoCategory> categoryList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserMatchInfoStore> storeList = new ArrayList<>();
 
 	@Embedded
 	private AgeRange ageRange;

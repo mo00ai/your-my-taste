@@ -19,6 +19,7 @@ import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfoCategory;
+import com.example.taste.domain.match.entity.UserMatchInfoFavor;
 import com.example.taste.domain.match.entity.UserMatchInfoStore;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.enums.MatchStatus;
@@ -44,14 +45,14 @@ public class MatchInfoService {
 			new UserMatchInfo(requestDto, user));
 
 		// 맛집 리스트 세팅
-		if (requestDto.getStores() != null) {
-			userMatchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStores(), userMatchInfo));
+		if (requestDto.getStoreList() != null) {
+			userMatchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStoreList(), userMatchInfo));
 		}
 
 		// 카테고리 리스트 세팅
-		if (requestDto.getCategories() != null) {
+		if (requestDto.getCategoryList() != null) {
 			userMatchInfo.updateCategoryList(
-				getValidUserMatchInfoCategories(requestDto.getCategories(), userMatchInfo));
+				getValidUserMatchInfoCategories(requestDto.getCategoryList(), userMatchInfo));
 		}
 	}
 
@@ -126,6 +127,18 @@ public class MatchInfoService {
 		}
 
 		return categoryList.stream()
+			.map((c) -> new UserMatchInfoCategory(matchInfo, c)).toList();
+	}
+
+	private List<UserMatchInfoFavor> getValidUserMatchInfoFavors(
+		List<String> favorNameList, UserMatchInfo matchInfo) {
+		List<Category> favorList = categoryRepository.findAllByNameIn(favorNameList);
+
+		if (favorList.size() != favorNameList.size()) {
+			throw new CustomException(FAVOR_NOT_FOUND);
+		}
+
+		return favorList.stream()
 			.map((c) -> new UserMatchInfoCategory(matchInfo, c)).toList();
 	}
 }
