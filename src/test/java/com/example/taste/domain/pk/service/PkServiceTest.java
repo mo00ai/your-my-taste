@@ -26,7 +26,8 @@ import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @Transactional
-@ActiveProfiles("test-int")
+// @ActiveProfiles("test-int")
+@ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
 class PkServiceTest {
 
 	@Autowired

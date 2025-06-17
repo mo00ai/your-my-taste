@@ -42,8 +42,9 @@ import com.example.taste.fixtures.UserFixture;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-@ActiveProfiles("test-int")
+// @ActiveProfiles("test-int")
 @SpringBootTest
+@ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
 class StoreBucketServiceTest {
 
 	@Autowired

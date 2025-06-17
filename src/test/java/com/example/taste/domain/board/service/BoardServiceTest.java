@@ -47,7 +47,8 @@ import com.example.taste.fixtures.UserFixture;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-@ActiveProfiles("test-int")
+// @ActiveProfiles("test-int")
+@ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort
