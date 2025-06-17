@@ -1,15 +1,16 @@
 version: '3.8'
 services:
   test-mysql:
-    image: mysql:8.0
-    container_name: test-mysql
-    environment:
-      MYSQL_DATABASE: taste
-      MYSQL_ROOT_PASSWORD: 1111
+    image: mysql:8.1
     ports:
-      - "3308:3306"
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: taste_ci_test
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: test1234
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p1111" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -18,7 +19,7 @@ services:
     image: redis:7
     container_name: test-redis
     ports:
-      - "6380:6379"
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s

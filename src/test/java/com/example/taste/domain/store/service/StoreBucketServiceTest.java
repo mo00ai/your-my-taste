@@ -44,7 +44,7 @@ import jakarta.transaction.Transactional;
 
 // @ActiveProfiles("test-int")
 @SpringBootTest
-@ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
+@ActiveProfiles("test-int-docker")
 class StoreBucketServiceTest {
 
 	@Autowired

@@ -48,7 +48,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 // @ActiveProfiles("test-int")
-@ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
+@ActiveProfiles("test-int-docker")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort
