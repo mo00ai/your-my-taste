@@ -78,7 +78,7 @@ public class MatchService {
 			partyInvitationRepository.deleteUserMatchByTypeAndStatus(
 				userMatchInfo.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 		}
-		userMatchInfoRepository.deleteById(userMatchInfoId);
+		userMatchInfo.clearMatching();
 	}
 
 	@Transactional
@@ -92,14 +92,14 @@ public class MatchService {
 		}
 
 		// 유저 수락 받지 않은(파티장 수락 대기, 수락한) 파티 초대가 있을 경우
-		List<PartyInvitation> beforeUserConfirmList =
+		List<PartyInvitation> pendingInvitationList =
 			partyInvitationRepository.findByPartyAndInvitationTypeAndStatus(
 				party.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 
-		partyInvitationRepository.deleteAll(beforeUserConfirmList);        // 초대 정보 삭제
+		partyInvitationRepository.deleteAll(pendingInvitationList);        // 초대 정보 삭제
 		partyMatchInfoRepository.deleteByParty(party);            // 파티 매칭 삭제
 
-		return beforeUserConfirmList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
+		return pendingInvitationList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
 			.map(pi -> pi.getUserMatchInfo().getId())
 			.toList();
 	}

@@ -203,7 +203,7 @@ public class PartyInvitationService {
 		}
 	}
 
-	// 호스트가 수동(초대/가입) 파티 초대 거절/취소
+	// 호스트가 수동(초대/가입) 파티 초대 거절
 	@Transactional
 	public void rejectManualPartyInvitation(Long hostId, Long partyId, Long partyInvitationId,
 		InvitationActionRequestDto requestDto) {
@@ -252,7 +252,7 @@ public class PartyInvitationService {
 		}
 	}
 
-	// 유저가 수동(초대/가입) 파티 초대 거절/취소
+	// 유저가 수동(초대/가입) 파티 초대 거절
 	@Transactional
 	public void rejectUserManualPartyInvitation(
 		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
@@ -357,7 +357,7 @@ public class PartyInvitationService {
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
 			party.joinMember();
-			userMatchInfo.updateMatchStatus(MatchStatus.IDLE);
+			userMatchInfo.clearMatching();
 
 			if (party.isFull()) {
 				PartyMatchInfo partyMatchInfo =
@@ -374,7 +374,7 @@ public class PartyInvitationService {
 		}
 	}
 
-	// 유저가 랜덤 파티 초대 거절/취소
+	// 유저가 랜덤 파티 초대 거절
 	@Transactional
 	public void rejectUserRandomPartyInvitation(
 		Long userId, Long partyInvitationId, InvitationActionRequestDto requestDto) {
@@ -391,13 +391,6 @@ public class PartyInvitationService {
 
 		partyInvitation.updateInvitationStatus(
 			InvitationStatus.valueOf(requestDto.getInvitationStatus()));
-	}
-
-	private void validateManualType(String type) {
-		if ((!type.equals(InvitationType.REQUEST.toString()) &&
-			!type.equals(InvitationType.INVITATION.toString()))) {
-			throw new CustomException(INVALID_PARTY_INVITATION);
-		}
 	}
 
 	private void validateWaitingInvitationType(InvitationStatus status) {

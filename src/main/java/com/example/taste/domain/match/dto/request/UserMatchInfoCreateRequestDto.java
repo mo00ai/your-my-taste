@@ -3,7 +3,6 @@ package com.example.taste.domain.match.dto.request;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -19,7 +18,6 @@ public class UserMatchInfoCreateRequestDto {
 	@Size(min = 1, max = 50, message = "제목은 50자 이하입니다.")
 	private String title;
 
-	@Valid    // MEMO : Range 관련 validator 필요
 	private AgeRange ageRange;
 
 	@DateRange(max = 30)

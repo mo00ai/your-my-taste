@@ -104,7 +104,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	public void registerMatch() {
 		this.matchStatus = MatchStatus.MATCHING;
-		this.matchStartedAt = LocalDateTime.now();    // TODO: 매칭 되거나하면 null 로 변경
+		this.matchStartedAt = LocalDateTime.now();
 	}
 
 	public boolean isMatching() {
@@ -135,5 +135,10 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	public void updateMatchStatus(MatchStatus matchStatus) {
 		this.matchStatus = matchStatus;
+	}
+
+	public void clearMatching() {
+		this.matchStatus = MatchStatus.IDLE;
+		this.matchStartedAt = null;
 	}
 }
