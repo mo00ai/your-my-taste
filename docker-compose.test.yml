@@ -4,8 +4,6 @@ services:
   test-mysql:
     image: mysql:8.0
     container_name: test-mysql
-    env_file:
-      - .env.test
     ports:
       - "3308:3306"  # 테스트용 포트
     healthcheck:
