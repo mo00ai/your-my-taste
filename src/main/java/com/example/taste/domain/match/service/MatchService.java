@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.service;
 
+import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 
@@ -13,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.favor.entity.Favor;
+import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
+import com.example.taste.domain.match.entity.PartyMatchInfoFavor;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
@@ -32,6 +36,7 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @RequiredArgsConstructor
 public class MatchService {
 	private final EntityFetcher entityFetcher;
+	private final FavorRepository favorRepository;
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
@@ -65,7 +70,12 @@ public class MatchService {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
-		partyMatchInfoRepository.save(new PartyMatchInfo(requestDto, party));
+		PartyMatchInfo partyMatchInfo = partyMatchInfoRepository.save(new PartyMatchInfo(requestDto, party));
+
+		// 입맛 리스트 세팅
+		if (requestDto.getFavorList() != null) {
+			partyMatchInfo.updateFavorList(getValidPartyMatchInfoFavors(requestDto.getFavorList(), partyMatchInfo));
+		}
 	}
 
 	@Transactional
@@ -100,5 +110,17 @@ public class MatchService {
 		return pendingInvitationList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
 			.map(pi -> pi.getUserMatchInfo().getId())
 			.toList();
+	}
+
+	private List<PartyMatchInfoFavor> getValidPartyMatchInfoFavors(
+		List<String> favorNameList, PartyMatchInfo matchInfo) {
+		List<Favor> favorList = favorRepository.findAllByNameIn(favorNameList);
+
+		if (favorList.size() != favorNameList.size()) {
+			throw new CustomException(NOT_FOUND_FAVOR);
+		}
+
+		return favorList.stream()
+			.map((f) -> new PartyMatchInfoFavor(matchInfo, f)).toList();
 	}
 }

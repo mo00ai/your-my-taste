@@ -129,10 +129,17 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 		}
 	}
 
-	public void updateCategoryList(List<UserMatchInfoCategory> categoryListList) {
-		if (categoryListList != null) {
+	public void updateCategoryList(List<UserMatchInfoCategory> categoryList) {
+		if (categoryList != null) {
 			this.categoryList.clear();
-			this.categoryList.addAll(categoryListList);
+			this.categoryList.addAll(categoryList);
+		}
+	}
+
+	public void updateFavorList(List<UserMatchInfoFavor> favorList) {
+		if (favorList != null) {
+			this.favorList.clear();
+			this.favorList.addAll(favorList);
 		}
 	}
 

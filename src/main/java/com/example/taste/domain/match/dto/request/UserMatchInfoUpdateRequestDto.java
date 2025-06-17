@@ -27,11 +27,11 @@ public class UserMatchInfoUpdateRequestDto {
 	private String region;
 
 	@Size(min = 0, max = 5, message = "선호 카테고리는 5개 이하로 입력해야 합니다.")
-	private List<String> categories;
+	private List<String> categoryList;
 
 	@Size(min = 0, max = 5, message = "선호 입맛은 5개 이하로 입력해야 합니다.")
 	private List<String> favorList;
 
 	@Size(min = 0, max = 3, message = "선호 맛집은 3개 이하로 입력해야 합니다.")
-	private List<Long> stores;
+	private List<Long> storeList;
 }

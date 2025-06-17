@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
+import com.example.taste.domain.match.entity.PartyMatchInfoFavor;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfoCategory;
 import com.example.taste.domain.match.entity.UserMatchInfoStore;
@@ -93,6 +94,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진
 	}
 
+	// TODO : 조건 조합 제한 필요 (가게 선택하면 위치, 카테고리, 입맛은 제한하는 식)
 	private PartyInvitation runMatchEngine(
 		UserMatchInfo matchingUser, List<PartyMatchInfo> matchingPartyList) {
 		int bestScore = 0;
@@ -124,11 +126,12 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		partyStream = matchAgeRange(matchingUser, partyStream);
 
 		// 2. 가중치 계산
-		// 카테고리 일치, 날짜 범위	// TODO: 입맛으로 변경
+		// 카테고리 일치, 입맛 일치, 날짜 범위
 		List<PartyMatchInfo> filteredPartyList = partyStream.toList();
 		for (PartyMatchInfo matchingParty : filteredPartyList) {
 			int nowMatchingScore = 0;
 			nowMatchingScore += calculateCategoryScore(matchingUser, matchingParty);
+			nowMatchingScore += calculateFavorScore(matchingUser, matchingParty);
 			nowMatchingScore += calculateMeetingDateScore(matchingUser, matchingParty);
 
 			// 동일 최고점 추가 (0이면 무시)
@@ -249,6 +252,24 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		}
 
 		return 0;
+	}
+
+	// 파티의 선호 입맛과 유저의 선호 입맛이 겹치는지
+	private int calculateFavorScore(UserMatchInfo matchingUser, PartyMatchInfo party) {
+		if (matchingUser.getFavorList() == null || party.getFavorList() == null) {
+			return 0;
+		}
+		int score = 0;
+		score = matchingUser.getFavorList().stream()
+			.map(favor -> favor.getFavor().getName())
+			.mapToInt(name ->
+				party.getFavorList().stream()
+					.map(PartyMatchInfoFavor::getFavor)
+					.anyMatch(partyFavor -> partyFavor.getName().equals(name)) ? 2 : 0
+			)
+			.sum();
+
+		return score;
 	}
 
 	private int calculateMeetingDateScore(UserMatchInfo matchingUser, PartyMatchInfo party) {

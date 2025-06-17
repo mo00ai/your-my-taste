@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.service;
 
+import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.match.exception.MatchErrorCode.FORBIDDEN_USER_MATCH_INFO;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.favor.entity.Favor;
+import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
@@ -35,6 +38,7 @@ public class MatchInfoService {
 	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
+	private final FavorRepository favorRepository;
 	private final UserMatchInfoRepository userMatchInfoRepository;
 
 	// MEMO : 맛집, 카테고리, 지역 중 특정 조합만 허용할 건지?
@@ -53,6 +57,11 @@ public class MatchInfoService {
 		if (requestDto.getCategoryList() != null) {
 			userMatchInfo.updateCategoryList(
 				getValidUserMatchInfoCategories(requestDto.getCategoryList(), userMatchInfo));
+		}
+
+		// 입맛 리스트 세팅
+		if (requestDto.getStoreList() != null) {
+			userMatchInfo.updateFavorList(getValidUserMatchInfoFavors(requestDto.getFavorList(), userMatchInfo));
 		}
 	}
 
@@ -80,13 +89,18 @@ public class MatchInfoService {
 		matchInfo.update(requestDto);
 
 		// 맛집 리스트 세팅
-		if (requestDto.getStores() != null) {
-			matchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStores(), matchInfo));
+		if (requestDto.getStoreList() != null) {
+			matchInfo.updateStoreList(getValidUserMatchInfoStores(requestDto.getStoreList(), matchInfo));
 		}
 
 		// 카테고리 리스트 세팅
-		if (requestDto.getCategories() != null) {
-			matchInfo.updateCategoryList(getValidUserMatchInfoCategories(requestDto.getCategories(), matchInfo));
+		if (requestDto.getCategoryList() != null) {
+			matchInfo.updateCategoryList(getValidUserMatchInfoCategories(requestDto.getCategoryList(), matchInfo));
+		}
+
+		// 입맛 리스트 세팅
+		if (requestDto.getStoreList() != null) {
+			matchInfo.updateFavorList(getValidUserMatchInfoFavors(requestDto.getFavorList(), matchInfo));
 		}
 	}
 
@@ -132,13 +146,13 @@ public class MatchInfoService {
 
 	private List<UserMatchInfoFavor> getValidUserMatchInfoFavors(
 		List<String> favorNameList, UserMatchInfo matchInfo) {
-		List<Category> favorList = categoryRepository.findAllByNameIn(favorNameList);
+		List<Favor> favorList = favorRepository.findAllByNameIn(favorNameList);
 
 		if (favorList.size() != favorNameList.size()) {
-			throw new CustomException(FAVOR_NOT_FOUND);
+			throw new CustomException(NOT_FOUND_FAVOR);
 		}
 
 		return favorList.stream()
-			.map((c) -> new UserMatchInfoCategory(matchInfo, c)).toList();
+			.map((f) -> new UserMatchInfoFavor(matchInfo, f)).toList();
 	}
 }

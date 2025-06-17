@@ -45,6 +45,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		if (requestDto.getStoreId() != null) {
 			store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
 		}
+
 		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		Party party = partyRepository.save(new Party(requestDto, hostUser, store));
 		partyInvitationRepository.save(new PartyInvitation(
