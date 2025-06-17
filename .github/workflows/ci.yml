@@ -77,9 +77,9 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      - name: Create .env.test file for Docker Compose
+      - name: Create .env.test.test file for Docker Compose
         run: |
-          echo "MYSQL_DATABASE=${MYSQL_DATABASE}" >> .env.test
+          echo "MYSQL_DATABASE=${MYSQL_DATABASE}" > .env.test
           echo "MYSQL_USER=${MYSQL_USER}" >> .env.test
           echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env.test
           echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" >> .env.test
