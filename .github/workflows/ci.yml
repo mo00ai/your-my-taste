@@ -83,8 +83,8 @@ jobs:
       - name: Create .env.test file for Docker Compose
         run: |
           echo "MYSQL_DATABASE=${MYSQL_DATABASE}" > .env.test
-          echo "MYSQL_USER=${MYSQL_USER}" >> .env.test
-          echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env.test
+          #echo "MYSQL_USER=${MYSQL_USER}" >> .env.test
+          #echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env.test
           echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" >> .env.test
 
       - name: Docker Compose Down (Clean DB)

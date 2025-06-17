@@ -27,7 +27,9 @@ services:
       retries: 5
 
   test-app:
-    image: your-app-image # GitHub Actions에서 빌드한 이미지명으로 바꿔줘야 함
+    build:
+      context: .
+      dockerfile: Dockerfile  # 👈 테스트용 Dockerfile 따로 만들어도 좋고 그냥 Dockerfile 써도 됨
     container_name: test-app
     depends_on:
       test-mysql:
