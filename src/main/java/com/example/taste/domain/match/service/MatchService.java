@@ -1,7 +1,7 @@
 package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ public class MatchService {
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 이미 매칭 중이라면
@@ -88,7 +88,7 @@ public class MatchService {
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 유저 수락 받지 않은(파티장 수락 대기, 수락한) 파티 초대가 있을 경우

@@ -2,7 +2,7 @@ package com.example.taste.domain.party.service;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 
 import java.util.List;
 
@@ -98,7 +98,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 최대 인원 변경하는 경우
@@ -119,7 +119,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		partyRepository.delete(party);

@@ -2,9 +2,9 @@ package com.example.taste.domain.party.service;
 
 import static com.example.taste.domain.party.exception.PartyErrorCode.ALREADY_EXISTS_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUITING_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_INVITE_TO_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
@@ -76,7 +76,7 @@ public class PartyInvitationService {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 파티 초대 가져와서 상태 변경
@@ -94,7 +94,7 @@ public class PartyInvitationService {
 
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 파티 모집 중이 아닌 경우
@@ -167,7 +167,7 @@ public class PartyInvitationService {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
@@ -188,7 +188,7 @@ public class PartyInvitationService {
 
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 		partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
 
@@ -217,7 +217,7 @@ public class PartyInvitationService {
 
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		partyInvitation.updateInvitationStatus(
@@ -285,7 +285,7 @@ public class PartyInvitationService {
 
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 매칭 상태가 WAITING_HOST 가 아닌 경우
@@ -324,7 +324,7 @@ public class PartyInvitationService {
 
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		partyInvitation.updateInvitationStatus(

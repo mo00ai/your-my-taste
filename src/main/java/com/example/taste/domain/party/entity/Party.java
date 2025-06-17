@@ -135,6 +135,12 @@ public class Party extends BaseCreatedAtEntity {
 		return this.getHostUser().getId().equals(hostId);
 	}
 
+	public boolean isActiveMemberOfParty(Long userId, List<PartyInvitation> partyInvitationList) {
+		return partyInvitationList.stream()
+			.anyMatch(pi -> pi.getUser().getId().equals(userId)
+				&& pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED));
+	}
+
 	public double calculateAverageMemberAge(List<PartyInvitation> partyInvitationList) {
 		return partyInvitationList.stream()
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))

@@ -16,6 +16,7 @@ import com.example.taste.domain.chat.dto.ChatResponseDto;
 import com.example.taste.domain.chat.entity.Chat;
 import com.example.taste.domain.chat.repository.ChatRepository;
 import com.example.taste.domain.party.entity.Party;
+import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
@@ -42,11 +43,14 @@ public class ChatService {
 	}
 
 	public List<ChatResponseDto> getChats(User user, Long partyId) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);            // TODO: 특정 파티 가입을 AOP 기반으로 리팩토링 고려 - @윤예진
+		Party party = entityFetcher.getPartyOrThrow(partyId);
+		List<PartyInvitation> partyInvitationList =
+			partyInvitationRepository.findByPartyId(partyId);
+
 		if (!partyInvitationRepository.isConfirmedPartyMember(partyId, user.getId())) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
-		// TODO: 탈퇴한 사용자 채팅은 어떻게 처리할건지 고민 - @윤예진
+
 		return chatRepository.findAllByPartyIdOrderByCreatedAtAsc(party.getId()).stream()
 			.map(ChatResponseDto::new)
 			.toList();
