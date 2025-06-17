@@ -161,7 +161,7 @@ public class UserService {
 
 	// 유저의 팔로잉 유저 목록 조회
 	public List<UserSimpleResponseDto> getFollowingUserList(Long followerUserId) {
-		return followRepository.findAllByFollower(followerUserId)
+		return followRepository.findByFollowerId(followerUserId)
 			.stream()
 			.map(Follow::getFollowing)
 			.map(UserSimpleResponseDto::new)
@@ -170,7 +170,7 @@ public class UserService {
 
 	// 유저의 팔로워 유저 목록 조회
 	public List<UserSimpleResponseDto> getFollowerUserList(Long followingUserId) {
-		return followRepository.findAllByFollowing(followingUserId)
+		return followRepository.findByFollowingId(followingUserId)
 			.stream()
 			.map(Follow::getFollower)
 			.map(UserSimpleResponseDto::new)
@@ -193,7 +193,7 @@ public class UserService {
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
 		User follower = entityFetcher.getUserOrThrow(followerUserId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
-		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId)
+		Follow follow = followRepository.findByFollowerIdAndFollowingId(followerUserId, followingUserId)
 			.orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
 
 		follower.unfollow(follow);
