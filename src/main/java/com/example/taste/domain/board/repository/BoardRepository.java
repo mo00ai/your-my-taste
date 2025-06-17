@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 
 @Repository
@@ -36,6 +36,6 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	// 	""", nativeQuery = true)
 	// long closeBoardsByIds(@Param("ids") List<Long> ids);
 
-	Page<Board> findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType type, Collection<BoardStatus> statuses,
+	Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);
 }

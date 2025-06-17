@@ -1,7 +1,7 @@
 package com.example.taste.domain.board.dto.search;
 
 import com.example.taste.common.annotation.ValidEnum;
-import com.example.taste.domain.board.entity.BoardStatus;
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.BoardType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -22,7 +22,7 @@ public class BoardSearchCondition {
 	// 필터링
 	@ValidEnum(target = BoardType.class)
 	private String type;    // "N", "O"
-	@ValidEnum(target = BoardStatus.class)
+	@ValidEnum(target = AccessPolicy.class)
 	private String status;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
 	// 날짜 범위
 	@Valid

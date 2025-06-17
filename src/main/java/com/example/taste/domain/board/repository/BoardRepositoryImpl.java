@@ -21,8 +21,8 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
@@ -103,7 +103,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	@Override
 	public long closeBoardsByIds(List<Long> ids) {
 		return queryFactory.update(board)
-			.set(board.status, BoardStatus.CLOSED)
+			.set(board.accessPolicy, AccessPolicy.CLOSED)
 			.where(board.id.in(ids))
 			.execute();
 	}
@@ -165,9 +165,9 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		);
 		// 공개 게시글이거나 오픈런 게시글의 경우 openLimit이 1이상인 경우만(유효한 상태의 게시글만)
 		builder.and(
-			board.status.eq(BoardStatus.OPEN)
-				.or(board.status.eq(BoardStatus.FCFS).and(board.openLimit.gt(0)))
-				.or(board.status.eq(BoardStatus.TIMEATTACK).and(board.openLimit.gt(0)))
+			board.accessPolicy.eq(AccessPolicy.OPEN)
+				.or(board.accessPolicy.eq(AccessPolicy.FCFS).and(board.openLimit.gt(0)))
+				.or(board.accessPolicy.eq(AccessPolicy.TIMEATTACK).and(board.openLimit.gt(0)))
 		);
 
 		// 통합 키워드 검색
@@ -194,7 +194,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		}
 		// 게시글 상태 필터
 		if (StringUtils.hasText(condition.getStatus())) {
-			builder.and(board.status.eq(BoardStatus.from(condition.getStatus())));
+			builder.and(board.accessPolicy.eq(AccessPolicy.from(condition.getStatus())));
 		}
 		// 가게명
 		if (StringUtils.hasText(condition.getStoreName())) {

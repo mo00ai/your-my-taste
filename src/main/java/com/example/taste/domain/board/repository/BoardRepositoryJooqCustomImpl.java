@@ -9,7 +9,7 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
-import com.example.jooq.enums.BoardStatus;
+import com.example.jooq.enums.BoardAccessPolicy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,10 +20,10 @@ public class BoardRepositoryJooqCustomImpl implements BoardRepositoryJooqCustom 
 	private final DSLContext dsl;
 
 	@Override
-	public List<Long> findExpiredTimeAttackBoardIds(String status) {
+	public List<Long> findExpiredTimeAttackBoardIds(String policy) {
 		return dsl.select(BOARD.ID)
 			.from(BOARD)
-			.where(BOARD.STATUS.eq(BoardStatus.valueOf(status))) // Bind variable
+			.where(BOARD.ACCESS_POLICY.eq(BoardAccessPolicy.valueOf(policy))) // Bind variable
 			.and(DSL.field("DATE_ADD({0}, INTERVAL {1} MINUTE)",
 					Timestamp.class,
 					BOARD.OPEN_TIME,

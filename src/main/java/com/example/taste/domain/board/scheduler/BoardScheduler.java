@@ -1,6 +1,6 @@
 package com.example.taste.domain.board.scheduler;
 
-import static com.example.taste.domain.board.entity.BoardStatus.*;
+import static com.example.taste.domain.board.entity.AccessPolicy.*;
 
 import java.util.List;
 
