@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  test-mysql:
+    image: mysql:8.0
+    container_name: test-mysql
+    environment: #테스트에 ocr, naver같은 건 mockbean으로 대체 (리얼 테스트 안함)
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3308:3306"  # 테스트용 포트
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  
+  test-redis:
+    image: redis:7
+    container_name: test-redis
+    ports:
+      - "6380:6379"  # 테스트용 포트
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
