@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: test-mysql
     ports:
-      - "3306:3306"  # 테스트용 포트
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root1111
       MYSQL_DATABASE: test-mysql
@@ -15,14 +15,38 @@ services:
       timeout: 3s
       retries: 5
 
-  
   test-redis:
     image: redis:7
     container_name: test-redis
     ports:
-      - "6379:6379"  # 테스트용 포트
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
+
+  test-app:
+    image: your-app-image # GitHub Actions에서 빌드한 이미지명으로 바꿔줘야 함
+    container_name: test-app
+    depends_on:
+      test-mysql:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: test-int-docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://test-mysql:3306/test-mysql?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root1111
+      DEV_REDIS_HOST: test-redis
+      DEV_REDIS_PORT: 6379
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_REGION: ${S3_REGION}
+      OCR_KEY: ${OCR_KEY}
+      NAVER_MAP_CLIENT_ID: ${NAVER_MAP_CLIENT_ID}
+      NAVER_MAP_CLIENT_SECRET: ${NAVER_MAP_CLIENT_SECRET}
+      NAVER_DATALAB_CLIENT_ID: ${NAVER_DATALAB_CLIENT_ID}
+      NAVER_DATALAB_CLIENT_SECRET: ${NAVER_DATALAB_CLIENT_SECRET}
