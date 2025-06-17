@@ -90,19 +90,22 @@ jobs:
       - name: Docker Compose Up (Test DB & Redis)
         run: docker-compose -f docker-compose.test.yml up -d
 
-      - name: Wait for MySQL and Redis to be healthy
+      - name: Wait for MySQL & Redis to be healthy
         run: |
-          echo "Waiting for MySQL & Redis health check..."
-          for i in {1..30}; do
-            MYSQL_HEALTH=$(docker inspect --format='{{.State.Health.Status}}' test-mysql || echo "notfound")
-            REDIS_HEALTH=$(docker inspect --format='{{.State.Health.Status}}' test-redis || echo "notfound")
-            echo "MySQL: $MYSQL_HEALTH / Redis: $REDIS_HEALTH"
-            if [ "$MYSQL_HEALTH" = "healthy" ] && [ "$REDIS_HEALTH" = "healthy" ]; then
-              echo "✅ All containers healthy!"
-              break
+          for i in {1..20}; do
+            MYSQL_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-mysql)
+            REDIS_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-redis)
+            echo "MySQL: $MYSQL_STATUS / Redis: $REDIS_STATUS"
+            if [[ "$MYSQL_STATUS" == "\"healthy\"" && "$REDIS_STATUS" == "\"healthy\"" ]]; then
+              echo "✅ All services healthy!"
+              exit 0
             fi
-            sleep 2
+            sleep 5
           done
+          echo "❌ Health check failed"
+          docker ps
+          docker logs test-mysql  # ← 여기에 바로 출력
+          exit 1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
