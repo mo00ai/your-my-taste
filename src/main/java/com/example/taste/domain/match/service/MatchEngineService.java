@@ -60,7 +60,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 			}
 		}
 		partyInvitationRepository.saveAll(matchedList);
-		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진 // MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
+		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진 MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
 	}
 
 	// 파티를 기준으로 맞는 유저 매칭
@@ -104,7 +104,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		Stream<PartyMatchInfo> partyStream = matchingPartyList.stream();
 
 		// 초대 이력이 없는 파티들만 필터링
-		List<Long> invitedPartyIdList = partyInvitationRepository.findAllPartyIdByUser(matchingUser.getUser());
+		List<Long> invitedPartyIdList = partyInvitationRepository.findAllPartyIdByUser(matchingUser.getUser().getId());
 		partyStream = partyStream.filter(p -> !invitedPartyIdList.contains(p.getParty().getId()));
 
 		// 가게 필터링
@@ -227,7 +227,10 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 
 			// 유저의 나이 선호 조건이 있다면 --> 파티 구성원 평균 나이가 해당하는지 체크
 			if (userPrefAgeRange != null) {
-				isPartyFitUserPref = userPrefAgeRange.includes(p.getParty().calculateAverageMemberAge());
+				List<PartyInvitation> partyInvitationList =
+					partyInvitationRepository.findByPartyId(p.getId());
+				isPartyFitUserPref = userPrefAgeRange.includes(
+					p.getParty().calculateAverageMemberAge(partyInvitationList));
 			}
 
 			return isUserFitPartyPref && isPartyFitUserPref;

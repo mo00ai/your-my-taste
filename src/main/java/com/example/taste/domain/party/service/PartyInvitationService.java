@@ -33,7 +33,6 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.MatchStatus;
-import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.user.entity.User;
@@ -54,15 +53,15 @@ public class PartyInvitationService {
 		partyInvitation.leave();
 
 		// 파티에서 현재 멤버 수 차감
-		Party party = partyRepository.findByIdWithInvitationsAndUsers(partyId)
-			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
+		Party party = entityFetcher.getPartyOrThrow(partyId);
 		party.leaveMember();
 
 		// 호스트가 나가는 경우(호스트 탈퇴 후에도 멤버가 남아있다면) 참가한지 오래된 유저에게 호스트 위임
 		if (party.getNowMembers() > 1 && party.isHostOfParty(userId)) {
 			// 오름차순 정렬
-			User newHostUser = party.getPartyInvitationList()
-				.stream()
+			List<PartyInvitation> partyInvitationList =
+				partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), InvitationStatus.CONFIRMED);
+			User newHostUser = partyInvitationList.stream()
 				.filter(pi -> !pi.getUser().getId().equals(userId)) // 호스트 제외
 				.min(Comparator.comparing(PartyInvitation::getCreatedAt))
 				.get().getUser();
@@ -158,8 +157,8 @@ public class PartyInvitationService {
 
 	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
 		List<PartyInvitation> partyInvitationList =
-			partyInvitationRepository.findMyActivePartyInvitationList(
-				userId, InvitationStatus.WAITING, PartyStatus.RECRUITING);
+			partyInvitationRepository.findAvailablePartyInvitationList(
+				userId, InvitationStatus.WAITING);
 		return partyInvitationList.stream()
 			.map(UserInvitationResponseDto::new).toList();
 	}
@@ -171,7 +170,7 @@ public class PartyInvitationService {
 			throw new CustomException(UNAUTHORIZED_PARTY);
 		}
 		List<PartyInvitation> partyInvitationList =
-			partyInvitationRepository.findAllByPartyAndInvitationStatus(party, InvitationStatus.WAITING);
+			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 		return partyInvitationList.stream()
 			.map(PartyInvitationResponseDto::new).toList();
 	}

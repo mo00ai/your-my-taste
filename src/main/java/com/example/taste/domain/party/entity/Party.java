@@ -1,6 +1,7 @@
 package com.example.taste.domain.party.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -134,17 +135,8 @@ public class Party extends BaseCreatedAtEntity {
 		return this.getHostUser().getId().equals(hostId);
 	}
 
-	public boolean isActiveMember(User user) {
-		for (PartyInvitation pi : this.partyInvitationList) {
-			if (pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED) && pi.getUser().equals(user)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public double calculateAverageMemberAge() {
-		return this.partyInvitationList.stream()
+	public double calculateAverageMemberAge(List<PartyInvitation> partyInvitationList) {
+		return partyInvitationList.stream()
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))
 			.mapToInt(pi -> pi.getUser().getAge())
 			.average().orElse(0.0);

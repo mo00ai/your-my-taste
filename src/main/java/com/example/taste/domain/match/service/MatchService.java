@@ -75,8 +75,8 @@ public class MatchService {
 		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
 		if (userMatchInfo.getMatchStatus().equals(MatchStatus.WAITING_HOST)) {
 			// 지금 삭제하려는 유저의 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
-			partyInvitationRepository.deleteUserMatchWhileMatching(
-				userMatchInfo, InvitationType.RANDOM, InvitationStatus.WAITING);
+			partyInvitationRepository.deleteUserMatchByTypeAndStatus(
+				userMatchInfo.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 		}
 		userMatchInfoRepository.deleteById(userMatchInfoId);
 	}
@@ -93,8 +93,8 @@ public class MatchService {
 
 		// 유저 수락 받지 않은(파티장 수락 대기, 수락한) 파티 초대가 있을 경우
 		List<PartyInvitation> beforeUserConfirmList =
-			partyInvitationRepository.findAllActivePartyInvitations(
-				party, InvitationType.RANDOM, InvitationStatus.WAITING);
+			partyInvitationRepository.findByPartyAndInvitationTypeAndStatus(
+				party.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 
 		partyInvitationRepository.deleteAll(beforeUserConfirmList);        // 초대 정보 삭제
 		partyMatchInfoRepository.deleteByParty(party);            // 파티 매칭 삭제
