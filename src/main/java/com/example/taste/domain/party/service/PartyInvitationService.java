@@ -87,9 +87,6 @@ public class PartyInvitationService {
 
 		// 파티에서 현재 멤버 수 차감
 		party.leaveMember();
-		if (party.getNowMembers() < party.getMaxMembers()) {
-			party.updatePartyStatus(PartyStatus.RECRUITING);
-		}
 	}
 
 	public void inviteUserToParty(
@@ -200,11 +197,9 @@ public class PartyInvitationService {
 			partyInvitation.getParty().joinMember();
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				party.updatePartyStatus(PartyStatus.FULL);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
 			}
 		} else {
-			party.updatePartyStatus(PartyStatus.FULL);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
@@ -251,11 +246,9 @@ public class PartyInvitationService {
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				party.updatePartyStatus(PartyStatus.FULL);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 			}
 		} else {
-			party.updatePartyStatus(PartyStatus.FULL);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
@@ -307,12 +300,10 @@ public class PartyInvitationService {
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				party.updatePartyStatus(PartyStatus.FULL);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
 			}
 		} else {
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-			party.updatePartyStatus(PartyStatus.FULL);
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
@@ -370,14 +361,12 @@ public class PartyInvitationService {
 			userMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 
 			if (party.isFull()) {
-				party.updatePartyStatus(PartyStatus.FULL);
 				PartyMatchInfo partyMatchInfo =
 					partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 				partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
 			}
 		} else {
-			party.updatePartyStatus(PartyStatus.FULL);
 			PartyMatchInfo partyMatchInfo =
 				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
@@ -419,7 +408,7 @@ public class PartyInvitationService {
 	}
 
 	private void validateRecruitingParty(Party party) {
-		if (!party.getPartyStatus().equals(PartyStatus.RECRUITING)) {
+		if (party.isFull()) {
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}

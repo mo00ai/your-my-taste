@@ -62,7 +62,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		PartyFilter partyFilter = PartyFilter.of(filter);
 		switch (partyFilter) {
 			case ALL -> {
-				// 유저가 열고 있는 파티 제외하고 모든 파티 보여줌
+				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
 				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();

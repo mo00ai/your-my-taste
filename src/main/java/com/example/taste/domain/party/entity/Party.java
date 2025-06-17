@@ -84,7 +84,7 @@ public class Party extends BaseCreatedAtEntity {
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
-		this.partyStatus = PartyStatus.RECRUITING;
+		this.partyStatus = PartyStatus.ACTIVE;
 	}
 
 	public void update(PartyUpdateRequestDto requestDto, Store store) {
@@ -118,9 +118,6 @@ public class Party extends BaseCreatedAtEntity {
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();
-			if (this.nowMembers < this.maxMembers) {
-				this.partyStatus = PartyStatus.RECRUITING;
-			}
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
@@ -136,7 +133,7 @@ public class Party extends BaseCreatedAtEntity {
 	}
 
 	public boolean isFull() {
-		return this.partyStatus.equals(PartyStatus.FULL) || (this.nowMembers >= this.maxMembers);
+		return this.nowMembers == this.maxMembers;
 	}
 
 	public boolean isHostOfParty(Long hostId) {
