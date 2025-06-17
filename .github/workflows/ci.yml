@@ -90,11 +90,11 @@ jobs:
       - name: Docker Compose Up (Test DB & Redis)
         run: docker-compose -f docker-compose.test.yml up -d
 
-      - name: Check if MySQL port 3308 is open
+      - name: Check if MySQL port 3306 is open
         run: |
-          echo "Checking MySQL port on 127.0.0.1:3308..."
+          echo "Checking MySQL port on 127.0.0.1:3306..."
           sudo apt-get update && sudo apt-get install -y netcat-openbsd
-          nc -zv 127.0.0.1 3308
+          nc -zv 127.0.0.1 3306
 
       - name: Wait for MySQL and Redis to be healthy
         run: |
