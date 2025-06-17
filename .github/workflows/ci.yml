@@ -105,19 +105,13 @@ jobs:
 
       - name: Wait for MySQL & Redis
         run: |
+          echo "Waiting for MySQL & Redis..."
           for i in {1..10}; do
-            MYSQL_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-mysql)
-            REDIS_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-redis)
-            echo "MySQL: $MYSQL_STATUS / Redis: $REDIS_STATUS"
-            if [[ "$MYSQL_STATUS" == "\"healthy\"" && "$REDIS_STATUS" == "\"healthy\"" ]]; then
-              echo " All services healthy!"
-              exit 0
-            fi
+            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && \
+            docker exec test-redis redis-cli ping | grep -q PONG && break
+            echo "waiting... ($i)"
             sleep 5
           done
-          echo " Health check failed"
-          docker logs test-mysql
-          exit 1
 
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
@@ -125,6 +119,3 @@ jobs:
       - name: Run Integration Tests
         run: ./gradlew integrationTest
 
-#      - name: Docker Compose Down (Cleanup)
-#        if: always()
-#        run: docker-compose -f docker-compose.test.yml down -v
