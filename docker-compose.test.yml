@@ -9,8 +9,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root1111
       MYSQL_DATABASE: test-mysql
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1111
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1111" ]
       interval: 5s
