@@ -105,7 +105,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Integration Tests
-        run: ./gradlew test -Dspring.profiles.active=test-int
+        run: ./gradlew test -Dspring.profiles.active=test-int -Dspring.config.name=application-test-int
         env:
           SPRING_PROFILES_ACTIVE: test-int
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
