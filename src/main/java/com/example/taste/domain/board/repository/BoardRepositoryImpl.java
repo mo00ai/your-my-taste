@@ -100,6 +100,14 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		return new PageImpl<>(contents, pageable, total != null ? total : 0L);
 	}
 
+	@Override
+	public long closeBoardsByIds(List<Long> ids) {
+		return queryFactory.update(board)
+			.set(board.status, BoardStatus.CLOSED)
+			.where(board.id.in(ids))
+			.execute();
+	}
+
 	private List<OrderSpecifier<? extends Comparable>> getOrderSpecifier(Pageable pageable) {
 		List<OrderSpecifier<? extends Comparable>> orders = new ArrayList<>();
 
