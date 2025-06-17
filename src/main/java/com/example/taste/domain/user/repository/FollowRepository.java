@@ -9,14 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.user.entity.Follow;
-import com.example.taste.domain.user.entity.User;
 
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
 	@Query("SELECT f FROM Follow f "
 		+ "WHERE f.follower.id = :followerUserId AND f.following.id = :followingUserId")
-	Follow findByFollowerAndFollower(
+	Optional<Follow> findByFollowerAndFollower(
 		@Param("followerUserId") Long followerUserId, @Param("followingUserId") Long followingUserId);
 
 	@Query("SELECT DISTINCT f FROM Follow f JOIN FETCH f.following "
@@ -27,5 +26,20 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 		+ "WHERE f.following.id = :followingUserId")
 	List<Follow> findAllByFollowing(@Param("followingUserId") Long followingUserId);
 
-	Optional<Follow> findByFollowerAndFollowing(User follower, User following);
+	@Query(value = """
+		select 
+		      	case when exists(
+		          	select 1 
+		              from Follow f
+		              where f.follower_id = :followerUserId and
+		              f.follwing_id = :followingUserid
+		          )
+		          then 'true'
+		          else 'false'
+		          end
+		      """,
+		nativeQuery = true
+	)
+	boolean existsByFollowerIdAndFollowingId(
+		@Param("followerUserId") Long followerUserId, @Param("followingUserId") Long followingUserId);
 }

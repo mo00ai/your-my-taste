@@ -1,11 +1,11 @@
 package com.example.taste.domain.user.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 
 import com.example.taste.common.exception.BaseCode;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
@@ -18,6 +18,7 @@ public enum UserErrorCode implements BaseCode {
 	POSTING_COUNT_OVERFLOW(HttpStatus.CONFLICT, "U006", "포스팅 허용 횟수를 초과했습니다."),
 
 	FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "F001", "팔로우 정보가 존재하지 않습니다."),
+	ALREADY_FOLLOWED(HttpStatus.BAD_REQUEST, "F001", "이미 팔로우된 유저입니다."),
 	;
 
 	private final HttpStatus httpStatus;

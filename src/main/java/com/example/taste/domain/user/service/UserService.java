@@ -1,5 +1,7 @@
 package com.example.taste.domain.user.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
+import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
@@ -179,16 +181,20 @@ public class UserService {
 	public void followUser(Long userId, Long followingUserId) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		if (followRepository.existsByFollowerIdAndFollowingId(userId, followingUserId)) {
+			throw new CustomException(ALREADY_FOLLOWED);
+		}
 		Follow follow = followRepository.save(new Follow(user, followingUser));
 		user.follow(follow);
-		followingUser.followed();    // TODO: 중복 팔로우 방지 추가
+		followingUser.followed();
 	}
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
 		User follower = entityFetcher.getUserOrThrow(followerUserId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
-		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId);
+		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId)
+			.orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
 
 		follower.unfollow(follow);
 		followingUser.unfollowed();
