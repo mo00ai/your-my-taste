@@ -77,6 +77,13 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
+      - name: Create .env.test file for Docker Compose
+        run: |
+          echo "MYSQL_DATABASE=${MYSQL_DATABASE}" >> .env.test
+          echo "MYSQL_USER=${MYSQL_USER}" >> .env.test
+          echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env.test
+          echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" >> .env.test
+
       - name: Docker Compose Down (Clean DB)
         run: docker-compose -f docker-compose.test.yml down -v
 
@@ -99,3 +106,8 @@ jobs:
 
       - name: Run Integration Tests
         run: ./gradlew test -Dspring.profiles.active=test-int
+        env:
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
