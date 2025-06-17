@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -18,36 +17,28 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @JsonSerialize
-public class NotificationEventDto implements Serializable {
+public class NotificationDataDto implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private User user;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private NotificationCategory category;
-	private NotificationType type;
-	private Long redirectionEntity;
+	private String contents;
+	private String redirectionUrl;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime createdAt;
 	private boolean read;
-	private String additionalText;
 
 	@Builder
-	public NotificationEventDto(User user, NotificationCategory category, NotificationType type, Long redirectionEntity,
-		LocalDateTime createdAt, Long contentId, String additionalText) {
+	public NotificationDataDto(User user, NotificationCategory category, String contents, String redirectionUrl,
+		LocalDateTime createdAt, boolean read) {
 		this.user = user;
 		this.category = category;
-		this.type = type;
-		this.redirectionEntity = redirectionEntity;
+		this.contents = contents;
+		this.redirectionUrl = redirectionUrl;
 		this.createdAt = createdAt;
-		this.read = false;
-		this.contentId = contentId;
-		this.additionalText = additionalText;
+		this.read = read;
 	}
-
-	// 저장시에 부여되는 id
-	@Setter
-	private Long contentId;
 
 	public void readIt() {
 		this.read = true;

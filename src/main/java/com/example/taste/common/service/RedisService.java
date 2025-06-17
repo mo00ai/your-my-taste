@@ -1,6 +1,7 @@
 package com.example.taste.common.service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -12,12 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.constant.RedisChannel;
 import com.example.taste.domain.match.dto.MatchEvent;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -106,17 +108,26 @@ public class RedisService {
 	}
 
 	//Notification store
-	public void storeNotification(Long userId, Long contentId, NotificationEventDto eventDto,
+	public void storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
 		Duration duration) {
-		eventDto.setContentId(contentId);
-		String key = "notification:user:" + userId + ":id:" + contentId + ":" + eventDto.getCategory().name();
-		redisTemplate.opsForValue().set(key, eventDto, duration);
+		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
+		redisTemplate.opsForValue().set(key, dataDto, duration);
 		// 모든 카테고리에 대해 count 증가
-		String countKey = "notification:count:user:" + userId + ":" + eventDto.getCategory().name();
+		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
 		redisTemplate.opsForValue().increment(countKey);
+		String list = "notification:notificationList:user:" + userId;
+		redisTemplate.opsForList().leftPush(list, key);
+		Long size =redisTemplate.opsForList().size(list);
+		if ( size != null && size > 100) {
+			String oldestKey = (String)redisTemplate.opsForList().rightPop(list);
+			if (oldestKey != null) {
+				// 3. 해당 알림 key 삭제
+				redisTemplate.delete(oldestKey);
+			}
+		}
 	}
 
-	public void updateNotification(NotificationEventDto eventDto, String key) {
+	public void updateNotification(NotificationDataDto eventDto, String key) {
 		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
 		redisTemplate.opsForValue().set(key, eventDto, duration);
 	}

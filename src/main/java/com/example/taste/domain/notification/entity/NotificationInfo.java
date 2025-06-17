@@ -46,11 +46,11 @@ public class NotificationInfo extends BaseEntity {
 	private NotificationContent notificationContent;
 
 	@Builder
-	public NotificationInfo(NotificationCategory category, Boolean isRead, NotificationContent notificationContent,
+	public NotificationInfo(NotificationCategory category, NotificationContent notificationContent,
 		User user) {
 		this.category = category;
 		this.user = user;
-		this.isRead = isRead != null ? isRead : false; // 초기값 세팅
+		this.isRead = false;
 		this.notificationContent = notificationContent;
 	}
 

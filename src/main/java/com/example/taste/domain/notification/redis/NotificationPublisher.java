@@ -3,7 +3,6 @@ package com.example.taste.domain.notification.redis;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 
 import lombok.RequiredArgsConstructor;

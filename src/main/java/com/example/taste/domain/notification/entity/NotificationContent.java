@@ -26,11 +26,11 @@ public class NotificationContent extends BaseEntity implements Serializable {
 	@Column(nullable = false)
 	private String content;
 
-	private Long redirectionEntity;
+	private String redirectionUrl;
 
 	@Builder
-	public NotificationContent(String content, Long redirectionEntity) {
+	public NotificationContent(String content, String redirectionUrl) {
 		this.content = content;
-		this.redirectionEntity = redirectionEntity;
+		this.redirectionUrl = redirectionUrl;
 	}
 }

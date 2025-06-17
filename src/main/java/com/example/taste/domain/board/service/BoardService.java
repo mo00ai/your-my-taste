@@ -35,7 +35,7 @@ import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.board.strategy.BoardCreationStrategy;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.BoardImageService;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
@@ -90,7 +90,7 @@ public class BoardService {
 			throw new CustomException(ImageErrorCode.FAILED_WRITE_FILE);
 		}
 
-		eventPublisher.publishEvent(NotificationEventDto.builder()
+		eventPublisher.publishEvent(NotificationDataDto.builder()
 			.build());
 	}
 

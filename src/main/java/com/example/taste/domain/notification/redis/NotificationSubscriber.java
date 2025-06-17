@@ -1,6 +1,7 @@
 package com.example.taste.domain.notification.redis;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.NotificationType;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationDataDto;
+import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
@@ -43,17 +45,17 @@ public class NotificationSubscriber implements MessageListener {
 		String json = new String(message.getBody(), StandardCharsets.UTF_8);
 		// json 을 역직렬화 하여 dto 로 맵핑
 		// redis 은 커스텀 objectMapper 를 사용해 직렬화 하였으므로 역직렬화때도 같은 objectMapper 를 써야 함
-		NotificationEventDto event = serializer.deserialize(message.getBody(), NotificationEventDto.class);
+		NotificationPublishDto publishDto = serializer.deserialize(message.getBody(), NotificationPublishDto.class);
 		// 받은 알림의 카테고리에 따라 다른 동작
-		switch (event.getCategory()) {
+		switch (publishDto.getCategory()) {
 			case INDIVIDUAL -> {
-				sendIndividual(event);
+				sendIndividual(publishDto);
 			}
 			case SYSTEM, MARKETING -> {
-				sendSystem(event);
+				sendSystem(publishDto);
 			}
 			case SUBSCRIBE -> {
-				sendSubscriber(event);
+				sendSubscriber(publishDto);
 			}
 			case PK -> {}
 			case CHAT -> {}
@@ -66,14 +68,23 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	// 개인에게 보내는 알림
-	private void sendIndividual(NotificationEventDto event) {
-		NotificationContent content = saveContent(event);
-		notificationService.sendIndividual(content, event, event.getUser());
+	private void sendIndividual(NotificationPublishDto publishDto) {
+		String contents = makeContent(publishDto.getUser(), publishDto.getCategory(), publishDto.getType(), publishDto.getAdditionalText());
+		String redirection = publishDto.getCategory().buildUrl(publishDto.getType(), publishDto.getRedirectionEntityId());
+		NotificationDataDto dataDto = NotificationDataDto.builder()
+			.user(publishDto.getUser())
+			.category(publishDto.getCategory())
+			.contents(contents)
+			.redirectionUrl(redirection)
+			.createdAt(LocalDateTime.now())
+			.build();
+		NotificationContent notificationContent = saveContent(dataDto);
+		notificationService.sendIndividual(notificationContent, dataDto);
 	}
 
 	// 시스템 알림. 모든 유저에게 전송.
 	@SuppressWarnings("checkstyle:RegexpMultiline")
-	private void sendSystem(NotificationEventDto event) {
+	private void sendSystem(NotificationPublishDto publishDto) {
 		NotificationContent content = saveContent(event);
 		// 페이징 방식
 		long startLogging = System.currentTimeMillis();
@@ -108,7 +119,7 @@ public class NotificationSubscriber implements MessageListener {
 	}
 
 	// 구독자 알림
-	private void sendSubscriber(NotificationEventDto event) {
+	private void sendSubscriber(NotificationPublishDto publishDto) {
 		NotificationContent content = saveContent(event);
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
@@ -124,11 +135,12 @@ public class NotificationSubscriber implements MessageListener {
 		// TODO 위의 시스템 알림에서 두 방식을 비교한 뒤 더 합리적인 방식을 여기에도 적용
 	}
 
-	public NotificationContent saveContent(NotificationEventDto event) {
-		return contentRepository.save(NotificationContent.builder()
-			.content(makeContent(event.getUser(), event.getCategory(), event.getType(), event.getAdditionalText()))
-			.redirectionEntity(event.getRedirectionEntity())
+	public NotificationContent saveContent(NotificationDataDto dataDto) {
+		NotificationContent notificationContent = contentRepository.save(NotificationContent.builder()
+			.content(dataDto.getContents())
+			.redirectionUrl(dataDto.getRedirectionUrl())
 			.build());
+		return notificationContent;
 	}
 
 	private String makeContent(User user, NotificationCategory category, NotificationType type, String content){

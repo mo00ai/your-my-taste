@@ -19,7 +19,7 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
+import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
@@ -68,14 +68,14 @@ public class NotificationUserService {
 		}
 
 		// 키를 이용해 모든 알림을 가져옴
-		List<NotificationEventDto> notifications = new ArrayList<>();
+		List<NotificationDataDto> notifications = new ArrayList<>();
 		for (String key : keys) {
 			notifications.add(getNotificationOrThrow(key));
 		}
 
 		// 가져온 알림을 정렬
-		List<NotificationEventDto> sorted = notifications.stream()
-			.sorted(Comparator.comparing(NotificationEventDto::getCreatedAt).reversed())
+		List<NotificationDataDto> sorted = notifications.stream()
+			.sorted(Comparator.comparing(NotificationDataDto::getCreatedAt).reversed())
 			.toList();
 
 		//슬라이스
@@ -88,14 +88,15 @@ public class NotificationUserService {
 		}
 		Pageable pageable = PageRequest.of(index, pageSize);
 
-		List<NotificationEventDto> sub = sorted.subList(here, there);
+		List<NotificationDataDto> sub = sorted.subList(here, there);
+
 		Boolean hasNext = sub.size() > pageSize;
 
 		if (hasNext) {
 			sub = sub.subList(0, pageSize);
 		}
 
-		Slice<NotificationEventDto> slice = new SliceImpl<>(sub, pageable, hasNext);
+		Slice<NotificationDataDto> slice = new SliceImpl<>(sub, pageable, hasNext);
 		return slice.map(NotificationResponseDto::new);
 	}
 
@@ -133,7 +134,7 @@ public class NotificationUserService {
 		Set<String> keys = getKeys(pattern);
 		if (!keys.isEmpty()) {
 			String key = keys.iterator().next();
-			NotificationEventDto dto = getNotificationOrThrow(key);
+			NotificationDataDto dto = getNotificationOrThrow(key);
 
 			if (!dto.isRead()) {
 				String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
@@ -158,7 +159,7 @@ public class NotificationUserService {
 		// redis 알림 읽음 처리
 		if (!keys.isEmpty()) {
 			for (String key : keys) {
-				NotificationEventDto dto = getNotificationOrThrow(key);
+				NotificationDataDto dto = getNotificationOrThrow(key);
 				if (!dto.isRead()) {
 					String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
 					redisService.decreaseCount(countKey, 1L);
@@ -179,10 +180,10 @@ public class NotificationUserService {
 		return redisService.getKeys(pattern);
 	}
 
-	private NotificationEventDto getNotificationOrThrow(String key) {
+	private NotificationDataDto getNotificationOrThrow(String key) {
 		Object obj = redisService.getKeyValue(key);
-		if (obj instanceof NotificationEventDto eventDto) {
-			return eventDto;
+		if (obj instanceof NotificationDataDto dataDto) {
+			return dataDto;
 		}
 		throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
 	}

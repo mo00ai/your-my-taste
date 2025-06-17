@@ -1,11 +1,8 @@
 package com.example.taste.domain.notification.service;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 
 import com.example.taste.domain.notification.NotificationType;
-import com.example.taste.domain.notification.dto.NotificationEventDto;
 import com.example.taste.domain.notification.dto.AdminNotificationRequestDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.redis.NotificationPublisher;
