@@ -106,4 +106,8 @@ jobs:
 
       - name: Export .env.test values and run tests
         run: |
-          set -a && source .env.test && set +a && ./gradlew test -Dspring.profiles.active=test-int -Dspring.config.location=classpath:/application-test-int.properties
+          while IFS='=' read -r key value; do
+            echo "export $key=$value" >> $GITHUB_ENV
+          done < .env.test
+          
+          ./gradlew test -Dspring.profiles.active=test-int -Dspring.config.location=classpath:/application-test-int.properties
