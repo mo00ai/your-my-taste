@@ -1,10 +1,13 @@
 package com.example.taste.domain.image.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,7 +34,13 @@ public class S3Service {
 
 	public S3ResponseDto upload(MultipartFile file) throws IOException {
 
-		String originalFileName = file.getOriginalFilename();
+		// String originalFileName = file.getOriginalFilename();
+		// String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
+
+		String originalFileName = Optional.ofNullable(file.getOriginalFilename())
+			.map(StringUtils::cleanPath)   // 경로·제어 문자 제거
+			.filter(name -> !name.isBlank())
+			.orElse("file");
 		String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
 
 		PutObjectRequest request = PutObjectRequest.builder()
@@ -46,7 +55,9 @@ public class S3Service {
 			.scheme("https")
 			.host(bucketName + ".s3." + region + ".amazonaws.com")
 			.path("/" + uploadFileName)
-			.build();
+			.build()
+			.encode(StandardCharsets.UTF_8);
+		;
 
 		String uploadUrl = uri.toUriString();
 
