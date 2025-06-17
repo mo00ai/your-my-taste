@@ -53,7 +53,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build JAR
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar -x generateJooq
 
 
   unit-tests:
@@ -110,12 +110,12 @@ jobs:
             REDIS_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-redis)
             echo "MySQL: $MYSQL_STATUS / Redis: $REDIS_STATUS"
             if [[ "$MYSQL_STATUS" == "\"healthy\"" && "$REDIS_STATUS" == "\"healthy\"" ]]; then
-              echo "✅ All services healthy!"
+              echo " All services healthy!"
               exit 0
             fi
             sleep 5
           done
-          echo "❌ Health check failed"
+          echo " Health check failed"
           docker logs test-mysql
           exit 1
 
