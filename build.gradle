@@ -105,7 +105,8 @@ tasks.register("unitTest", Test) {
 tasks.register("integrationTest", Test) {
     useJUnitPlatform()
     systemProperty "spring.profiles.active", "test-int-docker"
-    include '**/*IntegrationTest*'
+    include '**/*Test*'
+    exclude '**/*UnitTest*'
     testLogging {
         events "passed", "skipped", "failed"
     }
