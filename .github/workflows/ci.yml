@@ -77,7 +77,10 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      - name: Create .env.test.test file for Docker Compose
+      - name: Install jq for JSON formatting
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Create .env.test file for Docker Compose
         run: |
           echo "MYSQL_DATABASE=${MYSQL_DATABASE}" > .env.test
           echo "MYSQL_USER=${MYSQL_USER}" >> .env.test
@@ -92,6 +95,7 @@ jobs:
 
       - name: Wait for MySQL & Redis to be healthy
         run: |
+          echo "Waiting for MySQL & Redis to be healthy..."
           for i in {1..20}; do
             MYSQL_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-mysql)
             REDIS_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' test-redis)
@@ -103,8 +107,16 @@ jobs:
             sleep 5
           done
           echo "❌ Health check failed"
-          docker ps
-          docker logs test-mysql  # ← 여기에 바로 출력
+          
+          echo "===== 🔥 MYSQL CONTAINER LOGS (test-mysql) ====="
+          docker logs test-mysql || echo "❌ Could not fetch logs for test-mysql"
+          
+          echo "===== 🔍 MYSQL CONTAINER STATUS (docker inspect) ====="
+          docker inspect test-mysql --format='{{json .State}}' | jq .
+          
+          echo "===== 📂 MYSQL FILE SYSTEM CHECK (/var/lib/mysql) ====="
+          docker exec test-mysql ls -l /var/lib/mysql || echo "❌ Could not exec into container"
+          
           exit 1
 
       - name: Set up JDK 17
@@ -118,4 +130,3 @@ jobs:
 
       - name: Run Integration Tests
         run: ./gradlew test -Dspring.profiles.active=test-int -Dspring.config.location=classpath:/application-test-int-docker.properties
-

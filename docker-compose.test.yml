@@ -13,9 +13,9 @@ services:
       MYSQL_PASSWORD: 1111
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1111" ]
-      interval: 10s
-      timeout: 10s
-      retries: 10
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   
   test-redis:
