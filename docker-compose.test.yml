@@ -6,8 +6,13 @@ services:
     container_name: test-mysql
     ports:
       - "3306:3306"  # 테스트용 포트
+    environment:
+      MYSQL_ROOT_PASSWORD: root1111
+      MYSQL_DATABASE: test-mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1111
     healthcheck:
-      test: [ "CMD-SHELL", "mysql -uroot -p1111 -e 'SELECT 1'" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 10s
       retries: 10
