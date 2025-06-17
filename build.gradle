@@ -80,7 +80,7 @@ dependencies {
 
     testImplementation 'com.h2database:h2'
 
-    implementation 'org.flywaydb:flyway-core'
+//    implementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {
