@@ -68,7 +68,7 @@ public class UserController {
 		return CommonResponse.ok();
 	}
 
-	@PostMapping("/favor")
+	@PostMapping("/favors")
 	public CommonResponse<Void> updateUserFavor(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid List<UserFavorUpdateRequestDto> requestDtoList

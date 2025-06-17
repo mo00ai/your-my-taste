@@ -69,7 +69,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 			}
 			case MY -> {
 				// 유저가 참가, 호스트인 파티 모두 보여줌
-				return partyRepository.findAllByRecruitingUserIn(userId).stream()
+				return partyRepository.findAllByUserIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();
 			}

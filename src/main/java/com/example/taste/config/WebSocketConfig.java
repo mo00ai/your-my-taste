@@ -30,6 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 			.addInterceptors(customHttpHandshakeInterceptor)
 			.setHandshakeHandler(customHandshakeHandler)
 			.withSockJS();
+
 		// 포스트맨 테스트용 - ws://.../ws로 요청
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*");
