@@ -40,6 +40,16 @@ public class NotificationDataDto implements Serializable {
 		this.read = read;
 	}
 
+	public void buildUrl (String url, Long entity) {
+		if (url == null || url.isBlank()){
+			return;
+		}
+		this.redirectionUrl = url;
+		if (entity != null) {
+			this.redirectionUrl += "/" + entity;
+		}
+	}
+
 	public void readIt() {
 		this.read = true;
 	}

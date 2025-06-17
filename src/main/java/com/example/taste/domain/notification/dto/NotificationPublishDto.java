@@ -1,22 +1,30 @@
 package com.example.taste.domain.notification.dto;
 
+import java.io.Serializable;
+
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.user.entity.User;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-public class NotificationPublishDto {
+@JsonSerialize
+@NoArgsConstructor
+@AllArgsConstructor
+public class NotificationPublishDto implements Serializable {
 	private User user;
 	@NotNull(message = "올바르지 않은 알림 생성 요청입니다.")
 	private NotificationCategory category;
 	@NotNull(message = "올바르지 않은 알림 생성 요청입니다.")
 	private NotificationType type;
+	private String redirectionUrl;
 	private Long redirectionEntityId;
 	private String additionalText;
 }

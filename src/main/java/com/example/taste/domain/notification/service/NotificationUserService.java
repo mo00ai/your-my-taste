@@ -1,11 +1,10 @@
 package com.example.taste.domain.notification.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -26,9 +25,11 @@ import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationUserService {
 	private final RedisService redisService;
 	private final NotificationInfoRepository notificationInfoRepository;
@@ -54,50 +55,24 @@ public class NotificationUserService {
 	}
 
 	//최근 알림 조회(redis)
-	//TODO sortedSet
 	public Slice<NotificationResponseDto> getNotificationList(CustomUserDetails userDetails,
 		int index) {
 		Long userId = userDetails.getId();
 		// userId를 이용해 저장된 모든 알림을 가져옴
-		String pattern = "notification:user:" + userId + "*";
-		// 모든 키
-		Set<String> keys = getKeys(pattern);
-		//조회된 키가 없으면 빈 슬라이스 반환
-		if (keys.isEmpty()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, 10), false);
-		}
-
-		// 키를 이용해 모든 알림을 가져옴
-		List<NotificationDataDto> notifications = new ArrayList<>();
+		String listKey = "notification:list:user:" + userId;
+		List<String> keys = redisService.getKeysFromList(listKey, index-1);
+		List<NotificationResponseDto> responseDtoList = new ArrayList<>();
+		boolean hasNext = keys.size() > 10;
 		for (String key : keys) {
-			notifications.add(getNotificationOrThrow(key));
+			String[] splitKey = key.split(":");
+			Long contentId = Long.parseLong(splitKey[splitKey.length-2]);
+			NotificationDataDto notificationDataDto = (NotificationDataDto)redisService.getKeyValue(key);
+			NotificationResponseDto responseDto = new NotificationResponseDto(notificationDataDto);
+			responseDto.setContentId(contentId);
+			responseDtoList.add(responseDto);
 		}
-
-		// 가져온 알림을 정렬
-		List<NotificationDataDto> sorted = notifications.stream()
-			.sorted(Comparator.comparing(NotificationDataDto::getCreatedAt).reversed())
-			.toList();
-
-		//슬라이스
-		int pageSize = 10;
-		int here = (index - 1) * pageSize;
-		int there = Math.min(here + pageSize + 1, sorted.size());
-
-		if (here >= sorted.size()) {
-			return new SliceImpl<>(Collections.emptyList(), PageRequest.of(index - 1, pageSize), false);
-		}
-		Pageable pageable = PageRequest.of(index, pageSize);
-
-		List<NotificationDataDto> sub = sorted.subList(here, there);
-
-		Boolean hasNext = sub.size() > pageSize;
-
-		if (hasNext) {
-			sub = sub.subList(0, pageSize);
-		}
-
-		Slice<NotificationDataDto> slice = new SliceImpl<>(sub, pageable, hasNext);
-		return slice.map(NotificationResponseDto::new);
+		Pageable pageable = PageRequest.of(index, 10);
+		return new SliceImpl<>(responseDtoList, pageable, hasNext);
 	}
 
 	// 오래된 알림 조회(mysql)

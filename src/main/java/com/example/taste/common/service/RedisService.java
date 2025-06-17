@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -115,11 +115,11 @@ public class RedisService {
 		// 모든 카테고리에 대해 count 증가
 		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
 		redisTemplate.opsForValue().increment(countKey);
-		String list = "notification:notificationList:user:" + userId;
-		redisTemplate.opsForList().leftPush(list, key);
-		Long size =redisTemplate.opsForList().size(list);
-		if ( size != null && size > 100) {
-			String oldestKey = (String)redisTemplate.opsForList().rightPop(list);
+		String listKey = "notification:list:user:" + userId;
+		stringRedisTemplate.opsForList().leftPush(listKey, key);
+		Long size =redisTemplate.opsForList().size(listKey);
+		if (size != null && size > 100) {
+			String oldestKey = (String)redisTemplate.opsForList().rightPop(listKey);
 			if (oldestKey != null) {
 				// 3. 해당 알림 key 삭제
 				redisTemplate.delete(oldestKey);
@@ -184,6 +184,28 @@ public class RedisService {
 			return keys;
 		}
 		return Collections.emptySet();
+	}
+
+	public List<String> getKeysFromList(String listKey, int index){
+		List<String> raw = stringRedisTemplate.opsForList().range(listKey, 0, 99);
+		if (raw == null || raw.isEmpty()) {
+			return Collections.emptyList();
+		}
+		int here = index * 10;
+		int there = here + 11;
+		List<String> keyList = new ArrayList<>();
+		int count = 0;
+		for (String key : raw) {
+			NotificationDataDto dataDto = (NotificationDataDto)redisTemplate.opsForValue().get(key);
+			if (dataDto == null) {
+				redisTemplate.opsForList().remove(listKey, 1, key);
+				continue;
+			}
+			if (count >= here && count < there) {;keyList.add(key);}
+			if (count == there) {;break;}
+			count ++;
+		}
+		return keyList;
 	}
 
 	public <T> List<T> getOpsForList(String key, Class<T> clazz) {

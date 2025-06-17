@@ -69,15 +69,7 @@ public class NotificationSubscriber implements MessageListener {
 
 	// 개인에게 보내는 알림
 	private void sendIndividual(NotificationPublishDto publishDto) {
-		String contents = makeContent(publishDto.getUser(), publishDto.getCategory(), publishDto.getType(), publishDto.getAdditionalText());
-		String redirection = publishDto.getCategory().buildUrl(publishDto.getType(), publishDto.getRedirectionEntityId());
-		NotificationDataDto dataDto = NotificationDataDto.builder()
-			.user(publishDto.getUser())
-			.category(publishDto.getCategory())
-			.contents(contents)
-			.redirectionUrl(redirection)
-			.createdAt(LocalDateTime.now())
-			.build();
+		NotificationDataDto dataDto = makeDataDto(publishDto);
 		NotificationContent notificationContent = saveContent(dataDto);
 		notificationService.sendIndividual(notificationContent, dataDto);
 	}
@@ -85,7 +77,8 @@ public class NotificationSubscriber implements MessageListener {
 	// 시스템 알림. 모든 유저에게 전송.
 	@SuppressWarnings("checkstyle:RegexpMultiline")
 	private void sendSystem(NotificationPublishDto publishDto) {
-		NotificationContent content = saveContent(event);
+		NotificationDataDto dataDto = makeDataDto(publishDto);
+		NotificationContent notificationContent = saveContent(dataDto);
 		// 페이징 방식
 		long startLogging = System.currentTimeMillis();
 		// 유저를 100명 단위로 끊어와 보냄
@@ -94,7 +87,7 @@ public class NotificationSubscriber implements MessageListener {
 		Page<User> users;
 		do {
 			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
-			notificationService.sendBunch(content, event, users.getContent());
+			notificationService.sendBunch(notificationContent, dataDto, users.getContent());
 			page++;
 		} while (users.hasNext());
 		long endLogging = System.currentTimeMillis();
@@ -120,17 +113,18 @@ public class NotificationSubscriber implements MessageListener {
 
 	// 구독자 알림
 	private void sendSubscriber(NotificationPublishDto publishDto) {
-		NotificationContent content = saveContent(event);
+		NotificationDataDto dataDto = makeDataDto(publishDto);
+		NotificationContent notificationContent = saveContent(dataDto);
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
-		List<Follow> followList = followRepository.findAllByFollowing(event.getUser().getId());
+		List<Follow> followList = followRepository.findAllByFollowing(publishDto.getUser().getId());
 		// 팔로우 하는 모든 유저를 가져옴
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
 			followers.add(follow.getFollower());
 		}
-		notificationService.sendBunch(content, event, followers);
+		notificationService.sendBunch(notificationContent, dataDto, followers);
 
 		// TODO 위의 시스템 알림에서 두 방식을 비교한 뒤 더 합리적인 방식을 여기에도 적용
 	}
@@ -143,10 +137,28 @@ public class NotificationSubscriber implements MessageListener {
 		return notificationContent;
 	}
 
-	private String makeContent(User user, NotificationCategory category, NotificationType type, String content){
+	private String makeContent(User user, NotificationCategory category, NotificationType type, String additionalText){
+		if (category.equals(NotificationCategory.SYSTEM) ||
+			category.equals(NotificationCategory.MARKETING) ||
+			category.equals(NotificationCategory.INDIVIDUAL)){
+			return additionalText;
+		}
 		return user.getNickname() + " 이/가"
 			+ category.getCategoryText() + " 을/를"
 			+ type.getTypeString() + " 했습니다.\n"
-			+ content;
+			+ additionalText;
+	}
+
+	private NotificationDataDto makeDataDto (NotificationPublishDto publishDto){
+		String contents = makeContent(publishDto.getUser(), publishDto.getCategory(), publishDto.getType(), publishDto.getAdditionalText());
+		NotificationDataDto dataDto = NotificationDataDto.builder()
+			.user(publishDto.getUser())
+			.category(publishDto.getCategory())
+			.redirectionUrl(publishDto.getRedirectionUrl() + "/" + publishDto.getRedirectionEntityId())
+			.contents(contents)
+			.createdAt(LocalDateTime.now())
+			.build();
+		dataDto.buildUrl(publishDto.getRedirectionUrl(), publishDto.getRedirectionEntityId());
+		return dataDto;
 	}
 }

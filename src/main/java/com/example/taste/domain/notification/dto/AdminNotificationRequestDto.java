@@ -18,6 +18,7 @@ public class AdminNotificationRequestDto {
 	private NotificationCategory category;
 	@NotBlank
 	private String contents;
-	private Long redirectEntity;
+	private String redirectUrl;
+	private Long redirectEntityId;
 	private Long targetUserId;
 }

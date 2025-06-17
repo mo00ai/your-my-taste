@@ -36,12 +36,12 @@ public class NotificationService {
 
 	// 단체알림(마케팅, 시스템)
 	@Transactional
-	public void sendBunch(NotificationContent content, NotificationDataDto event, List<User> allUser) {
+	public void sendBunch(NotificationContent content, NotificationDataDto dataDto, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (User user : allUser) {
-			redisService.storeNotification(user.getId(), content.getId(), event, Duration.ofDays(7));
+			redisService.storeNotification(user.getId(), content.getId(), dataDto, Duration.ofDays(7));
 			notificationInfos.add(NotificationInfo.builder()
-				.category(event.getCategory())
+				.category(dataDto.getCategory())
 				.notificationContent(content)
 				.user(user)
 				.build());
