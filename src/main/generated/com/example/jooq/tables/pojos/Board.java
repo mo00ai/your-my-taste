@@ -4,7 +4,7 @@
 package com.example.jooq.tables.pojos;
 
 
-import com.example.jooq.enums.BoardStatus;
+import com.example.jooq.enums.BoardAccessPolicy;
 import com.example.jooq.enums.BoardType;
 
 import java.io.Serializable;
@@ -26,7 +26,7 @@ public class Board implements Serializable {
     private String contents;
     private Integer openLimit;
     private LocalDateTime openTime;
-    private BoardStatus status;
+    private BoardAccessPolicy accessPolicy;
     private String title;
     private BoardType type;
     private Long storeId;
@@ -42,7 +42,7 @@ public class Board implements Serializable {
         this.contents = value.contents;
         this.openLimit = value.openLimit;
         this.openTime = value.openTime;
-        this.status = value.status;
+        this.accessPolicy = value.accessPolicy;
         this.title = value.title;
         this.type = value.type;
         this.storeId = value.storeId;
@@ -57,7 +57,7 @@ public class Board implements Serializable {
         String contents,
         Integer openLimit,
         LocalDateTime openTime,
-        BoardStatus status,
+        BoardAccessPolicy accessPolicy,
         String title,
         BoardType type,
         Long storeId,
@@ -70,7 +70,7 @@ public class Board implements Serializable {
         this.contents = contents;
         this.openLimit = openLimit;
         this.openTime = openTime;
-        this.status = status;
+        this.accessPolicy = accessPolicy;
         this.title = title;
         this.type = type;
         this.storeId = storeId;
@@ -176,17 +176,17 @@ public class Board implements Serializable {
     }
 
     /**
-     * Getter for <code>taste.board.status</code>.
+     * Getter for <code>taste.board.access_policy</code>.
      */
-    public BoardStatus getStatus() {
-        return this.status;
+    public BoardAccessPolicy getAccessPolicy() {
+        return this.accessPolicy;
     }
 
     /**
-     * Setter for <code>taste.board.status</code>.
+     * Setter for <code>taste.board.access_policy</code>.
      */
-    public void setStatus(BoardStatus status) {
-        this.status = status;
+    public void setAccessPolicy(BoardAccessPolicy accessPolicy) {
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -296,11 +296,11 @@ public class Board implements Serializable {
         }
         else if (!this.openTime.equals(other.openTime))
             return false;
-        if (this.status == null) {
-            if (other.status != null)
+        if (this.accessPolicy == null) {
+            if (other.accessPolicy != null)
                 return false;
         }
-        else if (!this.status.equals(other.status))
+        else if (!this.accessPolicy.equals(other.accessPolicy))
             return false;
         if (this.title == null) {
             if (other.title != null)
@@ -340,7 +340,7 @@ public class Board implements Serializable {
         result = prime * result + ((this.contents == null) ? 0 : this.contents.hashCode());
         result = prime * result + ((this.openLimit == null) ? 0 : this.openLimit.hashCode());
         result = prime * result + ((this.openTime == null) ? 0 : this.openTime.hashCode());
-        result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
+        result = prime * result + ((this.accessPolicy == null) ? 0 : this.accessPolicy.hashCode());
         result = prime * result + ((this.title == null) ? 0 : this.title.hashCode());
         result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
         result = prime * result + ((this.storeId == null) ? 0 : this.storeId.hashCode());
@@ -359,7 +359,7 @@ public class Board implements Serializable {
         sb.append(", ").append(contents);
         sb.append(", ").append(openLimit);
         sb.append(", ").append(openTime);
-        sb.append(", ").append(status);
+        sb.append(", ").append(accessPolicy);
         sb.append(", ").append(title);
         sb.append(", ").append(type);
         sb.append(", ").append(storeId);

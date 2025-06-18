@@ -14,7 +14,7 @@ public enum BoardErrorCode implements BaseCode {
 	BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B001", "게시글을 찾을 수 없습니다."),
 
 	BOARD_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "BT001", "존재하지 않는 게시글 타입입니다."),
-	BOARD_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "BS001", "존재하지 않는 게시글 상태입니다."),
+	BOARD_ACCESS_POLICY_NOT_FOUND(HttpStatus.BAD_REQUEST, "BS001", "존재하지 않는 게시글 상태입니다."),
 
 	HASHTAG_NOT_FOUND(HttpStatus.BAD_REQUEST, "H001", "존재하지 않는 해시태그입니다."),
 	INVALID_HASHTAG(HttpStatus.BAD_REQUEST, "H002", "유효하지 않은 해시태그입니다."),

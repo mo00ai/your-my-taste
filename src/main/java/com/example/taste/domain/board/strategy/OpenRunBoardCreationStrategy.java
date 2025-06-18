@@ -13,7 +13,7 @@ public class OpenRunBoardCreationStrategy implements BoardCreationStrategy<OpenR
 			.title(requestDto.getTitle())
 			.contents(requestDto.getContents())
 			.type(requestDto.getType())
-			.status(requestDto.getStatus())
+			.accessPolicy(requestDto.getAccessPolicy())
 			.openLimit(requestDto.getOpenLimit())
 			.openTime(requestDto.getOpenTime())
 			.store(store)

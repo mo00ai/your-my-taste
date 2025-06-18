@@ -4,7 +4,7 @@
 package com.example.jooq.tables.daos;
 
 
-import com.example.jooq.enums.BoardStatus;
+import com.example.jooq.enums.BoardAccessPolicy;
 import com.example.jooq.enums.BoardType;
 import com.example.jooq.tables.Board;
 import com.example.jooq.tables.records.BoardRecord;
@@ -162,18 +162,18 @@ public class BoardDao extends DAOImpl<BoardRecord, com.example.jooq.tables.pojos
     }
 
     /**
-     * Fetch records that have <code>status BETWEEN lowerInclusive AND
+     * Fetch records that have <code>access_policy BETWEEN lowerInclusive AND
      * upperInclusive</code>
      */
-    public List<com.example.jooq.tables.pojos.Board> fetchRangeOfStatus(BoardStatus lowerInclusive, BoardStatus upperInclusive) {
-        return fetchRange(Board.BOARD.STATUS, lowerInclusive, upperInclusive);
+    public List<com.example.jooq.tables.pojos.Board> fetchRangeOfAccessPolicy(BoardAccessPolicy lowerInclusive, BoardAccessPolicy upperInclusive) {
+        return fetchRange(Board.BOARD.ACCESS_POLICY, lowerInclusive, upperInclusive);
     }
 
     /**
-     * Fetch records that have <code>status IN (values)</code>
+     * Fetch records that have <code>access_policy IN (values)</code>
      */
-    public List<com.example.jooq.tables.pojos.Board> fetchByStatus(BoardStatus... values) {
-        return fetch(Board.BOARD.STATUS, values);
+    public List<com.example.jooq.tables.pojos.Board> fetchByAccessPolicy(BoardAccessPolicy... values) {
+        return fetch(Board.BOARD.ACCESS_POLICY, values);
     }
 
     /**
