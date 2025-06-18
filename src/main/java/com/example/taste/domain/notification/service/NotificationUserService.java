@@ -63,7 +63,7 @@ public class NotificationUserService {
 		List<NotificationResponseDto> responseDtoList = new ArrayList<>();
 		boolean hasNext = keys.size() > 10;
 		if (hasNext) {
-			keys.subList(0, 10);
+			keys = keys.subList(0, 10);
 		}
 		for (String key : keys) {
 			String[] splitKey = key.split(":");
