@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -43,18 +44,15 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-// @ActiveProfiles("test-int")
-// @ActiveProfiles("test-int-docker")
+//@ActiveProfiles("test-int")
+@ActiveProfiles("test-int-docker")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort
 	private int port;
 
-	@Autowired
-	private EntityManager em;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -127,7 +125,6 @@ class BoardServiceTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
-		em.clear();
 
 		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
@@ -137,7 +134,6 @@ class BoardServiceTest {
 		ReflectionTestUtils.setField(dto, "openLimit", 1);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
 		Board board = boardRepository.saveAndFlush(BoardFixture.createFcfsOBoard(dto, store, user));
-		em.clear();
 
 		// 연결 및 구독하고 서버에서 메시지 수신 대기 (최대 5초)
 		CompletableFuture<String> future = connectAndSubscribe(board.getId());

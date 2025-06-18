@@ -61,7 +61,7 @@ public class Board extends SoftDeletableEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private BoardStatus status = BoardStatus.OPEN;
+	private AccessPolicy accessPolicy = AccessPolicy.OPEN;
 
 	private Integer openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
 
@@ -109,19 +109,20 @@ public class Board extends SoftDeletableEntity {
 		this.title = requestDto.getTitle();
 		this.contents = requestDto.getContents();
 		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.N;
-		this.status = requestDto.getStatus() != null ? BoardStatus.from(requestDto.getStatus()) : BoardStatus.OPEN;
+		this.accessPolicy =
+			requestDto.getAccessPolicy() != null ? AccessPolicy.from(requestDto.getAccessPolicy()) : AccessPolicy.OPEN;
 		register(store, user);
 	}
 
 	// 오버로딩된 빌더 생성자
 	@Builder(builderMethodName = "oBoardBuilder", buildMethodName = "buildOpenRun")
-	public Board(String title, String contents, String type, String status,
+	public Board(String title, String contents, String type, String accessPolicy,
 		Integer openLimit, LocalDateTime openTime, Store store, User user) {
 		this.title = title;
 		this.contents = contents;
 		this.type = type != null ? BoardType.from(type) : BoardType.O;
-		this.status = status != null ? BoardStatus.from(status) :
-			BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
+		this.accessPolicy = accessPolicy != null ? AccessPolicy.from(accessPolicy) :
+			AccessPolicy.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
 		this.openLimit = openLimit;
 		this.openTime = openTime;
 		register(store, user);
@@ -139,8 +140,8 @@ public class Board extends SoftDeletableEntity {
 		}
 	}
 
-	public void updateStatusClosed() {
-		this.status = BoardStatus.CLOSED;
+	public void updateAccessPolicyClosed() {
+		this.accessPolicy = AccessPolicy.CLOSED;
 	}
 
 	// 게시글의 공개 종료시각 <= 현재시각이면 error
@@ -150,7 +151,7 @@ public class Board extends SoftDeletableEntity {
 		}
 
 		if (!this.openTime.plusMinutes(this.openLimit).isAfter(LocalDateTime.now())) {
-			updateStatusClosed();
+			updateAccessPolicyClosed();
 			throw new CustomException(CLOSED_BOARD);
 		}
 	}

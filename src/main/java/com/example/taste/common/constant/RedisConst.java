@@ -5,5 +5,5 @@ package com.example.taste.common.constant;
  */
 public abstract class RedisConst {
 	public final static String DEFAULT = "default";
-	public final static String OPENRUN_KEY_PREFIX = "openrun:board:";
+	public final static String OPENRUN_KEY_PREFIX = "board:";
 }

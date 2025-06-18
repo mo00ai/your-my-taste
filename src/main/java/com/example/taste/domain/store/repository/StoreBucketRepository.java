@@ -13,4 +13,6 @@ public interface StoreBucketRepository extends JpaRepository<StoreBucket, Long>,
 	List<StoreBucket> findByUserAndNameStartingWith(User user, String name);
 
 	Page<StoreBucket> findAllByUserAndIsOpened(User targetUser, boolean isOpened, Pageable pageable);
+
+	void deleteAllByUser(User user);
 }

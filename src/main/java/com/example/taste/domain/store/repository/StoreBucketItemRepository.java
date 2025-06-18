@@ -14,4 +14,6 @@ public interface StoreBucketItemRepository extends JpaRepository<StoreBucketItem
 	void deleteAllByStoreBucket(StoreBucket storeBucket);
 
 	boolean existsByStoreBucketAndStore(StoreBucket storeBucket, Store store);
+
+	void deleteAllByStore(Store store);
 }

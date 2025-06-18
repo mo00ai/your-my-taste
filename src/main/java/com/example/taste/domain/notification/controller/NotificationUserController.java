@@ -34,14 +34,14 @@ public class NotificationUserController {
 	// 알림 목록 접근
 	@GetMapping("/list")
 	public CommonResponse<Slice<NotificationResponseDto>> getNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(0) int index) {
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
 	}
 
 	// 알림 추가 접근
 	@GetMapping("/list/old")
 	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(0) int index) {
+		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
 		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
 	}
 

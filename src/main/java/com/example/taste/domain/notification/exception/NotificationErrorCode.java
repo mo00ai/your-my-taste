@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum NotificationErrorCode implements BaseCode {
 	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "알림을 찾을 수 없습니다."),
+	WRONG_NOTIFICATION_CATEGORY(HttpStatus.NOT_FOUND, "N002", "잘못된 알림 카테고리 입니다."),
 	;
 
 	private final HttpStatus httpStatus;

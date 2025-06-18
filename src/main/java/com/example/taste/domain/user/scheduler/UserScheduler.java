@@ -20,7 +20,7 @@ public class UserScheduler {
 	@Transactional
 	@Scheduled(cron = "0 0 0 1 * *")
 	public void resetPostingCnt() {
-		int updatedCount = userRepository.resetPostingCnt();
+		long updatedCount = userRepository.resetPostingCnt();
 		log.info("[UserScheduler] 총 {}명 유저 포스팅 횟수 초기화 완료", updatedCount);
 	}
 }
