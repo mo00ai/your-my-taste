@@ -35,7 +35,7 @@
 // 			return;
 // 		}
 //
-// 		User user = board.getUser();
+// 		User user = board.getUserId();
 // 		Long boardId = board.getId();
 // 		Long userId = user.getId();
 //
