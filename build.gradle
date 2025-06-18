@@ -103,14 +103,6 @@ def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
 def dbUrl = "jdbc:mysql://${dbHost}:${dbPort}/${dbName}"
-//
-//sourceSets {
-//    main {
-//        java {
-//            srcDir 'build/generated'
-//        }
-//    }
-//}
 
 jooq {
     version = '3.18.6'
@@ -137,7 +129,7 @@ jooq {
                     }
                     target {
                         packageName = 'com.example.jooq'
-                        directory = 'build/generated-src/jooq/main'
+                        directory = "${buildDir}/generated-src/jooq/main"
                     }
                 }
             }
