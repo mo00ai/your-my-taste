@@ -61,7 +61,7 @@ public class Board extends SoftDeletableEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private BoardStatus status = BoardStatus.OPEN;
+	private AccessPolicy accessPolicy = AccessPolicy.OPEN;
 
 	private Integer openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
 
@@ -109,7 +109,8 @@ public class Board extends SoftDeletableEntity {
 		this.title = requestDto.getTitle();
 		this.contents = requestDto.getContents();
 		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.N;
-		this.status = requestDto.getStatus() != null ? BoardStatus.from(requestDto.getStatus()) : BoardStatus.OPEN;
+		this.accessPolicy =
+			requestDto.getStatus() != null ? AccessPolicy.from(requestDto.getStatus()) : AccessPolicy.OPEN;
 		register(store, user);
 	}
 
@@ -120,8 +121,8 @@ public class Board extends SoftDeletableEntity {
 		this.title = title;
 		this.contents = contents;
 		this.type = type != null ? BoardType.from(type) : BoardType.O;
-		this.status = status != null ? BoardStatus.from(status) :
-			BoardStatus.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
+		this.accessPolicy = status != null ? AccessPolicy.from(status) :
+			AccessPolicy.CLOSED;  // 오픈런 전용이지만 혹시 파라미터를 안 넣으면 게시글 보이지 않도록
 		this.openLimit = openLimit;
 		this.openTime = openTime;
 		register(store, user);
@@ -140,7 +141,7 @@ public class Board extends SoftDeletableEntity {
 	}
 
 	public void updateStatusClosed() {
-		this.status = BoardStatus.CLOSED;
+		this.accessPolicy = AccessPolicy.CLOSED;
 	}
 
 	// 게시글의 공개 종료시각 <= 현재시각이면 error

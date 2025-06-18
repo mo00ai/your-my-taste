@@ -1,7 +1,7 @@
 package com.example.taste.domain.store.controller;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +18,7 @@ import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
 import com.example.taste.domain.store.service.StoreService;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
 @Validated
@@ -44,7 +45,7 @@ public class StoreController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
-	public CommonResponse<Void> deleteStore(@PathVariable Long id) {
+	public CommonResponse<Void> deleteStore(@PathVariable @NotNull Long id) {
 		storeService.deleteStore(id);
 		return CommonResponse.ok();
 	}
