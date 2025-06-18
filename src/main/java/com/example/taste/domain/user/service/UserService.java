@@ -7,8 +7,8 @@ import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_US
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -126,42 +126,42 @@ public class UserService {
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
+		List<Favor> favorList = favorRepository.findAll();                // 유효한 맵 리스트
 
-		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
-		// 2. 삭제된 항목을 리스트에서 제거, 3. 새로 추가한 항목을 반영 (수정 항목)
+		// 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
+		// 1. 삭제된 항목을 리스트에서 제거, 2. 새로 추가한 항목을 반영 (수정 항목)
 
-		// 삭제된 항목 리스트에서 제거
-		user.removeUserFavorList(userFavorList.stream()
-			.filter(userFavor ->
-				requestDtoList.stream()
-					.noneMatch(updateItem -> isSameItem(updateItem, userFavor)))
-			.collect(Collectors.toCollection(ArrayList::new)));
+		// 기존 항목 맵 생성
+		Map<String, UserFavor> existingFavorMap = userFavorList.stream()
+			.collect(Collectors.toMap(uf -> uf.getFavor().getName(), uf -> uf));
 
-		// 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
-		List<UserFavorUpdateRequestDto> updateFavorList =
-			userFavorList == null || userFavorList.isEmpty() ? requestDtoList
-				: requestDtoList.stream()
-				.filter(updateItem ->
-					userFavorList.stream()
-						.noneMatch(userFavor -> isSameItem(updateItem, userFavor))
-				).toList();
+		// 유효한 Favor 맵 생성
+		Map<String, Favor> validFavorMap = favorList.stream()
+			.collect(Collectors.toMap(Favor::getName, f -> f));
 
+		// 요청 리스트 Favor 맵 생성
+		Map<String, UserFavorUpdateRequestDto> favorRequestMap = requestDtoList.stream()
+			.collect(Collectors.toMap(UserFavorUpdateRequestDto::getName, ufr -> ufr));
+
+		// 1. 삭제된 항목 리스트에서 제거
+		List<UserFavor> removeList = existingFavorMap.entrySet().stream()
+			.filter(e -> !favorRequestMap.containsKey(e.getKey()))
+			.map(Map.Entry::getValue)
+			.toList();
+		user.removeUserFavorList(removeList);
+
+		// 2. 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
 		// Favor 리스트에 있는 것만 추가 (올바른 값만)
 		// updateFavorList 의 아이템 하나가 favorList 의 하나와 일치한다면 새로운 userFavor 생성
-		List<Favor> favorList = favorRepository.findAll();
-		ArrayList<UserFavor> updateUserFavorList = new ArrayList<>();
-
-		updateFavorList.forEach(
-			(updateItem) -> favorList.forEach(
-				(favor) -> {
-					if (isExistsItem(updateItem, favor)) {
-						updateUserFavorList.add(new UserFavor(user, favor));
-					}
-				})
-		);
+		List<UserFavor> updateList = favorRequestMap.keySet().stream()
+			.filter(key -> !existingFavorMap.containsKey(key))
+			.map(validFavorMap::get)
+			.filter(Objects::nonNull)
+			.map(favor -> new UserFavor(user, favor))
+			.toList();
 
 		// 최종 저장
-		userFavorRepository.saveAll(updateUserFavorList);
+		userFavorRepository.saveAll(updateList);
 	}
 
 	// 유저의 팔로잉 유저 목록 조회
