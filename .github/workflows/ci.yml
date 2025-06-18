@@ -28,7 +28,7 @@ jobs:
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
-      DB_HOST: mysql
+      DB_HOST: test-mysql
       DB_PORT: 3306
       DB_USER: testuser
       DB_PASSWORD: test1234
