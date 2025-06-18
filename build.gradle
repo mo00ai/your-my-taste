@@ -171,3 +171,19 @@ tasks.register("integrationTest", Test) {
 test {
     enabled = false
 }
+
+checkstyleMain {
+    source = fileTree('.') {
+        include 'src/main/java/**/*.java'
+        exclude 'build/generated-src/**'
+        exclude 'src/main/java/com/example/jooq/**'
+    }
+}
+
+checkstyleTest {
+    source = fileTree('.') {
+        include 'src/test/java/**/*.java'
+        exclude 'build/generated-src/**'
+        exclude 'src/test/java/com/example/jooq/**'
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.taste.domain.party.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.example.taste.domain.party.entity.Party;
@@ -52,5 +53,15 @@ public class PartyRepositoryImpl implements PartyRepositoryCustom {
 			.leftJoin(p.store).fetchJoin()
 			.where(pi.user.id.eq(userId))
 			.fetch();
+	}
+
+	@Override
+	public List<Party> findAllMeetingDateAndDeleteAtIsNull(LocalDate meetingDate) {
+		return queryFactory
+			.selectFrom(p)
+			.where(
+				p.meetingDate.loe(meetingDate),
+				p.deletedAt.isNull()
+			).fetch();
 	}
 }

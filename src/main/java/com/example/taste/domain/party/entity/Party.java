@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -34,7 +34,7 @@ import com.example.taste.domain.user.entity.User;
 @Getter
 @NoArgsConstructor
 @Table(name = "party")
-public class Party extends BaseCreatedAtEntity {
+public class Party extends SoftDeletableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
