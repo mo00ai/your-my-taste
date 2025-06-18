@@ -6,7 +6,7 @@ package com.example.jooq.tables;
 
 import com.example.jooq.Keys;
 import com.example.jooq.Taste;
-import com.example.jooq.enums.BoardStatus;
+import com.example.jooq.enums.BoardAccessPolicy;
 import com.example.jooq.enums.BoardType;
 import com.example.jooq.tables.records.BoardRecord;
 
@@ -91,9 +91,9 @@ public class Board extends TableImpl<BoardRecord> {
     public final TableField<BoardRecord, LocalDateTime> OPEN_TIME = createField(DSL.name("open_time"), SQLDataType.LOCALDATETIME(6), this, "");
 
     /**
-     * The column <code>taste.board.status</code>.
+     * The column <code>taste.board.access_policy</code>.
      */
-    public final TableField<BoardRecord, BoardStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR(10).nullable(false).asEnumDataType(com.example.jooq.enums.BoardStatus.class), this, "");
+    public final TableField<BoardRecord, BoardAccessPolicy> ACCESS_POLICY = createField(DSL.name("access_policy"), SQLDataType.VARCHAR(10).nullable(false).asEnumDataType(com.example.jooq.enums.BoardAccessPolicy.class), this, "");
 
     /**
      * The column <code>taste.board.title</code>.
@@ -235,14 +235,14 @@ public class Board extends TableImpl<BoardRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row12<Long, LocalDateTime, LocalDateTime, LocalDateTime, String, Integer, LocalDateTime, BoardStatus, String, BoardType, Long, Long> fieldsRow() {
+    public Row12<Long, LocalDateTime, LocalDateTime, LocalDateTime, String, Integer, LocalDateTime, BoardAccessPolicy, String, BoardType, Long, Long> fieldsRow() {
         return (Row12) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function12<? super Long, ? super LocalDateTime, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? super Integer, ? super LocalDateTime, ? super BoardStatus, ? super String, ? super BoardType, ? super Long, ? super Long, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function12<? super Long, ? super LocalDateTime, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? super Integer, ? super LocalDateTime, ? super BoardAccessPolicy, ? super String, ? super BoardType, ? super Long, ? super Long, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -250,7 +250,7 @@ public class Board extends TableImpl<BoardRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Long, ? super LocalDateTime, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? super Integer, ? super LocalDateTime, ? super BoardStatus, ? super String, ? super BoardType, ? super Long, ? super Long, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Long, ? super LocalDateTime, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? super Integer, ? super LocalDateTime, ? super BoardAccessPolicy, ? super String, ? super BoardType, ? super Long, ? super Long, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }
