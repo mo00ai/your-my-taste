@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
@@ -21,7 +20,7 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Slf4j
-@Component
+// @Component
 @RequiredArgsConstructor
 public class PkLogScheduler {
 
@@ -29,7 +28,9 @@ public class PkLogScheduler {
 	private final RedisService redisService;
 	private final UserRepository userRepository;
 
+	// @Scheduled(cron = "0 */5 * * * *")
 	@Scheduled(cron = "0 0 0 * * *")
+	// @Scheduled(cron = "0 */2 * * * *")
 	public void insertPkLogs() {
 
 		log.info("[PK LOG] Redis → DB Bulk insert 스케줄러 시작");

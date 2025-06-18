@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'checkstyle'
+    id 'nu.studer.jooq' version '8.2'
 }
 
 group = 'com.example'
@@ -78,8 +79,95 @@ dependencies {
     // @ConfigurationProperties
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    testImplementation 'com.h2database:h2'
+
+//    implementation 'org.flywaydb:flyway-core'
+    // jOOQ
+    implementation 'org.jooq:jooq'
+    jooqGenerator 'mysql:mysql-connector-java:8.0.33' // 코드 생성 시 DB 접근용
 }
+
+def dotenv = new Properties()
+def envFile = file(".env")
+if (envFile.exists()) {
+    envFile.withInputStream { dotenv.load(it) }
+}
+
+def getEnvOrDotenv = { key ->
+    return System.getenv(key) ?: dotenv.getProperty(key) ?: ''
+}
+
+def dbName = getEnvOrDotenv("DB_NAME")
+def dbHost = getEnvOrDotenv("DB_HOST")
+def dbPort = getEnvOrDotenv("DB_PORT")
+def dbUser = getEnvOrDotenv("DB_USER")
+def dbPassword = getEnvOrDotenv("DB_PASSWORD")
+def dbUrl = "jdbc:mysql://${dbHost}:${dbPort}/${dbName}"
+
+jooq {
+    version = '3.18.6'
+    // edition = JooqEdition.OSS
+
+    configurations {
+        main {
+            generationTool {
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = dbUrl
+                    user = dbUser
+                    password = dbPassword
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        inputSchema = dbName
+                    }
+                    generate {
+                        daos = true
+                        pojos = true
+                    }
+                    target {
+                        packageName = 'com.example.jooq'
+                        directory = '${buildDir}/generated-src/jooq/main'
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+compileJava { options.compilerArgs << '-parameters' }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "-parameters"
+}
+
+tasks.register("unitTest", Test) {
+    useJUnitPlatform()
+    systemProperty "spring.profiles.active", "test"
+    include '**/*UnitTest*'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+tasks.register("integrationTest", Test) {
+    useJUnitPlatform()
+    systemProperty "spring.profiles.active", "test-int-docker"
+    include '**/*Test*'
+    exclude '**/*UnitTest*'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// 기존 test task는 비활성화
+test {
+    enabled = false
 }

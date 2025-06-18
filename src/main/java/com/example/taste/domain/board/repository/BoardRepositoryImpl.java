@@ -21,8 +21,8 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
@@ -30,6 +30,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -48,14 +49,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				board.title,
 				store.name,
 				user.nickname,
-				boardImage.image.url.max() // 마지막 이미지(id 높은)
+				JPAExpressions        // 서브쿼리 게시글&이미지 테이블에서 이미지 조회 -> 없으면 null반환
+					.select(boardImage.image.url)
+					.from(boardImage)
+					.where(boardImage.board.eq(board))
+					.orderBy(boardImage.id.asc())
+					.limit(1)
 			))
 			.from(board)
 			.leftJoin(board.user, user)
 			.leftJoin(board.store, store)
-			.leftJoin(board.boardImageList, boardImage)
+			//.leftJoin(board.boardImageList, boardImage)
 			.where(board.user.id.in(userIds))
-			.groupBy(board.id, board.title, store.name, user.nickname)
+			//.groupBy(board.id, board.title, store.name, user.nickname)
 			.orderBy(board.createdAt.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -78,14 +84,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				board.title,
 				store.name,
 				user.nickname,    // 작성자 이름
-				boardImage.image.url.max()
+				JPAExpressions        // 서브쿼리 게시글&이미지 테이블에서 이미지 조회 -> 없으면 null반환
+					.select(boardImage.image.url)
+					.from(boardImage)
+					.where(boardImage.board.eq(board))
+					.orderBy(boardImage.id.asc())
+					.limit(1)
 			))
 			.from(board)
 			.leftJoin(board.user, user)
 			.leftJoin(board.store, store)
-			.leftJoin(board.boardImageList, boardImage)
+			//.leftJoin(board.boardImageList, boardImage)
 			.where(buildSearchConditions(condition))
-			.groupBy(board.id, board.title, store.name, user.nickname)
+			//.groupBy(board.id, board.title, store.name, user.nickname)
 			.orderBy(getOrderSpecifier(pageable).toArray(new OrderSpecifier[0]))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -98,6 +109,14 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			.fetchOne();
 
 		return new PageImpl<>(contents, pageable, total != null ? total : 0L);
+	}
+
+	@Override
+	public long closeBoardsByIds(List<Long> ids) {
+		return queryFactory.update(board)
+			.set(board.accessPolicy, AccessPolicy.CLOSED)
+			.where(board.id.in(ids))
+			.execute();
 	}
 
 	private List<OrderSpecifier<? extends Comparable>> getOrderSpecifier(Pageable pageable) {
@@ -157,9 +176,9 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		);
 		// 공개 게시글이거나 오픈런 게시글의 경우 openLimit이 1이상인 경우만(유효한 상태의 게시글만)
 		builder.and(
-			board.status.eq(BoardStatus.OPEN)
-				.or(board.status.eq(BoardStatus.FCFS).and(board.openLimit.gt(0)))
-				.or(board.status.eq(BoardStatus.TIMEATTACK).and(board.openLimit.gt(0)))
+			board.accessPolicy.eq(AccessPolicy.OPEN)
+				.or(board.accessPolicy.eq(AccessPolicy.FCFS).and(board.openLimit.gt(0)))
+				.or(board.accessPolicy.eq(AccessPolicy.TIMEATTACK).and(board.openLimit.gt(0)))
 		);
 
 		// 통합 키워드 검색
@@ -185,8 +204,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			builder.and(board.type.eq(BoardType.from(condition.getType())));
 		}
 		// 게시글 상태 필터
-		if (StringUtils.hasText(condition.getStatus())) {
-			builder.and(board.status.eq(BoardStatus.from(condition.getStatus())));
+		if (StringUtils.hasText(condition.getAccessPolicy())) {
+			builder.and(board.accessPolicy.eq(AccessPolicy.from(condition.getAccessPolicy())));
 		}
 		// 가게명
 		if (StringUtils.hasText(condition.getStoreName())) {

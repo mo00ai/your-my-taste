@@ -33,6 +33,8 @@ import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
+import com.example.taste.domain.store.repository.StoreBucketItemRepository;
+import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
@@ -61,6 +63,8 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final UserJdbcRepository userJdbcRepository;
 	private final PkLogJdbcRepository pkLogJdbcRepository;
+	private final StoreBucketItemRepository storeBucketItemRepository;
+	private final StoreBucketRepository storeBucketRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -114,6 +118,7 @@ public class UserService {
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
+		storeBucketRepository.deleteAllByUser(user);
 		user.softDelete();
 	}
 
