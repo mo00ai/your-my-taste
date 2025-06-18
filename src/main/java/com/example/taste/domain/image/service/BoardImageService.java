@@ -3,8 +3,6 @@ package com.example.taste.domain.image.service;
 import java.io.IOException;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +16,8 @@ import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.repository.BoardImageRepository;
 import com.example.taste.domain.image.repository.ImageRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class BoardImageService {
 
 		Board board = entityFetcher.getBoardOrThrow(boardId);
 
-		return boardImageRepository.findAllById(boardId);
+		return boardImageRepository.findAllByBoardId(boardId);
 	}
 
 	@Transactional
