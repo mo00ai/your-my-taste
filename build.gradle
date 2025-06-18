@@ -78,8 +78,41 @@ dependencies {
     // @ConfigurationProperties
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    testImplementation 'com.h2database:h2'
+
+//    implementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+compileJava { options.compilerArgs << '-parameters' }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += "-parameters"
+}
+
+tasks.register("unitTest", Test) {
+    useJUnitPlatform()
+    systemProperty "spring.profiles.active", "test"
+    include '**/*UnitTest*'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+tasks.register("integrationTest", Test) {
+    useJUnitPlatform()
+    systemProperty "spring.profiles.active", "test-int-docker"
+    include '**/*Test*'
+    exclude '**/*UnitTest*'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// 기존 test task는 비활성화
+test {
+    enabled = false
 }

@@ -1,11 +1,8 @@
 package com.example.taste.domain.image.service;
 
-import static com.example.taste.common.exception.ErrorCode.FILE_UPLOAD_FAILED;
+import static com.example.taste.common.exception.ErrorCode.*;
 
 import java.io.IOException;
-import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.dto.ImageResponseDto;
+import com.example.taste.domain.image.dto.S3ResponseDto;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.repository.ImageRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class ImageService {
 	public Image saveImage(MultipartFile file, ImageType type) throws IOException {
 
 		// 유효성 검사 등은 이쪽에서
-		Map<String, String> fileInfo = null;
+		S3ResponseDto fileInfo = null;
 
 		try {
 
@@ -37,9 +37,9 @@ public class ImageService {
 
 			Image image = Image.builder()
 				.type(type)
-				.url(fileInfo.get("url"))
-				.uploadFileName(fileInfo.get("uploadFileName"))
-				.originFileName(fileInfo.get("originalFileName"))
+				.url(fileInfo.getUrl())
+				.uploadFileName(fileInfo.getUploadFileName())
+				.originFileName(fileInfo.getOriginalFileName())
 				.fileSize(file.getSize())
 				.fileExtension(
 					file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase())
@@ -53,7 +53,7 @@ public class ImageService {
 
 			//롤백
 			if (fileInfo != null) {
-				s3Service.delete(fileInfo.get("uploadFileName"));
+				s3Service.delete(fileInfo.getUploadFileName());
 			}
 			throw new CustomException(FILE_UPLOAD_FAILED);
 		}
@@ -72,16 +72,16 @@ public class ImageService {
 
 		Image image = entityFetcher.getImageOrThrow(imageId);
 		// 유효성 검사 등은 이쪽에서
-		Map<String, String> fileInfo = null;
+		S3ResponseDto fileInfo = null;
 
 		try {
 
 			fileInfo = s3Service.upload(file);
 
 			image.update(
-				fileInfo.get("url"),
-				fileInfo.get("uploadFileName"),
-				fileInfo.get("originalFileName"),
+				fileInfo.getUrl(),
+				fileInfo.getUploadFileName(),
+				fileInfo.getOriginalFileName(),
 				file.getSize(),
 				file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase(),
 				type
@@ -91,7 +91,7 @@ public class ImageService {
 
 			//롤백
 			if (fileInfo != null) {
-				s3Service.delete(fileInfo.get("uploadFileName"));
+				s3Service.delete(fileInfo.getUploadFileName());
 			}
 			throw new CustomException(FILE_UPLOAD_FAILED);
 		}

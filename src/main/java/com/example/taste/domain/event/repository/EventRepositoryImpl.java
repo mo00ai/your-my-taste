@@ -37,19 +37,18 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 	}
 
 	public Optional<Board> findWinningBoard(Long eventId) {
-		return Optional.ofNullable(
-			queryFactory
-				.select(board)
-				.from(boardEvent)
-				.join(boardEvent.board, board).fetchJoin()
-				.join(board.user, user).fetchJoin()
-				.leftJoin(board.likeList, like)
-				.where(boardEvent.event.id.eq(eventId))
-				.groupBy(board.id)
-				.orderBy(like.count().desc(), board.createdAt.asc())
-				.limit(1)
-				.fetchOne()
-		);
+		Board winningBoard = queryFactory
+			.selectFrom(board)
+			.join(boardEvent).on(boardEvent.board.eq(board)) // boardEvent 조인
+			.leftJoin(board.likeList, like)
+			.leftJoin(board.user, user).fetchJoin()
+			.where(boardEvent.event.id.eq(eventId))
+			.groupBy(board.id)
+			.orderBy(like.count().desc(), board.createdAt.asc())
+			.limit(1)
+			.fetchOne();
+
+		return Optional.ofNullable(winningBoard);
 	}
 
 }
