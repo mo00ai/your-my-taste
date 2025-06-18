@@ -30,6 +30,7 @@ public class PkCriteriaInitializer {
 					.active(true)
 					.build();
 				pkCriteriaRepository.save(pkCriteria);
+				
 			}
 		}
 	}
