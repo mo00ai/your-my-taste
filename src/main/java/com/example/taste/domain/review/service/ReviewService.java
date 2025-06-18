@@ -82,7 +82,7 @@ public class ReviewService {
 		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!review.getUser().isSameUser(user.getId())) { // equals 비교 실패로 임시 수정했습니다!
-			// if (!review.getUser().equals(user)) {
+			// if (!review.getUserId().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 
@@ -139,7 +139,7 @@ public class ReviewService {
 		// 유저 검증
 		User user = entityFetcher.getUserOrThrow(userDetails.getId());
 		if (!review.getUser().isSameUser(user.getId())) {    // equals 비교 실패로 임시 수정했습니다!
-			// if (!review.getUser().equals(user)) {
+			// if (!review.getUserId().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 		reviewRepository.delete(review);

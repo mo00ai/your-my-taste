@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,6 +35,9 @@ import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.board.strategy.BoardCreationStrategy;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.BoardImageService;
+import com.example.taste.domain.notification.NotificationCategory;
+import com.example.taste.domain.notification.NotificationType;
+import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
@@ -58,12 +62,12 @@ public class BoardService {
 	private final UserRepository userRepository;
 	private final BoardCreationStrategyFactory strategyFactory;
 	private final EntityManager entityManager;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
+	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		Store store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
-		Long boardId = 0L; // aop 용
 
 		BoardCreationStrategy strategy = strategyFactory.getStrategy(BoardType.from(requestDto.getType()));
 		Board entity = strategy.createBoard(requestDto, store, user);
@@ -71,7 +75,7 @@ public class BoardService {
 			hashtagService.applyHashtagsToBoard(entity, requestDto.getHashtagList());
 		}
 		Board saved = boardRepository.save(entity);
-		boardId = saved.getId();
+
 		// 오픈런 게시글 카운팅
 		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
@@ -90,7 +94,13 @@ public class BoardService {
 			throw new CustomException(ImageErrorCode.FAILED_WRITE_FILE);
 		}
 
-		return boardId;
+		eventPublisher.publishEvent(NotificationPublishDto.builder()
+			.userId(user.getId())
+			.category(NotificationCategory.BOARD)
+			.type(NotificationType.CREATE)
+			.redirectionUrl("/board")
+			.redirectionEntityId(saved.getId())
+			.build());
 	}
 
 	@Transactional

@@ -9,11 +9,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationResponseDto {
+	@Setter
 	private Long contentId;
 	private NotificationCategory category;
 	private String content;
@@ -27,6 +29,7 @@ public class NotificationResponseDto {
 	}
 
 	public NotificationResponseDto(NotificationInfo notificationInfo) {
+
 		this.contentId = notificationInfo.getNotificationContent().getId();
 		this.category = notificationInfo.getCategory();
 		this.content = notificationInfo.getNotificationContent().getContent();
@@ -35,12 +38,12 @@ public class NotificationResponseDto {
 		this.createdAt = notificationInfo.getCreatedAt();
 	}
 
-	public NotificationResponseDto(NotificationEventDto eventDto) {
-		this.contentId = eventDto.getContentId();
-		this.category = eventDto.getCategory();
-		this.content = eventDto.getContent();
-		this.redirectUrl = eventDto.getRedirectUrl();
-		this.isRead = eventDto.isRead();
-		this.createdAt = eventDto.getCreatedAt();
+	public NotificationResponseDto(NotificationDataDto dataDto) {
+		this.category = dataDto.getCategory();
+		this.content = dataDto.getContents();
+		this.redirectUrl = dataDto.getRedirectionUrl();
+		this.isRead = dataDto.isRead();
+		this.createdAt = dataDto.getCreatedAt();
+		this.contentId = 0L;
 	}
 }
