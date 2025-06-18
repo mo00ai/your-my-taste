@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.service.RedisService;
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
@@ -22,15 +23,17 @@ public class NotificationService {
 
 	private final NotificationInfoRepository infoRepository;
 	private final RedisService redisService;
+	private final EntityFetcher entityFetcher;
 
 	// 개별 알림
 	@Transactional // 둘 중 하나라도 저장 실패시 전부 롤백 하도록
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
-		redisService.storeNotification(dataDto.getUser().getId(), content.getId(), dataDto, Duration.ofDays(7));
+		User user = entityFetcher.getUserOrThrow(dataDto.getUserId());
+		redisService.storeNotification(dataDto.getUserId(), content.getId(), dataDto, Duration.ofDays(7));
 		infoRepository.save(NotificationInfo.builder()
 			.category(dataDto.getCategory())
 			.notificationContent(content)
-			.user(dataDto.getUser())
+			.user(user)
 			.build());
 	}
 

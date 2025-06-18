@@ -10,6 +10,7 @@ import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.notification.dto.AdminNotificationRequestDto;
 import com.example.taste.domain.notification.service.NotificationAdminService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ public class NotificationAdminController {
 	// 마케팅, 시스템 알림 생성 가능
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public CommonResponse<Void> publishNotification(@RequestBody AdminNotificationRequestDto dto) {
+	public CommonResponse<Void> publishNotification(@RequestBody @Valid AdminNotificationRequestDto dto) {
 		notificationAdminService.publishNotification(dto);
 		return CommonResponse.ok();
 	}

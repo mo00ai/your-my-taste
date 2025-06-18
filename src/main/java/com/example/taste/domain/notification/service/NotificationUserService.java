@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -60,18 +59,21 @@ public class NotificationUserService {
 		Long userId = userDetails.getId();
 		// userId를 이용해 저장된 모든 알림을 가져옴
 		String listKey = "notification:list:user:" + userId;
-		List<String> keys = redisService.getKeysFromList(listKey, index-1);
+		List<String> keys = redisService.getKeysFromList(listKey, index - 1);
 		List<NotificationResponseDto> responseDtoList = new ArrayList<>();
 		boolean hasNext = keys.size() > 10;
+		if (hasNext) {
+			keys.subList(0, 10);
+		}
 		for (String key : keys) {
 			String[] splitKey = key.split(":");
-			Long contentId = Long.parseLong(splitKey[splitKey.length-2]);
+			Long contentId = Long.parseLong(splitKey[splitKey.length - 2]);
 			NotificationDataDto notificationDataDto = (NotificationDataDto)redisService.getKeyValue(key);
 			NotificationResponseDto responseDto = new NotificationResponseDto(notificationDataDto);
 			responseDto.setContentId(contentId);
 			responseDtoList.add(responseDto);
 		}
-		Pageable pageable = PageRequest.of(index, 10);
+		Pageable pageable = PageRequest.of(index - 1, 10);
 		return new SliceImpl<>(responseDtoList, pageable, hasNext);
 	}
 

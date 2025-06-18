@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.NotificationType;
-import com.example.taste.domain.user.entity.User;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationPublishDto implements Serializable {
-	private User user;
+	private Long userId;
 	@NotNull(message = "올바르지 않은 알림 생성 요청입니다.")
 	private NotificationCategory category;
 	@NotNull(message = "올바르지 않은 알림 생성 요청입니다.")

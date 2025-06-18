@@ -13,6 +13,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
@@ -37,6 +38,7 @@ public class NotificationSubscriber implements MessageListener {
 	private final FollowRepository followRepository;
 	private final NotificationContentRepository contentRepository;
 	private final GenericJackson2JsonRedisSerializer serializer;
+	private final EntityFetcher entityFetcher;
 
 	// 알림 발행시 자동으로 실행
 	@Override
@@ -57,13 +59,20 @@ public class NotificationSubscriber implements MessageListener {
 			case SUBSCRIBE -> {
 				sendSubscriber(publishDto);
 			}
-			case PK -> {}
-			case CHAT -> {}
-			case BOARD -> {}
-			case MATCH -> {}
-			case PARTY -> {}
-			case STORE -> {}
-			case COMMENT -> {}
+			case PK -> {
+			}
+			case CHAT -> {
+			}
+			case BOARD -> {
+			}
+			case MATCH -> {
+			}
+			case PARTY -> {
+			}
+			case STORE -> {
+			}
+			case COMMENT -> {
+			}
 		}
 	}
 
@@ -118,7 +127,7 @@ public class NotificationSubscriber implements MessageListener {
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
-		List<Follow> followList = followRepository.findAllByFollowing(publishDto.getUser().getId());
+		List<Follow> followList = followRepository.findAllByFollowing(publishDto.getUserId());
 		// 팔로우 하는 모든 유저를 가져옴
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
@@ -137,24 +146,26 @@ public class NotificationSubscriber implements MessageListener {
 		return notificationContent;
 	}
 
-	private String makeContent(User user, NotificationCategory category, NotificationType type, String additionalText){
+	private String makeContent(Long userId, NotificationCategory category, NotificationType type,
+		String additionalText) {
 		if (category.equals(NotificationCategory.SYSTEM) ||
 			category.equals(NotificationCategory.MARKETING) ||
-			category.equals(NotificationCategory.INDIVIDUAL)){
+			category.equals(NotificationCategory.INDIVIDUAL)) {
 			return additionalText;
 		}
+		User user = entityFetcher.getUserOrThrow(userId);
 		return user.getNickname() + " 이/가"
 			+ category.getCategoryText() + " 을/를"
 			+ type.getTypeString() + " 했습니다.\n"
 			+ additionalText;
 	}
 
-	private NotificationDataDto makeDataDto (NotificationPublishDto publishDto){
-		String contents = makeContent(publishDto.getUser(), publishDto.getCategory(), publishDto.getType(), publishDto.getAdditionalText());
+	private NotificationDataDto makeDataDto(NotificationPublishDto publishDto) {
+		String contents = makeContent(publishDto.getUserId(), publishDto.getCategory(), publishDto.getType(),
+			publishDto.getAdditionalText());
 		NotificationDataDto dataDto = NotificationDataDto.builder()
-			.user(publishDto.getUser())
+			.userId(publishDto.getUserId())
 			.category(publishDto.getCategory())
-			.redirectionUrl(publishDto.getRedirectionUrl() + "/" + publishDto.getRedirectionEntityId())
 			.contents(contents)
 			.createdAt(LocalDateTime.now())
 			.build();

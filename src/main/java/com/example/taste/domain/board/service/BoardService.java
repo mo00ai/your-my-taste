@@ -93,9 +93,9 @@ public class BoardService {
 		}
 
 		eventPublisher.publishEvent(NotificationPublishDto.builder()
-			.user(user)
+			.userId(user.getId())
 			.category(NotificationCategory.BOARD)
-			.type(NotificationType.CREAT)
+			.type(NotificationType.CREATE)
 			.redirectionUrl("/board")
 			.redirectionEntityId(saved.getId())
 			.build());

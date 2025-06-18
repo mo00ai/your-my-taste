@@ -19,7 +19,7 @@ public class NotificationAdminService {
 	public void publishNotification(AdminNotificationRequestDto dto) {
 		NotificationPublishDto publishDto = NotificationPublishDto.builder()
 			.category(dto.getCategory())
-			.type(NotificationType.CREAT)
+			.type(NotificationType.CREATE)
 			.redirectionUrl(dto.getRedirectUrl())
 			.redirectionEntityId(dto.getRedirectEntityId())
 			.additionalText(dto.getContents())

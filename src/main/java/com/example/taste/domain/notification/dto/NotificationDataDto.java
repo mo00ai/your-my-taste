@@ -5,14 +5,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -21,7 +19,7 @@ public class NotificationDataDto implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private User user;
+	private Long userId;
 	private NotificationCategory category;
 	private String contents;
 	private String redirectionUrl;
@@ -30,9 +28,9 @@ public class NotificationDataDto implements Serializable {
 	private boolean read;
 
 	@Builder
-	public NotificationDataDto(User user, NotificationCategory category, String contents, String redirectionUrl,
+	public NotificationDataDto(Long userId, NotificationCategory category, String contents, String redirectionUrl,
 		LocalDateTime createdAt, boolean read) {
-		this.user = user;
+		this.userId = userId;
 		this.category = category;
 		this.contents = contents;
 		this.redirectionUrl = redirectionUrl;
@@ -40,8 +38,8 @@ public class NotificationDataDto implements Serializable {
 		this.read = read;
 	}
 
-	public void buildUrl (String url, Long entity) {
-		if (url == null || url.isBlank()){
+	public void buildUrl(String url, Long entity) {
+		if (url == null || url.isBlank()) {
 			return;
 		}
 		this.redirectionUrl = url;

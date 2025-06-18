@@ -8,12 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +19,8 @@ import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -117,9 +116,9 @@ public class RedisService {
 		redisTemplate.opsForValue().increment(countKey);
 		String listKey = "notification:list:user:" + userId;
 		stringRedisTemplate.opsForList().leftPush(listKey, key);
-		Long size =redisTemplate.opsForList().size(listKey);
+		Long size = stringRedisTemplate.opsForList().size(listKey);
 		if (size != null && size > 100) {
-			String oldestKey = (String)redisTemplate.opsForList().rightPop(listKey);
+			String oldestKey = stringRedisTemplate.opsForList().rightPop(listKey);
 			if (oldestKey != null) {
 				// 3. 해당 알림 key 삭제
 				redisTemplate.delete(oldestKey);
@@ -186,7 +185,7 @@ public class RedisService {
 		return Collections.emptySet();
 	}
 
-	public List<String> getKeysFromList(String listKey, int index){
+	public List<String> getKeysFromList(String listKey, int index) {
 		List<String> raw = stringRedisTemplate.opsForList().range(listKey, 0, 99);
 		if (raw == null || raw.isEmpty()) {
 			return Collections.emptyList();
@@ -201,9 +200,13 @@ public class RedisService {
 				redisTemplate.opsForList().remove(listKey, 1, key);
 				continue;
 			}
-			if (count >= here && count < there) {;keyList.add(key);}
-			if (count == there) {;break;}
-			count ++;
+			if (count >= here && count < there) {
+				keyList.add(key);
+			}
+			if (count == there) {
+				break;
+			}
+			count++;
 		}
 		return keyList;
 	}

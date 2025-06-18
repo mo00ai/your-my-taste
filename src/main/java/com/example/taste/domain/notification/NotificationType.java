@@ -1,7 +1,7 @@
 package com.example.taste.domain.notification;
 
 public enum NotificationType {
-	CREAT("생성"),
+	CREATE("생성"),
 	UPDATE("업데이트"),
 	DELETE("삭제"),
 	ACCEPT("승인"),
