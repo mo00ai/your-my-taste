@@ -2,6 +2,7 @@ package com.example.taste.domain.notification.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.notification.dto.AdminNotificationRequestDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
@@ -18,7 +19,7 @@ public class NotificationAdminService {
 
 	public void publishNotification(AdminNotificationRequestDto dto) {
 		NotificationPublishDto publishDto = NotificationPublishDto.builder()
-			.category(dto.getCategory())
+			.category(NotificationCategory.from(dto.getCategory()))
 			.type(NotificationType.CREATE)
 			.redirectionUrl(dto.getRedirectUrl())
 			.redirectionEntityId(dto.getRedirectEntityId())
