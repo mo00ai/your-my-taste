@@ -68,7 +68,7 @@ jobs:
         run: ./gradlew clean generateJooq bootJar
 
       - name: Run Unit Tests
-        run: ./gradlew unitTest
+        run: ./gradlew unitTest -x generateJooq
 
       - name: Run Integration Tests
         run: ./gradlew integrationTest
