@@ -30,6 +30,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -48,14 +49,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				board.title,
 				store.name,
 				user.nickname,
-				boardImage.image.url.max() // 마지막 이미지(id 높은)
+				JPAExpressions        // 서브쿼리 게시글&이미지 테이블에서 이미지 조회 -> 없으면 null반환
+					.select(boardImage.image.url)
+					.from(boardImage)
+					.where(boardImage.board.eq(board))
+					.orderBy(boardImage.id.asc())
+					.limit(1)
 			))
 			.from(board)
 			.leftJoin(board.user, user)
 			.leftJoin(board.store, store)
-			.leftJoin(board.boardImageList, boardImage)
+			//.leftJoin(board.boardImageList, boardImage)
 			.where(board.user.id.in(userIds))
-			.groupBy(board.id, board.title, store.name, user.nickname)
+			//.groupBy(board.id, board.title, store.name, user.nickname)
 			.orderBy(board.createdAt.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -78,14 +84,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				board.title,
 				store.name,
 				user.nickname,    // 작성자 이름
-				boardImage.image.url.max()
+				JPAExpressions        // 서브쿼리 게시글&이미지 테이블에서 이미지 조회 -> 없으면 null반환
+					.select(boardImage.image.url)
+					.from(boardImage)
+					.where(boardImage.board.eq(board))
+					.orderBy(boardImage.id.asc())
+					.limit(1)
 			))
 			.from(board)
 			.leftJoin(board.user, user)
 			.leftJoin(board.store, store)
-			.leftJoin(board.boardImageList, boardImage)
+			//.leftJoin(board.boardImageList, boardImage)
 			.where(buildSearchConditions(condition))
-			.groupBy(board.id, board.title, store.name, user.nickname)
+			//.groupBy(board.id, board.title, store.name, user.nickname)
 			.orderBy(getOrderSpecifier(pageable).toArray(new OrderSpecifier[0]))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -193,8 +204,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			builder.and(board.type.eq(BoardType.from(condition.getType())));
 		}
 		// 게시글 상태 필터
-		if (StringUtils.hasText(condition.getStatus())) {
-			builder.and(board.accessPolicy.eq(AccessPolicy.from(condition.getStatus())));
+		if (StringUtils.hasText(condition.getAccessPolicy())) {
+			builder.and(board.accessPolicy.eq(AccessPolicy.from(condition.getAccessPolicy())));
 		}
 		// 가게명
 		if (StringUtils.hasText(condition.getStoreName())) {

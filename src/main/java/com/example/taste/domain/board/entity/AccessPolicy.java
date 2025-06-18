@@ -14,9 +14,9 @@ public enum AccessPolicy {
 	;
 
 	public static AccessPolicy from(String input) {
-		for (AccessPolicy status : AccessPolicy.values()) {
-			if (status.name().equalsIgnoreCase(input)) {
-				return status;
+		for (AccessPolicy accessPolicy : AccessPolicy.values()) {
+			if (accessPolicy.name().equalsIgnoreCase(input)) {
+				return accessPolicy;
 			}
 		}
 		throw new CustomException(BoardErrorCode.BOARD_STATUS_NOT_FOUND);

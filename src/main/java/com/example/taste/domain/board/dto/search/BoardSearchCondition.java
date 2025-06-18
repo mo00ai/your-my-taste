@@ -23,7 +23,7 @@ public class BoardSearchCondition {
 	@ValidEnum(target = BoardType.class)
 	private String type;    // "N", "O"
 	@ValidEnum(target = AccessPolicy.class)
-	private String status;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
+	private String accessPolicy;    // "OPEN", "CLOSED",  "FCFS", "TIMEATTACK"
 	// 날짜 범위
 	@Valid
 	private CreatedDateRange dateRange = new CreatedDateRange();
