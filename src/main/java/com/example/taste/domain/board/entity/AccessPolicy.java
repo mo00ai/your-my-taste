@@ -19,7 +19,7 @@ public enum AccessPolicy {
 				return accessPolicy;
 			}
 		}
-		throw new CustomException(BoardErrorCode.BOARD_STATUS_NOT_FOUND);
+		throw new CustomException(BoardErrorCode.BOARD_ACCESS_POLICY_NOT_FOUND);
 	}
 
 }
