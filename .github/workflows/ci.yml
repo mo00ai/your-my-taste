@@ -58,4 +58,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build JAR only
-        run: ./gradlew bootJar -x generateJooq -x test
+        run: ./gradlew bootJar generateJooq -x test
