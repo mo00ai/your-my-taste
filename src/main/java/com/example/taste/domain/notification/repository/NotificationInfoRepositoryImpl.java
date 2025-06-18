@@ -1,5 +1,6 @@
 package com.example.taste.domain.notification.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -21,14 +22,11 @@ public class NotificationInfoRepositoryImpl implements NotificationInfoRepositor
 	public Slice<NotificationInfo> getMoreNotificationInfoWithContents(Long userId, List<Long> redisNotifications,
 		Pageable pageable) {
 		QNotificationInfo qNotificationInfo = QNotificationInfo.notificationInfo;
-		QNotificationContent qNotificationContent = QNotificationContent.notificationContent;
 
 		List<NotificationInfo> notificationInfos = queryFactory.selectFrom(qNotificationInfo)
-			.leftJoin(qNotificationInfo.notificationContent, qNotificationContent)
-			.fetchJoin()
 			.where(
 				redisNotifications.isEmpty() ? null :
-					qNotificationInfo.notificationContent.id.notIn(redisNotifications),
+					qNotificationInfo.createdAt.before(LocalDateTime.now().minusDays(7)),
 				qNotificationInfo.user.id.eq(userId)
 			)
 			.offset(pageable.getOffset())

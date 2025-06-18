@@ -3,7 +3,7 @@ package com.example.taste.domain.board.dto.request;
 import java.util.List;
 
 import com.example.taste.common.annotation.ValidEnum;
-import com.example.taste.domain.board.entity.BoardStatus;
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.BoardType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -34,8 +34,8 @@ public abstract class BoardRequestDto {
 
 	@ValidEnum(target = BoardType.class)
 	private String type;
-	@ValidEnum(target = BoardStatus.class)
-	private String status;
+	@ValidEnum(target = AccessPolicy.class)
+	private String accessPolicy;
 
 	private Long storeId;
 	// 해시 태그 추가

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.service.EventService;
@@ -15,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
+// @Component
 @RequiredArgsConstructor
 public class EventScheduler {
 
@@ -23,6 +22,7 @@ public class EventScheduler {
 	private final PkService pkService;
 
 	@Scheduled(cron = "0 0 0 * * *")
+	// @Scheduled(cron = "0 */2 * * * *")
 	public void selectEventWinner() {
 
 		log.info("[Event] 이벤트 우승자 선정 스케줄러 시작");
@@ -40,6 +40,7 @@ public class EventScheduler {
 					.ifPresent(winnerBoard -> {
 						Long userId = winnerBoard.getUser().getId();
 						pkService.savePkLog(userId, PkType.EVENT);
+
 						log.info("이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
 					});
 			}

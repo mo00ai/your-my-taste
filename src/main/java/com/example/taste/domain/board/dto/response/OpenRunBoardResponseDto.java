@@ -4,8 +4,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
 
 import java.time.LocalDateTime;
 
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -21,7 +21,7 @@ public class OpenRunBoardResponseDto {
 	private Long boardId;
 	private String title;
 	private LocalDateTime openTime;
-	private BoardStatus boardStatus;
+	private AccessPolicy accessPolicy;
 	private Integer openLimit; // 접근 허용 인원 수 or 시간
 	private Long remainingSlot; // 잔여 인원 수
 
@@ -36,7 +36,7 @@ public class OpenRunBoardResponseDto {
 			.boardId(board.getId())
 			.title(board.getTitle())
 			.openTime(board.getOpenTime())
-			.boardStatus(board.getStatus())
+			.accessPolicy(board.getAccessPolicy())
 			.openLimit(isOpened ? board.getOpenLimit() : null)
 			.remainingSlot(isOpened ? remainingSlot : null)
 			.build();

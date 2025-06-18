@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.exception.CustomException;
@@ -34,6 +35,7 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
+@ActiveProfiles("test-int")
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceUnitTest {
 	@InjectMocks
@@ -69,7 +71,7 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
+		ReflectionTestUtils.setField(dto, "accessPolicy", "TIMEATTACK");
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
 
@@ -98,7 +100,7 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "status", "CLOSED");
+		ReflectionTestUtils.setField(dto, "accessPolicy", "CLOSED");
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
 		Board board = BoardFixture.createClosedOBoard(dto, store, user);
@@ -126,7 +128,7 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
+		ReflectionTestUtils.setField(dto, "accessPolicy", "TIMEATTACK");
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
 		Board board = BoardFixture.createTimeLimitedOBoard(dto, store, user);

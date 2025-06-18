@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build JAR (dev profiles)
     runs-on: ubuntu-latest
 
     env:
@@ -27,6 +28,11 @@ jobs:
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: testuser
+      DB_PASSWORD: test1234
+      DB_NAME: taste_ci_test
 
     steps:
       - name: Checkout source
@@ -51,5 +57,5 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
-      - name: Build JAR
-        run: ./gradlew bootJar
+      - name: Build JAR only
+        run: ./gradlew bootJar -x generateJooq -x test
