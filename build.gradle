@@ -137,7 +137,7 @@ jooq {
                     }
                     target {
                         packageName = 'com.example.jooq'
-                        directory = 'src/main/generated'
+                        directory = "${buildDir}/generated-src/jooq/main"
                     }
                 }
             }
