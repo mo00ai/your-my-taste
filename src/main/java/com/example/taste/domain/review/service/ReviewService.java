@@ -142,8 +142,6 @@ public class ReviewService {
 			// if (!review.getUser().equals(user)) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
-		// 연관성 먼저 삭제
-		review.getStore().removeReview(review);
 		reviewRepository.delete(review);
 	}
 }

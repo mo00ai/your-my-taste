@@ -26,8 +26,8 @@ import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardStatus;
 import com.example.taste.domain.board.entity.BoardType;
 import com.example.taste.domain.board.factory.BoardCreationStrategyFactory;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -37,11 +37,11 @@ import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -50,7 +50,6 @@ public class BoardService {
 
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
-	private final StoreService storeService;
 	private final PkService pkService;
 	private final HashtagService hashtagService;
 	private final EntityFetcher entityFetcher;
@@ -58,6 +57,7 @@ public class BoardService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserRepository userRepository;
 	private final BoardCreationStrategyFactory strategyFactory;
+	private final EntityManager entityManager;
 
 	@Transactional
 	public Long createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -75,6 +75,8 @@ public class BoardService {
 		// 오픈런 게시글 카운팅
 		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
+			entityManager.refresh(user);
+
 			if (updatedUserCnt == 0) {
 				throw new CustomException(POSTING_COUNT_OVERFLOW);
 			}
@@ -110,17 +112,17 @@ public class BoardService {
 		}
 
 		// 비공개 게시글이면 error
-		if (board.getStatus() == BoardStatus.CLOSED) {
+		if (board.getAccessPolicy() == AccessPolicy.CLOSED) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.getStatus() == BoardStatus.TIMEATTACK) {
+		if (board.getAccessPolicy() == AccessPolicy.TIMEATTACK) {
 			board.validateAndCloseIfExpired();
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
-		if (board.getStatus() == BoardStatus.FCFS) {
+		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
 			tryEnterFcfsQueue(board, userId);
 		}
 
@@ -138,7 +140,7 @@ public class BoardService {
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
-		if (board.getStatus() == BoardStatus.FCFS) {
+		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
 			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
@@ -189,12 +191,12 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndStatusInAndDeletedAtIsNull(BoardType.O,
-			List.of(BoardStatus.FCFS, BoardStatus.TIMEATTACK), pageable);
+		Page<Board> boards = boardRepository.findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType.O,
+			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
 			Long remainingSlot = null;
-			if (board.getStatus() == BoardStatus.FCFS) {
+			if (board.getAccessPolicy() == AccessPolicy.FCFS) {
 				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
 				remainingSlot = Math.max(0, board.getOpenLimit() - zSetSize);
 			}

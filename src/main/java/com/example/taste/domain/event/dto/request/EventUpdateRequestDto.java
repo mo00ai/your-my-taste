@@ -16,9 +16,9 @@ public class EventUpdateRequestDto {
 	private String name;
 	private String contents;
 	@JsonFormat(pattern = "yyyy-MM-dd")
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	@JsonFormat(pattern = "yyyy-MM-dd")
-	private LocalDate endDate;
+	private LocalDate endDate = LocalDate.now();
 	@JsonProperty("isActive")
 	private Boolean isActive;
 }
