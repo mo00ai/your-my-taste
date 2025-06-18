@@ -104,6 +104,9 @@ jobs:
     name: Integration Tests (Docker MySQL)
     runs-on: ubuntu-latest
 
+    env:
+      CI: true
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v3

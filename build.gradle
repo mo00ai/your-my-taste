@@ -104,7 +104,14 @@ tasks.register("unitTest", Test) {
 
 tasks.register("integrationTest", Test) {
     useJUnitPlatform()
-    systemProperty "spring.profiles.active", "test-int-docker"
+    
+    def ci = System.getenv("CI") == "true"
+    if (ci) {
+        systemProperty "spring.profiles.active", "test-int-docker"
+    } else {
+        systemProperty "spring.profiles.active", "test-int" // fallback
+    }
+
     include '**/*Test*'
     exclude '**/*UnitTest*'
     testLogging {
