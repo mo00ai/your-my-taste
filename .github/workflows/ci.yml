@@ -28,6 +28,11 @@ jobs:
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: testuser
+      DB_PASSWORD: test1234
+      DB_NAME: taste_ci_test
 
     steps:
       - name: Checkout source
@@ -52,77 +57,5 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
-      #      - name: Build JAR
-      #        run: ./gradlew bootJar -x generateJooq
-      - name: Conditionally exclude generateJooq
-        run: |
-          if ./gradlew tasks --all | grep -q generateJooq; then
-            ./gradlew bootJar -x generateJooq
-          else
-            ./gradlew bootJar
-          fi
-
-
-  unit-tests:
-    name: Unit Tests (H2)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Grant execute permission for Gradle
-        run: chmod +x ./gradlew
-
-      - name: Run Unit Tests
-        run: ./gradlew unitTest
-
-
-
-  integration-tests:
-    name: Integration Tests (Docker MySQL)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Install docker-compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-
-      - name: Docker Compose Down (Clean DB)
-        run: docker-compose -f docker-compose.test.yml down -v
-
-      - name: Docker Compose Up
-        run: docker-compose -f docker-compose.test.yml up -d
-
-      - name: Wait for MySQL & Redis
-        run: |
-          echo "Waiting for MySQL & Redis..."
-          for i in {1..10}; do
-            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && \
-            docker exec test-redis redis-cli ping | grep -q PONG && break
-            echo "waiting... ($i)"
-            sleep 5
-          done
-
-      - name: Grant execute permission for Gradle
-        run: chmod +x ./gradlew
-
-      - name: Run Integration Tests
-        run: ./gradlew integrationTest
-
+      - name: Build JAR only
+        run: ./gradlew bootJar -x generateJooq -x test

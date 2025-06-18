@@ -94,7 +94,6 @@ public class StoreBucketService {
 	}
 
 	// 남의 버킷 조회 - 공개된 것만(특정 유저의 맛집 리스트 조회(유저 프로필로 접근)
-
 	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
 		User targetUser = entityFetcher.getUndeletedUserOrThrow(targetUserId); // 삭제되지 않은 유저만 조회
 
