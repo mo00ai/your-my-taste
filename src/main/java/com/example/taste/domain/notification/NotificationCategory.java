@@ -23,6 +23,10 @@ public enum NotificationCategory {
 	}
 
 	public static NotificationCategory from(String name) {
+		if (name == null || name.isBlank()) {
+			throw new CustomException(NotificationErrorCode.WRONG_NOTIFICATION_CATEGORY);
+		}
+		name = name.trim();
 		for (NotificationCategory category : values()) {
 			if (category.name().equalsIgnoreCase(name)) {
 				return category;

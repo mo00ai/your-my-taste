@@ -44,5 +44,6 @@ public class NotificationResponseDto {
 		this.redirectUrl = dataDto.getRedirectionUrl();
 		this.isRead = dataDto.isRead();
 		this.createdAt = dataDto.getCreatedAt();
+		this.contentId = 0L;
 	}
 }
