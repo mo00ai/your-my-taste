@@ -35,7 +35,7 @@ public abstract class BoardRequestDto {
 	@ValidEnum(target = BoardType.class)
 	private String type;
 	@ValidEnum(target = AccessPolicy.class)
-	private String status;
+	private String accessPolicy;
 
 	private Long storeId;
 	// 해시 태그 추가
