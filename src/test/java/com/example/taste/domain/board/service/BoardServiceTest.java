@@ -46,8 +46,8 @@ import com.example.taste.fixtures.UserFixture;
 
 import jakarta.transaction.Transactional;
 
-@ActiveProfiles("test-int")
-//@ActiveProfiles("test-int-docker")
+//@ActiveProfiles("test-int")
+@ActiveProfiles("test-int-docker")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort
