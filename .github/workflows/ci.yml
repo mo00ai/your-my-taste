@@ -7,18 +7,18 @@ on:
     branches: [ "main", "dev" ]
 
 jobs:
-  build:
-    name: Build JAR (dev profiles)
+  build-and-test:
     runs-on: ubuntu-latest
 
     env:
-      SPRING_PROFILES_ACTIVE: dev
-      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-      MYSQL_USER: ${{ secrets.MYSQL_USER }}
-      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
-      DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
+      CI: true
+      SPRING_PROFILES_ACTIVE: local
+      LOCAL_DB_NAME: taste_ci_test
+      LOCAL_DB_USERNAME: testuser
+      LOCAL_DB_PASSWORD: test1234
+      LOCAL_ROOT_PASSWORD: root1234
+      LOCAL_REDIS_HOST: localhost
+      LOCAL_REDIS_PORT: 6379
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
       S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
       S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -28,7 +28,7 @@ jobs:
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
-      DB_HOST: mysql
+      DB_HOST: localhost
       DB_PORT: 3306
       DB_USER: testuser
       DB_PASSWORD: test1234
@@ -44,18 +44,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Install docker-compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Docker Compose Up
+        run: docker-compose -f docker-compose.test.ci.yml up -d
+
+      - name: Wait for MySQL & Redis
+        run: |
+          for i in {1..10}; do
+            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && \
+            docker exec test-redis redis-cli ping | grep -q PONG && break
+            echo "Waiting..."
+            sleep 5
+          done
 
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
-      - name: Build JAR only
-        run: ./gradlew bootJar -x generateJooq -x test
+      - name: Generate Jooq & Build
+        run: ./gradlew clean generateJooq bootJar
+
+      - name: Run Unit Tests
+        run: ./gradlew unitTest -x generateJooq
+
+      - name: Run Integration Tests
+        run: ./gradlew integrationTest
