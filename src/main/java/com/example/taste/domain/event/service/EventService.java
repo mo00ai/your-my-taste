@@ -1,8 +1,12 @@
 package com.example.taste.domain.event.service;
 
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
@@ -20,10 +23,6 @@ import com.example.taste.domain.event.dto.response.EventResponseDto;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.repository.EventRepository;
 import com.example.taste.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +61,7 @@ public class EventService {
 
 	protected void checkUser(Long userId, Event event) {
 		if (!event.getUser().getId().equals(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 
 	}

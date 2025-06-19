@@ -1,6 +1,6 @@
 package com.example.taste.common.websocket;
 
-import static com.example.taste.common.exception.ErrorCode.INVALID_SIGNATURE;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHENTICATED;
 
 import java.util.Map;
 
@@ -33,11 +33,11 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
 			// 세션이 없다면 인증(로그인) 필요
 			if (session == null) {
-				throw new CustomException(INVALID_SIGNATURE);
+				throw new CustomException(UNAUTHENTICATED);
 			}
 			SecurityContext securityContext = (SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT");
 			if (securityContext == null || securityContext.getAuthentication() == null) {
-				throw new CustomException(INVALID_SIGNATURE);
+				throw new CustomException(UNAUTHENTICATED);
 			}
 
 			Authentication authentication = securityContext.getAuthentication();

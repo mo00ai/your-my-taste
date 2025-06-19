@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.example.taste.domain.auth.handler.CustomAccessDeniedHandler;
+import com.example.taste.domain.auth.handler.CustomAuthenticationEntryPointHandler;
 import com.example.taste.domain.user.service.CustomUserDetailsService;
 
 @Configuration
@@ -20,6 +22,8 @@ import com.example.taste.domain.user.service.CustomUserDetailsService;
 @EnableMethodSecurity
 public class SecurityConfig {
 	private final CustomUserDetailsService userDetailsService;
+	private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -46,6 +50,9 @@ public class SecurityConfig {
 				auth.requestMatchers("/h2-console/**").permitAll();
 				auth.anyRequest().authenticated();
 			})
+			.exceptionHandling((exceptionConfig) ->
+				exceptionConfig.authenticationEntryPoint(customAuthenticationEntryPointHandler)
+					.accessDeniedHandler(customAccessDeniedHandler))
 			.userDetailsService(userDetailsService);
 
 		return httpSecurity.build();

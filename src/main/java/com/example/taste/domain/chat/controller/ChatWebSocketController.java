@@ -1,6 +1,6 @@
 package com.example.taste.domain.chat.controller;
 
-import static com.example.taste.common.exception.ErrorCode.INVALID_SIGNATURE;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHENTICATED;
 
 import java.security.Principal;
 
@@ -15,10 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.chat.dto.ChatCreateRequestDto;
 import com.example.taste.domain.chat.dto.ChatResponseDto;
 import com.example.taste.domain.chat.service.ChatService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @Slf4j
 @Controller
@@ -33,12 +33,12 @@ public class ChatWebSocketController {
 		@DestinationVariable Long partyId,
 		@Payload ChatCreateRequestDto message, Principal principal) {
 		if (!(principal instanceof Authentication authentication)) {
-			throw new CustomException(INVALID_SIGNATURE);
+			throw new CustomException(UNAUTHENTICATED);
 		}
 
 		Object inner = authentication.getPrincipal();
 		if (!(inner instanceof CustomUserDetails customUserDetails)) {
-			throw new CustomException(INVALID_SIGNATURE);
+			throw new CustomException(UNAUTHENTICATED);
 		}
 
 		log.info("메세지 전송내용: {}, UserID: {}, PartyId: {}",
