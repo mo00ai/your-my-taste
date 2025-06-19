@@ -1,12 +1,13 @@
 package com.example.taste.domain.party.service;
 
+import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
+import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
 import static com.example.taste.domain.party.exception.PartyErrorCode.ALREADY_EXISTS_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUITING_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_INVITE_TO_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
 
 import java.util.Comparator;
@@ -60,11 +61,11 @@ public class PartyInvitationService {
 		if (party.getNowMembers() > 1 && party.isHostOfParty(userId)) {
 			// 오름차순 정렬
 			List<PartyInvitation> partyInvitationList =
-				partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), InvitationStatus.CONFIRMED);
+				partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), CONFIRMED);
 			User newHostUser = partyInvitationList.stream()
 				.filter(pi -> !pi.getUser().getId().equals(userId)) // 호스트 제외
 				.min(Comparator.comparing(PartyInvitation::getCreatedAt))
-				.get().getUser();
+				.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND)).getUser();
 
 			party.updateHost(newHostUser);
 		}
@@ -104,24 +105,22 @@ public class PartyInvitationService {
 		User user = entityFetcher.getUndeletedUserOrThrow(requestDto.getUserId());
 
 		// 파티 초대 정보가 있다면 (초대 중, 확정)
-		PartyInvitation partyInvitation =
-			partyInvitationRepository.findByUserAndParty(requestDto.getUserId(), partyId)
-				.orElse(null);
-		if (partyInvitation != null
-			&& (partyInvitation.getInvitationStatus().equals(InvitationStatus.WAITING)
-			|| partyInvitation.getInvitationStatus().equals(InvitationStatus.CONFIRMED))) {
-			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
-		}
-		// 초대 불가능하다면 (초대 거절)
-		if (partyInvitation != null
-			&& partyInvitation.getInvitationType().equals(InvitationType.INVITATION)
-			&& partyInvitation.getInvitationStatus().equals(InvitationStatus.REJECTED)) {
-			throw new CustomException(UNAVAILABLE_TO_INVITE_TO_PARTY);
-		}
+		partyInvitationRepository.findByUserAndParty(requestDto.getUserId(), partyId)
+			.ifPresent((pi) -> {
+					// 파티 수라가 대기-가입된 유저 재초대하는 경우 예외 발생
+					if (pi.getInvitationStatus().equals(WAITING)
+						|| pi.getInvitationStatus().equals(CONFIRMED)) {
+						throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
+					}
+					// 그 외 재초대 가능한 경우 삭제 후 새로 생성
+					else {
+						partyInvitationRepository.deleteById(pi.getId());
+					}
+				}
+			);
 
-		// TODO: 초대 정보가 있고, 재초대 가능한 경우 로직 처리 추가
 		partyInvitationRepository.save(new PartyInvitation(
-			party, user, InvitationType.INVITATION, InvitationStatus.WAITING));
+			party, user, InvitationType.INVITATION, WAITING));
 	}
 
 	// 유저가 파티에 가입 신청
@@ -140,25 +139,25 @@ public class PartyInvitationService {
 		User user = entityFetcher.getUndeletedUserOrThrow(userId);
 
 		// 초대 정보가 존재하는 경우
-		PartyInvitation partyInvitation = partyInvitationRepository.findByUserAndParty(userId, partyId).orElse(null);
-		if (partyInvitation != null) {
-			switch (partyInvitation.getInvitationStatus()) {
-				case EXITED -> {
-				} // 가입 신청 가능
-				case KICKED, REJECTED -> throw new CustomException(UNAVAILABLE_TO_REQUEST_PARTY_INVITATION);
-				case WAITING, CONFIRMED -> throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
-				default -> throw new CustomException(INVALID_PARTY_INVITATION);
-			}
-		}
+		partyInvitationRepository.findByUserAndParty(userId, partyId)
+			.ifPresent((pi) -> {
+				switch (pi.getInvitationStatus()) {
+					case EXITED -> {
+					} // 가입 신청 가능
+					case KICKED, REJECTED -> throw new CustomException(UNAVAILABLE_TO_REQUEST_PARTY_INVITATION);
+					case WAITING, CONFIRMED -> throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
+					default -> throw new CustomException(INVALID_PARTY_INVITATION);
+				}
+			});
 
-		partyInvitationRepository.save(new PartyInvitation(
-			party, user, InvitationType.REQUEST, InvitationStatus.WAITING));
+		partyInvitationRepository.save(
+			new PartyInvitation(party, user, InvitationType.REQUEST, WAITING));
 	}
 
 	public List<UserInvitationResponseDto> getMyInvitations(Long userId) {
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findAvailablePartyInvitationList(
-				userId, InvitationStatus.WAITING);
+				userId, WAITING);
 		return partyInvitationList.stream()
 			.map(UserInvitationResponseDto::new).toList();
 	}
@@ -170,7 +169,7 @@ public class PartyInvitationService {
 			throw new CustomException(NOT_PARTY_HOST);
 		}
 		List<PartyInvitation> partyInvitationList =
-			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
+			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), WAITING);
 		return partyInvitationList.stream()
 			.map(PartyInvitationResponseDto::new).toList();
 	}
@@ -190,13 +189,13 @@ public class PartyInvitationService {
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
 		}
-		partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+		partyInvitation.updateInvitationStatus(CONFIRMED);
 
 		if (!party.isFull()) {
 			partyInvitation.getParty().joinMember();
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 			}
 		} else {
 			throw new CustomException(NOT_RECRUITING_PARTY);
@@ -240,12 +239,12 @@ public class PartyInvitationService {
 		validateRecruitingParty(party);
 
 		if (!party.isFull()) {
-			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+			partyInvitation.updateInvitationStatus(CONFIRMED);
 			partyInvitation.getParty().joinMember();            // TODO: 수락하기 전 invitation status 가 waiting 이 아니라면 예외처리
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			}
 		} else {
 			throw new CustomException(NOT_RECRUITING_PARTY);
@@ -299,11 +298,11 @@ public class PartyInvitationService {
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 			}
 		} else {
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, InvitationStatus.WAITING);
+			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
@@ -355,7 +354,7 @@ public class PartyInvitationService {
 		}
 
 		if (!party.isFull()) {
-			partyInvitation.updateInvitationStatus(InvitationStatus.CONFIRMED);
+			partyInvitation.updateInvitationStatus(CONFIRMED);
 			party.joinMember();
 			userMatchInfo.clearMatching();
 
@@ -363,13 +362,13 @@ public class PartyInvitationService {
 				PartyMatchInfo partyMatchInfo =
 					partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 				partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
+				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			}
 		} else {
 			PartyMatchInfo partyMatchInfo =
 				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
 			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), InvitationStatus.WAITING);
+			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
@@ -394,7 +393,7 @@ public class PartyInvitationService {
 	}
 
 	private void validateWaitingInvitationType(InvitationStatus status) {
-		if (!status.equals(InvitationStatus.WAITING)) {
+		if (!status.equals(WAITING)) {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
