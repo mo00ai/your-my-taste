@@ -11,8 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.exception.BoardErrorCode;
+import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
@@ -30,13 +31,15 @@ import lombok.RequiredArgsConstructor;
 public class CommentService {
 	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
+	private final BoardRepository boardRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardId,
-		CustomUserDetails userDetails) {
+		User userFromDetail) {
 		// 댓글 달 보드
-		Board board = entityFetcher.getBoardOrThrow(boardId);
+		Board board = boardRepository.findById(boardId)
+			.orElseThrow(() -> new CustomException(BoardErrorCode.BOARD_NOT_FOUND));
 		// 댓글 달 유저
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		User user = userFromDetail;
 
 		// TODO 댓글 조회 방식을 바꾸면 이것도 바꿀 가능성 있음
 		// 부모댓글, root 댓글 설정
@@ -67,11 +70,11 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
-		CustomUserDetails userDetails) {
+		User userFromDetail) {
 		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		// 유저 검증
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		User user = userFromDetail;
 		if (!comment.getUser().equals(user)) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
@@ -82,11 +85,11 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId, CustomUserDetails userDetails) {
+	public void deleteComment(Long commentId, User userFromDetail) {
 		// 수정할 댓글
 		Comment comment = entityFetcher.getCommentOrThrow(commentId);
 		// 유저 검증
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		User user = userFromDetail;
 		if (!comment.getUser().getId().equals(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
