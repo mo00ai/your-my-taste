@@ -8,7 +8,7 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.example.taste.common.batch.QuartzBatchLauncherJob;
+import com.example.taste.common.batch.BatchLauncherJob;
 
 @Configuration
 public class WinnerQuartzConfig {
@@ -16,7 +16,7 @@ public class WinnerQuartzConfig {
 	//여기다가도 우선순위 설정 가능
 	@Bean
 	public JobDetail winnerJobDetail() {
-		return JobBuilder.newJob(QuartzBatchLauncherJob.class)
+		return JobBuilder.newJob(BatchLauncherJob.class)
 			.withIdentity("winnerJobDetail")
 			.usingJobData("jobName", "winnerSelectionJob") // 실제 Batch Job 이름
 			.storeDurably()

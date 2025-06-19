@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class QuartzBatchLauncherJob extends QuartzJobBean {
+public class BatchLauncherJob extends QuartzJobBean {
 
 	@Autowired
 	private JobLauncher jobLauncher;
