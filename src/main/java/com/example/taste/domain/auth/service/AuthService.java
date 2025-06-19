@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.image.entity.Image;
@@ -38,41 +38,8 @@ import com.example.taste.domain.user.service.UserService;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private final UserService userService;
 	private final UserRepository userRepository;
-	private final ImageService imageService;
 	private final PasswordEncoder passwordEncoder;
-
-	// 회원 가입
-	@Transactional
-	public void signup(SignupRequestDto requestDto, MultipartFile file) {
-		// 유저 이메일(아이디) 중복 검사
-		if (isExistsEmail(requestDto.getEmail())) {
-			throw new CustomException(CONFLICT_EMAIL);
-		}
-
-		// 비밀번호 인코딩
-		String encodedPwd = passwordEncoder.encode(requestDto.getPassword());
-		requestDto.setPassword(encodedPwd);
-
-		// 유저 정보 저장
-		User user = new User(requestDto);
-		userRepository.save(user);
-
-		// 입맛 취향 정보 저장
-		userService.updateUserFavors(user.getId(), requestDto.getFavorList());
-
-		// 프로필 이미지 저장
-		if (file != null) {
-			try {
-				Image image = imageService.saveImage(file, ImageType.USER);
-				user.setImage(image);
-				userRepository.save(user);
-			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
-				log.warn("[AuthService] 회원 가입 중에 유저 이미지 저장에 실패하였습니다. ID: {}", user.getId());
-			}
-		}
-	}
 
 	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
 		// 로그인(기존 세션) 확인
@@ -121,11 +88,6 @@ public class AuthService {
 			session.invalidate();
 		}
 		SecurityContextHolder.clearContext();
-	}
-
-	// 중복 이메일 검사
-	private boolean isExistsEmail(String email) {
-		return userRepository.existsByEmail(email);
 	}
 
 	// 비밀번호 일치 검사

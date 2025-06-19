@@ -1,4 +1,4 @@
-package com.example.taste.config.security;
+package com.example.taste.domain.user.entity;
 
 import java.util.Collection;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.taste.config.security;
+package com.example.taste.config;
 
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.example.taste.domain.user.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity

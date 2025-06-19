@@ -14,7 +14,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 

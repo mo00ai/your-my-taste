@@ -18,7 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.review.dto.OcrRequestDto;
 import com.example.taste.domain.review.dto.OcrResponseDto;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
@@ -26,6 +26,7 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
+
 import reactor.core.publisher.Mono;
 
 @Service

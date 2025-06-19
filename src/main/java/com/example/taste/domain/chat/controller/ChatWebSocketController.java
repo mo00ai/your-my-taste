@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.chat.dto.ChatCreateRequestDto;
 import com.example.taste.domain.chat.dto.ChatResponseDto;
 import com.example.taste.domain.chat.service.ChatService;

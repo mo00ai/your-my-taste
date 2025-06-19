@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.service.AuthService;
@@ -31,15 +31,6 @@ import com.example.taste.domain.auth.service.AuthService;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
-
-	@ImageValid
-	@PostMapping(path = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public CommonResponse<Void> signup(
-		@RequestPart(name = "data") @Valid SignupRequestDto requestDto,
-		@RequestPart(name = "file", required = false) MultipartFile file) {
-		authService.signup(requestDto, file);
-		return CommonResponse.ok();
-	}
 
 	@PostMapping("/signin")
 	public CommonResponse<Void> signin(
