@@ -2,7 +2,7 @@ create table batch_job_execution_seq
 (
     ID         bigint not null,
     UNIQUE_KEY char   not null,
-    constraint UNIQUE_KEY_UN
+    constraint BATCH_JOB_EXEC_SEQ_UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
 
@@ -50,7 +50,7 @@ create table batch_job_execution_params
     PARAMETER_NAME   varchar(100)  not null,
     PARAMETER_TYPE   varchar(100)  not null,
     PARAMETER_VALUE  varchar(2500) null,
-    IDENTIFYING      char          not null,
+    IDENTIFYING      char(1)       not null,
     constraint JOB_EXEC_PARAMS_FK
         foreign key (JOB_EXECUTION_ID) references batch_job_execution (JOB_EXECUTION_ID)
 );
@@ -59,7 +59,7 @@ create table batch_job_seq
 (
     ID         bigint not null,
     UNIQUE_KEY char   not null,
-    constraint UNIQUE_KEY_UN
+    constraint BATCH_JOB_SEQ_UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
 
@@ -85,7 +85,7 @@ create table batch_step_execution
     EXIT_CODE          varchar(2500) null,
     EXIT_MESSAGE       varchar(2500) null,
     LAST_UPDATED       datetime(6)   null,
-    constraint JOB_EXEC_STEP_FK
+    constraint BATCH_STEP_EXEC_SEQ_UNIQUE_KEY_UN
         foreign key (JOB_EXECUTION_ID) references batch_job_execution (JOB_EXECUTION_ID)
 );
 
@@ -101,8 +101,8 @@ create table batch_step_execution_context
 
 create table batch_step_execution_seq
 (
-    ID         bigint not null,
-    UNIQUE_KEY char   not null,
+    ID         bigint    not null,
+    UNIQUE_KEY char(255) not null,
     constraint UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
