@@ -45,7 +45,6 @@ public class FavorAdminService {
 
 	@Transactional
 	public void deleteFavor(Long favorId) {
-		Favor favor = entityFetcher.getFavorOrThrow(favorId);
-		favorRepository.delete(favor);
+		favorRepository.deleteById(favorId);
 	}
 }
