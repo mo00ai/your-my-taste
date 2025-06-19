@@ -20,9 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
 	boolean existsByEmail(String email);
 
-	// 활성화된 유저만 가져오기
-	List<User> findAllByDeletedAtIsNull();
-
 	List<User> findAllByOrderByPointDesc(PageRequest of);
 
 	List<User> findByPointGreaterThan(int i);

@@ -2,7 +2,7 @@ package com.example.taste.domain.party.service;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 
 import java.util.List;
 
@@ -45,6 +45,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		if (requestDto.getStoreId() != null) {
 			store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
 		}
+
 		User hostUser = entityFetcher.getUserOrThrow(hostId);
 		Party party = partyRepository.save(new Party(requestDto, hostUser, store));
 		partyInvitationRepository.save(new PartyInvitation(
@@ -62,7 +63,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		PartyFilter partyFilter = PartyFilter.of(filter);
 		switch (partyFilter) {
 			case ALL -> {
-				// 유저가 열고 있는 파티 제외하고 모든 파티 보여줌
+				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
 				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
 					.map(PartyResponseDto::new)
 					.toList();
@@ -98,7 +99,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		// 최대 인원 변경하는 경우
@@ -119,7 +120,7 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY);
+			throw new CustomException(NOT_PARTY_HOST);
 		}
 
 		partyRepository.delete(party);
