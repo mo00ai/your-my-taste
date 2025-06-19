@@ -1,0 +1,2286 @@
+[33mcommit 309582409859a673b71d0f1476130292af066cd8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat#86/refactor[m[33m, [m[1;31morigin/feat#86/refactor[m[33m)[m
+Merge: cd6e667 b03c554
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 13:43:17 2025 +0900
+
+    Fix: 로컬 병합 수정 및 알림 subscriber 조회 메소드 수정
+
+[33mcommit cd6e667aca2f21313312df37123d67fd71a32b19[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 13:38:52 2025 +0900
+
+    Fix: JOOQ 수정
+
+[33mcommit b03c55450317a338737b932131e7e778dc89ce71[m[33m ([m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mdev[m[33m)[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Wed Jun 18 13:37:41 2025 +0900
+
+    Refactor/#90/notfication event (#92)
+    
+    * refactor: 알림 발행 방식 변경, NotificationPublishDto 사용
+    
+    * refactor: 알림 생성 dto 수정, 알림 저장 방식 변경,  유저별 redis 알림 리스트 생성, 유저 별 redis 알림 개수 제한
+    
+    * refactor: 알림 조회 수정, 알림 생성 dto 수정, redirection url 수동 지정으로 변경
+    
+    * refactor: enum 오타 수정, url 중복 설정 수정, off by one 수정, stringRedisTemplate 일괄 사용, User 대신 UserId 필드 사용
+    
+    * fix: 오프 바이 원 리스트 잘라내고 할당
+    
+    * refactor: 알림 카테고리 요청 방식 변경 enum-> String
+    
+    * fix: 미사용 클래스 제거, 카테고리 from null 처리, responseDto contentId 초기화
+
+[33mcommit 451df0ad38d55da9a15e8f0166dcb814855be29c[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 13:36:43 2025 +0900
+
+    Fix: 오류 수정
+
+[33mcommit c96ba9c4e9e2aa07b3ffff02b84a8a8be9b4045b[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 12:45:08 2025 +0900
+
+    Fix: JooQ 빌드 오류 수정
+
+[33mcommit 585c75ed0670208232e093866da6aed43491ae11[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 12:08:24 2025 +0900
+
+    Refactor: 유저 입맛 업데이트 로직 개선
+
+[33mcommit bde4e5483130043cc23531002adca00ee9753b31[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 11:15:46 2025 +0900
+
+    Fix: 입맛 삭제 메소드 변경
+
+[33mcommit f31c7d928f59c7e22bdec6467febc1d1233e9991[m
+Merge: 75f5a57 0c3829b
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 11:14:55 2025 +0900
+
+    Fix: 로컬 병합 충돌 해결
+
+[33mcommit 0c3829bdeca7b4ef5d465c04b402f8413abaccce[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Wed Jun 18 11:11:17 2025 +0900
+
+    [Refactoring] Store, Board 리팩토링 (#91)
+    
+    * 🐛 fix : dto 정규표현식 수정
+    
+    * ✨ feat : 포스팅 횟수 증가 및 예외처리
+    
+    * ✨ feat : postingCount 스케줄링
+    
+    * ✨  feat : 게시글 조회시 검증 로직 추가
+    
+    * ✨ feat : 오픈런 게시글 closed 하는 스케줄러 구현
+    
+    * ♻️  refactor : 스케줄링 누락 방지
+    
+    * ✨ feat : board status 변경 메서드 구현
+    
+    * 🐛 fix : 에러코드 수정
+    
+    * ✨ feat : 선착순 기능 구현 및 책임 분리
+    
+    * 🐛 fix : 오류 해결
+    
+    * ✨ feat : 오픈런 게시글 조회 api 구현
+    
+    * ✨ feat : 페이징 디폴트값 설정
+    
+    * 🐛 fix : 임시 버그 수정
+    
+    * ✨ feat : 웹소켓 관련 오픈런 게시글 기능 구현
+    
+    * 🔥 remove : 주석 정리
+    
+    * 🐛 fix : jpa 메서드명 관련 오류 해결
+    
+    * 🐛 fix : 오류 수정 및 리팩토링
+    
+    * 🐛 fix : 유효성 검증 어노테이션 수정
+    
+    * ♻️  refactor : 불필요한 래퍼 클래스 기본 타입으로 변경, clearAutomatically 옵션 적용
+    
+    * ♻️  refactor : 삭제된 데이터 제외하고 조회
+    
+    * 🧪 test : 테스트코드 작성 및 일부 수정
+    
+    * 🐛 fix : 코드리뷰 반영
+    
+    * ♻️  refactor : 하드코딩된 코드 수정
+    
+    * 🐛 fix : 웹소켓 config 수정 반영
+    
+    * 🐛 fix : null 검증
+    
+    * 🐛 fix : 오류 해결
+    
+    * 🐛 fix : 오류 해결
+    
+    * ♻️  refactor : OnDelete -> cascade+orphanRemoval로 수정 및 부모 삭제시 자식 삭제 선행
+    
+    * ♻️  refactor : store-board간 제약조건 고려하여 softDelete로 변경 및 리뷰 단방향 관계로 변경
+    
+    * ♻️  refactor : 리뷰의 이미지 조회 로직 성능 개선으로 리뷰-가게 단방향 변경
+    
+    * ♻️  refactor : user 도메인 queryDSL 적용
+    
+    * ♻️ refactor : 쿼리 변경 및 redis key 변경
+    
+    * ♻️  refactor : host 정보도 환경변수로 변경
+    
+    * ♻️ refactor : Board.java BoardStatus -> AccessPolicy로 필드 변경
+    
+    * 🛠️ chore : 오류나는 부분 주석 처리
+    
+    * ️ chore : properties 변경
+    
+    * 🛠️ chore : ci.yml 수정
+    
+    * chore : ci.yml 수정
+    
+    * chore : 필드명 수정
+
+[33mcommit a00b684c0d99f37564d21c4cd7a16e9a519ee79b[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Wed Jun 18 10:18:22 2025 +0900
+
+    [Refactoring, Test] event 당첨시 알림 발행, Pk 단위, ci 에 test 추가 (#85)
+    
+    * test : pk 서비스 테스트 코드 작성
+    
+    * fix : 코드래빗 기반 리팩토링
+    
+    * fix : 이미지 jpql -> querydsl 리팩토링, 및 map이 아닌 클래스로 데이터 저장 적용
+    
+    * fix : eventAop 임시 주석 처리 -> 리팩토링 예정
+    
+    * fix : 테스트 환경 설정, 테스트 코드 수정
+    
+    * chore : 테스트 환경 설정
+    
+    * chore : 테스트 환경 설정, ci.yml 테스트 반영
+    
+    * chore : ci.yml 에 docker-compose 설치
+    
+    * chore : ci.yml 환경변수 설정 github secret 쓰도록 설정
+    
+    * fix : 모든 통합 테스트에 @ActiveProfiles("test-int") 추가
+    
+    * fix : BoardFixture.java 수정
+    
+    * chore: ci.yml test-int만 properties 인식하도록 수정
+    
+    * chore: 경로 명시
+    
+    * chore: 백슬래시 삭제
+    
+    * chore: .env.test 환경변수 export 할 수 있도록 수정
+    
+    * chore: .env.test를 run: 안에서 직접 export로 하나씩 읽도록 수정
+    
+    * chore: 환경변수 강제 주입하도록 수정
+    
+    * chore: 환경변수 강제 주입하도록 수정
+    
+    * chore: run test 수정..
+    
+    * chore: localhost -> 아이피로 인식되도록 수정
+    
+    * chore: docker compose up 디버깅
+    
+    * chore: docker compose up 디버깅
+    
+    * chore: 재수정..
+    
+    * chore: 재수정..
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 3306으로 포트 번호 변경
+    
+    * chore: 순정
+    
+    * chore: 순정
+    
+    * chore: 순정
+    
+    * chore: 제발 되세요...
+    
+    * chore: 제발 되세요...2
+    
+    * chore: host.docker.mysql 임시시도
+    
+    * chore: app 서비스 이용하도록
+    
+    * chore: app 서비스 이용하도록
+    
+    * chore: app 서비스 이용하도록
+    
+    * chore: app 서비스 이용하도록
+    
+    * chore: 헬스채크 수정
+    
+    * chore: env username password 삭제
+    
+    * chore: 포트 외부 수정
+    
+    * chore: 포트 외부 수정
+    
+    * chore: sout
+    
+    * chore: sout
+    
+    * chore: flyway삭제
+    
+    * chore: 다시 localhost변경
+    
+    * chore: 더미 환경변수
+    
+    * chore: 더미 환경변수
+    
+    * chore: ip 다 컨테이너 이름으로
+    
+    * chore: 갈아 엎음
+    
+    * chore: 갈아 엎음
+    
+    * chore: 갈아 엎음
+    
+    * chore: 갈아 엎음
+    
+    * chore: 갈아 엎음
+    
+    * chore: 갈아 엎음
+    
+    * chore: 환경변수 수정
+    
+    * chore: 더미 환경변수
+    
+    * chore: 채진님 jooq 설정 ci 반영
+    
+    * chore: 최종 수정
+    
+    * fix : 이미지 주소 관련 수정, 및 ci conditional하게 jooq 제외하도록
+
+[33mcommit 75f5a57684e425dc3f7e70b1352170c89f782b4f[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 05:13:47 2025 +0900
+
+    Feat: 파티 매치 조건에 카테고리 추가 및 매칭 알고리즘 반영
+
+[33mcommit 96a8682d688343485b51e01d387a50532df8b5c0[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 04:35:21 2025 +0900
+
+    Refactor: 중복 에러 코드 제거
+
+[33mcommit e0b36bcd45a31728018a07db0539dc5aecdd152a[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 04:04:51 2025 +0900
+
+    Feat: 유저 랜덤 매칭 취소 시 상태 변경 반영
+
+[33mcommit 266089c162d8274a5f80349b903a96f42003956d[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 03:40:56 2025 +0900
+
+    Comment: 유저 이미지 관련 트랜잭션 주석 제거
+
+[33mcommit 7761c6f241440af95f6f1fb117ec4f4ab4c6fcab[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 03:30:33 2025 +0900
+
+    Feat: 탈퇴한 사용자 채팅에서 닉네임 마스킹 기능 추가
+
+[33mcommit a617f4fea6d4c9f27a1f6f3dfe8eb4a0c00f48d6[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 02:37:38 2025 +0900
+
+    Refactor: 팔로우repo 리팩토링
+
+[33mcommit 0957366c74689fd55f7a8e8c613be7d7ff15f1be[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Wed Jun 18 02:29:18 2025 +0900
+
+    Refactor: 파티/파티 초대 queryDSL 리팩토링
+
+[33mcommit c9bbe373493f7cff2783582363a033f9072634ef[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Tue Jun 17 23:55:50 2025 +0900
+
+    Refactor: 파티 - 파티 초대 양방향 연관관계 삭제
+
+[33mcommit 3435fa5c05184c9dc9fb47e8118f2f4b81353eff[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Tue Jun 17 23:48:38 2025 +0900
+
+    Refacator: 파티 스태이터스 RECRUITING, FULL > ACTIVE 로 통일
+
+[33mcommit 095cb5d91381519fc2d9123cede83b777ac052d3[m
+Author: YejinY00n <yoon17710@gmail.com>
+Date:   Tue Jun 17 22:08:41 2025 +0900
+
+    Feat: 중복 팔로우/언팔로우 방지 로직 추가
+
+[33mcommit 10428b74e99245685733e90ebed00137846fecc0[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Mon Jun 16 14:39:11 2025 +0900
+
+    [Fix] 유저 테스트수정 #87 (#88)
+    
+    * Feat: 채팅 기능 추가
+    
+    * Feat: 자신의 채팅방 구독 여부 검증 로직 추가
+    
+    * Refactor: DateRange 최소 날짜 변경
+    
+    * Fix: CRLF --> LF 문제 변경
+    
+    * Fix: 빌드 오류 수정
+    
+    * Fix: 빌드 오류 수정
+    
+    * Fix: 빌드 오류 수정
+    
+    * Refactor: 파티 API 경로 및 메소드 수정
+    
+    * Fix: 채팅 기능 테스트 중 오류 수정
+    
+    * Fix: 채팅 시 LAZY 문제 임시 조치
+    
+    * Fix: 채팅 기능 테스트 중 오류 수정
+    
+    * Fix: 파티 초대 중 로직 오류, LAZY 로딩, JPA 오류 수정
+    
+    * Fix : Fix
+
+[33mcommit 87ef92b924ba5a4a49d6ffae3e53a23e5ef85007[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Mon Jun 16 12:11:32 2025 +0900
+
+    [Feature] 오픈런 게시글 기능 구현 (#83)
+    
+    * 🐛 fix : dto 정규표현식 수정
+    
+    * ✨ feat : 포스팅 횟수 증가 및 예외처리
+    
+    * ✨ feat : postingCount 스케줄링
+    
+    * ✨  feat : 게시글 조회시 검증 로직 추가
+    
+    * ✨ feat : 오픈런 게시글 closed 하는 스케줄러 구현
+    
+    * ♻️  refactor : 스케줄링 누락 방지
+    
+    * ✨ feat : board status 변경 메서드 구현
+    
+    * 🐛 fix : 에러코드 수정
+    
+    * ✨ feat : 선착순 기능 구현 및 책임 분리
+    
+    * 🐛 fix : 오류 해결
+    
+    * ✨ feat : 오픈런 게시글 조회 api 구현
+    
+    * ✨ feat : 페이징 디폴트값 설정
+    
+    * 🐛 fix : 임시 버그 수정
+    
+    * ✨ feat : 웹소켓 관련 오픈런 게시글 기능 구현
+    
+    * 🔥 remove : 주석 정리
+    
+    * 🐛 fix : jpa 메서드명 관련 오류 해결
+    
+    * 🐛 fix : 오류 수정 및 리팩토링
+    
+    * 🐛 fix : 유효성 검증 어노테이션 수정
+    
+    * ♻️  refactor : 불필요한 래퍼 클래스 기본 타입으로 변경, clearAutomatically 옵션 적용
+    
+    * ♻️  refactor : 삭제된 데이터 제외하고 조회
+    
+    * 🧪 test : 테스트코드 작성 및 일부 수정
+    
+    * 🐛 fix : 코드리뷰 반영
+    
+    * ♻️  refactor : 하드코딩된 코드 수정
+    
+    * 🐛 fix : 웹소켓 config 수정 반영
+    
+    * 🐛 fix : null 검증
+    
+    * 🐛 fix : 오류 해결
+
+[33mcommit d53a90892ceff6b59c53336f82ae2114ac73d8f9[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Mon Jun 16 10:18:40 2025 +0900
+
+    [Refactor] 게시글 생성/연관관계 리팩토링 및 해시태그 검색 확장 (#82)
+    
+    * refactor: 게시글 목록 API 구조 통합 및 QueryDSL로 리팩토링
+    
+    - /simple, /detailed API 제거 후 /feed API로 통합
+    - JPQL 기반 repository 메서드 제거
+    - QueryDSL 기반 피드 조회 쿼리 구현
+    - 내 게시글 + 팔로우 게시글 통합 조회 및 페이지네이션 적용
+    
+    * refactor: 게시글 연관관계 List → Set 변경 및 빌더 명시
+    
+    - User 엔티티의 boardList를 boardSet으로 변경하여 중복 방지
+    - Board 엔티티의 boardHashtagList를 boardHashtagSet으로 변경
+    - BoardHashtag#setBoard 내부 로직을 Set 기준으로 수정
+    - @EqualsAndHashCode(of = "id") 적용으로 중복 판단 기준 일관성 확보
+    - Board 엔티티에 빌더 메서드 명시 (nBoardBuilder, oBoardBuilder)로 가독성 향상
+    
+    * remove: 게시글 BoardMapper 삭제
+    
+    * refactor: 게시글 해시태그 연관관계 List → Set 기반으로 리팩토링
+    
+    * refactor: 게시글 생성에 전략 + 팩토리 패턴 적용
+    
+    - 게시글 타입별 생성 로직에 전략 패턴 도입 (Normal, OpenRun 구분)
+    - BoardCreationStrategyFactory 통해 타입에 따른 전략 자동 주입
+    - 기존 BoardMapper 제거, 서비스 내부에서 전략 기반으로 생성 책임 위임
+    
+    * refactor: 해시태그 삭제 및 조회 로직 repository 기반으로 통일 및 구조 간소화
+    
+    - 게시글의 해시태그 전체 삭제를 deleteAllByBoardId JPQL 기반으로 변경
+    - findByBoardIdAndHashtagId, findByBoardIdAndHashtag_Name 메서드 추가
+    - 해시태그 존재 여부 확인 후 삭제 방식에서 ID 기반 삭제 방식으로 단순화
+    - 기존 Map<String, Hashtag> 구조 제거, List<Hashtag> 기반으로 해시태그 처리 로직 간소화
+    
+    * feat: 게시글 키워드 검색 시 해시태그 이름 조건 추가
+    
+    - 게시글 제목(title), 내용(contents)에 더해 해시태그 이름(name)에도 키워드 포함 여부를 검사
+    
+    * refactor: 게시글 생성 전략에 제네릭 타입 명시하여 타입 캐스팅 제거
+    
+    - BoardCreationStrategy<T>에 제네릭 타입 명시
+    - 각 전략 구현체에서 DTO 타입 명확히 지정 (Normal, OpenRun)
+    - 팩토리 Map 및 반환 메서드에 제네릭 타입 지정
+    - 런타임 캐스팅 제거로 타입 안정성 확보 및 유지보수성 향상
+    
+    * fix: JPQL 파라미터 이름 불일치 및 clearAutomatically 설정 추가
+    
+    * fix: 해시태그 삭제 시 정규화된 이름 사용 누락 오류 수정
+    
+    * fix: BoardHashtag equals/hashCode 로직 수정으로 Set 중복 및 비교 오류 해결
+    
+    - 기존 id 기반 비교에서 board.id와 hashtag.name 기반 비교로 변경
+    - 영속화 전 상태에서도 중복 판단 가능하도록 개선
+    - board 또는 hashtag가 null인 경우 예외 발생시켜 오류 조기 감지
+    - @EqualsAndHashCode 제거 후 equals/hashCode 직접 구현
+    
+    * refactor: 게시글 목록 및 키워드 검색 쿼리 서브쿼리 제거 및 성능 개선
+    
+    - findBoardListDtoByUserIdList, searchBoardsByKeyword 두 메서드 리팩토링
+    - 게시글 대표 이미지 조회 시 JPAExpressions 서브쿼리 제거
+    - boardImage 테이블 left join + groupBy로 대표 이미지 URL을 한 번에 조회
+    
+    * fix: 리뷰 작성자 비교 시 equals 실패로 id 기반 비교로 임시 조치
+
+[33mcommit b9472a66d751a5a2bf71438fa2ed66d270d35e73[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Mon Jun 16 10:07:34 2025 +0900
+
+    [Feature] 채팅 기능 개발 #80 (#84)
+    
+    * Feat: 채팅 기능 추가
+    
+    * Feat: 자신의 채팅방 구독 여부 검증 로직 추가
+    
+    * Refactor: DateRange 최소 날짜 변경
+    
+    * Fix: CRLF --> LF 문제 변경
+    
+    * Fix: 빌드 오류 수정
+    
+    * Fix: 빌드 오류 수정
+    
+    * Fix: 빌드 오류 수정
+    
+    * Refactor: 파티 API 경로 및 메소드 수정
+    
+    * Fix: 채팅 기능 테스트 중 오류 수정
+    
+    * Fix: 채팅 시 LAZY 문제 임시 조치
+    
+    * Fix: 채팅 기능 테스트 중 오류 수정
+    
+    * Fix: 파티 초대 중 로직 오류, LAZY 로딩, JPA 오류 수정
+
+[33mcommit 9547ca346938ec603f15e75fa6f0f356cfbcb9b7[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Fri Jun 13 22:19:07 2025 +0900
+
+    [Refactoring] comment service, review OCR service #77 (#81)
+    
+    * refactor: 댓글 전체조회 삭제, 루트 댓글, 대댓글 조회 기능 추가
+    
+    * fix: 댓글 조회 쿼리 오류 수정
+    
+    * fix: OCR 요청 webflux 사용, 상호 비교 방식 수정
+    
+    * feat, fix: 유저 알림 카테고리 엔티티 생성, 알림 조회 관련 테스트, 수정
+    
+    * fix:ocr 요청 수정, block 시간 제한, 복합키 직렬화 구현, 관계 엔티티 equal and hashcode 구현
+    
+    * fix: 디버그 코드 삭제, dto data 대신 getter 사용
+
+[33mcommit 8fa0cfaa3d67176fa3990de038514bae1a411d8c[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Fri Jun 13 17:37:49 2025 +0900
+
+    [Feature] 랜덤 파티(맛집메이트) 기능 구현 #62 (#68)
+    
+    * Feat: 매칭 조건 추가 기능
+    
+    * Feat: 유저 매칭 조건 조회
+    
+    * Feat: 유저 매칭 조건 업데이트
+    
+    * Feat: 유저 매칭 조건 삭제
+    
+    * Refactor: 엔티티 페처 적요
+    
+    * Feat: 매칭 알고리즘 초안
+    
+    * Feat: 파티 매칭 시작 기능
+    
+    * Feat: 파티 매칭 알고리즘 중간 저장
+    
+    * Feat: 매칭 알고리즘 추가
+    
+    * Commnet: 주석에 담당자 추가
+    
+    * Feat: 매칭 취소 기능 추가
+    
+    * Feat: 랜덤 파티 매칭 유저/파티장 수락/거절 기능 추가
+    
+    * Feat: 랜덤 파티 매칭 유저 수락/거절 기능 추가
+    
+    * Feat: 유저의 파티 초대 조회 시 조건 추가
+    
+    * Feat: 엔티티 페처에 활성화 유저 가져오는 메소드 추가
+    
+    * Refacor: 파티 거절 메소드 일부 트랜잭션 누락 추가
+    
+    * Refactor: 파티 조회 switch문 구조 변경
+    
+    * Comment: 주석 제거
+    
+    * Fix: UserMatchCondCategory 레포지토리 키 오류 수정
+    
+    * Feat: 매칭 서비스/ 매칭 엔진 서비스 분리 초안
+    
+    * Fix: 로컬 병합 충돌 해결
+    
+    * Fix: 로컬 병합 충돌 해결
+    
+    * Feat: 매칭 서비스/ 매칭 엔진 서비스 분리 및 구조 리팩토링
+    
+    * Refactor: DateRange 수정
+    
+    * Feat: 매칭 redis publisher 추가
+    
+    * Feat: 매칭 redis subscriber 추가
+    
+    * Refactor: RedisChannel 리팩토링 및 RedisService 주입
+    
+    * Feat: Redis 리스너 컨테이너 등록 및 리팩토링
+    
+    * Feat: 매칭 요청 AOP 추가 및 호출하도록 변경
+    
+    * Feat: 매칭 스케줄러 추가
+    
+    * Refactor: UserMatchCond --> UserMatchInfo 엔티티 명 수정
+    
+    * Refactor: PartyMatchRandom --> PartyMatchInfo 엔티티 명 변경
+    
+    * Refactor: 수정된 엔티티 명 필드 적용
+    
+    * Feat: 파티 DTO Valid 추가
+    
+    * Comment : 주석 수정
+    
+    * Feat: Category hashCode 추가
+    
+    * Refactor: 파티 초대 에러코드 수정
+    
+    * Refactor: jsonformat 에러 수정
+    
+    * Feat: AgeRange 생성자 추가
+    
+    * Refactor: 파티 업데이트 시 필드 반영되도록 수정
+    
+    * Fix: UserMatchInfo Repo JPA 메소드명 수정
+    
+    * Fix: Party LocalDateTime 필드 --> LocalDate 로 수정
+    
+    * Fix: Party 필드 null일 시 기본값 지정
+    
+    * Fix: PartyMatchInfo 생성자 수정
+    
+    * Fix: 유저 매칭 정보 삭제 대상 엔티티 없을 경우 예외 처리 발생하도록 처리
+    
+    * Fix: PartyInvitation Repo 파라미터 수정
+    
+    * Fix: 매칭 알고리즘 필터링 및 가중치 계산 논리 오류 수정
+    
+    * Fix: @Valid 추가
+    
+    * Fix: MatchInfo 수정/삭제 시 자신의 것만 허용
+    
+    * Refactor: UserMatchInfo Setter 제거
+    
+    * Refactor: PartyMatchInfo Setter 제거
+    
+    * Refactor: UserMatchInfo 빌더 수정
+    
+    * Fix: PartyInvitation Service 분기 오류 수정
+    
+    * Fix: manual type 검증 오류 수정
+    
+    * Feat: DateRange 에서 DateTime, LocalDateTime 둘다 커버하도록 변경
+    
+    * Refactor: 유저 매칭 정보 카테고리/상점 연관관계 전파속성 변경
+    
+    * Fix: 매칭 작업 이벤트 메세지 소비 시 방어 로직 추가
+    
+    * Refactor: PartyInvitaion Repo 안쓰는 JPA 메소드 삭제
+    
+    * Refactor: PartyInvitaion Repo JPA 반환값 수정
+    
+    * Refactor: PartyMatchInfo 생성자 필드 대입 수정
+    
+    * Refactor: PartyMatchInfo 연관관계 제약 수정
+    
+    * Refactor: UserMatchInfoResponseDto 생성자 필드 대입 수정
+    
+    * Refactor: 유저매칭 인포 DTO LocalDate 포맷 어노테이션 적용
+    
+    * Refactor: 새 버전 TransactionSynchronization 으로 변경
+    
+    * Feat: 빌드 오류 수정
+    
+    * Fix: DateRangeValidator 검증 오류 수정
+    
+    * Fix: MatchingEngineService 검증 오류 수정
+    
+    * Fix: Party 생성자 수정 =
+    
+    * Fix: 중복 builder 제거
+    
+    * Fix: setter 제거
+    
+    * Fix: PartyInvitationService 파티 가입 로직 오류 수정
+    
+    * Fix: 중복 가입/초대 방지
+    
+    * Fix: 중복 가입/초대 방지
+    
+    * Refactor: 리스너컨테이너에 등록 하는 부분을 redisConfig 로 이동
+    
+    * Refactor: Illegal --> Custom Exception 변경
+
+[33mcommit 41480f3ac462297ec4a9b44cfda19638d62b5806[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Fri Jun 13 14:26:24 2025 +0900
+
+    [Refactoring] after-fixes #78
+    
+    - 실제 작동 테스트 진행 하면서 생긴 자잘한 오류 수정
+
+[33mcommit 2d57330ca9964baed53d2f0cf7d5f82d572018af[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Thu Jun 12 23:05:58 2025 +0900
+
+    [Feature] 게시글·맛집 키워드 검색 및 맛집 등록 기능 구현 (#74)
+    
+    * refactor: 공통 엔티티 조회 유틸 EntityFetcher 적용 및 좌표 포맷 개선
+    
+    - 여러 도메인에서 엔티티 조회 중복 제거를 위해 EntityFetcher 적용
+    - 네이버 지도 API 호출 시 좌표를 '%.7f,%.7f' 형식으로 포맷하도록 수정
+    
+    * feat: 게시글 키워드 기반 검색 기능 구현
+    
+    - BoardSearchCondition을 활용한 게시글 검색 조건 동적 구성
+    - QueryDSL 기반 동적 정렬 및 검색 조건(querydsl.BooleanBuilder) 구현
+    - 게시글 목록 응답용 BoardListResponseDto 생성자 매핑 처리
+    - 이미지 서브쿼리 활용하여 게시글 대표 이미지 URL 조회
+    - 키워드가 없는 경우 개별 조건(제목/내용/작성자 등) 검색 분기 처리
+    
+    * feat: 게시글 키워드 검색 API 컨트롤러 및 서비스 구현
+    
+    - BoardService에 키워드 기반 게시글 검색 로직 추가
+    - BoardController에서 /boards/search GET API 엔드포인트 정의
+    
+    * fix: BoardStatus 변환 로직에 커스텀 예외처리 적용
+    
+    * feat: 게시글 상태 예외코드 BOARD_STATUS_NOT_FOUND 추가
+    
+    * refactor: 게시글 검색 조건의 타입 검증을 Enum 기반으로 리팩토링
+    
+    - @Pattern 정규표현식 제거하고 @ValidEnum으로 대체
+    - BoardType, BoardStatus에 대한 유효성 검증을 Enum 클래스 기준으로 수행
+    
+    * feat: 게시글 키워드 검색 조건 BoardSearchCondition DTO 생성
+    
+    - 제목, 내용, 가게명, 작성자 등 필드 기반 검색 조건 정의
+    - 통합 키워드(keyword) 검색과 개별 필드 검색 분기 처리 지원
+    - 게시글 타입과 상태 필터링을 위한 @ValidEnum 적용
+    - 작성일 범위 필터(createdFrom, createdTo) 추가로 기간 검색 지원
+    
+    * feat: 초기 카테고리 데이터 자동 생성 로직 추가
+    
+    - '한식', '일식', '중식', '양식' 카테고리를 초기값으로 등록
+    - Category 엔터티에 name 속성 unique 제약 추가로 중복 등록 방지 강화
+    
+    * feat: CategoryRepository 조회 메서드 추가
+    
+    - 이름으로 존재 여부 확인하는 existsByName 메서드 추가
+    - 이름으로 카테고리를 조회하는 findByName 메서드 추가
+    - 최대 displayOrder 값을 조회하는 findMaxDisplayOrder 쿼리 메서드 추가
+    
+    * feat: 맛집 등록 기능 구현 및 중복 저장 방지 처리
+    
+    - 네이버 검색 API 결과 기반으로 맛집 등록하는 createStore 컨트롤러/서비스 구현
+    - 음식점 카테고리명 추출 후 존재하지 않으면 자동 생성되도록 개선
+    - 가게명 + 좌표(mapx, mapy) 기준으로 중복 등록 여부 확인하는 로직 추가
+    - 중복 시 STORE_ALREADY_EXISTS 예외 발생
+    - Store 엔티티에 mapx, mapy 소수점 정밀도 설정(precision=10, scale=7)
+    - HTML 태그 제거 유틸 stripHtmlTags 구현
+    
+    * feat: 유저의 팔로잉 ID 목록 조회 쿼리 메서드 추가
+    
+    - 팔로워 ID를 기준으로 팔로우 중인 유저 ID 목록을 조회하는 쿼리 메서드 추가
+    - 게시글, 피드 등에서 팔로잉 기반 필터링에 활용 가능
+    
+    * feat: 나와 팔로잉 유저의 맛집리스트 키워드 조회 기능 추가
+    
+    - 내 버킷에서 키워드 기반 맛집 검색 기능 구현
+    - 팔로우한 유저들의 버킷에서도 키워드로 맛집 검색 가능
+    - 컨트롤러 및 서비스 로직 추가
+    - QueryDSL을 이용한 검색 쿼리 레포지토리 구현
+    
+    * style: 검색 조건 파라미터에 @ModelAttribute 및 설명 주석 추가
+    
+    - 키워드 기반 검색 조건 객체에 @ModelAttribute 어노테이션 명시
+    
+    * feat: 게시글 검색 조건에 날짜 필터 기능 추가 및 쿼리 개선
+    
+    - BoardSearchCondition의 createdFrom, createdTo 필드에 날짜 포맷 지정 (@DateTimeFormat)
+    - 기간 필터링 쿼리 작성: 전체 범위, 이후, 이전 조건에 따라 동적 쿼리 적용
+    
+    * fix: EnumValidator에서 대소문자 구분 없이 값 비교하도록 수정
+    
+    - equals → equalsIgnoreCase로 변경하여 유효성 검사 시 대소문자 무시
+    
+    * feat: 맛집 키워드 검색 범위에 카테고리명 포함
+    
+    - 검색 조건에 가게명, 설명 외에 카테고리명도 포함되도록 개선
+    
+    * fix: @RequestParam 유효성 검사를 위한 @Validated 추가
+    
+    * style: 좌표 포맷에 불필요한 주석 제거
+    
+    * refactor: getOrCreateCategory의 동시 생성 시 중복 방지 구조 유지 확인
+    
+    - 카테고리 중복 생성 방지를 위해 unique 제약 및 orElseGet 구조 유지
+    - 별도 락 도입은 생략, 예외로 처리
+    
+    * fix: 맛집 등록 시 중복 저장 방지를 위한 유니크 제약 및 예외 처리 추가
+    
+    - Store 엔티티에 (name, mapx, mapy) 복합 유니크 제약 조건 추가
+    - 중복 저장 시 발생하는 무결성 위반 예외를 캐치하여 STORE_ALREADY_EXISTS 예외로 변환
+    - 예상치 못한 무결성 오류는 INTERNAL_SERVER_ERROR로 대응
+    
+    * fix: 팔로잉 ID 중복 방지를 위해 DISTINCT 키워드 추가
+    
+    * fix: 검색 결과 없을 경우 예외 처리 추가
+    
+    - Naver 검색 API 응답에서 아이템이 비어 있을 경우 STORE_NOT_FOUND 예외 발생
+    
+    * feat: 기간 유효성 검증을 위한 @ValidDateRange 애노테이션 및 Validator 추가
+    
+    - createdFrom이 createdTo보다 이후일 수 없는 유효성 검사 로직 구현
+    - 검색 조건 등에서 날짜 범위 검증에 활용 가능
+    
+    * feat: 게시글 검색 조건에 기간 필터 분리 및 유효성 검증 로직 추가
+    
+    - createdFrom, createdTo 필드를 별도 DTO(CreatedDateRange)로 분리
+    - @ValidDateRange 애노테이션 기반 커스텀 기간 유효성 검사 적용
+    - 검색 요청 시 최대 페이지 사이즈 제한(50) 추가 및 INVALID_PAGE_SIZE 예외 코드 추가
+    
+    * fix: storeBucket 목록 조회 시 count 쿼리의 중복 계산 오류 수정
+    
+    * style: NaverLocalSearchResponseDto static import 와일드카드 제거
+    
+    - 가독성과 충돌 방지를 위해 Item 클래스만 명시적으로 import
+    
+    * fix: 가게 저장 시 중복 제약 조건 예외 처리 안정성 개선
+    
+    - e.getCause() → NestedExceptionUtils.getRootCause() 변경
+    - ConstraintViolationException 중첩 예외까지 탐색 가능하도록 수정
+    - STORE_ALREADY_EXISTS 정확하게 매핑되도록 개선
+    - 알 수 없는 예외는 INTERNAL_SERVER_ERROR 처리 유지
+
+[33mcommit 3f39d3091f69af999cbf1f040d0d5395fb0c3c4e[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Thu Jun 12 20:40:35 2025 +0900
+
+    [Test] Store 도메인 테스트코드 (#71)
+    
+    * ♻️ refactor : 공통응답 사용하도록 수정
+    
+    * 🧪 test : addBucketItem(), getBucketsByUserId() 일부 테스트코드 작성 완료
+    
+    * test : 테스트코드 작성
+    
+    * 🧪 test : makeUnduplicateName() 테스트코드 작성
+    
+    * ♻️  refactor : 성능 관련 제외 코드리뷰 사항 리팩토링
+    
+    * ♻️  refactor : 유효한 데이터만 조회하도록 수정 및 entity fetcher 사용
+    
+    * 🐛 fix : 테스트 실패 원인 해결
+    
+    * ♻️  refactor : 코드 리팩토링
+
+[33mcommit 0de14f067f53d24ad53c99a6e0a528cf3a34a271[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Thu Jun 12 17:09:32 2025 +0900
+
+    [Feature] Notification CRUD #43 (#69)
+    
+    * refactor: remove dependency of redis template from review service
+    
+    * feat: add notification info, content, publishing, subbing
+    
+    * refactor: notification info batch insert
+    
+    * refactor: fetch user by page, fetch user id for reference by id
+    
+    * fix: allow review creation, update without image
+    
+    * refactor: remove other api repository dependency, find user via user details
+    
+    * refactor: notification 카테고리별 분류, 알림 생성 방식 변경
+    
+    * refactor: 불필요한 알림 타입 객체 제거, pub/sub을 위한 redis 설정 post construct 로 확장.
+    
+    * feat: 알림 카테고리별 스쿼시
+    
+    * feat: 알림 read, update
+    
+    * feat: 알림 읽음 처리 구현
+    
+    * refactor: review 점검 및 코드 정리, 3항연산자 제거
+    
+    * feat: system, marketing 알림 발행기능 추가
+    
+    * feat: aop를 통한 구독자 알림 발행 기능 추가(게시글 생성)
+    
+    * fix: 구독자 알림 redirection url 설정
+    
+    * chore: 리뷰 주석
+    
+    * chore: 댓글 주석
+    
+    * chore: 알림 주석
+    
+    * fix: comment boardId 관련 수정, properties 수정
+    
+    * fix: user id 참조용 생성자 제거
+    
+    * fix: 알림 전송 대상에서 삭제된 유저 제외
+    
+    * fix: 전체 알림 dto 빌더 패턴 적용, transactional 제거
+    
+    * fix: 알림 aop null return 방어
+    
+    * fix: 알림 예외 코드 메시지 수정
+    
+    * fix: 관리자 발행 알림의 카테고리 정규식 설정
+    
+    * fix: 관리자 발행 알림 유저 역활 검증 설정
+    
+    * fix: ocr 요청 map 에서 dto로 변경
+    
+    * fix: ocr 영수증 파일타입 동적 인식
+    
+    * fix: 알림 조회 메서드 saveAll 삭제
+    
+    * fix: 잡다한 쓰레기 코드 정리
+    
+    * fix: 리뷰 컨트롤러 이미지 null 체크 삭제
+    
+    * fix: 리뷰 files empty 방어
+    
+    * fix: 오래된 알림 조회 redis 알림 조회 로직 수정
+    
+    * fix: 알림 조회 인덱스 기본값 설정
+    
+    * fix: 리뷰 이미지 업데이트 로직 수정
+
+[33mcommit 24e2d27fdfe13432a76cb0b1d3bbbea77186e3e9[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Thu Jun 12 16:55:14 2025 +0900
+
+    [Refactoring] 이미지 Aspect, 공통 응답 객체 리팩토링 (#70)
+    
+    * refactor : 이미지 Aspect validate 메서드 분리
+    
+    * refactor : 이미지 aspect 리팩토링, 확장성
+    
+    * refactor : 이미지 aspect 에러코드 image 도메인으로 이동
+    
+    * refactor : commonResponse 수정
+    
+    * refactor : image S3 url String -> URL로 수정
+    
+    * refactor : ci, cd yml 분리
+    
+    * refactor : run test 추가
+    
+    * refactor : 이미지 에러코드 수정
+    
+    * refactor : application-local과 연결
+    
+    * refactor : 테스트 제거
+
+[33mcommit d3214781310e48982daac6aec80ce106f6144614[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Wed Jun 11 22:33:51 2025 +0900
+
+    [Feature] 오픈런 게시글 기능 구현 (#66)
+    
+    * 🐛 fix : dto 정규표현식 수정
+    
+    * ✨ feat : 포스팅 횟수 증가 및 예외처리
+    
+    * ✨ feat : postingCount 스케줄링
+    
+    * ✨  feat : 게시글 조회시 검증 로직 추가
+    
+    * ✨ feat : 오픈런 게시글 closed 하는 스케줄러 구현
+    
+    * ♻️  refactor : 스케줄링 누락 방지
+    
+    * ✨ feat : board status 변경 메서드 구현
+    
+    * 🐛 fix : 에러코드 수정
+    
+    * ✨ feat : 선착순 기능 구현 및 책임 분리
+    
+    * 🐛 fix : 오류 해결
+    
+    * ✨ feat : 오픈런 게시글 조회 api 구현
+    
+    * ✨ feat : 페이징 디폴트값 설정
+    
+    * 🐛 fix : 임시 버그 수정
+    
+    * ✨ feat : 웹소켓 관련 오픈런 게시글 기능 구현
+    
+    * 🔥 remove : 주석 정리
+    
+    * 🐛 fix : jpa 메서드명 관련 오류 해결
+    
+    * 🐛 fix : 오류 수정 및 리팩토링
+    
+    * 🐛 fix : 유효성 검증 어노테이션 수정
+    
+    * ♻️  refactor : 불필요한 래퍼 클래스 기본 타입으로 변경, clearAutomatically 옵션 적용
+
+[33mcommit 1de2884d0ad06d3fefe80a07246860dd6febd680[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 20:01:36 2025 +0900
+
+    chore : 빌드 테스트 주석
+
+[33mcommit d46d7b6771287d0e607b6c71aeedf07fe0c77db8[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 19:51:43 2025 +0900
+
+    refactor : dev pull 받도록 수정
+
+[33mcommit 1afbc54fb046fcda6c759fc49bf3e126a9cbabea[m
+Merge: 3b8d784 3914a4d
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 18:20:27 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into feat#63/ci-cd
+    
+    # Conflicts:
+    #       .github/workflows/docker-image.yml
+
+[33mcommit 3b8d784ed01c23587024d8f7555e87dae8a35f14[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 18:10:19 2025 +0900
+
+    chore : docker-compose 이미지 설정 수정
+
+[33mcommit 3914a4d588904cdffda0505633c51ea5719e3bd3[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Wed Jun 11 17:10:05 2025 +0900
+
+    [Feature] Docker를 활용한 CI/CD 구축 (#65)
+    
+    * chore : github action yml 생성
+    
+    * chore : application.properties ocr_key 환경변수 수정
+
+[33mcommit b7b66fdc5b103b49f45658936a4281419dbb931e[m
+Merge: 7a7629e fc6ba63
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 16:41:46 2025 +0900
+
+    Merge remote-tracking branch 'origin/feat#63/ci-cd' into feat#63/ci-cd
+
+[33mcommit 7a7629e7a79995973d133cc0310c3bf3334708a9[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 11 16:41:18 2025 +0900
+
+    chore : application.properties ocr_key 환경변수 수정
+
+[33mcommit fc6ba637c3411955cf9a0e739a889c044f5d7d07[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Wed Jun 11 16:30:47 2025 +0900
+
+    chore : github action yml 생성
+
+[33mcommit 46a1620cc4916c39e475235e2bdbf301b41a0a3e[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 18:48:01 2025 +0900
+
+    chore : 환경변수 수정...
+
+[33mcommit d46d965d1bf30665313bd17aa251d7223cca36c7[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 16:41:04 2025 +0900
+
+    chore : port번호, 환경변수 추가
+
+[33mcommit 9deca12ef6bf81401ba31c3910de4d894b4c4086[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 15:09:30 2025 +0900
+
+    refactor : application dev port번호 변경
+
+[33mcommit 43892809efb88001363176e97970df27563555c7[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 14:01:24 2025 +0900
+
+    refactor : EntityFetcher 미적용 수정
+
+[33mcommit 0c0f0403d592421ad2d1859f1dc6995f0cb5f711[m
+Merge: cca5583 079dfd6
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 13:54:55 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into feat#63/ci-cd
+
+[33mcommit cca55836ad1fb723cde04c155de0d82f9428bcb8[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 13:53:45 2025 +0900
+
+    refactor : docker-compose app port 번호 변경
+
+[33mcommit 09467c4f0e66db3abbdcb4c74100f066e08261a5[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 13:45:58 2025 +0900
+
+    refactor : prod db 경로 수정
+
+[33mcommit 2f443a17d3fddbaa3b9637b299bd573398467134[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 10 13:44:51 2025 +0900
+
+    feat: dockerfile, docker-compose.yml 생성
+
+[33mcommit 079dfd649823a0abc7f46f51a086f4c51328ab99[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Tue Jun 10 11:09:43 2025 +0900
+
+    [Refactoring] 엔티티 페처 적용 #53 (#61)
+    
+    * Refacotr: 일부 엔티티 페처 반영
+    
+    * Refacotr: 엔티티 페처 반영
+    
+    * Fix: 수정
+
+[33mcommit 6bdd4aa61ec2e74c74aa36474b067c2e1105edc3[m
+Merge: 02c094e 64d0abc
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Mon Jun 9 18:24:02 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit 64d0abc0fb67edb02658db7e95861d93859a1be3[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Mon Jun 9 15:53:49 2025 +0900
+
+    [Feature] 이벤트 스케줄러, Pk 기수 등록 스케줄러 구현 (#60)
+    
+    * feat : image entity 구현
+    
+    * refactor : board 도메인 image 기능 추가
+    
+    * refactor : board 로직 image 기능 추가
+    
+    * refactor : 게시글 수정 로직 내 이미지 로직 삭제, 게시글 등록 캐싱 로직 추가
+    
+    * refactor : Board 등록 dto 정규식 수정
+    
+    * refactor : 리뷰 등록 시 pk 포인트 점수 부여
+    
+    * refactor : 게시글 Patch 어노테이션 consumes 수정
+    
+    * refactor : 불필요한 코드 주석 제거
+    
+    * feat : pk 기수 스케줄러 기능 구현
+    
+    * feat : event winner 스케줄러 기능 구현
+    
+    * refactor : 이벤트 스케줄러 final 누락 수정
+    
+    * refactor : NPE 방지 로직 수정
+    
+    * refactor : 이벤트 스케줄러 try-catch 처리
+    
+    * refactor : savePkLog jpa 서비스 메서드 삭제
+    
+    * refactor : PkLogJdbcRepository timestamp 수정
+    
+    * refactor : event fetch join 해결
+    
+    * refactor : PkLogScheduler 내 n+1 문제 해결
+    
+    * refactor : user point reset도 pk로그에 남겨서 추적 가능하도록 수정
+    
+    * refactor : 레디스 내 PkLog 변환 실패시 예외처리
+    
+    * chore : 스케줄러 내 로깅 추가
+    
+    * refactor : PkLog batchInsert @Transactional 추가
+
+[33mcommit cc054684cf52bc1946fc9e8cf3e5b041201e38f4[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Mon Jun 9 14:38:30 2025 +0900
+
+    [Feature] Party CRUD #44 (#59)
+    
+    * Feat: 파티 생성 기능 추가
+    
+    * Feat: 파티 조회 기능 추가
+    
+    * Feat: 파티 상세 정보 조회 기능 추가
+    
+    * Feat: 파티 상세 정보 수정 기능 추가
+    
+    * Feat: 파티 탈퇴 기능 추가
+    
+    * Feat: 파티 강퇴 기능 추가
+    
+    * Feat: 파티 초대/가입 요청 기능 추가
+    
+    * Feat: 파티 초대 조회 기능 추가
+    
+    * Feat: 파티장/유저 초대 수락/거절 기능 추가
+    
+    * Refactor: 파티 request/response 시간 포맷 유효성 검증 추가
+    
+    * Refactor: 파티 장소 추가 로직 수정
+    
+    * Feat: 날짜 검증 어노테이션 추가
+    
+    * Feat: 날짜 검증 어노테이션 Validator 추가
+    
+    * Feat: 날짜 검증 어노테이션 적용
+    
+    * Comment : 불필요한 TODO 삭제
+    
+    * Refacotr : 유저 업데이트에 프로필 이미지 업데이트 추가
+    
+    * Comment : 주석 수정
+    
+    * Refactor: ImageValid 추가
+    
+    * Rename : 패키지명 오타 수정
+    
+    * Fix : 변수 사용 변경
+    
+    * Refactor : 날짜 범위 비교 조건식 추가
+    
+    * Refactor : 파티 예외 코드 번호 수정
+    
+    * Refactor : 파티 예외 코드 수정
+    
+    * Refactor : Valid 추가
+    
+    * Refactor : 조건식 수정
+    
+    * Refactor : JPA 메소드명 수정
+    
+    * Refactor: Null-safe
+    
+    * Refactor: Null-safe
+    
+    * Refactor: 유저 프로필 이미지 수정 로직 변경
+    
+    * Feat: 파티 정원 확인 메소드 추가
+
+[33mcommit 1ae61ec4e1fb8f701f8bef49e5f6f4debb68d4ae[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Mon Jun 9 12:42:27 2025 +0900
+
+    Feat/#55/open api (#57)
+    
+    * feat: 네이버 지도 API 연동을 위한 설정 및 의존성 추가
+    
+    - application.properties에 client-id, secret, geocoding URL 등 설정 추가
+    - WebClient 사용을 위한 spring-boot-starter-webflux 의존성 추가
+    - @ConfigurationProperties 사용을 위한 configuration-processor 추가
+    
+    * feat: 네이버 지도 API 설정 클래스 및 WebClient 설정 추가
+    
+    - NaverConfig 클래스 생성해 clientId, secret, geocoding URL 등 프로퍼티 바인딩 처리
+    - WebClientConfig 클래스 생성해 WebClient Bean 등록
+    
+    * feat: 네이버 지도 API 요청 및 응답 DTO 클래스 생성
+    
+    - Geocoding 및 ReverseGeocoding API 호출을 위한 요청/응답 DTO 정의
+    
+    * feat: WebClient 기반 네이버 지도 API 호출 로직 구현
+    
+    - Controller에서 Service를 통해 Geocoding API 호출 처리
+    - Service에서 WebClient 사용해 외부 API 동기 방식으로 호출 (block 사용)
+    - 직렬화 오류 해결 전 임시 커밋
+    
+    * refactor: 게시글 타입명을 '오픈런'으로 수정
+    
+    - 기존 '홍대병' 타입명을 더 직관적인 '오픈런'으로 변경
+    
+    * feat: 게시글 타입 미존재 시 예외 처리 로직 추가
+    
+    - 유효하지 않은 타입 입력 시 BOARD_TYPE_NOT_FOUND 예외 발생
+    
+    * feat: 게시글-해시태그 연관관계 orphanRemoval 설정 및 제거 메서드 추가
+    
+    - 게시글 삭제 시 연관된 해시태그 자동 삭제를 위해 orphanRemoval = true 설정
+    - 게시글에서 개별 해시태그 제거를 위한 removeBoardHashtag 메서드 추가
+    
+    * feat: 게시글-해시태그 연관관계 삭제를 위한 equals/hashCode 오버라이딩
+    
+    - orphanRemoval 동작 보장을 위해 BoardHashtag에 equals/hashCode 메서드 오버라이딩
+    
+    * feat: 해시태그 및 게시글-해시태그 관계 Repository 인터페이스 생성
+    
+    * rename: HongdaeBoardRequestDto → OpenRunBoardRequestDto로 클래스명 변경
+    
+    * feat: 게시글 요청 DTO에 해시태그 리스트 필드 추가 및 검증 적용
+    
+    - hashtagList 필드 추가로 해시태그 입력 가능하도록 확장
+    - 빈 문자열 입력 방지를 위해 @NotBlank 검증 적용
+    
+    * feat: 게시글에 해시태그를 적용/삭제하는 HashtagService 구현
+    
+    - 입력 해시태그 정규화 및 중복 제거 처리
+    - 기존 해시태그 조회 후 없으면 신규 생성하여 저장
+    - 게시글과 해시태그 연결을 위한 BoardHashtag 생성 및 저장
+    - 게시글에 등록된 해시태그 전체/단건 삭제 기능 제공
+    - 해시태그 길이 유효성 검사 로직 포함
+    
+    * feat: 좋아요 관련 성공/예외 코드 추가
+    
+    * docs: 사용자 조회 로직에 삭제된 유저 고려 필요 주석 추가
+    
+    - findById 메서드에 soft delete된 사용자 처리 TODO 주석 작성
+    
+    * feat: 좋아요 기능을 위한 Controller, Service, Repository 구현
+    
+    - BoardController에 좋아요 등록/취소 API 엔드포인트 추가
+    - LikeService에서 좋아요 등록 및 중복 처리 로직 구현
+    - LikeRepository를 통한 데이터베이스 연동 처리
+    
+    * feat: 이벤트 관련 API Controller/Service/Repository 기본 구조 생성
+    
+    - 이벤트 등록/조회/수정/삭제/신청/취소 API 엔드포인트 구성
+    - EventController 및 EventService, EventRepository 생성
+    - 관리자 권한 기반 접근 제어 @PreAuthorize 설정 포함
+    
+    * feat: 이벤트 관련 성공 및 에러 코드 정의
+    
+    - 이벤트 도메인에 대한 SuccessCode, ErrorCode 항목 추가
+    
+    * feat: 이벤트 요청 및 응답 DTO 생성
+    
+    - 이벤트 등록, 수정 요청용 DTO 생성
+    - 이벤트 목록 응답용 DTO 정의
+    
+    * feat: 이벤트 CRUD 컨트롤러 및 서비스 구현
+    
+    - 이벤트 등록, 조회, 수정, 삭제 로직 구현
+    - 관리자 권한 기반 접근 제어 설정
+    
+    * feat: 이벤트 신청 관련 성공 및 에러 코드 추가
+    
+    * feat: 이벤트 신청 및 취소 기능 구현
+    
+    * refactor: 게시글 생성 시 userId 직접 입력에서 인증 객체로 수정
+    
+    - 기존 하드코딩된 userId 값을 제거하고 인증 정보에서 ID를 추출하도록 변경
+    - @AuthenticationPrincipal CustomUserDetails 를 통해 인증된 사용자 정보 사용
+    
+    * fix: 게시글 타입 패턴 검증 정규식 및 메시지 오타 수정
+    
+    - 오류 메시지도 실제 허용 값에 맞춰 'H' → 'O'로 수정
+    
+    * fix: 오타 수정 - unlikedBoard를 unlikeBoard로 변경
+    
+    * fix: 게시글 타입 오타 수정
+    
+    * fix: 이벤트 에러 코드의 HTTP 상태값을 BAD_REQUEST에서 NOT_FOUND로 수정
+    
+    * refactor: 이벤트 요청 DTO에 validation 추가 및 좋아요 취소 로직 정리
+    
+    - EventRequestDto에 @NotBlank, @NotNull 등 유효성 검사 어노테이션 적용
+    
+    * refactor: 이벤트 삭제 로직에서 중복된 이벤트 조회 제거
+    
+    * refactor: equals 및 hashCode 구현 시 지연 로딩 회피 및 비즈니스 키 기반 비교로 개선
+    
+    - BoardEvent: board, event 직접 비교 대신 ID 기반으로 비교하여 지연 로딩 문제 방지
+    - BoardHashtag: ID가 null일 수 있어 board, hashtag 필드 기반으로 equals/hashCode 구현
+    
+    * feat: 네이버 데이터랩 검색 API 연동 기본 구조 설정
+    
+    - application에 @ConfigurationPropertiesScan 어노테이션 추가
+    - naver.datalab.* 관련 설정 프로퍼티 등록
+    - config 패키지에 NaverDatalabConfig 클래스 추가
+    - searchapi 패키지에 컨트롤러 및 서비스 기본 클래스 생성
+    - 추후 WebClient를 활용해 통합 검색어 트렌드 API 연동 예정
+    
+    * feat: 네이버 검색 API 연동 및 기본 응답 처리 로직 구현
+    
+    - 네이버 지역 검색 API 연동을 위한 SearchApiController, SearchApiService 생성
+    - 응답 DTO(NaverLocalSearchResponseDto) 정의
+    - SearchErrorCode 추가 및 예외 상황 처리 기본 구조 마련
+    - 현재 API 연동은 완료되었으며 직렬화 이슈 존재
+    
+    * fix: 지역 검색 API 요청 시 URI 인코딩 방식 수정으로 직렬화 오류 해결
+    
+    - 기존 toUriString() 방식에서 build().toUri() 방식으로 URI 처리 로직 변경
+    - encode(StandardCharsets.UTF_8) 적용하여 이중 인코딩 문제 해결
+    - WebClient 응답 직렬화 오류 원인을 정확히 파악하고 URI 처리 방식 개선
+    - NaverLocalSearchResponseDto 구조 단순화 및 @JsonProperty 적용으로 응답 매핑 안정화
+    
+    * rename: dto.geo 패키지를 dto.geocode로 이동
+    
+    dto.geo 패키지를 dto.geocode로 이동하여 geocode 의미 반영
+    
+    * feat: 네이버 지도 API 연동 로직 구현
+    
+    - WebClient를 활용하여 네이버 지도 검색 API 호출 로직 구현
+    - NaverMapService에서 API 요청 처리, NaverMapController에서 서비스 호출
+    
+    * feat: Reverse Geocoding API 응답 DTO 클래스 추가
+    
+    - Reverse Geocoding 응답 처리를 위한 DTO 클래스 ReverseGeocode* 구현
+    - 계층적 주소 정보 파싱을 위한 필드 구조화 및 직렬화 대응
+    
+    * refactor: GeoStatus 제거 및 status 필드를 String으로 단순화
+    
+    - 직렬화 처리 간소화 및 응답 구조 일관성 확보
+    - GeoMapDetailResponse에서 status 필드 단순 문자열로 처리하도록 수정
+    
+    * chore: 지도 API 엔드포인트 인증 예외 처리 추가
+    
+    - /api/map/** 경로에 대해 인증 없이 접근 가능하도록 임시 설정
+    - 추후 인증 정책에 대해 팀원들과 논의 후 수정 예정
+    
+    * fix: 프로퍼티 플레이스홀더 문법 오류 수정
+    
+    * fix: GeoMeta에 @JsonIgnoreProperties 추가
+    
+    * chore: spring-boot-configuration-processor 의존성 범위 수정
+    
+    * remove: 테스트용 임시 엔드포인트 및 하드코딩된 JSON 제거
+    
+    * feat: 검색 및 지도 API 요청 파라미터에 검증 및 설명 주석 추가
+    
+    - @NotBlank, @NotNull, @DecimalMin/Max 등 유효성 검증 어노테이션 적용
+    - 필수 파라미터 및 값 범위에 대한 안내 주석 추가
+    
+    * feat: ReverseGeocode API 호출에 타임아웃 설정 추가
+    
+    * fix: 역지오코딩 API 호출에 대한 예외 처리 로직 추가
+
+[33mcommit 4351977e8932033fbecad3d72afe6a4ed90ea3f3[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Thu Jun 5 12:12:22 2025 +0900
+
+    Feat/#40/hashtag 해시태그, 좋아요, 이벤트 신청/취소 기능 구현 (#51)
+    
+    * refactor: 게시글 타입명을 '오픈런'으로 수정
+    
+    - 기존 '홍대병' 타입명을 더 직관적인 '오픈런'으로 변경
+    
+    * feat: 게시글 타입 미존재 시 예외 처리 로직 추가
+    
+    - 유효하지 않은 타입 입력 시 BOARD_TYPE_NOT_FOUND 예외 발생
+    
+    * feat: 게시글-해시태그 연관관계 orphanRemoval 설정 및 제거 메서드 추가
+    
+    - 게시글 삭제 시 연관된 해시태그 자동 삭제를 위해 orphanRemoval = true 설정
+    - 게시글에서 개별 해시태그 제거를 위한 removeBoardHashtag 메서드 추가
+    
+    * feat: 게시글-해시태그 연관관계 삭제를 위한 equals/hashCode 오버라이딩
+    
+    - orphanRemoval 동작 보장을 위해 BoardHashtag에 equals/hashCode 메서드 오버라이딩
+    
+    * feat: 해시태그 및 게시글-해시태그 관계 Repository 인터페이스 생성
+    
+    * rename: HongdaeBoardRequestDto → OpenRunBoardRequestDto로 클래스명 변경
+    
+    * feat: 게시글 요청 DTO에 해시태그 리스트 필드 추가 및 검증 적용
+    
+    - hashtagList 필드 추가로 해시태그 입력 가능하도록 확장
+    - 빈 문자열 입력 방지를 위해 @NotBlank 검증 적용
+    
+    * feat: 게시글에 해시태그를 적용/삭제하는 HashtagService 구현
+    
+    - 입력 해시태그 정규화 및 중복 제거 처리
+    - 기존 해시태그 조회 후 없으면 신규 생성하여 저장
+    - 게시글과 해시태그 연결을 위한 BoardHashtag 생성 및 저장
+    - 게시글에 등록된 해시태그 전체/단건 삭제 기능 제공
+    - 해시태그 길이 유효성 검사 로직 포함
+    
+    * feat: 좋아요 관련 성공/예외 코드 추가
+    
+    * docs: 사용자 조회 로직에 삭제된 유저 고려 필요 주석 추가
+    
+    - findById 메서드에 soft delete된 사용자 처리 TODO 주석 작성
+    
+    * feat: 좋아요 기능을 위한 Controller, Service, Repository 구현
+    
+    - BoardController에 좋아요 등록/취소 API 엔드포인트 추가
+    - LikeService에서 좋아요 등록 및 중복 처리 로직 구현
+    - LikeRepository를 통한 데이터베이스 연동 처리
+    
+    * feat: 이벤트 관련 API Controller/Service/Repository 기본 구조 생성
+    
+    - 이벤트 등록/조회/수정/삭제/신청/취소 API 엔드포인트 구성
+    - EventController 및 EventService, EventRepository 생성
+    - 관리자 권한 기반 접근 제어 @PreAuthorize 설정 포함
+    
+    * feat: 이벤트 관련 성공 및 에러 코드 정의
+    
+    - 이벤트 도메인에 대한 SuccessCode, ErrorCode 항목 추가
+    
+    * feat: 이벤트 요청 및 응답 DTO 생성
+    
+    - 이벤트 등록, 수정 요청용 DTO 생성
+    - 이벤트 목록 응답용 DTO 정의
+    
+    * feat: 이벤트 CRUD 컨트롤러 및 서비스 구현
+    
+    - 이벤트 등록, 조회, 수정, 삭제 로직 구현
+    - 관리자 권한 기반 접근 제어 설정
+    
+    * feat: 이벤트 신청 관련 성공 및 에러 코드 추가
+    
+    * feat: 이벤트 신청 및 취소 기능 구현
+    
+    * refactor: 게시글 생성 시 userId 직접 입력에서 인증 객체로 수정
+    
+    - 기존 하드코딩된 userId 값을 제거하고 인증 정보에서 ID를 추출하도록 변경
+    - @AuthenticationPrincipal CustomUserDetails 를 통해 인증된 사용자 정보 사용
+    
+    * fix: 게시글 타입 패턴 검증 정규식 및 메시지 오타 수정
+    
+    - 오류 메시지도 실제 허용 값에 맞춰 'H' → 'O'로 수정
+    
+    * fix: 오타 수정 - unlikedBoard를 unlikeBoard로 변경
+    
+    * fix: 게시글 타입 오타 수정
+    
+    * fix: 이벤트 에러 코드의 HTTP 상태값을 BAD_REQUEST에서 NOT_FOUND로 수정
+    
+    * refactor: 이벤트 요청 DTO에 validation 추가 및 좋아요 취소 로직 정리
+    
+    - EventRequestDto에 @NotBlank, @NotNull 등 유효성 검사 어노테이션 적용
+    
+    * refactor: 이벤트 삭제 로직에서 중복된 이벤트 조회 제거
+    
+    * refactor: equals 및 hashCode 구현 시 지연 로딩 회피 및 비즈니스 키 기반 비교로 개선
+    
+    - BoardEvent: board, event 직접 비교 대신 ID 기반으로 비교하여 지연 로딩 문제 방지
+    - BoardHashtag: ID가 null일 수 있어 board, hashtag 필드 기반으로 equals/hashCode 구현
+
+[33mcommit d5f18041256874f8918c35879444b74418153cca[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Thu Jun 5 10:49:24 2025 +0900
+
+    [Refactoring] Board에 Image 적용, 캐싱 테스트 (#50)
+    
+    * feat : image entity 구현
+    
+    * refactor : board 도메인 image 기능 추가
+    
+    * refactor : board 로직 image 기능 추가
+    
+    * refactor : 게시글 수정 로직 내 이미지 로직 삭제, 게시글 등록 캐싱 로직 추가
+    
+    * refactor : Board 등록 dto 정규식 수정
+    
+    * refactor : 리뷰 등록 시 pk 포인트 점수 부여
+    
+    * refactor : 게시글 Patch 어노테이션 consumes 수정
+    
+    * refactor : 불필요한 코드 주석 제거
+
+[33mcommit 54e62a3fd456c0e98ad841c9f23f603a6c4db8bb[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Thu Jun 5 10:23:38 2025 +0900
+
+    [Refactoring] Store 도메인 리팩토링 (#48)
+    
+    * ♻️ refactor : 버킷명 중복 검사 로직에 패턴 적용
+    
+    * ✨ feat : 이미지 추가 반환
+    
+    * ✨ feat : 리뷰 생성, 삭제 시 store에도 반영
+    
+    * ️  refactor : 공통 응답 적용 및 유저 id 추출
+    
+    * ♻️  refactor : dto에서 비즈니스 로직 분리
+    
+    * ♻️ refactor : 정적 팩토리 메서드명 변경
+    
+    * ️  refactor : NPE 방지
+
+[33mcommit 02c094e7bf990b6e31f07aaa573a4efb31f3fa99[m
+Merge: 7d956fb ca906e1
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 4 21:57:56 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit 57832e593a7674f2154809818abc7f6a4d4ee113[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Wed Jun 4 21:57:17 2025 +0900
+
+    [Refactoring] Pk 포인트 유형 캐싱 (#45)
+    
+    * feat : image entity 구현
+    
+    * refactor : Pk 포인트 관리 캐싱 로직 리팩토링
+    
+    * refactor : Pk 컨트롤러에 security 추가
+    
+    * refactor : reviewService 내 redisTemplate 형변환 수정
+    
+    * refactor : 코드래빗 코드리뷰 반영 수정
+    
+    * refactor : LocalDate 시스템 로케일 수정
+
+[33mcommit ca906e1ab721623741b2b5d2372d8b962314a4fe[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Wed Jun 4 19:40:25 2025 +0900
+
+    [Feature] Auth/Author #31 (#39)
+    
+    * Feat: 로그인 기능 초안
+    
+    * Feat: 스프링 시큐리티 Config 설정
+    
+    * Feat: 스프링 시큐리티 설정
+    
+    * Feat: 회원 가입
+    
+    * Feat: 로그인 기능
+    
+    * Feat: 로그인 및 인증
+    
+    * Feat: 로그아웃 구현
+    
+    * Fix: 입맛 취향 역직렬화 오류 문제 해결
+    
+    * Fix: 입맛 취향 역직렬화 오류 문제 해결
+    
+    * Fix: 회원 가입 시 입맛 취향 저장 로직 에러 수정
+    
+    * Refactor: 회원 정보 조회 반환 값 수정
+    
+    * Feat: Favor 값 초기화 컴포넌트 추가
+    
+    * Refactor: Valid 추가 및 UserFavor Setter 제거
+    
+    * Refactor: UserErrorCode 수정
+    
+    * Refactor: Image Cacade 수정
+    
+    * Refactor: 로그아웃 시 세션 비우기, 회원가입 이미지 저장 로직 변경
+    
+    * Refactor: signup 검증 어노테이션 및 파라미터명 명시
+    
+    * Refactor: Favor Admin 리스트 검증 추가
+    
+    * Refactor: 입맛 취향 업데이트 로직 변경
+
+[33mcommit fd48bbaa10c4fa379d387247e9cc33557d1ce2bd[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Wed Jun 4 19:23:02 2025 +0900
+
+    [Feature] Review CRUD, Comment Review chore #38
+    
+    * feat: Review create dto
+    
+    * feat, fix: add Review creation, fix comment request annotations
+    
+    * chore: fix typo
+    
+    * feat: add update, get Review api
+    
+    * feat: add review deletion api, receipt validation api
+    
+    * refactor: apply custom error
+    
+    * fix: change controller request param to MultipartFile
+    
+    * refactor: replace temporal objects
+    
+    * refactor: replace temporal entities, use custom error of ReviewService
+    
+    * refactor: replace temporal entities, use custom error of CommentService
+    
+    * refactor: add isPresented field to review creation, update dto
+    
+    * chore: security 임시 무력화
+    
+    * fix: typo, unignore annotation, add pattern annotations
+    
+    * fix: match data type int-> inteager
+    
+    * fix: paging at db level
+    
+    * fix: Review entity, match type, remove redundant validation setting
+    
+    * fix: replace requestbody to requestpart, add null check for image files
+    
+    * fix: prevent image npe, create and use ocr failed custom error
+    
+    * fix: fecting store id instead of user id for redis search key
+    
+    * fix: contents empty check, correct key typo, use custom exception when fetching store
+    
+    * fix: fix key typo, remove image npe check from service
+    
+    * fix: add image npe check at service
+
+[33mcommit a9509b03a57027f96ea901736331356f872d459c[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Wed Jun 4 16:45:40 2025 +0900
+
+    Feat/#28/board (#37)
+    
+    * style: 테스트를 위해 @NoArgsConstructor access 속성 제거
+    
+    - 추후 접근제한자 복원 필요 여부 검토 예정
+    
+    * feat: 게시글 생성 요청 DTO 상속 구조 설계 및 구현
+    
+    - BoardRequestDto를 상속한 하위 DTO 타입(Normal, Hongdae)을 instanceof로 분기
+    - 각 타입별로 BoardMapper를 통해 엔티티 변환 및 저장 처리
+    - dto 내부가 아닌 서비스 계층에서 비즈니스 로직 분기 책임을 수행
+    - 미구현된 유저/가게 연관 관계는 추후 주석 해제 예정
+    
+    * refactor: CommonResponse.success 파라미터 타입을 BaseCode로 수정
+    
+    - SuccessCode에서 BaseCode로 추상화해 공통 코드 처리
+    
+    * feat: 게시글 관련 성공 및 에러 코드 enum 클래스 구현
+    
+    * feat: 게시글 엔티티 및 CRUD용 컨트롤러, 서비스 로직 구현
+    
+    - Board 엔티티 설계 및 User, Store 연관관계 설정 예정
+    - BoardController에서 게시글 생성/조회/수정/삭제 API 구현
+    - 서비스에서는 게시글 타입에 따라 분기 처리 및 저장 로직 구성
+    - 게시글 단건/목록 조회, 상세 조건 기반 조회 기능 기본 틀 마련
+    
+    * feat: 게시글 요청 DTO → 엔터티 변환용 BoardMapper 클래스 구현
+    
+    - 일반 게시글과 홍대병 게시글 요청 DTO를 Board 엔터티로 매핑
+    - Board → BoardListResponseDto 변환 메서드 추가
+    
+    * feat: 게시글 수정 및 응답 처리를 위한 DTO 클래스 생성
+    
+    - BoardUpdateRequestDto: 게시글 수정 요청 필드 정의
+    - BoardResponseDto: 게시글 단건 조회 응답 구조 정의
+    - BoardListResponseDto: 게시글 목록 조회 응답 구조 정의
+    
+    * feat: QueryDSL 지원을 위한 커스텀 리포지토리 인터페이스 및 구현체 생성
+    
+    - 게시글 동적 조회를 위한 BoardRepositoryCustom, BoardRepositoryImpl 클래스 추가
+    - 기존 BoardRepository에 BoardRepositoryCustom 확장 적용
+    - QueryDSL 기반 페이징 및 조건 검색 로직 구현 준비
+    
+    * fix: @Builder 사용 시 리스트 초기화를 위한 @Builder.Default 적용
+    
+    - Lombok 빌더 사용 시 컬렉션 필드가 null로 초기화되는 문제 방지
+    
+    * refactor: 연관관계 편의 메서드 일관성을 위해 @Setter 제거
+    
+    - setBoard 메서드를 통한 연관관계 설정 방식으로 통일
+    
+    * feat: BoardType enum에 @JsonCreator 적용하여 문자열 매핑 지원
+    
+    - from(String) 메서드에 @JsonCreator 추가로 JSON 역직렬화 시 자동 매핑 가능
+    - 외부 요청에서 문자열 타입을 안전하게 BoardType으로 변환하도록 개선
+    
+    * feat: 사용자 ID로 조회하는 findById 서비스 메서드 추가
+    
+    - userRepository를 통해 사용자 엔티티 조회
+    - 존재하지 않을 경우 USER_NOT_FOUND 예외 발생 처리
+    
+    * feat: Store 조회 메서드 추가 및 @Transactional 어노테이션 수정
+    
+    - storeId로 매장 조회하는 findById 메서드 추가
+    - 매장 미존재 시 STORE_NOT_FOUND 예외 발생
+    - 트랜잭션 설정이 정상 작동하도록 jakarta → spring 패키지로 변경
+    
+    * refactor: 게시글 생성 시 사용자 및 맛집 도메인 서비스로부터 조회 처리
+    
+    - createBoard 메서드에 userId, storeId 파라미터 추가
+    - userService, storeService를 통해 실제 엔티티 조회
+    
+    * feat: WebClient 기반 네이버 지도 API 호출 로직 구현
+    
+    - Controller에서 Service를 통해 Geocoding API 호출 처리
+    - Service에서 WebClient 사용해 외부 API 동기 방식으로 호출 (block 사용)
+    - 직렬화 오류 해결 전 임시 커밋
+    
+    * chore: 불필요한 NaverMap 파일 제거
+    
+    * fix: 잘못된 @Param import 수정
+    
+    - Lettuce용 @Param을 JPA용 org.springframework.data.repository.query.Param으로 수정
+    - JPA @Query 문법에서의 파라미터 바인딩 오류 방지 목적
+    
+    * remove: 테스트용 DummySecurityConfig 파일 삭제
+    
+    * fix: updatedAt 필드명 오타 수정
+    
+    * fix: 엔티티 무분별한 인스턴스 생성 방지
+    
+    - @NoArgsConstructor(access = AccessLevel.PROTECTED) 추가
+    
+    * feat: 요청 DTO에 유효성 검사 어노테이션 추가
+    
+    - @Valid를 통한 컨트롤러 단 유효성 검사 적용
+    
+    * fix: createdAt 필드명 오타 수정
+    
+    - 잘못된 필드명으로 인한 정렬 오류 방지
+    
+    * fix: 성공 코드 중복으로 인한 식별 불가 문제 해결
+    
+    - 각 작업에 고유한 코드(B003~B007) 부여하여 명확한 식별 가능하도록 수정
+
+[33mcommit 7d956fb50f908a3776bf24057f18e064beaa5103[m
+Merge: 13c2c47 31493fc
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Wed Jun 4 14:30:22 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit 31493fc74d16d8a0197a23c6614382351b2c109a[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Wed Jun 4 14:19:32 2025 +0900
+
+    [Feature] PK CRUD, 관련 기능 (#34)
+    
+    * feat : image entity 구현
+    
+    * feat : Pk 포인트 유형 CRUD 구현
+    
+    * feat : Pk 포인트 기준 등록시 중복 확인
+    
+    * feat : 포인트 오버플로우 예외처리
+    
+    * fix : 오타 수정
+    
+    * fix : PK 타입 중복 검사 로직 수정
+    
+    * fix : PK 포인트 적립의 일관성 수정
+    
+    * fix : requestDto 역직렬화 문제 방지
+    
+    * fix : Enum Validator 공용 객체로 변경
+
+[33mcommit 0fc4f064e732196aee8aac8d5fc77ab602148618[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Wed Jun 4 11:46:16 2025 +0900
+
+    [Feature] Store CRUD (#33)
+    
+    * ✨feat : createBucket 구현
+    
+    * ✨feat : addStore 구현
+    
+    * ✨feat : getStore 구현
+    
+    * ✨feat : 기본 crud 구현
+    
+    * ✨feat : 기본 crud 구현
+    
+    * ✨feat : 유효성 검증
+    
+    * 🚚move : 유저 관련 error code 이동
+    
+    * 🚚 move : User 도메인 errorcode 이동
+    
+    * 🐛fix : USER_NOT_FOUND status 수정
+    
+    * ✨feat : valid 추가 및  message 옵션 적용
+    
+    * ♻️ refactor : 코드 통일 및 명확성을 위해 enum 클래스 수정
+    
+    * 🐛 fix : NPE 방지
+    
+    * 🐛fix : 컨트롤러-서비스 연결안된 부분 연결
+    
+    * 🐛fix : addBucketItem 트랜잭션 적용
+    
+    * ♻️ refactor : 버킷명 중복 확인 로직 분리
+    
+    * ♻️ refactor : validated 에러 핸들러 리턴 타입 수정
+    
+    * 🔥remove : jpaRepo에서 제공하는 메서드 중복 삭제
+
+[33mcommit 13c2c47738e2a0588030f8b76be081d4d45c9666[m
+Merge: 658fd1a eec9520
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Tue Jun 3 13:59:56 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit eec95202400d6892edce91042b5eb4a65a401dbd[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Mon Jun 2 23:31:46 2025 +0900
+
+    [Feature] User CRUD #24 (#30)
+    
+    * Feat: 자신의 프로필 조회 기능 추가
+    
+    * Feat: 다른 유저 프로필 조회 기능 추가
+    
+    * Feat: 유저 정보 수정 기능 추가
+    
+    * Feat: 유저 탈퇴 기능 추가
+    
+    * Feat: 유저 언/팔로우 기능 추가
+    
+    * Feat: 유저 입맛 취향 수정 기능 추가
+    
+    * Feat: 팔로우/언팔로우 숫자 반영
+    
+    * Feat: 팔로우/팔로워 목록 조회 기능 추가
+    
+    * Feat: 입맛 취향 관리자 추가/수정 기능 추가
+    
+    * Feat: 입맛 관리자 CRUD 기능 추가
+
+[33mcommit 70bb36b7fa02bf9865456ad6147ff18dd1e4c098[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Mon Jun 2 21:02:48 2025 +0900
+
+    [Feature] Image Service 구현 (#29)
+    
+    * feat : image entity 구현
+    
+    * feat : BaseCreatedEntity 생성
+    
+    * feat : Pk 관련 Entity,enum 파일  생성
+    
+    * style : checkstyle 반영
+    
+    * refactor : builder 수정
+    
+    * refactor : enumerated 추가
+    
+    * refactor : rank 예약어 오류 수정
+    
+    * feat : image, pk entity들 연관관계 추가
+    
+    * feat : image S3 Service 분리
+    
+    * feat : image 테스트 전, 기능 구현 완료, 수정 필요
+    
+    * fix : 테스트 하면서 수정함
+    
+    * fix : PR template 위치 수정
+    
+    * fix : 주석 삭제, 불필요한 코드 제거
+    
+    * fix : ImageService update 수정
+    
+    * fix : ImageResponseDto builder 삭제 후 생성자 사용
+
+[33mcommit 658fd1ae84967a49f564254bcb9c14d488482866[m
+Merge: e18d374 a4ea5f1
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Mon Jun 2 20:55:17 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+    
+    # Conflicts:
+    #       src/main/java/com/example/taste/domain/image/entity/BoardImage.java
+    #       src/main/java/com/example/taste/domain/image/entity/Image.java
+
+[33mcommit a4ea5f1a0b761fa26be2c03e62aa5e147bdbdf30[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Mon Jun 2 11:26:07 2025 +0900
+
+    [Feature] Comment CRUD #10 (#25)
+    
+    * refactor: Comment 연관관계 설정
+    
+    * feat: create comment controller, service, repository, dto for create request
+    
+    * [Feature] Board, Hashtag, Like 관련 entity 생성 #6 (#12)
+    
+    * feat: 게시글(Board) 엔티티 생성(연관관계 제외)
+    
+    - BoardType, BoardStatus enum 매핑 적용
+    
+    * feat: 게시글-해시태그 연관관계 설정 및 이벤트 관련 엔티티 생성
+    
+    - Board ↔ BoardHashtag 양방향 연관관계 설정 (게시글 기준 해시태그 조회)
+    - BoardHashtag → Hashtag 단방향 다대일 연관관계 설정
+    - 연관관계 일관성 유지를 위한 편의 메서드 구현
+    - Like, Event, BoardEvent 엔티티 생성
+    - 게시글과 이벤트 간 연관관계 설정
+    - 모든 엔티티 생성자에 빌더 패턴 적용 (팀 규칙 반영)
+    
+    * rename: Like 엔티티 테이블명을 'likes'로 변경
+    
+    - 예약어 'like'로 인한 충돌 방지를 위해 테이블명을 'likes'로 수정
+    
+    * refactor: Event 엔티티 필드에 @Column(nullable = false) 설정 추가
+    
+    * refactor: BoardEvent 생성자에서 잘못된 void 반환 타입 제거
+    
+    * [Feature] User, Party, Chat, RandomMatchingCondition 엔티티 #7 (#13)
+    
+    * Feat: 유저 엔티티 추가
+    
+    * Feat: 파티, 파티초대, 유저/파티 매칭 조건 추가
+    
+    * Feat: Chat 엔티티 추가
+    
+    * Feat: 생성일 엔티티 상속 적용
+    
+    * Feat: 유저 생성자 추가
+    
+    * Feat: 유저 이미지 연관관계 추가
+    
+    * feat: add comment creation
+    
+    * feat:add update comment
+    
+    * feat: add update, soft delete api
+    
+    * feat: add getAllComment api
+    
+    * feat: add api to get single comment
+    
+    * feix: add parent, root, child relationships to Comment
+    
+    * refactor: separate root and nested comments for pagination
+    
+    * refactor: remove unnecessary ResponseEntity
+    
+    * fix: corret delete mapping
+    
+    ---------
+    
+    Co-authored-by: modesty <108976049+Chaemin07@users.noreply.github.com>
+    Co-authored-by: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+
+[33mcommit 601d8aa2168b914870938861549b17cdaa1d924f[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Fri May 30 21:44:56 2025 +0900
+
+    Feat#7/init entities (#23)
+    
+    * Feat: 유저 엔티티 추가
+    
+    * Feat: 파티, 파티초대, 유저/파티 매칭 조건 추가
+    
+    * Feat: Chat 엔티티 추가
+    
+    * Feat: 생성일 엔티티 상속 적용
+    
+    * Feat: 유저 생성자 추가
+    
+    * Feat: 유저 이미지 연관관계 추가
+    
+    * Feat: 파티 도메인 연관관계 추가
+    
+    * Feat: 팔로우 엔티티 추가
+    
+    * Feat: 유저 취향 엔티티 추가
+    
+    * Feat: 생성자 추가
+    
+    * Fix: 연관 관계 맵핑 수정
+    
+    * Fix: 연관 관계 맵핑 수정
+    
+    * Feat: Favor 생성자 추가
+    
+    * Feat: Favor 생성자 추가
+
+[33mcommit 31941ab7099b8ca3c9b92979291e6adbaf38f434[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Fri May 30 21:32:22 2025 +0900
+
+    [Refactoring] Review 연관관계 생성 (#22)
+    
+    * refactor: 리뷰 연관관계 수정
+    
+    * fix: joinColumn 수정
+    
+    * fix: store and board 연관관계 수정
+
+[33mcommit 722ea6a97fb6664f8402294d3fe2479fe30888b1[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Fri May 30 21:20:09 2025 +0900
+
+    [Feature] Board, User, Like Entity 연관관계 구현 #19 (#20)
+    
+    * feat: 게시글(Board) 엔티티 생성(연관관계 제외)
+    
+    - BoardType, BoardStatus enum 매핑 적용
+    
+    * feat: 게시글-해시태그 연관관계 설정 및 이벤트 관련 엔티티 생성
+    
+    - Board ↔ BoardHashtag 양방향 연관관계 설정 (게시글 기준 해시태그 조회)
+    - BoardHashtag → Hashtag 단방향 다대일 연관관계 설정
+    - 연관관계 일관성 유지를 위한 편의 메서드 구현
+    - Like, Event, BoardEvent 엔티티 생성
+    - 게시글과 이벤트 간 연관관계 설정
+    - 모든 엔티티 생성자에 빌더 패턴 적용 (팀 규칙 반영)
+    
+    * rename: Like 엔티티 테이블명을 'likes'로 변경
+    
+    - 예약어 'like'로 인한 충돌 방지를 위해 테이블명을 'likes'로 수정
+    
+    * refactor: Event 엔티티 필드에 @Column(nullable = false) 설정 추가
+    
+    * refactor: BoardEvent 생성자에서 잘못된 void 반환 타입 제거
+    
+    * feat: 게시글, 공감 엔티티의 연관관계 및 편의 메서드 설정
+    
+    - 연관관계 설정 및 편의 메서드 구현
+    
+    * feat: 댓글과 게시글 간 연관관계 설정
+    
+    * feat: 게시글과 게시글 이미지 연관관계 설정
+    
+    - 연관관계 편의 메서드 정의하여 양방향 관계 유지
+
+[33mcommit 74ef781852d4ef63cccd7eda02548bc621962403[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Fri May 30 20:44:20 2025 +0900
+
+    [Feature] image, pk Entity 연관관계 구현 (#16)
+
+[33mcommit e60f2195e9b25e66c3207a1fdc8e7ba1e70593fa[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Fri May 30 20:42:47 2025 +0900
+
+    [Feature] store 도메인 관련 entity에 연관관계 적용 및 리팩토링 (#14)
+    
+    * ✨feat : store 도메인 엔티티 생성
+    
+    * ✨ feat : 기본 생성자 및 빌더 추가
+    
+    * ✨ feat : repository 틀 생성 및 빌더 적용
+    
+    * ✨ feat : 생성자 어노테이션 추가
+    
+    * ✨ feat : Enumerated 어노테이션 적용
+    
+    * ✨ feat : Getter 어노테이션 적용
+    
+    * ♻️  refactor : User 연관관계 추가 및 어노테이션 적용
+
+[33mcommit f16b6ee2dbd8cd2712c49e64a128287f221d2169[m
+Author: YejinYoon <68535398+YejinY00n@users.noreply.github.com>
+Date:   Fri May 30 20:20:53 2025 +0900
+
+    [Feature] User, Party, Chat, RandomMatchingCondition 엔티티 #7 (#13)
+    
+    * Feat: 유저 엔티티 추가
+    
+    * Feat: 파티, 파티초대, 유저/파티 매칭 조건 추가
+    
+    * Feat: Chat 엔티티 추가
+    
+    * Feat: 생성일 엔티티 상속 적용
+    
+    * Feat: 유저 생성자 추가
+    
+    * Feat: 유저 이미지 연관관계 추가
+
+[33mcommit 7b0dcae24dc9f14830b32b7064d60b4ccbb84f7f[m
+Author: modesty <108976049+Chaemin07@users.noreply.github.com>
+Date:   Fri May 30 20:00:09 2025 +0900
+
+    [Feature] Board, Hashtag, Like 관련 entity 생성 #6 (#12)
+    
+    * feat: 게시글(Board) 엔티티 생성(연관관계 제외)
+    
+    - BoardType, BoardStatus enum 매핑 적용
+    
+    * feat: 게시글-해시태그 연관관계 설정 및 이벤트 관련 엔티티 생성
+    
+    - Board ↔ BoardHashtag 양방향 연관관계 설정 (게시글 기준 해시태그 조회)
+    - BoardHashtag → Hashtag 단방향 다대일 연관관계 설정
+    - 연관관계 일관성 유지를 위한 편의 메서드 구현
+    - Like, Event, BoardEvent 엔티티 생성
+    - 게시글과 이벤트 간 연관관계 설정
+    - 모든 엔티티 생성자에 빌더 패턴 적용 (팀 규칙 반영)
+    
+    * rename: Like 엔티티 테이블명을 'likes'로 변경
+    
+    - 예약어 'like'로 인한 충돌 방지를 위해 테이블명을 'likes'로 수정
+    
+    * refactor: Event 엔티티 필드에 @Column(nullable = false) 설정 추가
+    
+    * refactor: BoardEvent 생성자에서 잘못된 void 반환 타입 제거
+
+[33mcommit 4384f57afcc581901767b764071c5aaf12a0ca94[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Fri May 30 19:06:42 2025 +0900
+
+    [Feature] Image, Pk 관련 entity 생성 (#11)
+    
+    * feat : image entity 구현
+    
+    * feat : BaseCreatedEntity 생성
+    
+    * feat : Pk 관련 Entity,enum 파일  생성
+    
+    * style : checkstyle 반영
+    
+    * refactor : builder 수정
+    
+    * refactor : enumerated 추가
+    
+    * refactor : rank 예약어 오류 수정
+
+[33mcommit 87885908874dbca868ba517068e2132272b3617f[m
+Author: kmchaejin <109498876+kmchaejin@users.noreply.github.com>
+Date:   Fri May 30 18:53:02 2025 +0900
+
+    [Feature] store 도메인 관련 entity 생성 (#9)
+    
+    * ✨feat : store 도메인 엔티티 생성
+    
+    * ✨ feat : 기본 생성자 및 빌더 추가
+    
+    * ✨ feat : repository 틀 생성 및 빌더 적용
+    
+    * ✨ feat : 생성자 어노테이션 추가
+    
+    * ✨ feat : Enumerated 어노테이션 적용
+    
+    * ✨ feat : Getter 어노테이션 적용
+
+[33mcommit 9bde1e4c3b0e6eef101250802b7abd5806452445[m
+Author: rlgkghkd <rlgkghkd@gmail.com>
+Date:   Fri May 30 17:40:26 2025 +0900
+
+    [Feature] review, comment, notification 엔티티 작성  (#8)
+    
+    * feat: Review 엔티티
+    
+    * feat: Comment 엔티티 생성
+    
+    * feat: Notification 관련 엔티티 및 에넘
+    
+    * fix: deletedAt, isRead 기본값 수정
+    
+    * fix: Review isPresented 필드 추가
+    
+    * fix: added generated id, added AllArgsConstructor, fixed incorrect annotation usage
+
+[33mcommit e18d374e4e08e4c57d98c40cfbee132887814b5b[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 14:15:02 2025 +0900
+
+    feat : image entity 구현
+
+[33mcommit e6068320f05db5c9e79873530906d3fc4cdde0fb[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 12:49:51 2025 +0900
+
+    chore : setting 오류 수정
+
+[33mcommit a484ca2fd65f25d6912acf590f87fa50a5fbe680[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 12:47:01 2025 +0900
+
+    chore : setting 오류 수정
+
+[33mcommit 662e32bd6bc2bb4a99db29db4734c058463d0c40[m
+Merge: 2b35c20 06e81e6
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 12:31:36 2025 +0900
+
+    Merge remote-tracking branch 'origin/dev'
+
+[33mcommit 06e81e61e2e1363ae43f8d7c1dda09aaa7f4417f[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Fri May 30 11:38:06 2025 +0900
+
+    chore: User, Board Entity 생성 (#2)
+
+[33mcommit 2b35c20ee50516d7376c61ca6f2d80ed1c0bafd7[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 11:35:35 2025 +0900
+
+    chore: User, Board Entity 생성
+
+[33mcommit c4bc1963b7b0d55fb4d2931bdf91a7cd0b001e69[m
+Author: 아현느 <134674305+mo00ai@users.noreply.github.com>
+Date:   Fri May 30 00:30:10 2025 +0900
+
+    Update issue templates (#1)
+
+[33mcommit 6bb17914387282202aa3607db0c3c364eb66b025[m
+Author: AhyunCho <jah112482@gmail.com>
+Date:   Fri May 30 00:04:17 2025 +0900
+
+    chore/init-project

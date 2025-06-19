@@ -1,13 +1,21 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
+import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.EntityManager;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,10 +49,6 @@ import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -65,14 +69,14 @@ public class UserService {
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
 		User user = userRepository.findByIdWithUserFavorList(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserMyProfileResponseDto(user);
 	}
 
 	// 다른 유저 프로필 조회
 	public UserProfileResponseDto getProfile(Long userId) {
 		User user = userRepository.findByIdWithUserFavorList(userId)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserProfileResponseDto(user);
 	}
 
@@ -93,15 +97,15 @@ public class UserService {
 			if (oldImage != null) {
 				try {
 					imageService.update(oldImage.getId(), ImageType.USER, file);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요 - @윤예진
-					log.info("유저 이미지 업데이트에 실패하였습니다 (email: " + user.getEmail() + ")");
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
+					log.warn("[AuthService] 유저 정보 수정 중에 유저 이미지 업데이트에 실패하였습니다. ID: {}", user.getId());
 				}
 			} else {
 				try {
 					Image image = imageService.saveImage(file, ImageType.USER);
 					user.setImage(image);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 정보 업데이트 진행 // TODO: 이미지 트랜잭션 확인 필요 - @윤예진
-					log.info("유저 이미지 저장에 실패하였습니다 (email: " + user.getEmail() + ")");
+				} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
+					log.warn("[AuthService] 유저 정보 수정 중에 유저 이미지 업로드에 실패하였습니다. ID: {}", user.getId());
 				}
 			}
 		}
@@ -122,47 +126,47 @@ public class UserService {
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
+		List<Favor> favorList = favorRepository.findAll();                // 유효한 맵 리스트
 
-		// 1. 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
-		// 2. 삭제된 항목을 리스트에서 제거, 3. 새로 추가한 항목을 반영 (수정 항목)
+		// 입맛 취향 업데이트 요청 리스트와 비교하여 기존의 항목은 유지
+		// 1. 삭제된 항목을 리스트에서 제거, 2. 새로 추가한 항목을 반영 (수정 항목)
 
-		// 삭제된 항목 리스트에서 제거
-		user.removeUserFavorList(userFavorList.stream()
-			.filter(userFavor ->
-				requestDtoList.stream()
-					.noneMatch(updateItem -> isSameItem(updateItem, userFavor)))
-			.collect(Collectors.toCollection(ArrayList::new)));
+		// 기존 항목 맵 생성
+		Map<String, UserFavor> existingFavorMap = userFavorList.stream()
+			.collect(Collectors.toMap(uf -> uf.getFavor().getName(), uf -> uf));
 
-		// 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
-		List<UserFavorUpdateRequestDto> updateFavorList =
-			userFavorList == null || userFavorList.isEmpty() ? requestDtoList
-				: requestDtoList.stream()
-				.filter(updateItem ->
-					userFavorList.stream()
-						.noneMatch(userFavor -> isSameItem(updateItem, userFavor))
-				).toList();
+		// 유효한 Favor 맵 생성
+		Map<String, Favor> validFavorMap = favorList.stream()
+			.collect(Collectors.toMap(Favor::getName, f -> f));
 
+		// 요청 리스트 Favor 맵 생성
+		Map<String, UserFavorUpdateRequestDto> favorRequestMap = requestDtoList.stream()
+			.collect(Collectors.toMap(UserFavorUpdateRequestDto::getName, ufr -> ufr));
+
+		// 1. 삭제된 항목 리스트에서 제거
+		List<UserFavor> removeList = existingFavorMap.entrySet().stream()
+			.filter(e -> !favorRequestMap.containsKey(e.getKey()))
+			.map(Map.Entry::getValue)
+			.toList();
+		user.removeUserFavorList(removeList);
+
+		// 2. 새로 추가할 항목만 추출 (기존 리스트가 비었다면 추가/수정 요청 리스트 그대로 사용, 아니면 필터링)
 		// Favor 리스트에 있는 것만 추가 (올바른 값만)
 		// updateFavorList 의 아이템 하나가 favorList 의 하나와 일치한다면 새로운 userFavor 생성
-		List<Favor> favorList = favorRepository.findAll();
-		ArrayList<UserFavor> updateUserFavorList = new ArrayList<>();
-
-		updateFavorList.forEach(
-			(updateItem) -> favorList.forEach(
-				(favor) -> {
-					if (isExistsItem(updateItem, favor)) {
-						updateUserFavorList.add(new UserFavor(user, favor));
-					}
-				})
-		);
+		List<UserFavor> updateList = favorRequestMap.keySet().stream()
+			.filter(key -> !existingFavorMap.containsKey(key))
+			.map(validFavorMap::get)
+			.filter(Objects::nonNull)
+			.map(favor -> new UserFavor(user, favor))
+			.toList();
 
 		// 최종 저장
-		userFavorRepository.saveAll(updateUserFavorList);
+		userFavorRepository.saveAll(updateList);
 	}
 
 	// 유저의 팔로잉 유저 목록 조회
 	public List<UserSimpleResponseDto> getFollowingUserList(Long followerUserId) {
-		return followRepository.findAllByFollower(followerUserId)
+		return followRepository.findByFollowerId(followerUserId)
 			.stream()
 			.map(Follow::getFollowing)
 			.map(UserSimpleResponseDto::new)
@@ -171,7 +175,7 @@ public class UserService {
 
 	// 유저의 팔로워 유저 목록 조회
 	public List<UserSimpleResponseDto> getFollowerUserList(Long followingUserId) {
-		return followRepository.findAllByFollowing(followingUserId)
+		return followRepository.findByFollowingId(followingUserId)
 			.stream()
 			.map(Follow::getFollower)
 			.map(UserSimpleResponseDto::new)
@@ -182,16 +186,20 @@ public class UserService {
 	public void followUser(Long userId, Long followingUserId) {
 		User user = entityFetcher.getUserOrThrow(userId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		if (followRepository.existsByFollowerIdAndFollowingId(userId, followingUserId)) {
+			throw new CustomException(ALREADY_FOLLOWED);
+		}
 		Follow follow = followRepository.save(new Follow(user, followingUser));
 		user.follow(follow);
-		followingUser.followed();    // TODO: 중복 팔로우 방지 추가
+		followingUser.followed();
 	}
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
 		User follower = entityFetcher.getUserOrThrow(followerUserId);
 		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
-		Follow follow = followRepository.findByFollowerAndFollower(followerUserId, followingUserId);
+		Follow follow = followRepository.findByFollowerIdAndFollowingId(followerUserId, followingUserId)
+			.orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
 
 		follower.unfollow(follow);
 		followingUser.unfollowed();
