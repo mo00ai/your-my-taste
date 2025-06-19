@@ -54,10 +54,13 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 	private String title;
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserMatchInfoStore> storeList = new ArrayList<>();
+	private List<UserMatchInfoFavor> favorList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserMatchInfoCategory> categoryList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "userMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserMatchInfoStore> storeList = new ArrayList<>();
 
 	@Embedded
 	private AgeRange ageRange;
@@ -104,7 +107,7 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 
 	public void registerMatch() {
 		this.matchStatus = MatchStatus.MATCHING;
-		this.matchStartedAt = LocalDateTime.now();    // TODO: 매칭 되거나하면 null 로 변경
+		this.matchStartedAt = LocalDateTime.now();
 	}
 
 	public boolean isMatching() {
@@ -126,14 +129,26 @@ public class UserMatchInfo extends BaseCreatedAtEntity {
 		}
 	}
 
-	public void updateCategoryList(List<UserMatchInfoCategory> categoryListList) {
-		if (categoryListList != null) {
+	public void updateCategoryList(List<UserMatchInfoCategory> categoryList) {
+		if (categoryList != null) {
 			this.categoryList.clear();
-			this.categoryList.addAll(categoryListList);
+			this.categoryList.addAll(categoryList);
+		}
+	}
+
+	public void updateFavorList(List<UserMatchInfoFavor> favorList) {
+		if (favorList != null) {
+			this.favorList.clear();
+			this.favorList.addAll(favorList);
 		}
 	}
 
 	public void updateMatchStatus(MatchStatus matchStatus) {
 		this.matchStatus = matchStatus;
+	}
+
+	public void clearMatching() {
+		this.matchStatus = MatchStatus.IDLE;
+		this.matchStartedAt = null;
 	}
 }

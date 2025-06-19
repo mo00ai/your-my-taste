@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.service.RedisService;
@@ -24,11 +23,11 @@ import com.example.taste.fixtures.UserFixture;
 
 import jakarta.persistence.EntityManager;
 
-@SpringBootTest
-@Transactional
 // @ActiveProfiles("test-int")
 // @ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
-@ActiveProfiles("test-int-docker")
+// @ActiveProfiles("test-int-docker")
+@SpringBootTest
+@Transactional
 class PkServiceTest {
 
 	@Autowired
@@ -49,22 +48,22 @@ class PkServiceTest {
 		System.out.println("🔍 SYSTEM spring.profiles.active: " + System.getProperty("spring.profiles.active"));
 	}
 
-	@Test
-	void savePkLog_saveToRedis() {
-		// // given
-		// User user = userRepository.save(UserFixture.create(ImageFixture.create()));
-		//
-		// // when
-		// pkService.savePkLog(user.getId(), PkType.POST);
-		// em.flush();
-		// em.refresh(user);
-		//
-		// // then
-		// assertThat(user.getPoint()).isEqualTo(30);
-		// String key = "pkLog:" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ":" + user.getId();
-		// List<Object> logs = redisService.getOpsForList(key, Object.class);
-		// assertThat(logs).hasSize(1);
-	}
+	// @Test
+	// void savePkLog_saveToRedis() {
+	// 	// // given
+	// 	// User user = userRepository.save(UserFixture.create(ImageFixture.create()));
+	// 	//
+	// 	// // when
+	// 	// pkService.savePkLog(user.getId(), PkType.POST);
+	// 	// em.flush();
+	// 	// em.refresh(user);
+	// 	//
+	// 	// // then
+	// 	// assertThat(user.getPoint()).isEqualTo(30);
+	// 	// String key = "pkLog:" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ":" + user.getId();
+	// 	// List<Object> logs = redisService.getOpsForList(key, Object.class);
+	// 	// assertThat(logs).hasSize(1);
+	// }
 
 	@Test
 	void runPkTermRankingScheduler_ResetUsersPoint() {
