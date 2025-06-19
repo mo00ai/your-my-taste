@@ -131,6 +131,10 @@ public class Party extends SoftDeletableEntity {
 		return this.nowMembers == this.maxMembers;
 	}
 
+	public boolean isStatus(PartyStatus partyStatus) {
+		return this.partyStatus.equals(partyStatus);
+	}
+
 	public boolean isHostOfParty(Long hostId) {
 		return this.getHostUser().getId().equals(hostId);
 	}
