@@ -11,7 +11,6 @@ import static com.example.taste.domain.pk.exception.PkErrorCode.PK_CRITERIA_NOT_
 import static com.example.taste.domain.store.exception.StoreErrorCode.BUCKET_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
-import static com.example.taste.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import lombok.RequiredArgsConstructor;
 
@@ -71,7 +70,7 @@ public class EntityFetcher {
 
 	public User getUndeletedUserOrThrow(Long id) {
 		return userRepository.findByIdAndDeletedAtIsNull(id)
-			.orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 	}
 
 	public Store getStoreOrThrow(Long id) {

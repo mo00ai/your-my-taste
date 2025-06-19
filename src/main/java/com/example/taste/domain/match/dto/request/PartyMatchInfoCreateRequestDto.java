@@ -1,7 +1,10 @@
 package com.example.taste.domain.match.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -18,8 +21,9 @@ public class PartyMatchInfoCreateRequestDto {
 	private AgeRange ageRange;
 	@ValidEnum(target = Gender.class)
 	private String gender;
-	// MEMO : 주소 검증 필요
 	private String region;
+	@Size(min = 0, max = 5, message = "선호 입맛은 5개 이하로 입력해야 합니다.")
+	private List<String> favorList;
 
 	@Builder
 	public PartyMatchInfoCreateRequestDto(
@@ -29,6 +33,7 @@ public class PartyMatchInfoCreateRequestDto {
 			this.ageRange = partyMatchInfo.getAgeRange() != null ? partyMatchInfo.getAgeRange() : null;
 			this.gender = partyMatchInfo.getGender() != null ? partyMatchInfo.getGender() : null;
 			this.region = partyMatchInfo.getRegion() != null ? partyMatchInfo.getRegion() : null;
+			this.favorList = partyMatchInfo.getFavorList() != null ? partyMatchInfo.getFavorList() : null;
 		}
 	}
 }
