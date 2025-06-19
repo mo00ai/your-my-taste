@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationUserController {
 
 	private final NotificationUserService notificationUserService;
+	//todo 서비스에 detail 넘겨주지 말 것.
 
 	// 알림 카운트 접근(전체)(원하지 않는 카테고리 알림 삭제)
 	@GetMapping
@@ -44,6 +45,7 @@ public class NotificationUserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
 		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
 	}
+	//todo 합쳐라
 
 	// 알림 읽음 처리하기
 	@PatchMapping
@@ -59,4 +61,5 @@ public class NotificationUserController {
 		notificationUserService.markAllNotificationAsRead(userDetails);
 		return CommonResponse.ok();
 	}
+
 }

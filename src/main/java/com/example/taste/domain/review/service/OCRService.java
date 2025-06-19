@@ -67,6 +67,7 @@ public class OCRService {
 		// 이미지는 인코딩해서 api에 전달
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
 
+		// 프로퍼티로 뺄 것.
 		URI uri = UriComponentsBuilder.newInstance()
 			.scheme("https")
 			.host("dwyd1vrxhu.apigw.ntruss.com")
@@ -98,7 +99,9 @@ public class OCRService {
 			.bodyToMono(OcrResponseDto.class);
 
 		OcrResponseDto ocrResponseDto = response.block(Duration.ofSeconds(10));
+		//todo 예외
 
+		//todo 맵 말고
 		ocrResponseDto.getImages();
 		// 가게 이름 (ex: 프랭크 버거)
 		String storeName = Optional.ofNullable(ocrResponseDto.getImages()).filter(images -> !images.isEmpty())

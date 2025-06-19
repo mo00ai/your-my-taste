@@ -3,8 +3,8 @@ package com.example.taste.domain.notification.dto;
 import java.io.Serial;
 import java.io.Serializable;
 
-import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.notification.NotificationType;
+import com.example.taste.domain.notification.entity.NotificationCategory;
+import com.example.taste.domain.notification.entity.NotificationType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class NotificationPublishDto implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
-	
+
 	private Long userId;
 	@NotNull(message = "올바르지 않은 알림 생성 요청입니다.")
 	private NotificationCategory category;

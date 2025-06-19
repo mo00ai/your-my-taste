@@ -14,11 +14,11 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.notification.NotificationType;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
+import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationContent;
+import com.example.taste.domain.notification.entity.NotificationType;
 import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
@@ -75,6 +75,7 @@ public class NotificationSubscriber implements MessageListener {
 			}
 		}
 	}
+	//todo 전략 패턴
 
 	// 개인에게 보내는 알림
 	private void sendIndividual(NotificationPublishDto publishDto) {
@@ -92,12 +93,13 @@ public class NotificationSubscriber implements MessageListener {
 		long startLogging = System.currentTimeMillis();
 		// 유저를 100명 단위로 끊어와 보냄
 		int page = 0;
-		int size = 100;
+		int size = 1000;
 		Page<User> users;
 		do {
 			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
 			notificationService.sendBunch(notificationContent, dataDto, users.getContent());
 			page++;
+
 		} while (users.hasNext());
 		long endLogging = System.currentTimeMillis();
 		log.info("paging 타임 체크: {} ms", (endLogging - startLogging));
@@ -172,4 +174,5 @@ public class NotificationSubscriber implements MessageListener {
 		dataDto.buildUrl(publishDto.getRedirectionUrl(), publishDto.getRedirectionEntityId());
 		return dataDto;
 	}
+
 }

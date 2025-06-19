@@ -73,6 +73,7 @@ public class ReviewService {
 		return new CreateReviewResponseDto(saved);
 	}
 
+	//todo null 이 내용 지우기 일 수도 있슴
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		List<MultipartFile> files, ImageType imageType, CustomUserDetails userDetails) throws IOException {

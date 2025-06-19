@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.config.security.CustomUserDetails;
-import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
+import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
@@ -152,6 +152,8 @@ public class NotificationUserService {
 		List<Long> emptyList = new ArrayList<>();
 		markSqlNotificationAsRead(userId, emptyList);
 	}
+
+	// 읽음 처리 중복 코드 정리
 
 	private Set<String> getKeys(String pattern) {
 		return redisService.getKeys(pattern);
