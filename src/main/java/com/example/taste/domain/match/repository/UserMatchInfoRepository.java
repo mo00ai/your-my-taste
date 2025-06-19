@@ -13,7 +13,5 @@ import com.example.taste.domain.user.entity.User;
 public interface UserMatchInfoRepository extends JpaRepository<UserMatchInfo, Long> {
 	List<UserMatchInfo> findAllByUser(User user);
 
-	MatchStatus findMatchStatusById(Long id);
-
 	List<UserMatchInfo> findAllByMatchStatus(MatchStatus matchStatus);
 }

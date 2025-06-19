@@ -1,64 +1,17 @@
 package com.example.taste.domain.party.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.taste.domain.match.entity.UserMatchInfo;
-import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
-import com.example.taste.domain.party.enums.InvitationType;
-import com.example.taste.domain.party.enums.PartyStatus;
-import com.example.taste.domain.user.entity.User;
 
 @Repository
-public interface PartyInvitationRepository extends JpaRepository<PartyInvitation, Long> {
-	@Query("SELECT DISTINCT pi.user FROM PartyInvitation pi "
-		+ "WHERE pi.party.id = :partyId AND pi.invitationStatus = 'CONFIRMED'")
-	List<User> findUsersInParty(@Param("partyId") Long partyId);
-
-	@Query("SELECT pi FROM PartyInvitation pi "
-		+ "WHERE pi.user.id = :userId AND pi.party.id = :partyId")
-	Optional<PartyInvitation> findByUserAndParty(
-		@Param("userId") Long userId, @Param("partyId") Long partyId);
-
-	@Query("SELECT pi FROM PartyInvitation pi "
-		+ "WHERE pi.user.id = :userId AND pi.invitationStatus = :invitationStatus "
-		+ "AND pi.party.partyStatus = :partyStatus")
-	List<PartyInvitation> findMyActivePartyInvitationList(
-		@Param("userId") Long userId, @Param("invitationStatus") InvitationStatus invitationStatus,
-		@Param("partyStatus") PartyStatus partyStatus);
-
-	List<PartyInvitation> findAllByPartyAndInvitationStatus(Party party, InvitationStatus invitationStatus);
-
-	@Query("SELECT pi FROM PartyInvitation pi "
-		+ "WHERE pi.party = :party AND pi.invitationType = :type AND pi.invitationStatus = :status")
-	List<PartyInvitation> findAllActivePartyInvitations(
-		@Param("party") Party party,
-		@Param("type") InvitationType type, @Param("status") InvitationStatus status);
-
-	@Query("SELECT pi.party.id FROM PartyInvitation pi WHERE pi.user = :user")
-	List<Long> findAllPartyIdByUser(@Param("user") User user);
-
-	@Query("DELETE FROM PartyInvitation pi "
-		+ "WHERE pi.userMatchInfo = :userMatchInfo "
-		+ "AND pi.invitationType = :type AND pi.invitationStatus = :status")
-	void deleteUserMatchWhileMatching(
-		@Param("userMatchInfo") UserMatchInfo userMatchInfo,
-		@Param("invitationType") InvitationType type,
-		@Param("invitationStatus") InvitationStatus status);
-
-	@Modifying(clearAutomatically = true)
-	@Query("DELETE FROM PartyInvitation pi WHERE pi.invitationStatus = :status "
-		+ "AND pi.party.id = :partyId")
-	void deleteAllByPartyAndInvitationStatus(
-		@Param("partyId") Long partyId, @Param("status") InvitationStatus status);
+public interface PartyInvitationRepository extends
+	JpaRepository<PartyInvitation, Long>, PartyInvitationRepositoryCustom {
+	List<PartyInvitation> findByPartyId(Long partyId);
 
 	boolean existsByUserIdAndPartyIdAndInvitationStatus(
 		Long userId, Long partyId, InvitationStatus invitationStatus);

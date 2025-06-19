@@ -14,8 +14,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMatchInfoResponseDto {
 	private Long id;
-	private List<UserMatchInfoStoreResponseDto> stores;
-	private List<UserMatchInfoCategoryResponseDto> categories;
+	private List<UserMatchInfoStoreResponseDto> storeList;
+	private List<UserMatchInfoCategoryResponseDto> categoryList;
+	private List<UserMatchInfoFavorResponseDto> favorList;
 	private AgeRange ageRange;
 	private String gender;
 	private String region;
@@ -25,10 +26,12 @@ public class UserMatchInfoResponseDto {
 	@Builder
 	public UserMatchInfoResponseDto(UserMatchInfo userMatchInfo) {
 		this.id = userMatchInfo.getId();
-		this.stores = userMatchInfo.getStoreList().stream()
+		this.storeList = userMatchInfo.getStoreList().stream()
 			.map(UserMatchInfoStoreResponseDto::new).toList();
-		this.categories = userMatchInfo.getCategoryList().stream()
+		this.categoryList = userMatchInfo.getCategoryList().stream()
 			.map(UserMatchInfoCategoryResponseDto::new).toList();
+		this.favorList = userMatchInfo.getFavorList().stream()
+			.map(UserMatchInfoFavorResponseDto::new).toList();
 		this.ageRange = userMatchInfo.getAgeRange();
 		this.gender = userMatchInfo.getUserGender().toString();
 		this.region = userMatchInfo.getRegion();
