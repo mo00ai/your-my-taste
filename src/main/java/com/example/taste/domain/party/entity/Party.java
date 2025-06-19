@@ -3,7 +3,6 @@ package com.example.taste.domain.party.entity;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
@@ -24,7 +22,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.example.taste.common.entity.BaseCreatedAtEntity;
+import com.example.taste.common.entity.SoftDeletableEntity;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -36,7 +34,7 @@ import com.example.taste.domain.user.entity.User;
 @Getter
 @NoArgsConstructor
 @Table(name = "party")
-public class Party extends BaseCreatedAtEntity {
+public class Party extends SoftDeletableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -45,9 +43,6 @@ public class Party extends BaseCreatedAtEntity {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User hostUser;
-
-	@OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PartyInvitation> partyInvitationList;
 
 	@Column(nullable = false)
 	private String title;
@@ -84,7 +79,7 @@ public class Party extends BaseCreatedAtEntity {
 			requestDto.getMaxMembers() != null ? requestDto.getMaxMembers() : 0;
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
-		this.partyStatus = PartyStatus.RECRUITING;
+		this.partyStatus = PartyStatus.ACTIVE;
 	}
 
 	public void update(PartyUpdateRequestDto requestDto, Store store) {
@@ -118,9 +113,6 @@ public class Party extends BaseCreatedAtEntity {
 		}
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();
-			if (this.nowMembers < this.maxMembers) {
-				this.partyStatus = PartyStatus.RECRUITING;
-			}
 		}
 		if (requestDto.getEnableRandomMatching() != null) {
 			this.enableRandomMatching = requestDto.getEnableRandomMatching();
@@ -136,24 +128,21 @@ public class Party extends BaseCreatedAtEntity {
 	}
 
 	public boolean isFull() {
-		return this.partyStatus.equals(PartyStatus.FULL) || (this.nowMembers >= this.maxMembers);
+		return this.nowMembers == this.maxMembers;
 	}
 
 	public boolean isHostOfParty(Long hostId) {
 		return this.getHostUser().getId().equals(hostId);
 	}
 
-	public boolean isActiveMember(User user) {
-		for (PartyInvitation pi : this.partyInvitationList) {
-			if (pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED) && pi.getUser().equals(user)) {
-				return true;
-			}
-		}
-		return false;
+	public boolean isActiveMemberOfParty(Long userId, List<PartyInvitation> partyInvitationList) {
+		return partyInvitationList.stream()
+			.anyMatch(pi -> pi.getUser().getId().equals(userId)
+				&& pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED));
 	}
 
-	public double calculateAverageMemberAge() {
-		return this.partyInvitationList.stream()
+	public double calculateAverageMemberAge(List<PartyInvitation> partyInvitationList) {
+		return partyInvitationList.stream()
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))
 			.mapToInt(pi -> pi.getUser().getAge())
 			.average().orElse(0.0);

@@ -85,6 +85,10 @@ dependencies {
     // jOOQ
     implementation 'org.jooq:jooq'
     jooqGenerator 'mysql:mysql-connector-java:8.0.33' // 코드 생성 시 DB 접근용
+
+    // quartz
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'com.mchange:c3p0:0.9.5.5'
 }
 
 def dotenv = new Properties()
