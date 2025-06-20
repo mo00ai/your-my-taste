@@ -1,5 +1,7 @@
 package com.example.taste.domain.notification.entity;
 
+import java.time.LocalDateTime;
+
 import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -9,13 +11,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class NotificationVapidKey {
+@Getter
+public class WebPushInformation {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,15 +29,21 @@ public class NotificationVapidKey {
 
 	@Column(unique = true)
 	private String endpoint;
+	@Setter
 	private String p256dhKey;
+	@Setter
 	private String authKey;
+
+	private LocalDateTime expirationTime;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 
-	public NotificationVapidKey(String authKey, String p256dhKey, String endpoint) {
+	@Builder
+	public WebPushInformation(String authKey, String p256dhKey, String endpoint, User user) {
 		this.authKey = authKey;
 		this.p256dhKey = p256dhKey;
 		this.endpoint = endpoint;
+		this.user = user;
 	}
 }

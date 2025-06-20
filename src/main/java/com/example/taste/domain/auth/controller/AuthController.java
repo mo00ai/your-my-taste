@@ -18,6 +18,7 @@ import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.dto.UserResponseDto;
 import com.example.taste.domain.auth.service.AuthService;
+import com.example.taste.domain.notification.service.WebPushService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
+	private final WebPushService webPushService;
 
 	// web push를 위해 유저에세 vapid 공개키를 전송할 필요가 있음.
 	@Value("${vapid.public}")
@@ -58,6 +60,7 @@ public class AuthController {
 	@PostMapping("/signout")
 	public CommonResponse<Void> signout(
 		HttpServletRequest httpRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		webPushService.deleteInfomation();
 		authService.signout(httpRequest, userDetails);
 
 		return CommonResponse.ok();
