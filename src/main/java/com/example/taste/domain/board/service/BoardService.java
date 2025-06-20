@@ -6,7 +6,6 @@ import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,7 +42,6 @@ import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
@@ -80,7 +78,7 @@ public class BoardService {
 		Board saved = boardRepository.save(entity);
 
 		// 오픈런 게시글 카운팅
-		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
+		if (!saved.isNBoard()) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
 			entityManager.refresh(user);
 
@@ -112,31 +110,31 @@ public class BoardService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-		if (board.getType() == BoardType.N) {
+		if (board.isNBoard()) {
 			return new BoardResponseDto(board);
 		}
 
-		if (board.getUser().isSameUser(userId) || user.getRole() == Role.ADMIN) {
+		if (board.getUser().isSameUser(userId) || user.isAdmin()) {
 			return new BoardResponseDto(board);
 		}
 
 		// 게시글 공개시간 전이면 error
-		if (LocalDateTime.now().isBefore(board.getOpenTime())) {
+		if (!board.isOpenTimeNow()) {
 			throw new CustomException(BOARD_NOT_YET_OPEN);
 		}
 
 		// 비공개 게시글이면 error
-		if (board.getAccessPolicy() == AccessPolicy.CLOSED) {
+		if (board.isClosed()) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.getAccessPolicy() == AccessPolicy.TIMEATTACK) {
+		if (board.isTimeAttack()) {
 			board.validateAndCloseIfExpired();
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
-		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
+		if (board.isFcfs()) {
 			tryEnterFcfsQueue(board, userId);
 		}
 
@@ -154,7 +152,7 @@ public class BoardService {
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
-		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
+		if (board.isFcfs()) {
 			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
@@ -170,7 +168,7 @@ public class BoardService {
 
 	// 게시물 작성자와 현재 사용자가 일치하는지 검증
 	private void checkUser(Long userId, Board board) {
-		if (!board.getUser().getId().equals(userId)) {
+		if (!board.getUser().isSameUser(userId)) {
 			throw new CustomException(ErrorCode.UNAUTHORIZED);
 		}
 	}
@@ -205,12 +203,12 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType.O,
+		Page<Board> boards = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
 			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
 			Long remainingSlot = null;
-			if (board.getAccessPolicy() == AccessPolicy.FCFS) {
+			if (board.isFcfs()) {
 				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
 				remainingSlot = Math.max(0, board.getOpenLimit() - zSetSize);
 			}
@@ -235,7 +233,7 @@ public class BoardService {
 
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 		long size = redisService.getZSetSize(key);
-		if (size >= board.getOpenLimit()) {
+		if (board.isOverOpenLimit(size)) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
@@ -251,7 +249,7 @@ public class BoardService {
 
 		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
 		Long rank = redisService.getRank(key, userId);
-		if (rank != null && rank >= board.getOpenLimit()) {
+		if (rank != null && board.isOverOpenLimit(rank)) {
 			redisService.removeFromZSet(key, userId);
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}

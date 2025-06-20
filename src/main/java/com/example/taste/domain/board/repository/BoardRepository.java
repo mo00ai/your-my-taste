@@ -38,4 +38,9 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 
 	Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);
+
+	default Page<Board> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
+		Pageable pageable) {
+		return findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(type, statuses, pageable);
+	}
 }

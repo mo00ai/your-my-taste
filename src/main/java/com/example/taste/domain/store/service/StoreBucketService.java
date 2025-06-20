@@ -59,7 +59,7 @@ public class StoreBucketService {
 			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
 		for (Long bucketId : request.getBucketIds()) {
-			StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
+			StoreBucket storeBucket = storeBucketRepository.findById(bucketId) // TODO 성능 개선 가능할듯 @김채진
 				.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 			// 로그인 유저의 버킷인지 확인

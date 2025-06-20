@@ -155,4 +155,28 @@ public class Board extends SoftDeletableEntity {
 			throw new CustomException(CLOSED_BOARD);
 		}
 	}
+
+	public boolean isNBoard() {
+		return this.type == BoardType.N;
+	}
+
+	public boolean isTimeAttack() {
+		return this.accessPolicy == AccessPolicy.TIMEATTACK;
+	}
+
+	public boolean isFcfs() {
+		return this.accessPolicy == AccessPolicy.FCFS;
+	}
+
+	public boolean isOpenTimeNow() {
+		return !LocalDateTime.now().isBefore(this.openTime);
+	}
+
+	public boolean isClosed() {
+		return this.accessPolicy == AccessPolicy.CLOSED;
+	}
+
+	public boolean isOverOpenLimit(Long num) {
+		return this.openLimit <= num;
+	}
 }
