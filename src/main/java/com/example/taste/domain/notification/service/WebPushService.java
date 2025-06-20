@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.domain.notification.dto.PushSubscribeRequestDto;
 import com.example.taste.domain.notification.entity.WebPushInformation;
-import com.example.taste.domain.notification.repository.WebPushRepository;
+import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
 import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +37,10 @@ public class WebPushService {
 		webPushRepository.save(information);
 	}
 
-	public void deleteInfomation() {
+	public void deleteInfomation(Long userId, String endpoint) {
+		WebPushInformation information = webPushRepository.getWebPushInformationByUserIdAndEndPoint(userId, endpoint);
+		if (information != null) {
+			webPushRepository.delete(information);
+		}
 	}
 }

@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.repository;
+package com.example.taste.domain.notification.repository.webPush;
 
 import java.util.Optional;
 
@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.example.taste.domain.notification.entity.WebPushInformation;
 
 @Repository
-public interface WebPushRepository extends JpaRepository<WebPushInformation, Long> {
+public interface WebPushRepository extends JpaRepository<WebPushInformation, Long>, WebPushRepositoryCustom {
 	Optional<WebPushInformation> findByEndpoint(String endpoint);
 }

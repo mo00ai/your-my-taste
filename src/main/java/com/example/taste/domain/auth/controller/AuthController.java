@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.auth.dto.DeleteWebPushInfoDto;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.dto.UserResponseDto;
@@ -59,8 +60,10 @@ public class AuthController {
 
 	@PostMapping("/signout")
 	public CommonResponse<Void> signout(
-		HttpServletRequest httpRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
-		webPushService.deleteInfomation();
+		HttpServletRequest httpRequest, @AuthenticationPrincipal CustomUserDetails userDetails,
+		// 로그아웃 시 등록된 web push 정보를 삭제
+		@RequestBody DeleteWebPushInfoDto dto) {
+		webPushService.deleteInfomation(userDetails.getId(), dto.getEndpoint());
 		authService.signout(httpRequest, userDetails);
 
 		return CommonResponse.ok();

@@ -95,7 +95,7 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     //web_push
-    implementation 'com.zerodeplibs:webpush-java'
+    implementation 'com.zerodeplibs:zerodep-web-push-java:2.1.2'
 }
 
 def dotenv = new Properties()
