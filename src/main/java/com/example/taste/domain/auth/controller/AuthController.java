@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.service.AuthService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
+import com.example.taste.domain.user.facade.UserFacade;
 
 @RestController
 @CrossOrigin(
@@ -31,6 +30,16 @@ import com.example.taste.domain.auth.service.AuthService;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
+	private final UserFacade userFacade;
+
+	@PostMapping("/signup")
+	public CommonResponse<Void> signup(
+		@RequestPart(name = "data") @Valid SignupRequestDto requestDto,
+		@RequestPart(name = "file", required = false) MultipartFile file) {
+		userFacade.signup(requestDto, file);
+
+		return CommonResponse.ok();
+	}
 
 	@PostMapping("/signin")
 	public CommonResponse<Void> signin(

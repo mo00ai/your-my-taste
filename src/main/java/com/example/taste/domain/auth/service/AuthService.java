@@ -1,12 +1,9 @@
 package com.example.taste.domain.auth.service;
 
 import static com.example.taste.domain.auth.exception.AuthErrorCode.ALREADY_LOGIN;
-import static com.example.taste.domain.user.exception.UserErrorCode.CONFLICT_EMAIL;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
-
-import java.io.IOException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -20,16 +17,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
-import com.example.taste.domain.auth.dto.SignupRequestDto;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.domain.user.service.UserService;
@@ -38,6 +30,8 @@ import com.example.taste.domain.user.service.UserService;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+	private final ImageService imageService;
+	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 

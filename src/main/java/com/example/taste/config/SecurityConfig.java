@@ -37,7 +37,7 @@ public class SecurityConfig {
 				}
 			)
 			.authorizeHttpRequests(auth -> {
-				auth.requestMatchers("/auth/**").permitAll();
+				auth.requestMatchers("/auth/signin").permitAll();
 
 				auth.requestMatchers("/ws/**").permitAll();            // MEMO: 웹소켓 테스트용
 				auth.requestMatchers("/admin/**").hasRole("ADMIN");

@@ -1,7 +1,6 @@
 package com.example.taste.domain.user.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
-import static com.example.taste.domain.user.exception.UserErrorCode.CONFLICT_EMAIL;
 import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import jakarta.persistence.EntityManager;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.image.entity.Image;
@@ -35,7 +31,6 @@ import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
-import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
@@ -55,7 +50,6 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	private final EntityManager em;
 	private final EntityFetcher entityFetcher;
 	private final ImageService imageService;
 	private final UserRepository userRepository;
@@ -65,39 +59,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final UserJdbcRepository userJdbcRepository;
 	private final PkLogJdbcRepository pkLogJdbcRepository;
-	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final StoreBucketRepository storeBucketRepository;
-
-	// 회원 가입
-	@Transactional
-	public void signup(SignupRequestDto requestDto, MultipartFile file) {
-		// 유저 이메일(아이디) 중복 검사
-		if (isExistsEmail(requestDto.getEmail())) {
-			throw new CustomException(CONFLICT_EMAIL);
-		}
-
-		// 비밀번호 인코딩
-		String encodedPwd = passwordEncoder.encode(requestDto.getPassword());
-		requestDto.setPassword(encodedPwd);
-
-		// 유저 정보 저장
-		User user = new User(requestDto);
-		userRepository.save(user);
-
-		// 입맛 취향 정보 저장
-		updateUserFavors(user.getId(), requestDto.getFavorList());
-
-		// 프로필 이미지 저장
-		if (file != null) {
-			try {
-				Image image = imageService.saveImage(file, ImageType.USER);
-				user.setImage(image);
-				userRepository.save(user);
-			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
-				log.warn("[AuthService] 회원 가입 중에 유저 이미지 저장에 실패하였습니다. ID: {}", user.getId());
-			}
-		}
-	}
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -236,11 +198,6 @@ public class UserService {
 
 		follower.unfollow(follow);
 		followingUser.unfollowed();
-	}
-
-	// 중복 이메일 검사
-	private boolean isExistsEmail(String email) {
-		return userRepository.existsByEmail(email);
 	}
 
 	@Transactional
