@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
 import com.example.taste.domain.match.dto.response.UserMatchInfoResponseDto;
 import com.example.taste.domain.match.service.MatchInfoService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RequestMapping("/match-infos")
 @RestController
@@ -48,7 +48,7 @@ public class MatchInfoController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId,
 		@RequestBody @Valid UserMatchInfoUpdateRequestDto requestDto) {
-		matchInfoService.updateUserMatchInfo(customUserDetails.getUser(), matchInfoId, requestDto);
+		matchInfoService.updateUserMatchInfo(customUserDetails.getId(), matchInfoId, requestDto);
 		return CommonResponse.ok();
 	}
 
@@ -56,7 +56,7 @@ public class MatchInfoController {
 	public CommonResponse<Void> deleteUserMatchInfo(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Long matchInfoId) {
-		matchInfoService.deleteUserMatchInfo(customUserDetails.getUser(), matchInfoId);
+		matchInfoService.deleteUserMatchInfo(customUserDetails.getId(), matchInfoId);
 		return CommonResponse.ok();
 	}
 }

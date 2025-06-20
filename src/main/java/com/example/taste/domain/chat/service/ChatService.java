@@ -25,12 +25,14 @@ import com.example.taste.domain.user.repository.UserRepository;
 @RequiredArgsConstructor
 public class ChatService {
 	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
 	private final ChatRepository chatRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
-	private final UserRepository userRepository;
 
 	// 보낸 메세지 저장
-	public ChatResponseDto saveMessage(User user, ChatCreateRequestDto dto) {
+	public ChatResponseDto saveMessage(Long userId, ChatCreateRequestDto dto) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Party party = entityFetcher.getPartyOrThrow(dto.getPartyId());
 		if (!partyInvitationRepository.isConfirmedPartyMember(dto.getPartyId(), user.getId())) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
@@ -42,12 +44,14 @@ public class ChatService {
 		return new ChatResponseDto(chat);
 	}
 
-	public List<ChatResponseDto> getChats(User user, Long partyId) {
+	public List<ChatResponseDto> getChats(Long userId, Long partyId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 		List<PartyInvitation> partyInvitationList =
 			partyInvitationRepository.findByPartyId(partyId);
 
-		if (!partyInvitationRepository.isConfirmedPartyMember(partyId, user.getId())) {
+		if (!party.isConfirmedPartyMember(user.getId(), partyInvitationList)) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 

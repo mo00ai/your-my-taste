@@ -12,9 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @Slf4j
 @Component
@@ -39,7 +39,7 @@ public class WebSocketSubscriptionManager {
 				CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 
 				if (!partyInvitationRepository.existsByUserIdAndPartyIdAndInvitationStatus(
-					userDetails.getUser().getId(), partyId, InvitationStatus.CONFIRMED)) {
+					userDetails.getId(), partyId, InvitationStatus.CONFIRMED)) {
 					throw new IllegalAccessException();
 				}
 			} else {

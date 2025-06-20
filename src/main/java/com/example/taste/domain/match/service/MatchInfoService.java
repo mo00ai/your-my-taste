@@ -5,6 +5,7 @@ import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MAT
 import static com.example.taste.domain.match.exception.MatchErrorCode.FORBIDDEN_USER_MATCH_INFO;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.util.List;
 
@@ -31,11 +32,13 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class MatchInfoService {
 	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
 	private final FavorRepository favorRepository;
@@ -74,7 +77,9 @@ public class MatchInfoService {
 
 	@Transactional
 	public void updateUserMatchInfo(
-		User user, Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
+		Long userId, Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
 		// 자신의 소유가 아닌 경우
 		if (!matchInfo.isOwner(user)) {
@@ -105,7 +110,9 @@ public class MatchInfoService {
 	}
 
 	@Transactional
-	public void deleteUserMatchInfo(User user, Long matchInfoId) {
+	public void deleteUserMatchInfo(Long userId, Long matchInfoId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(matchInfoId);
 		// 자신의 소유가 아닌 경우
 		if (!matchInfo.isOwner(user)) {

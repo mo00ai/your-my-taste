@@ -40,17 +40,17 @@ public class CustomUserDetails implements UserDetails, Serializable {
 
 	@Override
 	public String getPassword() {
-		return getPassword();
+		return this.password;
 	}
 
 	// 이메일 식별자
 	@Override
 	public String getUsername() {
-		return getEmail();
+		return this.email;
 	}
 
 	public Long getId() {
-		return getId();
+		return this.id;
 	}
 
 	@Override

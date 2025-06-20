@@ -7,7 +7,6 @@ import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -30,7 +29,6 @@ public class ChatWebSocketController {
 	@MessageMapping("/parties/{partyId}/chat/send")
 	@SendTo("/sub/parties/{partyId}/chat")
 	public ChatResponseDto sendMessage(
-		@DestinationVariable Long partyId,
 		@Payload ChatCreateRequestDto message, Principal principal) {
 		if (!(principal instanceof Authentication authentication)) {
 			throw new CustomException(UNAUTHENTICATED);
@@ -43,9 +41,9 @@ public class ChatWebSocketController {
 
 		log.info("메세지 전송내용: {}, UserID: {}, PartyId: {}",
 			message.getMessage(),
-			customUserDetails.getUser().getId(),
+			customUserDetails.getId(),
 			message.getPartyId());
 
-		return chatService.saveMessage(customUserDetails.getUser(), message);
+		return chatService.saveMessage(customUserDetails.getId(), message);
 	}
 }
