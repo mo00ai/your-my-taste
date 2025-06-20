@@ -252,4 +252,14 @@ public class BoardService {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 	}
+
+	@Transactional
+	public List<Long> findExpiredTimeAttackBoardIds(AccessPolicy policy) {
+		return boardRepository.findExpiredTimeAttackBoardIds(policy.name());
+	}
+
+	@Transactional
+	public long closeBoardsByIds(List<? extends Long> ids) {
+		return boardRepository.closeBoardsByIds(ids);
+	}
 }

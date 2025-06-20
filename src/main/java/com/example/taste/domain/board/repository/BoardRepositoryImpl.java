@@ -112,7 +112,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	}
 
 	@Override
-	public long closeBoardsByIds(List<Long> ids) {
+	public long closeBoardsByIds(List<? extends Long> ids) {
 		return queryFactory.update(board)
 			.set(board.accessPolicy, AccessPolicy.CLOSED)
 			.where(board.id.in(ids))

@@ -16,5 +16,5 @@ public interface BoardRepositoryCustom {
 	// 키워드 기반 검색
 	Page<BoardListResponseDto> searchBoardsByKeyword(BoardSearchCondition condition, Pageable pageable);
 
-	long closeBoardsByIds(List<Long> ids);
+	long closeBoardsByIds(List<? extends Long> ids);
 }
