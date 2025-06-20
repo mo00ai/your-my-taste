@@ -33,6 +33,7 @@ public class UserInvitationInternalService {
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 
 	// 유저가 랜덤 파티 초대 수락
+	@Transactional
 	public void confirmRandomPartyInvitation(Long userId, PartyInvitation partyInvitation) {
 		// 초대 스테이터스가 대기가 아닌 경우
 		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
@@ -42,6 +43,7 @@ public class UserInvitationInternalService {
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
+		validateRecruitingParty(party);
 
 		// 매칭 상태가 WAITING_USER 가 아닌 경우
 		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
@@ -61,11 +63,7 @@ public class UserInvitationInternalService {
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			}
 		} else {
-			PartyMatchInfo partyMatchInfo =
-				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
-			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
-			throw new CustomException(NOT_RECRUITING_PARTY);        // TODO: 이런 throw 구조 수정
+			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
 
@@ -83,7 +81,7 @@ public class UserInvitationInternalService {
 
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(CONFIRMED);
-			partyInvitation.getParty().joinMember();            // TODO: 수락하기 전 invitation status 가 waiting 이 아니라면 예외처리
+			partyInvitation.getParty().joinMember();
 
 			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 			if (party.isFull()) {

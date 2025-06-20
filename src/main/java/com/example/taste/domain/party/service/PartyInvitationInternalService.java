@@ -64,8 +64,6 @@ public class PartyInvitationInternalService {
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 			}
 		} else {
-			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 			throw new CustomException(NOT_RECRUITING_PARTY);
 		}
 	}
@@ -153,7 +151,6 @@ public class PartyInvitationInternalService {
 		}
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
-
 		return List.of(partyInvitation.getUserMatchInfo().getId());    // 매칭 대상이 될 유저 매칭 조건 ID return
 	}
 

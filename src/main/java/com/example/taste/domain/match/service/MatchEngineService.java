@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.match.entity.AgeRange;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.PartyMatchInfoFavor;
 import com.example.taste.domain.match.entity.UserMatchInfo;
@@ -20,7 +21,6 @@ import com.example.taste.domain.match.entity.UserMatchInfoCategory;
 import com.example.taste.domain.match.entity.UserMatchInfoStore;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
-import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;

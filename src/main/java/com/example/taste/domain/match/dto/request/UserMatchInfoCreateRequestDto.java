@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 import com.example.taste.common.annotation.DateRange;
-import com.example.taste.domain.match.vo.AgeRange;
+import com.example.taste.domain.match.entity.AgeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
