@@ -1,17 +1,18 @@
 package com.example.taste.domain.event.batch;
 
 import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -32,7 +33,7 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 
 	private final EventService eventService;
 	private final PkService pkService;
-	private static final int RETRY_LIMIT = 3;
+	public static final int RETRY_LIMIT = 3;
 
 	@Bean
 	public Job eventWinnerJob(JobRepository repo, Step winnerStep) {
@@ -42,46 +43,42 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 	}
 
 	@Bean
-	public Step winnerStep(JobRepository repo, PlatformTransactionManager tx) {
+	public Step winnerStep(JobRepository repo, PlatformTransactionManager transactionManager) {
 		return new StepBuilder("winnerStep", repo)
-			.<Event, Event>chunk(500, tx) //chunksize = batch 처리 사이즈, tx = 트랜잭션 매니저
+			.<Event, Event>chunk(500, transactionManager)
 			.reader(eventReader())
 			.writer(eventWriter())
 			.build();
 	}
 
 	@Bean
+	@StepScope
 	public ItemReader<Event> eventReader() {
-
 		LocalDate yesterday = LocalDate.now().minusDays(1);
 
 		List<Event> events = RetryUtils.executeWithRetry(
-			() -> eventService.findEndedEventList(yesterday), RETRY_LIMIT, "Reader - 이벤트 목록 조회");
+			() -> eventService.findEndedEventList(yesterday),
+			RETRY_LIMIT,
+			"Reader - [Event] 종료된 이벤트 목록 조회");
 
-		Iterator<Event> iterator = events.iterator();
-
-		return () -> RetryUtils.executeWithRetry(
-			() -> iterator.hasNext() ? iterator.next() : null, RETRY_LIMIT, "Reader - 이벤트 하나씩 읽기");
-
+		log.info("[Event] 종료된 이벤트 수: {}", events.size());
+		return new ListItemReader<>(events);
 	}
 
 	@Bean
+	@StepScope
 	public ItemWriter<Event> eventWriter() {
 		return events -> {
 			for (Event event : events) {
 				RetryUtils.executeWithRetry(() -> {
-
 					eventService.findWinningBoard(event.getId())
 						.ifPresent(winner -> {
-
 							Long userId = winner.getUser().getId();
 							pkService.savePkLog(userId, PkType.EVENT);
-
-							log.info("이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
+							log.info("Writer - [Event] 이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
 						});
-
 					return null;
-				}, RETRY_LIMIT, "Writer - eventId: " + event.getId());
+				}, RETRY_LIMIT, "Writer - [Event] eventId: " + event.getId());
 			}
 		};
 	}

@@ -2,17 +2,18 @@ package com.example.taste.domain.pk.batch;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,29 +48,29 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 	}
 
 	@Bean
-	public Step pkLogStep(JobRepository repo, PlatformTransactionManager tx) {
+	public Step pkLogStep(JobRepository repo, PlatformTransactionManager transactionManager) {
 		return new StepBuilder("pkLogStep", repo)
-			.<String, String>chunk(100, tx)
+			.<String, String>chunk(100, transactionManager)
 			.reader(pkLogKeyReader())
 			.writer(pkLogWriter())
 			.build();
 	}
 
 	@Bean
+	@StepScope
 	public ItemReader<String> pkLogKeyReader() {
-
 		List<String> keys = RetryUtils.executeWithRetry(
-			() -> redisService.getKeys("pkLog:*").stream().toList(), RETRY_LIMIT, "[PK LOG] 키 스캔");
+			() -> redisService.getKeys("pkLog:*").stream().toList(),
+			RETRY_LIMIT,
+			"Reader - [PK LOG] 키 스캔");
 
-		Iterator<String> iterator = keys.iterator();
-
-		return () -> RetryUtils.executeWithRetry(
-			() -> iterator.hasNext() ? iterator.next() : null, RETRY_LIMIT, "[PK LOG] 키 순회");
+		log.info("[PK LOG] {}개의 키를 조회함", keys.size());
+		return new ListItemReader<>(keys);
 	}
 
 	@Bean
+	@StepScope
 	public ItemWriter<String> pkLogWriter() {
-
 		return keys -> {
 			for (String key : keys) {
 				RetryUtils.executeWithRetry(() -> {
@@ -89,8 +90,9 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 						.toList();
 
 					pkService.saveBulkPkLogs(pkLogs);
+					log.info("[PK LOG] {}에 대해 {}건 저장", key, pkLogs.size());
 					return null;
-				}, RETRY_LIMIT, "[PK LOG] 쓰기 - key: " + key);
+				}, RETRY_LIMIT, "Writer - [PK LOG] 쓰기 - key: " + key);
 			}
 		};
 	}

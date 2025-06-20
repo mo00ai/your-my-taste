@@ -31,7 +31,8 @@ public class WinnerQuartzConfig {
 			.forJob(winnerJobDetail)
 			.withIdentity("EventWinnerJobTrigger")
 			.withPriority(5) //우선순위
-			.withSchedule(CronScheduleBuilder.cronSchedule("0 0/5 * * * ?")) // 매일 2시
+			// .withSchedule(CronScheduleBuilder.cronSchedule("0 0/5 * * * ?"))
+			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
 			.build();
 	}
 }

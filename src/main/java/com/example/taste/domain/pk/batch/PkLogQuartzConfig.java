@@ -29,6 +29,7 @@ public class PkLogQuartzConfig {
 			.withIdentity("PkLogBatchTrigger")
 			.withPriority(10)
 			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?")) // 매일 자정
+			// .withSchedule(CronScheduleBuilder.cronSchedule("0 0/5 * * * ?"))
 			.build();
 	}
 }

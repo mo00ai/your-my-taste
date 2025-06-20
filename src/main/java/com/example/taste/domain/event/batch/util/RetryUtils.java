@@ -1,5 +1,7 @@
 package com.example.taste.domain.event.batch.util;
 
+import static com.example.taste.domain.event.batch.EventWinnerBatchConfig.*;
+
 import java.util.concurrent.Callable;
 
 import org.springframework.dao.DataAccessException;
@@ -17,7 +19,11 @@ public class RetryUtils {
 
 			try {
 
-				return task.call();
+				T result = task.call();
+
+				log.info("[최종 성공] {} - {}회 시도 후 성공", context, retryCount + 1);
+
+				return result;
 
 			} catch (Exception e) {
 				retryCount++;
@@ -42,6 +48,6 @@ public class RetryUtils {
 	}
 
 	private static void logWarn(String context, String type, Exception e, int retryCount) {
-		log.warn("[재시도 {}/{}] {} - {}: {}", retryCount, 3, context, type, e.getMessage());
+		log.warn("[재시도 {}/{}] {} - {}: {}", retryCount, RETRY_LIMIT, context, type, e.getMessage());
 	}
 }
