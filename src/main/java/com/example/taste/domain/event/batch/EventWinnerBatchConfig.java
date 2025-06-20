@@ -44,7 +44,7 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 
 	@Bean
 	public Step winnerStep(JobRepository repo, PlatformTransactionManager transactionManager) {
-		return new StepBuilder("winnerStep", repo)
+		return new StepBuilder("EventWinnerStep", repo)
 			.<Event, Event>chunk(500, transactionManager)
 			.reader(eventReader())
 			.writer(eventWriter())

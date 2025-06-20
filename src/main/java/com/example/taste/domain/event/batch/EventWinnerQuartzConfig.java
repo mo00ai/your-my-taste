@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import com.example.taste.common.batch.BatchLauncherJob;
 
 @Configuration
-public class WinnerQuartzConfig {
+public class EventWinnerQuartzConfig {
 
 	//여기다가도 우선순위 설정 가능
 	@Bean
