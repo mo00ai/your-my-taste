@@ -2,6 +2,7 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
@@ -20,7 +21,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
@@ -41,6 +41,7 @@ import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
@@ -55,8 +56,8 @@ public class BoardService {
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final PkService pkService;
+	private final StoreRepository storeRepository;
 	private final HashtagService hashtagService;
-	private final EntityFetcher entityFetcher;
 	private final RedisService redisService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserRepository userRepository;
@@ -66,8 +67,10 @@ public class BoardService {
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		Store store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		Store store = storeRepository.findById(requestDto.getStoreId())
+			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
 		BoardCreationStrategy strategy = strategyFactory.getStrategy(BoardType.from(requestDto.getType()));
 		Board entity = strategy.createBoard(requestDto, store, user);
@@ -106,7 +109,8 @@ public class BoardService {
 	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 		if (board.getType() == BoardType.N) {
 			return new BoardResponseDto(board);
