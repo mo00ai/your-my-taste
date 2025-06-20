@@ -1,5 +1,7 @@
 package com.example.taste.domain.event.batch;
 
+import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.batch.core.Job;
@@ -8,62 +10,80 @@ import org.springframework.batch.core.configuration.support.DefaultBatchConfigur
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.example.taste.domain.event.batch.util.RetryUtils;
+import com.example.taste.domain.event.entity.Event;
+import com.example.taste.domain.event.service.EventService;
+import com.example.taste.domain.pk.enums.PkType;
+import com.example.taste.domain.pk.service.PkService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 
-	//재시도 로직
+	private final EventService eventService;
+	private final PkService pkService;
+	private static final int RETRY_LIMIT = 3;
+
 	@Bean
-	public Job EventWinnerJob(JobRepository repo, Step step) {
-		return new JobBuilder("winnerSelectionJob", repo)
-			.start(step)
+	public Job eventWinnerJob(JobRepository repo, Step winnerStep) {
+		return new JobBuilder("EventWinnerJob", repo)
+			.start(winnerStep)
 			.build();
 	}
 
 	@Bean
-	public Step step(JobRepository repo, PlatformTransactionManager tx) {
+	public Step winnerStep(JobRepository repo, PlatformTransactionManager tx) {
 		return new StepBuilder("winnerStep", repo)
-			.<String, String>chunk(10, tx)
-			.reader(reader())
-			.processor(processor())
-			.writer(writer())
+			.<Event, Event>chunk(500, tx) //chunksize = batch 처리 사이즈, tx = 트랜잭션 매니저
+			.reader(eventReader())
+			.writer(eventWriter())
 			.build();
 	}
 
 	@Bean
-	public ItemReader<String> reader() {
+	public ItemReader<Event> eventReader() {
 
-		return new ListItemReader<>(List.of("EVENT1", "EVENT2"));
+		LocalDate yesterday = LocalDate.now().minusDays(1);
+
+		List<Event> events = RetryUtils.executeWithRetry(
+			() -> eventService.findEndedEventList(yesterday), RETRY_LIMIT, "Reader - 이벤트 목록 조회");
+
+		Iterator<Event> iterator = events.iterator();
+
+		return () -> RetryUtils.executeWithRetry(
+			() -> iterator.hasNext() ? iterator.next() : null, RETRY_LIMIT, "Reader - 이벤트 하나씩 읽기");
+
 	}
 
 	@Bean
-	public ItemProcessor<String, String> processor() {
+	public ItemWriter<Event> eventWriter() {
+		return events -> {
+			for (Event event : events) {
+				RetryUtils.executeWithRetry(() -> {
 
-		return item -> item.toLowerCase();
+					eventService.findWinningBoard(event.getId())
+						.ifPresent(winner -> {
+
+							Long userId = winner.getUser().getId();
+							pkService.savePkLog(userId, PkType.EVENT);
+
+							log.info("이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
+						});
+
+					return null;
+				}, RETRY_LIMIT, "Writer - eventId: " + event.getId());
+			}
+		};
 	}
-
-	@Bean
-	public ItemWriter<String> writer() {
-
-		return items -> items.forEach(System.out::println);
-	}
-
-	//스텝의 하위 단계
-	//스텝을 만들면 스텝 하나에 테스크렛 하나가 만드러짐
-	// @Bean
-	// public Tasklet myTasklet() {
-	// 	return (contribution, context) -> {
-	// 		// 여기 안에 로직을 다 씀
-	// 		System.out.println("DB 조회 → 조건 체크 → 포인트 지급");
-	// 		return RepeatStatus.FINISHED;
-	// 	};
-	// }
 
 }

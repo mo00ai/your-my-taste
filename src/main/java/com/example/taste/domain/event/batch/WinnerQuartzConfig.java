@@ -18,7 +18,7 @@ public class WinnerQuartzConfig {
 	public JobDetail winnerJobDetail() {
 		return JobBuilder.newJob(BatchLauncherJob.class)
 			.withIdentity("winnerJobDetail")
-			.usingJobData("jobName", "winnerSelectionJob") // 실제 Batch Job 이름
+			.usingJobData("jobName", "EventWinnerJob") // 실제 Batch Job 이름
 			.storeDurably()
 			.build();
 	}
@@ -29,8 +29,9 @@ public class WinnerQuartzConfig {
 	public Trigger winnerJobTrigger(JobDetail winnerJobDetail) {
 		return TriggerBuilder.newTrigger()
 			.forJob(winnerJobDetail)
-			.withIdentity("winnerJobTrigger")
-			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 * * ?")) // 매일 2시
+			.withIdentity("EventWinnerJobTrigger")
+			.withPriority(5) //우선순위
+			.withSchedule(CronScheduleBuilder.cronSchedule("0 0/5 * * * ?")) // 매일 2시
 			.build();
 	}
 }
