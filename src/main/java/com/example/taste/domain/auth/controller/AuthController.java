@@ -1,10 +1,6 @@
 package com.example.taste.domain.auth.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,7 +16,12 @@ import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
+import com.example.taste.domain.auth.dto.UserResponseDto;
 import com.example.taste.domain.auth.service.AuthService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @CrossOrigin(
@@ -32,6 +33,10 @@ import com.example.taste.domain.auth.service.AuthService;
 public class AuthController {
 	private final AuthService authService;
 
+	// web push를 위해 유저에세 vapid 공개키를 전송할 필요가 있음.
+	@Value("${vapid.public}")
+	private String vapidPublicKey;
+
 	@ImageValid
 	@PostMapping(path = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CommonResponse<Void> signup(
@@ -41,12 +46,13 @@ public class AuthController {
 		return CommonResponse.ok();
 	}
 
+	// vapid 공개키를 전송하기 위해 반환 객체를 설정하였음.
 	@PostMapping("/signin")
-	public CommonResponse<Void> signin(
+	public CommonResponse<UserResponseDto> signin(
 		HttpServletRequest httpRequest, @RequestBody SigninRequestDto requestDto) {
 		authService.signin(httpRequest, requestDto);
 
-		return CommonResponse.ok();
+		return CommonResponse.ok(new UserResponseDto(vapidPublicKey));
 	}
 
 	@PostMapping("/signout")

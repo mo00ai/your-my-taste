@@ -5,9 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,7 +13,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationCategory;
@@ -26,8 +23,12 @@ import com.example.taste.domain.notification.repository.NotificationContentRepos
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -38,7 +39,6 @@ public class NotificationSubscriber implements MessageListener {
 	private final FollowRepository followRepository;
 	private final NotificationContentRepository contentRepository;
 	private final GenericJackson2JsonRedisSerializer serializer;
-	private final EntityFetcher entityFetcher;
 
 	// 알림 발행시 자동으로 실행
 	@Override
@@ -155,7 +155,8 @@ public class NotificationSubscriber implements MessageListener {
 			category.equals(NotificationCategory.INDIVIDUAL)) {
 			return additionalText;
 		}
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
 		return user.getNickname() + " 이/가"
 			+ category.getCategoryText() + " 을/를"
 			+ type.getTypeString() + " 했습니다.\n"

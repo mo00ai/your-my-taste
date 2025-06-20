@@ -29,21 +29,21 @@ public class NotificationUserController {
 	@GetMapping
 	public CommonResponse<GetNotificationCountResponseDto> getNotificationCount(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(notificationUserService.getNotificationCount(userDetails));
+		return CommonResponse.ok(notificationUserService.getNotificationCount(userDetails.getId()));
 	}
 
 	// 알림 목록 접근
 	@GetMapping("/list")
 	public CommonResponse<Slice<NotificationResponseDto>> getNotificationList(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
-		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails, index));
+		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails.getId(), index));
 	}
 
 	// 알림 추가 접근
 	@GetMapping("/list/old")
 	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
-		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails, index));
+		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails.getId(), index));
 	}
 	//todo 합쳐라
 
@@ -51,14 +51,14 @@ public class NotificationUserController {
 	@PatchMapping
 	public CommonResponse<Void> markNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam Long contentsId) {
-		notificationUserService.markNotificationAsRead(userDetails, contentsId);
+		notificationUserService.markNotificationAsRead(userDetails.getId(), contentsId);
 		return CommonResponse.ok();
 	}
 
 	// 전체 알림 읽음 처리하기
 	@PatchMapping("/all")
 	public CommonResponse<Void> markAllNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
-		notificationUserService.markAllNotificationAsRead(userDetails);
+		notificationUserService.markAllNotificationAsRead(userDetails.getId());
 		return CommonResponse.ok();
 	}
 

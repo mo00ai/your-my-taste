@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -29,19 +28,15 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-	private final EntityFetcher entityFetcher;
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardId,
-		User userFromDetail) {
+		User user) {
 		// 댓글 달 보드
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new CustomException(BoardErrorCode.BOARD_NOT_FOUND));
-		// 댓글 달 유저
-		User user = userFromDetail;
 
-		// TODO 댓글 조회 방식을 바꾸면 이것도 바꿀 가능성 있음
 		// 부모댓글, root 댓글 설정
 		Comment parent = null;
 		Comment root = null;
@@ -49,7 +44,8 @@ public class CommentService {
 		// 요청에서 부모 댓글을 명시한 경우
 		if (requestDto.getParent() != null) {
 			// 부모 댓글을 찾아서 부여
-			parent = entityFetcher.getCommentOrThrow(requestDto.getParent());
+			parent = commentRepository.findById(requestDto.getParent())
+				.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 			// 부모 댓글의 root 가 null 이 아닌 경우(부모 댓글이 root 가 아닌 경우) 부모 댓글의 root 를 가져와 root 로 설정
 			// 아니면 부모 댓글을 root 로 설정
 			root = parent.getRoot() != null ? parent.getRoot() : parent;
@@ -70,12 +66,12 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
-		User userFromDetail) {
+		User user) {
 		// 수정할 댓글
-		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		// 유저 검증
-		User user = userFromDetail;
-		if (!comment.getUser().equals(user)) {
+		if (!comment.getUser().isSameUser(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
 		// 댓글에서 수정할 내용은 contents 밖에 없음
@@ -85,12 +81,12 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId, User userFromDetail) {
+	public void deleteComment(Long commentId, User user) {
 		// 수정할 댓글
-		Comment comment = entityFetcher.getCommentOrThrow(commentId);
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
 		// 유저 검증
-		User user = userFromDetail;
-		if (!comment.getUser().getId().equals(user.getId())) {
+		if (!comment.getUser().isSameUser(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
 		// comment 객체의 deleteContent 메서드 호출.
@@ -117,6 +113,7 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public GetCommentDto getComment(Long commentId) {
-		return new GetCommentDto(entityFetcher.getCommentOrThrow(commentId));
+		return new GetCommentDto(commentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND)));
 	}
 }

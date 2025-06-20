@@ -90,9 +90,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
-    //p
+    //prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    //web_push
+    implementation 'com.zerodeplibs:webpush-java'
 }
 
 def dotenv = new Properties()
