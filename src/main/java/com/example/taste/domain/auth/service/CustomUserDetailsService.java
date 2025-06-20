@@ -1,4 +1,4 @@
-package com.example.taste.domain.user.service;
+package com.example.taste.domain.auth.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;

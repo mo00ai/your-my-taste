@@ -14,12 +14,15 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import com.example.taste.common.constant.RedisChannel;
 import com.example.taste.domain.match.redis.MatchSubscriber;
@@ -33,6 +36,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 @EnableCaching
+@EnableRedisHttpSession
 public class RedisConfig {
 
 	@Bean
@@ -129,5 +133,11 @@ public class RedisConfig {
 	@Bean
 	public GenericJackson2JsonRedisSerializer redisSerializer() {
 		return new GenericJackson2JsonRedisSerializer(createRedisObjectMapper());
+	}
+
+	@Bean
+	public RedisConnectionFactory redisConnectionFactory() {
+		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+		return new LettuceConnectionFactory(redisStandaloneConfiguration);
 	}
 }

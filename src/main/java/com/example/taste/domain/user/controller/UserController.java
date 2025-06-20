@@ -22,13 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
+import com.example.taste.domain.user.entity.CustomUserDetails;
+import com.example.taste.domain.user.facade.UserFacade;
 import com.example.taste.domain.user.service.UserService;
 
 @Slf4j
@@ -37,6 +38,7 @@ import com.example.taste.domain.user.service.UserService;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
+	private final UserFacade userFacade;
 
 	@GetMapping
 	public CommonResponse<UserMyProfileResponseDto> getMyProfile(
@@ -56,7 +58,7 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestPart(name = "data") @Valid UserUpdateRequestDto requestDto,
 		@RequestPart(name = "file", required = false) MultipartFile file) {
-		userService.updateUser(userDetails.getId(), requestDto, file);
+		userFacade.updateUser(userDetails.getId(), requestDto, file);
 		return CommonResponse.ok();
 	}
 

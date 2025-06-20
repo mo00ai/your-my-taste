@@ -20,18 +20,14 @@ import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
-import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-import com.example.taste.domain.user.service.UserService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private final ImageService imageService;
-	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
