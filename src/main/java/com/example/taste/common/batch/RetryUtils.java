@@ -1,4 +1,4 @@
-package com.example.taste.domain.event.batch.util;
+package com.example.taste.common.batch;
 
 import static com.example.taste.domain.event.batch.EventWinnerBatchConfig.*;
 

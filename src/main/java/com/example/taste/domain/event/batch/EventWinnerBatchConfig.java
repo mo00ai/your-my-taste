@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.taste.domain.event.batch.util.RetryUtils;
+import com.example.taste.common.batch.RetryUtils;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.service.EventService;
 import com.example.taste.domain.pk.enums.PkType;
