@@ -1,6 +1,6 @@
 package com.example.taste.config;
 
-import static com.example.taste.common.constant.RedisConst.DEFAULT;
+import static com.example.taste.common.constant.RedisConst.*;
 
 import java.time.Duration;
 import java.util.HashMap;

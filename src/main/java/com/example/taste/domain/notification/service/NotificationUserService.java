@@ -110,7 +110,7 @@ public class NotificationUserService {
 
 			if (!dto.isRead()) {
 				String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
-				redisService.decreaseCount(countKey, 1L);
+				redisService.decreaseCount(countKey);
 			}
 			dto.readIt();
 			redisService.updateNotification(dto, key);
@@ -133,7 +133,7 @@ public class NotificationUserService {
 				NotificationDataDto dto = getNotificationOrThrow(key);
 				if (!dto.isRead()) {
 					String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
-					redisService.decreaseCount(countKey, 1L);
+					redisService.decreaseCount(countKey);
 				}
 				dto.readIt();
 				redisService.updateNotification(dto, key);
