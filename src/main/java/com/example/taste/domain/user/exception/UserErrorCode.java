@@ -18,7 +18,7 @@ public enum UserErrorCode implements BaseCode {
 	USER_POINT_RESET_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "U007", "사용자 포인트 초기화에 실패했습니다"),
 
 	FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "F001", "팔로우 정보가 존재하지 않습니다."),
-	ALREADY_FOLLOWED(HttpStatus.BAD_REQUEST, "F001", "이미 팔로우된 유저입니다.");
+	ALREADY_FOLLOWED(HttpStatus.BAD_REQUEST, "F002", "이미 팔로우된 유저입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
