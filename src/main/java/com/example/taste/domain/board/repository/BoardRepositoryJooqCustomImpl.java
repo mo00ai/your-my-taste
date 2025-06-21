@@ -31,4 +31,12 @@ public class BoardRepositoryJooqCustomImpl implements BoardRepositoryJooqCustom 
 				.le(DSL.currentTimestamp()))
 			.fetch(BOARD.ID);
 	}
+
+	@Override
+	public long closeBoardsByIds(List<? extends Long> ids) {
+		return dsl.update(BOARD)
+			.set(BOARD.ACCESS_POLICY, BoardAccessPolicy.CLOSED)
+			.where(BOARD.ID.in(ids))
+			.execute();
+	}
 }

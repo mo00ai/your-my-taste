@@ -20,7 +20,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	@Query("SELECT b FROM Board b WHERE b.id = :id and b.deletedAt is null ")
 	Optional<Board> findActiveBoard(@Param("id") Long boardId);
 
-	// 리팩토링 전 코드 - 성능 비교때 사용할 예정
+	// 리팩토링 전 코드 - 성능 비교때 사용할 예정 @김채진
 	// @Query(value = """
 	// 	    SELECT id
 	// 		FROM board
