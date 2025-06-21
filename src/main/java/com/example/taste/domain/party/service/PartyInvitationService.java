@@ -83,9 +83,14 @@ public class PartyInvitationService {
 		Long hostId, Long partyId, PartyInvitationRequestDto requestDto) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
-		// 호스트가 아닌 경우
+		// 호스트가 아닌데 초대 시도 하는 경우
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
+		}
+
+		// 호스트가 자기 자신 초대하는 경우
+		if (party.isHostOfParty(hostId)) {
+			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 		}
 
 		// 파티 모집 중이 아닌 경우
@@ -117,16 +122,13 @@ public class PartyInvitationService {
 	public void joinIntoParty(Long userId, Long partyId) {
 		Party party = entityFetcher.getPartyOrThrow(partyId);
 
-		// 호스트인 경우
+		// 호스트가 자신의 파티에 가입 신청하는 경우
 		if (party.isHostOfParty(userId)) {
 			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 		}
 
 		// 파티 모집 중이 아닌 경우
 		validateActiveAndNotFullParty(party);
-
-		// 탈퇴한 유저인 경우 예외 발생
-		User user = entityFetcher.getUndeletedUserOrThrow(userId);
 
 		// 초대 정보가 존재하는 경우
 		partyInvitationRepository.findByUserAndParty(userId, partyId)
@@ -140,6 +142,7 @@ public class PartyInvitationService {
 				}
 			});
 
+		User user = entityFetcher.getUserOrThrow(userId);
 		partyInvitationRepository.save(
 			new PartyInvitation(party, user, InvitationType.REQUEST, WAITING));
 	}

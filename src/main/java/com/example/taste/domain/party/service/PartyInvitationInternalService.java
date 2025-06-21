@@ -3,10 +3,7 @@ package com.example.taste.domain.party.service;
 import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
-import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE_PARTY;
-import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_CAPACITY_EXCEEDED;
-import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 
 import java.util.List;
 
@@ -24,8 +21,9 @@ import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.MatchStatus;
-import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
+import com.example.taste.domain.party.validator.PartyInvitationValidator;
+import com.example.taste.domain.party.validator.PartyValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -37,19 +35,14 @@ public class PartyInvitationInternalService {
 	@Transactional
 	public void confirmRandomPartyInvitation(
 		Long hostId, Long partyId, PartyInvitation partyInvitation) {
-		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
-		// 해당 파티의 초대가 아닌 경우
-		validInvitationOfParty(partyInvitation, partyId);
+		PartyInvitationValidator.IS_WAITING_INVITATION
+			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
+			.isSatisfiedBy(partyInvitation);
 
-		// 파티 모집 중이 아닌 경우
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-		validateActiveAndNotFullParty(party);
-
-		// 호스트가 아닌 경우
-		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(NOT_PARTY_HOST);
-		}
+		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
+			.and(PartyValidator.isHostOfParty(hostId))
+			.isSatisfiedBy(party);
 
 		// 매칭 상태가 WAITING_HOST 가 아닌 경우
 		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
@@ -72,19 +65,14 @@ public class PartyInvitationInternalService {
 	// 호스트가 가입 요청 타입(REQUEST) 수락
 	@Transactional
 	public void confirmRequestedPartyInvitation(Long hostId, Long partyId, PartyInvitation partyInvitation) {
-		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
-		// 해당 파티의 초대가 아닌 경우
-		validInvitationOfParty(partyInvitation, partyId);
+		PartyInvitationValidator.IS_WAITING_INVITATION
+			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
+			.isSatisfiedBy(partyInvitation);
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-		// 파티 모집 중이 아닌 경우
-		validateActiveAndNotFullParty(party);
-
-		// 호스트가 아닌 경우
-		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(NOT_PARTY_HOST);
-		}
+		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
+			.and(PartyValidator.isHostOfParty(hostId))
+			.isSatisfiedBy(party);
 
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(CONFIRMED);
@@ -101,17 +89,13 @@ public class PartyInvitationInternalService {
 	// 호스트가 파티 초대 취소
 	@Transactional
 	public void cancelInvitedPartyInvitation(Long hostId, Long partyId, PartyInvitation partyInvitation) {
-		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
-		// 해당 파티의 초대가 아닌 경우
-		validInvitationOfParty(partyInvitation, partyId);
+		PartyInvitationValidator.IS_WAITING_INVITATION
+			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
+			.isSatisfiedBy(partyInvitation);
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-
-		// 호스트가 아닌 경우
-		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(NOT_PARTY_HOST);
-		}
+		PartyValidator.isHostOfParty(hostId)
+			.isSatisfiedBy(party);
 
 		partyInvitationRepository.deleteById(partyInvitation.getId());
 	}
@@ -119,17 +103,13 @@ public class PartyInvitationInternalService {
 	// 호스트가 파티 가입 요청 거절
 	@Transactional
 	public void rejectRequestedPartyInvitation(Long hostId, Long partyId, PartyInvitation partyInvitation) {
-		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
-		// 해당 파티의 초대가 아닌 경우
-		validInvitationOfParty(partyInvitation, partyId);
+		PartyInvitationValidator.IS_WAITING_INVITATION
+			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
+			.isSatisfiedBy(partyInvitation);
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-
-		// 호스트가 아닌 경우
-		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(NOT_PARTY_HOST);
-		}
+		PartyValidator.isHostOfParty(hostId)
+			.isSatisfiedBy(party);
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
 	}
@@ -139,41 +119,15 @@ public class PartyInvitationInternalService {
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> rejectRandomPartyInvitation(
 		Long hostId, Long partyId, PartyInvitation partyInvitation) {
-		// 초대 스테이터스가 대기가 아닌 경우
-		validateWaitingInvitationType(partyInvitation.getInvitationStatus());
-		// 해당 파티의 초대가 아닌 경우
-		validInvitationOfParty(partyInvitation, partyId);
+		PartyInvitationValidator.IS_WAITING_INVITATION
+			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
+			.isSatisfiedBy(partyInvitation);
 
 		Party party = entityFetcher.getPartyOrThrow(partyId);
-
-		// 호스트가 아닌 경우
-		if (!party.isHostOfParty(hostId)) {
-			throw new CustomException(NOT_PARTY_HOST);
-		}
+		PartyValidator.isHostOfParty(hostId)
+			.isSatisfiedBy(party);
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
 		return List.of(partyInvitation.getUserMatchInfo().getId());    // 매칭 대상이 될 유저 매칭 조건 ID return
-	}
-
-	private void validateWaitingInvitationType(InvitationStatus status) {
-		if (!status.equals(WAITING)) {
-			throw new CustomException(INVALID_PARTY_INVITATION);
-		}
-	}
-
-	private void validateActiveAndNotFullParty(Party party) {
-		if (!party.isStatus(PartyStatus.ACTIVE)) {
-			throw new CustomException(NOT_ACTIVE_PARTY);
-		}
-
-		if (party.isFull()) {
-			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
-		}
-	}
-
-	private void validInvitationOfParty(PartyInvitation partyInvitation, Long partyId) {
-		if (!partyInvitation.getParty().getId().equals(partyId)) {
-			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
-		}
 	}
 }
