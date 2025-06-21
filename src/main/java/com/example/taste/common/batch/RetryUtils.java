@@ -1,7 +1,5 @@
 package com.example.taste.common.batch;
 
-import static com.example.taste.domain.event.batch.EventWinnerBatchConfig.*;
-
 import java.util.concurrent.Callable;
 
 import org.springframework.dao.DataAccessException;
@@ -13,8 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RetryUtils {
 
+	private static final int DEFAULT_RETRY_LIMIT = 3;
+
 	public static <T> T executeWithRetry(Callable<T> task, int maxRetries, String context) {
 		int retryCount = 0;
+
 		while (retryCount < maxRetries) {
 
 			try {
@@ -48,6 +49,6 @@ public class RetryUtils {
 	}
 
 	private static void logWarn(String context, String type, Exception e, int retryCount) {
-		log.warn("[재시도 {}/{}] {} - {}: {}", retryCount, RETRY_LIMIT, context, type, e.getMessage());
+		log.warn("[재시도 {}/{}] {} - {}: {}", retryCount, DEFAULT_RETRY_LIMIT, context, type, e.getMessage());
 	}
 }
