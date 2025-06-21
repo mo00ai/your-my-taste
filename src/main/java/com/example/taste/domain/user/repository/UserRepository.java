@@ -49,5 +49,4 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 	@Query("UPDATE User u SET u.point = 0")
 	void resetAllPoints();
 
-	Long id(Long id);
 }
