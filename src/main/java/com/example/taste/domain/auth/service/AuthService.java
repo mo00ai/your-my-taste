@@ -1,11 +1,12 @@
 package com.example.taste.domain.auth.service;
 
-import static com.example.taste.domain.auth.exception.AuthErrorCode.ALREADY_LOGIN;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import lombok.RequiredArgsConstructor;
@@ -33,16 +34,10 @@ public class AuthService {
 
 	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
 		// 로그인(기존 세션) 확인
-		HttpSession session = httpRequest.getSession(false);
-
-		SecurityContext securityContext = (session != null) ?
-			(SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT") : null;
-
-		if (securityContext != null) {
-			Authentication auth = securityContext.getAuthentication();
-			if (auth != null && auth.isAuthenticated()) {
-				throw new CustomException(ALREADY_LOGIN);
-			}
+		HttpSession oldSession = httpRequest.getSession(false);
+		if (oldSession != null) {
+			oldSession.invalidate();    // 기존 세션 무효화
+			SecurityContextHolder.clearContext(); // 기존 인증 정보 초기화
 		}
 
 		// 이메일 검증
@@ -67,17 +62,26 @@ public class AuthService {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(auth);
 		SecurityContextHolder.setContext(context);
+
+		// 새 세션 생성 후 저장
 		httpRequest.getSession(true)
 			.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 	}
 
-	public void signout(HttpServletRequest httpRequest, CustomUserDetails userDetails) {
+	public void signout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		HttpSession session = httpRequest.getSession(false);
 
 		if (session != null) {
 			session.invalidate();
 		}
+
 		SecurityContextHolder.clearContext();
+
+		// 쿠키 삭제
+		Cookie cookie = new Cookie("JSESSIONID", null);
+		cookie.setPath("/");
+		cookie.setMaxAge(0);
+		httpResponse.addCookie(cookie);
 	}
 
 	// 비밀번호 일치 검사

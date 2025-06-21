@@ -25,7 +25,6 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
-		authException.printStackTrace();
 		AuthErrorCode errorCode = AuthErrorCode.UNAUTHENTICATED;
 
 		response.setStatus(errorCode.getHttpStatus().value());
