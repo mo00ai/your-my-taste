@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.user.entity.User;
 
-public interface PkLogRepository extends JpaRepository<PkLog, Long> {
+public interface PkLogRepository extends JpaRepository<PkLog, Long>, PkLogRepositoryJooqCustom {
 	List<PkLog> findAllByUser(User user);
 }

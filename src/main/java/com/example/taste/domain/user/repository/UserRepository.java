@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.example.taste.domain.user.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom, UserRepositoryJooqCustom {
 	Optional<User> findUserByEmail(String email);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userFavorList WHERE u.id = :id")
@@ -43,5 +44,9 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
 	@Query("SELECT u FROM User u JOIN FETCH u.image WHERE u.id = :id")
 	Optional<User> findByIdWithImage(@Param("id") Long id);
+
+	@Modifying
+	@Query("UPDATE User u SET u.point = 0")
+	void resetAllPoints();
 
 }
