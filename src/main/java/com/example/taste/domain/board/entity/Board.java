@@ -1,7 +1,5 @@
 package com.example.taste.domain.board.entity;
 
-import static com.example.taste.domain.board.exception.BoardErrorCode.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
@@ -144,16 +141,14 @@ public class Board extends SoftDeletableEntity {
 		this.accessPolicy = AccessPolicy.CLOSED;
 	}
 
-	// 게시글의 공개 종료시각 <= 현재시각이면 error
-	public void validateAndCloseIfExpired() {
+	// 게시글의 공개 종료시각 <= 현재시각이면 true
+	public boolean isExpired() {
 		if (this.openTime == null || this.openLimit == null) {
-			return; // dto 에서 Null 방지하고 있지만 방어 코드
+			return false;
 		}
 
-		if (!this.openTime.plusMinutes(this.openLimit).isAfter(LocalDateTime.now())) {
-			updateAccessPolicyClosed();
-			throw new CustomException(CLOSED_BOARD);
-		}
+		LocalDateTime closeTime = this.openTime.plusMinutes(this.openLimit);
+		return !LocalDateTime.now().isBefore(closeTime);
 	}
 
 	public boolean isNBoard() {

@@ -129,8 +129,9 @@ public class BoardService {
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.isTimeAttack()) {
-			board.validateAndCloseIfExpired();
+		if (board.isTimeAttack() && board.isExpired()) {
+			board.updateAccessPolicyClosed();
+			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
