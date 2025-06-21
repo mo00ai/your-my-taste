@@ -3,7 +3,8 @@ package com.example.taste.domain.party.service;
 import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
-import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_RECRUITING_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE_PARTY;
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_CAPACITY_EXCEEDED;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAUTHORIZED_PARTY_INVITATION;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class UserInvitationInternalService {
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
-		validateRecruitingParty(party);
+		validateActiveAndNotFullParty(party);
 
 		// 매칭 상태가 WAITING_USER 가 아닌 경우
 		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
@@ -63,7 +64,7 @@ public class UserInvitationInternalService {
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			}
 		} else {
-			throw new CustomException(NOT_RECRUITING_PARTY);
+			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
 		}
 	}
 
@@ -77,7 +78,7 @@ public class UserInvitationInternalService {
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
-		validateRecruitingParty(party);
+		validateActiveAndNotFullParty(party);
 
 		if (!party.isFull()) {
 			partyInvitation.updateInvitationStatus(CONFIRMED);
@@ -88,7 +89,7 @@ public class UserInvitationInternalService {
 				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 			}
 		} else {
-			throw new CustomException(NOT_RECRUITING_PARTY);
+			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
 		}
 	}
 
@@ -127,7 +128,7 @@ public class UserInvitationInternalService {
 
 		// 파티 모집 중이 아닌 경우
 		Party party = partyInvitation.getParty();
-		validateRecruitingParty(party);
+		validateActiveAndNotFullParty(party);
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
 	}
@@ -138,9 +139,13 @@ public class UserInvitationInternalService {
 		}
 	}
 
-	private void validateRecruitingParty(Party party) {
-		if (party.isStatus(PartyStatus.ACTIVE)) {
-			throw new CustomException(NOT_RECRUITING_PARTY);
+	private void validateActiveAndNotFullParty(Party party) {
+		if (!party.isStatus(PartyStatus.ACTIVE)) {
+			throw new CustomException(NOT_ACTIVE_PARTY);
+		}
+
+		if (party.isFull()) {
+			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
 		}
 	}
 
