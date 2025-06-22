@@ -237,15 +237,15 @@ public class BoardService {
 	public void tryEnterFcfsQueue(Board board, Long userId) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 
+		// 순위가 없는 유저만 ZSet에 insert
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
+		}
+
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 		long size = redisService.getZSetSize(key);
 		if (board.isOverOpenLimit(size)) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
-		}
-
-		// 순위가 없는 유저만 ZSet에 insert
-		if (redisService.hasRankInZSet(key, userId)) {
-			return;
 		}
 
 		redisService.addToZSet(key, userId, System.currentTimeMillis());
@@ -268,6 +268,11 @@ public class BoardService {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 
+		// 순위가 없는 유저만 ZSet에 insert
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
+		}
+
 		boolean hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
 		int retry = 10;
 
@@ -286,11 +291,6 @@ public class BoardService {
 			long size = redisService.getZSetSize(key);
 			if (board.isOverOpenLimit(size)) {
 				throw new CustomException(EXCEED_OPEN_LIMIT);
-			}
-
-			// 순위가 없는 유저만 ZSet에 insert
-			if (redisService.hasRankInZSet(key, userId)) {
-				return;
 			}
 
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
@@ -314,6 +314,11 @@ public class BoardService {
 	public void tryEnterFcfsQueueByRedisson(Board board, Long userId) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+
+		// 순위가 없는 유저만 ZSet에 insert
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
+		}
 
 		RLock lock = redissonClient.getLock(lockKey);
 
