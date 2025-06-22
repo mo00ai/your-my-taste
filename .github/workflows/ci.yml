@@ -14,6 +14,11 @@ jobs:
       mysql:
         image: mysql:8.1
         env:
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: taste_ci_test
+          DB_USER: testuser
+          DB_PASSWORD: test1234
           MYSQL_ROOT_PASSWORD: root1234
           MYSQL_DATABASE: taste_ci_test
           MYSQL_USER: testuser
