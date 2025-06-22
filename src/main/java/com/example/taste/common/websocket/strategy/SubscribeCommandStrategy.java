@@ -21,7 +21,7 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @Component
 @RequiredArgsConstructor
 public class SubscribeCommandStrategy implements StompCommandStrategy {
-	private final String CHAT_SUB_PATTERN = "^/sub/parties/(\\d+)/chat(?:/.*)?$";
+	private static final Pattern CHAT_SUB_PATTERN_COMPILED = Pattern.compile("^/sub/parties/(\\d+)/chat(?:/.*)?$");
 	private final PartyInvitationRepository partyInvitationRepository;
 	private final WebSocketSubscriptionManager subscriptionManager;
 
@@ -33,11 +33,9 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 	@Override
 	public Message<?> handle(StompHeaderAccessor headerAccessor, Message<?> message) {
 		String destination = headerAccessor.getDestination();
-		Pattern pattern = Pattern.compile(CHAT_SUB_PATTERN);
-		Matcher matcher = pattern.matcher(destination);
+		Matcher matcher = CHAT_SUB_PATTERN_COMPILED.matcher(destination);
 		Authentication auth = (headerAccessor.getUser() instanceof Authentication a) ? a : null;
 		CustomUserDetails userDetails = (CustomUserDetails)(auth != null ? auth.getPrincipal() : null);
-
 		try {
 			if (auth == null || !auth.isAuthenticated()) {
 				throw new IllegalAccessException("인증 정보 없음");

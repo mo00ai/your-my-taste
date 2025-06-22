@@ -20,7 +20,7 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @Component
 @RequiredArgsConstructor
 public class SendCommandStrategy implements StompCommandStrategy {
-	private final String CHAT_PUB_PATTERN = "^/pub/parties/(\\d+)/chat(?:/.*)?$";
+	private static final Pattern CHAT_PUB_PATTERN_COMPILED = Pattern.compile("^/pub/parties/(\\d+)/chat(?:/.*)?$");
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	@Override
@@ -32,8 +32,7 @@ public class SendCommandStrategy implements StompCommandStrategy {
 	public Message<?> handle(StompHeaderAccessor headerAccessor, Message<?> message) {
 		// SEND, 자신의 채팅방에 보내는지 검사
 		String destination = headerAccessor.getDestination();
-		Pattern pattern = Pattern.compile(CHAT_PUB_PATTERN);
-		Matcher matcher = pattern.matcher(destination);
+		Matcher matcher = CHAT_PUB_PATTERN_COMPILED.matcher(destination);
 		Authentication auth = (headerAccessor.getUser() instanceof Authentication a) ? a : null;
 		CustomUserDetails userDetails = (CustomUserDetails)(auth != null ? auth.getPrincipal() : null);
 
