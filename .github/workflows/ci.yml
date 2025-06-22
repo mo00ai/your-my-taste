@@ -73,14 +73,14 @@ jobs:
       DB_PASSWORD: test1234
 
       # Local DB
-      LOCAL_DB_NAME: taste_ci_test
-      LOCAL_DB_USERNAME: testuser
-      LOCAL_DB_PASSWORD: test1234
-      LOCAL_ROOT_PASSWORD: root1234
-
-      # Redis
-      LOCAL_REDIS_HOST: localhost
-      LOCAL_REDIS_PORT: 6379
+      #      LOCAL_DB_NAME: taste_ci_test
+      #      LOCAL_DB_USERNAME: testuser
+      #      LOCAL_DB_PASSWORD: test1234
+      #      LOCAL_ROOT_PASSWORD: root1234
+      #
+      #      # Redis
+      #      LOCAL_REDIS_HOST: localhost
+      #      LOCAL_REDIS_PORT: 6379
 
       # AWS S3
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
