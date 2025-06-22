@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ImageService {
 	private final S3Service s3Service;
+	private final S3PresignedUrlService s3PresignedUrlService;
 	private final ImageRepository imageRepository;
 
 	@Transactional
@@ -32,11 +33,12 @@ public class ImageService {
 
 		try {
 
-			fileInfo = s3Service.upload(file);
+			// fileInfo = s3Service.upload(file);
+			fileInfo = s3PresignedUrlService.upload(file);
 
 			Image image = Image.builder()
 				.type(type)
-				.url(fileInfo.getUrl())
+				.url(fileInfo.getStaticUrl())
 				.uploadFileName(fileInfo.getUploadFileName())
 				.originFileName(fileInfo.getOriginalFileName())
 				.fileSize(file.getSize())
@@ -79,7 +81,7 @@ public class ImageService {
 			fileInfo = s3Service.upload(file);
 
 			image.update(
-				fileInfo.getUrl(),
+				fileInfo.getStaticUrl(),
 				fileInfo.getUploadFileName(),
 				fileInfo.getOriginalFileName(),
 				file.getSize(),
