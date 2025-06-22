@@ -1,19 +1,13 @@
 package com.example.taste.domain.board.repository;
 
-import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
-import com.example.taste.domain.board.entity.BoardType;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom, BoardRepositoryJooqCustom {
@@ -36,13 +30,12 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	// 	""", nativeQuery = true)
 	// long closeBoardsByIds(@Param("ids") List<Long> ids);
 
-	@EntityGraph(attributePaths = {"user", "user.image"})
-		// TODO projection?
-	Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
-		Pageable pageable);
-
-	default Page<Board> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
-		Pageable pageable) {
-		return findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(type, statuses, pageable);
-	}
+	// @EntityGraph(attributePaths = {"user", "user.image"})
+	// Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
+	// 	Pageable pageable);
+	//
+	// default Page<Board> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
+	// 	Pageable pageable) {
+	// 	return findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(type, statuses, pageable);
+	// }
 }

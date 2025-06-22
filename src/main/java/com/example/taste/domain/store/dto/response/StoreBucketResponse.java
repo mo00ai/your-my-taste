@@ -13,6 +13,13 @@ public class StoreBucketResponse {
 	private String name;
 	private boolean isOpened;
 
+	public StoreBucketResponse(Long id, Long userId, String name, boolean isOpened) {
+		this.id = id;
+		this.userId = userId;
+		this.name = name;
+		this.isOpened = isOpened;
+	}
+
 	public static StoreBucketResponse from(StoreBucket storeBucket) {
 		return StoreBucketResponse.builder()
 			.id(storeBucket.getId())

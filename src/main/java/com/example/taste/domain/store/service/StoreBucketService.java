@@ -57,11 +57,13 @@ public class StoreBucketService {
 	public void addBucketItem(AddBucketItemRequest request, Long userId) {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		List<StoreBucket> storeBuckets = storeBucketRepository.findAllByIdIn(request.getBucketIds());
 
-		for (Long bucketId : request.getBucketIds()) {
-			StoreBucket storeBucket = storeBucketRepository.findById(bucketId) // TODO 성능 개선 가능할듯 @김채진
-				.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
+		if (storeBuckets.size() != request.getBucketIds().size()) {
+			throw new CustomException(BUCKET_NOT_FOUND);
+		}
 
+		for (StoreBucket storeBucket : storeBuckets) {
 			// 로그인 유저의 버킷인지 확인
 			if (!storeBucket.getUser().isSameUser(userId)) {
 				throw new CustomException(BUCKET_ACCESS_DENIED);
@@ -103,8 +105,8 @@ public class StoreBucketService {
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER)); // 삭제되지 않은 유저만 조회
 
 		// 공개된 버킷만 반환
-		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable)
-			.map(StoreBucketResponse::from);
+		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable);
+		//.map(StoreBucketResponse::from);
 
 		return PageResponse.from(dtos);
 	}
@@ -118,8 +120,8 @@ public class StoreBucketService {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable)
-			.map(BucketItemResponse::from);
+		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable);
+		//.map(BucketItemResponse::from);
 
 		return PageResponse.from(dtos);
 	}
@@ -167,7 +169,7 @@ public class StoreBucketService {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		List<StoreBucketItem> items = storeBucketItemRepository.findAllById(
+		List<StoreBucketItem> items = storeBucketItemRepository.findAllByIdIn(
 			request.getBucketItemIds());
 
 		// 일부 storeBucketItem의 id가 존재하지 않으면 error

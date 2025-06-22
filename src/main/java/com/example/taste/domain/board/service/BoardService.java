@@ -124,18 +124,18 @@ public class BoardService {
 		}
 
 		// 비공개 게시글이면 error
-		if (board.isClosed()) {
+		if (board.getAccessPolicy().isClosed()) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.isTimeAttack() && board.isExpired()) {
+		if (board.getAccessPolicy().isTimeAttack() && board.isExpired()) {
 			board.updateAccessPolicyClosed();
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
-		if (board.isFcfs()) {
+		if (board.getAccessPolicy().isFcfs()) {
 			tryEnterFcfsQueue(board, userId);
 		}
 
@@ -153,7 +153,7 @@ public class BoardService {
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
-		if (board.isFcfs()) {
+		if (board.getAccessPolicy().isFcfs()) {
 			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
@@ -204,20 +204,19 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
+		Page<OpenRunBoardResponseDto> dtos = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
 			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
-		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
-			Long remainingSlot = null;
-			if (board.isFcfs()) {
-				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
-				remainingSlot = Math.max(0, board.getOpenLimit() - zSetSize);
+		Page<OpenRunBoardResponseDto> result = dtos.map(dto -> {
+			if (dto.getAccessPolicy().isFcfs()) {
+				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
+				long remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
+				dto.setRemainingSlot(remainingSlot);
 			}
-
-			return OpenRunBoardResponseDto.create(board, remainingSlot);
+			return dto;
 		});
 
-		return PageResponse.from(dtos);
+		return PageResponse.from(result);
 	}
 
 	// 게시글에 해시태그 전부 삭제

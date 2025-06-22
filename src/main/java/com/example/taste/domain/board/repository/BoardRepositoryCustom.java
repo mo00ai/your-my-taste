@@ -1,12 +1,16 @@
 package com.example.taste.domain.board.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
+import com.example.taste.domain.board.entity.AccessPolicy;
+import com.example.taste.domain.board.entity.BoardType;
 
 public interface BoardRepositoryCustom {
 
@@ -17,4 +21,7 @@ public interface BoardRepositoryCustom {
 	Page<BoardListResponseDto> searchBoardsByKeyword(BoardSearchCondition condition, Pageable pageable);
 
 	//long closeBoardsByIds(List<? extends Long> ids);
+
+	Page<OpenRunBoardResponseDto> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
+		Pageable pageable);
 }
