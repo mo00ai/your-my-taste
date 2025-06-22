@@ -1,5 +1,7 @@
 package com.example.taste.domain.image.service;
 
+import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -7,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.dto.ImageResponseDto;
@@ -22,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BoardImageService {
-	private final EntityFetcher entityFetcher;
 	private final ImageService imageService;
 	private final ImageRepository imageRepository;
 	private final BoardImageRepository boardImageRepository;
@@ -46,7 +47,7 @@ public class BoardImageService {
 	@Transactional(readOnly = true)
 	public List<ImageResponseDto> findBoardImages(Long boardId) {
 
-		Board board = entityFetcher.getBoardOrThrow(boardId);
+		Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 
 		return boardImageRepository.findAllByBoardId(boardId);
 	}

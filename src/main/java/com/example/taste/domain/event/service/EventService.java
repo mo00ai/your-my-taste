@@ -1,5 +1,8 @@
 package com.example.taste.domain.event.service;
 
+import static com.example.taste.domain.event.exception.EventErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.dto.request.EventRequestDto;
 import com.example.taste.domain.event.dto.request.EventUpdateRequestDto;
@@ -20,20 +22,19 @@ import com.example.taste.domain.event.dto.response.EventResponseDto;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.repository.EventRepository;
 import com.example.taste.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
-	private final EntityFetcher entityFetcher;
 	private final EventRepository eventRepository;
+	private final UserRepository userRepository;
 
 	@Transactional
 	public void createEvent(Long userId, EventRequestDto requestDto) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Event entity = EventRequestDto.toEntity(user, requestDto);
 		eventRepository.save(entity);
 	}
@@ -69,7 +70,7 @@ public class EventService {
 
 	@Transactional(readOnly = true)
 	public Event findById(Long eventId) {
-		return entityFetcher.getEventOrThrow(eventId);
+		return eventRepository.findById(eventId).orElseThrow(() -> new CustomException(NOT_FOUND_EVENT));
 	}
 
 	@Transactional(readOnly = true)
