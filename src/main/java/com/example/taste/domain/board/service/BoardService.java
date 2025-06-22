@@ -1,11 +1,13 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -154,7 +156,7 @@ public class BoardService {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		if (board.getAccessPolicy().isFcfs()) {
-			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
+			redisService.deleteKey(OPENRUN_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
@@ -238,20 +240,69 @@ public class BoardService {
 		}
 
 		// 순위가 없는 유저만 ZSet에 insert
-		if (!redisService.hasRankInZSet(key, userId)) {
-			redisService.addToZSet(key, userId, System.currentTimeMillis());
-
-			// 클라이언트에 잔여 인원 전송
-			String destination = "/sub/openrun/board/" + board.getId();
-			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
-			messagingTemplate.convertAndSend(destination, remainingSlot);
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
 		}
+
+		redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+		// 클라이언트에 잔여 인원 전송
+		String destination = "/sub/openrun/board/" + board.getId();
+		long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+		messagingTemplate.convertAndSend(destination, remainingSlot);
 
 		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
 		Long rank = redisService.getRank(key, userId);
 		if (rank != null && board.isOverOpenLimit(rank)) {
 			redisService.removeFromZSet(key, userId);
 			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
+	}
+
+	// lettuce 분산락으로 동시성 제어
+	public void tryEnterFcfsQueueByLock(Board board, Long userId) {
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+
+		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+		long size = redisService.getZSetSize(key);
+		if (board.isOverOpenLimit(size)) {
+			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
+
+		boolean hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(1000));
+		int retry = 10;
+
+		try {
+			while (!hasLock && retry > 0) {
+				Thread.sleep(50);
+				hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(1000));
+				retry--;
+			}
+
+			if (!hasLock) {
+				throw new CustomException(REDIS_FAIL_GET_LOCK);
+			}
+
+			// 순위가 없는 유저만 ZSet에 insert
+			if (redisService.hasRankInZSet(key, userId)) {
+				return;
+			}
+
+			redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+			// 클라이언트에 잔여 인원 전송
+			String destination = "/sub/openrun/board/" + board.getId();
+			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+			messagingTemplate.convertAndSend(destination, remainingSlot);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt(); // 스레드 중단 요청
+			throw new CustomException(REDIS_FAIL_GET_LOCK);
+		} finally {
+			Long value = redisService.getKeyLongValue(lockKey);
+			if (value != null && value.equals(userId)) {
+				redisService.deleteKey(lockKey);
+			}
 		}
 	}
 
