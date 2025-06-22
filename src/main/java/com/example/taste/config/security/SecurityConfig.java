@@ -33,8 +33,6 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/auth/**").permitAll();
-
-				auth.requestMatchers("/ws/**").permitAll();            // MEMO: 웹소켓 테스트용
 				auth.requestMatchers("/admin/**").hasRole("ADMIN");
 				// ✅ 검색 API 요청 허용
 				auth.requestMatchers("/api/search/**").permitAll();

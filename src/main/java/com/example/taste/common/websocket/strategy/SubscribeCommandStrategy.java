@@ -61,7 +61,6 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 			log.warn("자신의 활성화된 채팅방이 아닙니다. 유저 ID: {}, 구독 경로: {}",
 				userDetails != null ? userDetails.getId() : null, headerAccessor.getDestination());
 		}
-		// TODO: 구독 시간 설정 (구독 끊김 이벤트 리스너)
 		if (userDetails == null || userDetails.getId() == null) {
 			log.warn("인증 정보 없음");
 			return null;
