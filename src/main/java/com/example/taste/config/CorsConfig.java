@@ -12,7 +12,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.example.taste.common.entity.CorsProperties;
 
 @Configuration
-@Profile({"local", "dev", "prod"})  // 원하는 환경 지정
+@Profile("local")
 @RequiredArgsConstructor
 public class CorsConfig {
 
