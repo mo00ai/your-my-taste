@@ -66,6 +66,12 @@ jobs:
     env:
       CI: true
 
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: taste_ci_test
+      DB_USER: testuser
+      DB_PASSWORD: test1234
+
       # Local DB
       LOCAL_DB_NAME: taste_ci_test
       LOCAL_DB_USERNAME: testuser
@@ -136,7 +142,7 @@ jobs:
           path: build/libs
 
       - name: Run Unit Tests
-        run: ./gradlew unitTest -x generateJooq
+        run: ./gradlew unitTest -x generateJooq #profiles는 build.gradle에서
 
       - name: Run Integration Tests
-        run: ./gradlew integrationTest
+        run: ./gradlew integrationTest #profiles는 build.gradle에서
