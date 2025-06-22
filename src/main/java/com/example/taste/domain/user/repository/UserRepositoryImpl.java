@@ -20,7 +20,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 			.execute();
 	}
 
-	// 성능 비교용 @김채진
 	// @Override
 	// public long resetPostingCnt() {
 	// 	return queryFactory.update(user)

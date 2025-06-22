@@ -150,8 +150,8 @@ class BoardServiceTest {
 		// tryEnterFcfsQueue() 테스트 완료 후 진행
 	}
 
-	// TODO 유저 posting count 초기화하는 스케줄러 테스트코드 @김채진
-	// TODO 타임어택 게시글 공개 시간 지나면 close 하는 스케줄러 테스트코드 @김채진
+	// 유저 posting count 초기화하는 스케줄러 테스트코드
+	// 타임어택 게시글 공개 시간 지나면 close 하는 스케줄러 테스트코드
 
 	private CompletableFuture<String> connectAndSubscribe(Long boardId) throws InterruptedException {
 		// WebSocket + STOMP 통신을 위한 클라이언트 클래스

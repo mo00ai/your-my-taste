@@ -56,7 +56,7 @@ public class StoreService {
 			.map(review -> review.getImage().getUrl())
 			.toList();
 
-		return StoreResponse.create(store, imageUrls); // TODO 가게 정보에 리뷰 이미지 없을때/3개 미만/4개 이상일때 결과값 테스트코드 @김채진
+		return StoreResponse.create(store, imageUrls);
 	}
 
 	@Transactional

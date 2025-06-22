@@ -167,7 +167,8 @@ public class StoreBucketService {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		List<StoreBucketItem> items = storeBucketItemRepository.findAllById(request.getBucketItemIds());
+		List<StoreBucketItem> items = storeBucketItemRepository.findAllById(
+			request.getBucketItemIds());
 
 		// 일부 storeBucketItem의 id가 존재하지 않으면 error
 		if (items.size() != request.getBucketItemIds().size()) {

@@ -111,7 +111,6 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		return new PageImpl<>(contents, pageable, total != null ? total : 0L);
 	}
 
-	// 성능 비교용 @김채진
 	// @Override
 	// public long closeBoardsByIds(List<? extends Long> ids) {
 	// 	return queryFactory.update(board)

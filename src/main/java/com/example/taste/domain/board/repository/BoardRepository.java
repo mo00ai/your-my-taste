@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +21,6 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	@Query("SELECT b FROM Board b WHERE b.id = :id and b.deletedAt is null ")
 	Optional<Board> findActiveBoard(@Param("id") Long boardId);
 
-	// 리팩토링 전 코드 - 성능 비교때 사용할 예정 @김채진
 	// @Query(value = """
 	// 	    SELECT id
 	// 		FROM board
@@ -36,6 +36,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	// 	""", nativeQuery = true)
 	// long closeBoardsByIds(@Param("ids") List<Long> ids);
 
+	@EntityGraph(attributePaths = {"user", "user.image"})
+		// TODO projection?
 	Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);
 

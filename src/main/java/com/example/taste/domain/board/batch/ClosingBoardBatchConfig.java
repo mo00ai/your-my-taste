@@ -72,7 +72,7 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 		// 1차 캐시가 bulk 연산을 덮어쓰지 않도록 board가 아닌 id 값만 반환
 		List<Long> expiredBoardIds = boardService.findExpiredTimeAttackBoardIds(TIMEATTACK);
 		log.debug("[BoardScheduler] 만료된 오픈런 게시글 id: {}", expiredBoardIds);
-		return new IteratorItemReader<>(expiredBoardIds); // TODO PagingItemReader, CursorItemReader 성능 비교 @김채진
+		return new IteratorItemReader<>(expiredBoardIds);
 	}
 
 	@Bean
