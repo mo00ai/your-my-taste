@@ -1,4 +1,4 @@
-package com.example.taste.common.websocket;
+package com.example.taste.common.interceptor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +21,9 @@ import com.example.taste.domain.party.repository.PartyInvitationRepository;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class WebSocketAuthInterceptor implements ChannelInterceptor {        // 메시지를 주고 받으면서 메시지 전송과 관련한 추가 로직을 처리할 때 사용
+public class WebSocketAuthInterceptor implements ChannelInterceptor {
+	// STOMP 통신 중 메시지 전송과 관련한 추가 로직을 처리할 때 사용
+
 	private final String CHAT_SUB_PATTERN = "^/pub/parties/(\\d+)/chat(?:/.*)?$";
 	private final PartyInvitationRepository partyInvitationRepository;
 

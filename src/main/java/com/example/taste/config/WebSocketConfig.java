@@ -10,9 +10,8 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
-import com.example.taste.common.websocket.CustomHandshakeHandler;
-import com.example.taste.common.websocket.CustomHttpHandshakeInterceptor;
-import com.example.taste.common.websocket.WebSocketAuthInterceptor;
+import com.example.taste.common.interceptor.CustomHttpHandshakeInterceptor;
+import com.example.taste.common.interceptor.WebSocketAuthInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -20,7 +19,6 @@ import com.example.taste.common.websocket.WebSocketAuthInterceptor;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	private final WebSocketAuthInterceptor authInterceptor;
 	private final CustomHttpHandshakeInterceptor customHttpHandshakeInterceptor;
-	private final CustomHandshakeHandler customHandshakeHandler;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -28,7 +26,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
 			.addInterceptors(customHttpHandshakeInterceptor)
-			.setHandshakeHandler(customHandshakeHandler)
 			.withSockJS();
 
 		// 포스트맨 테스트용 - ws://.../ws로 요청

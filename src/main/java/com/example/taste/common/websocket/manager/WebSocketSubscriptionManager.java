@@ -1,4 +1,4 @@
-package com.example.taste.common.websocket;
+package com.example.taste.common.websocket.manager;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
