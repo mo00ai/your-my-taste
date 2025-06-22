@@ -10,28 +10,6 @@ jobs:
   generate-jooq:
     runs-on: ubuntu-latest
 
-    env:
-      DB_HOST: localhost
-      DB_PORT: 3306
-      DB_NAME: taste_ci_test
-      DB_USER: testuser
-      DB_PASSWORD: test1234
-
-    services:
-      mysql:
-        image: mysql:8.1
-        env:
-          MYSQL_ROOT_PASSWORD: root1234
-          MYSQL_DATABASE: taste_ci_test
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: test1234
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot1234"
-          --health-interval=5s
-          --health-retries=20
-
     steps:
       - uses: actions/checkout@v3
 
@@ -39,6 +17,22 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Install docker-compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Docker Compose Up (MySQL with init.sql)
+        run: docker-compose -f docker-compose.test.ci.yml up -d test-mysql
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          for i in {1..10}; do
+            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && break
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
 
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
@@ -57,7 +51,6 @@ jobs:
         with:
           name: built-jar
           path: build/libs/*.jar
-
 
   build-and-test:
     runs-on: ubuntu-latest
