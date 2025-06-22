@@ -55,9 +55,11 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 		} catch (IllegalArgumentException e) {
 			log.warn("STOMP 구독 실패 유저 ID: {}, 구독 경로: {}",
 				userDetails != null ? userDetails.getId() : null, headerAccessor.getDestination());
+			return null;
 		} catch (IllegalAccessException e) {
 			log.warn("자신의 활성화된 채팅방이 아닙니다. 유저 ID: {}, 구독 경로: {}",
 				userDetails != null ? userDetails.getId() : null, headerAccessor.getDestination());
+			return null;
 		}
 		if (userDetails == null || userDetails.getId() == null) {
 			log.warn("인증 정보 없음");
