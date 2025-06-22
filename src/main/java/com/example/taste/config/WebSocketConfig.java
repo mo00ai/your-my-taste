@@ -11,13 +11,13 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 import com.example.taste.common.interceptor.CustomHttpHandshakeInterceptor;
-import com.example.taste.common.interceptor.WebSocketAuthInterceptor;
+import com.example.taste.common.interceptor.StompCommandInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-	private final WebSocketAuthInterceptor authInterceptor;
+	private final StompCommandInterceptor stompCommandInterceptor;
 	private final CustomHttpHandshakeInterceptor customHttpHandshakeInterceptor;
 
 	@Override
@@ -26,11 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
 			.addInterceptors(customHttpHandshakeInterceptor)
-			.withSockJS();
-
-		// 포스트맨 테스트용 - ws://.../ws로 요청
-		registry.addEndpoint("/ws")
-			.setAllowedOriginPatterns("*");
+			.withSockJS()
+			.setHeartbeatTime(10000);            // 10초마다 세션 서버 -> 클라이언트 살아있는지 확인, 응답 없으면 kill
 	}
 
 	@Override
@@ -42,7 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureClientInboundChannel(ChannelRegistration registration) {
-		registration.interceptors(authInterceptor);        // 메시지 전송 시 인증/권한 검증
+		registration.interceptors(stompCommandInterceptor);        // 메시지 전송 시 타입 따라 검증
 		registration.taskExecutor()                        // 성능 최적화: 스레드 풀 설정
 			.corePoolSize(10)
 			.maxPoolSize(20)
