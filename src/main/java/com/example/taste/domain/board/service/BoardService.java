@@ -9,7 +9,10 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +67,7 @@ public class BoardService {
 	private final BoardCreationStrategyFactory strategyFactory;
 	private final EntityManager entityManager;
 	private final ApplicationEventPublisher eventPublisher;
+	private final RedissonClient redissonClient;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -264,24 +268,24 @@ public class BoardService {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 
-		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
-		long size = redisService.getZSetSize(key);
-		if (board.isOverOpenLimit(size)) {
-			throw new CustomException(EXCEED_OPEN_LIMIT);
-		}
-
-		boolean hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(1000));
+		boolean hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
 		int retry = 10;
 
 		try {
 			while (!hasLock && retry > 0) {
 				Thread.sleep(50);
-				hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(1000));
+				hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
 				retry--;
 			}
 
 			if (!hasLock) {
 				throw new CustomException(REDIS_FAIL_GET_LOCK);
+			}
+
+			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+			long size = redisService.getZSetSize(key);
+			if (board.isOverOpenLimit(size)) {
+				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
 
 			// 순위가 없는 유저만 ZSet에 insert
@@ -302,6 +306,47 @@ public class BoardService {
 			Long value = redisService.getKeyLongValue(lockKey);
 			if (value != null && value.equals(userId)) {
 				redisService.deleteKey(lockKey);
+			}
+		}
+	}
+
+	// Redisson 분산락으로 동시성 제어
+	public void tryEnterFcfsQueueByRedisson(Board board, Long userId) {
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+
+		RLock lock = redissonClient.getLock(lockKey);
+
+		try {
+			boolean hasLock = lock.tryLock(1000, 3000, TimeUnit.MILLISECONDS);// 최대 1초 동안 락 획득 시도, 락 유지 시간 1초
+
+			if (!hasLock) {
+				throw new CustomException(REDIS_FAIL_GET_LOCK);
+			}
+
+			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+			long size = redisService.getZSetSize(key);
+			if (board.isOverOpenLimit(size)) {
+				throw new CustomException(EXCEED_OPEN_LIMIT);
+			}
+
+			// 순위가 없는 유저만 ZSet에 insert
+			if (redisService.hasRankInZSet(key, userId)) {
+				return;
+			}
+
+			redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+			// 클라이언트에 잔여 인원 전송
+			String destination = "/sub/openrun/board/" + board.getId();
+			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+			messagingTemplate.convertAndSend(destination, remainingSlot);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt(); // 스레드 중단 요청
+			throw new CustomException(REDIS_FAIL_GET_LOCK);
+		} finally {
+			if (lock.isHeldByCurrentThread()) { // 현재 쓰레드가 락 소유자인지 확인
+				lock.unlock();
 			}
 		}
 	}
