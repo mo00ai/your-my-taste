@@ -1,13 +1,15 @@
 package com.example.taste.config.security;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,11 +21,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 	private final CustomUserDetailsService userDetailsService;
 
+	@Value("${cors.allowed-origins}")
+	private String allowedOrigins;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.csrf(AbstractHttpConfigurer::disable)
-			.cors(AbstractHttpConfigurer::disable)                    // TODO: 실제 배포에선 변경 필요 - @윤예진
-			// .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+		httpSecurity
+			.cors(withDefaults())        // CORS Config 따름
+			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.sessionManagement(sm -> {
 					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
