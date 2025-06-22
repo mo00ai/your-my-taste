@@ -56,6 +56,36 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-jooq
 
+    env:
+      CI: true
+
+      # Local DB
+      LOCAL_DB_NAME: taste_ci_test
+      LOCAL_DB_USERNAME: testuser
+      LOCAL_DB_PASSWORD: test1234
+      LOCAL_ROOT_PASSWORD: root1234
+
+      # Redis
+      LOCAL_REDIS_HOST: localhost
+      LOCAL_REDIS_PORT: 6379
+
+      # AWS S3
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+      S3_REGION: ${{ secrets.S3_REGION }}
+
+      # OCR
+      OCR_KEY: ${{ secrets.OCR_KEY }}
+
+      # Naver Map API
+      NAVER_MAP_CLIENT_ID: ${{ secrets.NAVER_MAP_CLIENT_ID }}
+      NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
+
+      # Naver Datalab API
+      NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
+      NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
+
     steps:
       - uses: actions/checkout@v3
 
