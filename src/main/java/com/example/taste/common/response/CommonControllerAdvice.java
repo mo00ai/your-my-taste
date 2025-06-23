@@ -15,6 +15,10 @@ public class CommonControllerAdvice implements ResponseBodyAdvice<Object> {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+		// 프로메테우스는 CommonResponse 말고 일반 응답
+		if (returnType.getContainingClass().getName().contains("PrometheusEndpoint")) {
+			return false;
+		}
 		return !Void.TYPE.equals(returnType.getParameterType());
 	}
 
@@ -22,6 +26,12 @@ public class CommonControllerAdvice implements ResponseBodyAdvice<Object> {
 	public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
 		Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
 		ServerHttpResponse response) {
+
+		// prometheus 엔드포인트는 감싸지 말기
+		String path = request.getURI().getPath();
+		if (path.startsWith("/actuator/prometheus")) {
+			return body;
+		}
 
 		//CommonResponse 반환, 상태코드와 함께
 		//created, 에러 등

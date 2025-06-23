@@ -93,6 +93,16 @@ dependencies {
     implementation 'org.jooq:jooq'
     jooqGenerator 'mysql:mysql-connector-java:8.0.33'
 
+    // quartz
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'com.mchange:c3p0:0.9.5.5'
+
+    //prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    //web_push
+    implementation 'com.zerodeplibs:zerodep-web-push-java:2.1.2'
 }
 
 def dotenv = new Properties()
