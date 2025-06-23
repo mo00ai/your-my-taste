@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
@@ -28,6 +27,8 @@ import com.example.taste.domain.review.entity.Review;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.exception.StoreErrorCode;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewService {
 	private final EntityFetcher entityFetcher;
+	private final StoreRepository storeRepository;
 	private final ReviewRepository reviewRepository;
 	private final RedisService redisService;
 	private final ImageService imageService;
@@ -43,16 +45,17 @@ public class ReviewService {
 
 	@Transactional
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
-		List<MultipartFile> files, ImageType imageType, CustomUserDetails userDetails) throws IOException {
+		List<MultipartFile> files, ImageType imageType, User userFromDetails) throws IOException {
 		// 이미지 요청이 왔으면 등록, 없으면 null
 		Image image = null;
 		if (files != null && !files.isEmpty()) {
 			image = imageService.saveImage(files.get(0), imageType);
 		}
 		// 리뷰 등록할 가게
-		Store store = entityFetcher.getStoreOrThrow(storeId);
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		// 리뷰 작성할 유저
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
+		User user = userFromDetails;
 
 		// 영수증 인증 결과 조회
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
@@ -73,16 +76,17 @@ public class ReviewService {
 		return new CreateReviewResponseDto(saved);
 	}
 
+	//todo null 이 내용 지우기 일 수도 있슴
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
-		List<MultipartFile> files, ImageType imageType, CustomUserDetails userDetails) throws IOException {
+		List<MultipartFile> files, ImageType imageType, User userFromDetails) throws IOException {
 
 		// 수정할 리뷰
-		Review review = entityFetcher.getReviewOrThrow(reviewId);
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		// 유저 검증
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		if (!review.getUser().isSameUser(user.getId())) { // equals 비교 실패로 임시 수정했습니다!
-			// if (!review.getUserId().equals(user)) {
+		User user = userFromDetails;
+		if (!review.getUser().isSameUser(user.getId())) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 
@@ -120,7 +124,8 @@ public class ReviewService {
 	@Transactional(readOnly = true)
 	public Page<GetReviewResponseDto> getAllReview(Long storeId, int index, int score) {
 		// 가게의 모든 리뷰 조회
-		Store store = entityFetcher.getStoreOrThrow(storeId);
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		// index는 기본값 1, 최소값 검증은 controller에서
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		// score 입력값이 있으면, 해당 score의 리뷰만 조회함. 0인 경우(혹은 입력이 없는 경우) 모든 리뷰 조회
@@ -130,16 +135,17 @@ public class ReviewService {
 
 	@Transactional(readOnly = true)
 	public GetReviewResponseDto getReview(Long reviewId) {
-		return new GetReviewResponseDto(entityFetcher.getReviewOrThrow(reviewId));
+		return new GetReviewResponseDto(reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND)));
 	}
 
 	@Transactional
-	public void deleteReview(Long reviewId, CustomUserDetails userDetails) {
-		Review review = entityFetcher.getReviewOrThrow(reviewId);
+	public void deleteReview(Long reviewId, User userFromDetails) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		// 유저 검증
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		if (!review.getUser().isSameUser(user.getId())) {    // equals 비교 실패로 임시 수정했습니다!
-			// if (!review.getUserId().equals(user)) {
+		User user = userFromDetails;
+		if (!review.getUser().isSameUser(user.getId())) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
 		reviewRepository.delete(review);

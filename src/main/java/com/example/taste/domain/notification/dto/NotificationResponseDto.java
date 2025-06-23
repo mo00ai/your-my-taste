@@ -2,7 +2,7 @@ package com.example.taste.domain.notification.dto;
 
 import java.time.LocalDateTime;
 
-import com.example.taste.domain.notification.NotificationCategory;
+import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 

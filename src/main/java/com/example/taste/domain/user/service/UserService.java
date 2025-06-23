@@ -25,6 +25,7 @@ import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
+import com.example.taste.domain.pk.repository.PkLogRepository;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
@@ -61,6 +62,7 @@ public class UserService {
 	private final PkLogJdbcRepository pkLogJdbcRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final StoreBucketRepository storeBucketRepository;
+	private final PkLogRepository pkLogRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -238,10 +240,26 @@ public class UserService {
 					.build())
 				.toList();
 
-			pkLogJdbcRepository.batchInsert(resetLogs);
+			//jdbc
+			// pkLogJdbcRepository.batchInsert(resetLogs);
+
+			//jpa
+			// pkLogRepository.saveAll(resetLogs);
+
+			//jooq
+			pkLogRepository.insertPkLogs(resetLogs);
+
 		}
 
-		userJdbcRepository.resetAllUserPoints();
+		//jdbc
+		// userJdbcRepository.resetAllUserPoints();
+
+		//jpa
+		// userRepository.resetAllPoints();
+
+		//jooq
+		userRepository.resetAllPoints();
+
 	}
 
 	@Transactional

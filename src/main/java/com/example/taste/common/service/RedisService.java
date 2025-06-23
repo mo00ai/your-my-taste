@@ -106,26 +106,6 @@ public class RedisService {
 		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, publishDto);
 	}
 
-	//Notification store
-	public void storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
-		Duration duration) {
-		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
-		redisTemplate.opsForValue().set(key, dataDto, duration);
-		// 모든 카테고리에 대해 count 증가
-		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
-		redisTemplate.opsForValue().increment(countKey);
-		String listKey = "notification:list:user:" + userId;
-		stringRedisTemplate.opsForList().leftPush(listKey, key);
-		Long size = stringRedisTemplate.opsForList().size(listKey);
-		if (size != null && size > 100) {
-			String oldestKey = stringRedisTemplate.opsForList().rightPop(listKey);
-			if (oldestKey != null) {
-				// 3. 해당 알림 key 삭제
-				redisTemplate.delete(oldestKey);
-			}
-		}
-	}
-
 	public void updateNotification(NotificationDataDto eventDto, String key) {
 		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
 		redisTemplate.opsForValue().set(key, eventDto, duration);
@@ -137,8 +117,25 @@ public class RedisService {
 	}
 
 	// 알림 카운트 감소
-	public void decreaseCount(String key, Long amount) {
-		redisTemplate.opsForValue().decrement(key, amount);
+	public void decreaseCount(String key) {
+		redisTemplate.opsForValue().decrement(key);
+	}
+
+	public void increaseCount(String key) {
+		redisTemplate.opsForValue().increment(key);
+	}
+
+	public void listLeftPush(String key, String value) {
+		redisTemplate.opsForList().leftPush(key, value);
+	}
+
+	public void delete(String key) {
+		redisTemplate.delete(key);
+	}
+
+	public <T> void deleteFromList(String key, T value, Class<T> tClass) {
+		T serializedValue = objectMapper.convertValue(value, tClass);
+		redisTemplate.opsForList().remove(key, 1, serializedValue);
 	}
 
 	/**
@@ -223,7 +220,7 @@ public class RedisService {
 				try {
 					return objectMapper.convertValue(item, clazz);
 				} catch (Exception e) {
-					log.warn("레디스 내 Ojbect -> PkLogCacheDto로 변환 실패");
+					RedisService.log.warn("레디스 내 Ojbect -> PkLogCacheDto로 변환 실패");
 					return null;
 					//CustomException을 날리진 않음
 					//convert 실패 처리 하나 때문에 모든 스케줄러 로직이 멈출 순 없으니까
@@ -248,6 +245,19 @@ public class RedisService {
 
 	public <T> T deserializeMesageToObject(Message message, Class<T> valueType) {
 		return this.serializer.deserialize(message.getBody(), valueType);
+	}
+
+	public Long getListSize(String key) {
+		Long size = redisTemplate.opsForList().size(key);
+		return (size == null || size == 0) ? 0L : size;
+	}
+
+	public <T> T getLast(String key, Class<T> tClass) {
+		Object obj = redisTemplate.opsForList().getLast(key);
+		if (obj == null) {
+			return null;
+		}
+		return objectMapper.convertValue(obj, tClass);
 	}
 
 	// MEMO : 추후 성능 비교해서 필요한 직렬화 구현체 사용 - @윤예진
