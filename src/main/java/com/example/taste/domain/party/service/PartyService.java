@@ -1,6 +1,7 @@
 package com.example.taste.domain.party.service;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
+import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
@@ -111,6 +112,11 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 			throw new CustomException(NOT_PARTY_HOST);
 		}
 
+		// 랜덤 매칭 중인 경우
+		if (party.isEnableRandomMatching()) {
+			throw new CustomException(ACTIVE_MATCH_EXISTS);
+		}
+
 		// 최대 인원 변경하는 경우
 		if (requestDto.getMaxMembers() != null) {
 			if (requestDto.getMaxMembers() < party.getNowMembers()) {
@@ -119,7 +125,13 @@ public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼�
 		}
 
 		// 장소 바꾸는 경우
-		// 생성 시점에 맛집이 DB에 없어도 맛집 검색 API 로 추가했다고 가정
+		if (requestDto.getStoreId() != null) {
+			Store newStore = storeRepository.findById(requestDto.getStoreId())
+				.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+			party.update(requestDto, newStore);
+			return;
+		}
+
 		party.update(requestDto);
 	}
 
