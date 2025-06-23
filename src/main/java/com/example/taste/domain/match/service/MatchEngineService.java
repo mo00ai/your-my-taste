@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.entity.AgeRange;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.PartyMatchInfoFavor;
@@ -30,7 +29,6 @@ import com.example.taste.domain.user.enums.Gender;
 @Slf4j
 @RequiredArgsConstructor
 public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워커 서비스
-	private final EntityFetcher entityFetcher;
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;

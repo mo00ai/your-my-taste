@@ -2,7 +2,9 @@ package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
+import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 
 import java.util.List;
 
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
@@ -30,12 +31,13 @@ import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
+import com.example.taste.domain.party.repository.PartyRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchService {
-	private final EntityFetcher entityFetcher;
+	private final PartyRepository partyRepository;
 	private final FavorRepository favorRepository;
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
@@ -44,7 +46,8 @@ public class MatchService {
 	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> registerUserMatch(Long userMatchInfoId) {
-		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
+		UserMatchInfo userMatchInfo = userMatchInfoRepository.findById(userMatchInfoId)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
 		// 이미 매칭 중이라면
 		if (userMatchInfo.isMatching()) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
@@ -58,7 +61,8 @@ public class MatchService {
 	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.PARTY_MATCH)
 	public void registerPartyMatch(Long hostId, PartyMatchInfoCreateRequestDto requestDto) {
-		Party party = entityFetcher.getPartyOrThrow(requestDto.getPartyId());
+		Party party = partyRepository.findById(requestDto.getPartyId())
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
@@ -80,7 +84,8 @@ public class MatchService {
 
 	@Transactional
 	public void cancelUserMatch(Long userMatchInfoId) {
-		UserMatchInfo userMatchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
+		UserMatchInfo userMatchInfo = userMatchInfoRepository.findById(userMatchInfoId)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
 		if (userMatchInfo.isStatus(MatchStatus.WAITING_HOST)) {
 			// 지금 삭제하려는 유저의 매칭으로 생성된 파티 초대이며, 파티 초대 타입이 랜덤, 파티 초대 상태가 WAITING 인 경우
 			partyInvitationRepository.deleteUserMatchByTypeAndStatus(
@@ -92,7 +97,8 @@ public class MatchService {
 	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
 	public List<Long> cancelPartyMatch(Long hostId, Long partyId) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {

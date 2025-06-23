@@ -8,7 +8,9 @@ import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_CAPACITY_EXCEEDED;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
+import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
 import com.example.taste.domain.party.dto.response.UserInvitationResponseDto;
@@ -28,12 +29,15 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
+import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationService {
-	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
+	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	@Transactional
@@ -44,7 +48,8 @@ public class PartyInvitationService {
 		partyInvitation.leave();
 
 		// 파티에서 현재 멤버 수 차감
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		party.leaveMember();
 
 		// 호스트가 나가는 경우(호스트 탈퇴 후에도 멤버가 남아있다면) 참가한지 오래된 유저에게 호스트 위임
@@ -64,7 +69,8 @@ public class PartyInvitationService {
 	// 강퇴
 	@Transactional
 	public void removePartyMember(Long hostId, Long userId, Long partyId) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
@@ -81,7 +87,8 @@ public class PartyInvitationService {
 
 	public void inviteUserToParty(
 		Long hostId, Long partyId, PartyInvitationRequestDto requestDto) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아닌데 초대 시도 하는 경우
 		if (!party.isHostOfParty(hostId)) {
@@ -97,7 +104,8 @@ public class PartyInvitationService {
 		validateActiveAndNotFullParty(party);
 
 		// 유저 가져오기, 탈퇴 유저인 경우 예외 발생
-		User user = entityFetcher.getUndeletedUserOrThrow(requestDto.getUserId());
+		User user = userRepository.findByIdAndDeletedAtIsNull(requestDto.getUserId())
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 		// 파티 초대 정보가 있다면 (초대 중, 확정)
 		partyInvitationRepository.findByUserAndParty(requestDto.getUserId(), partyId)
@@ -119,7 +127,8 @@ public class PartyInvitationService {
 
 	// 유저가 파티에 가입 신청
 	public void joinIntoParty(Long userId, Long partyId) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 자신의 파티에 가입 신청하는 경우
 		if (party.isHostOfParty(userId)) {
@@ -141,7 +150,8 @@ public class PartyInvitationService {
 				}
 			});
 
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		partyInvitationRepository.save(
 			new PartyInvitation(party, user, InvitationType.REQUEST, WAITING));
 	}
@@ -155,7 +165,8 @@ public class PartyInvitationService {
 	}
 
 	public List<PartyInvitationResponseDto> getPartyInvitations(Long hostId, Long partyId) {
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyRepository.findById(partyId)
+			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		// 호스트가 아닌 경우
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
