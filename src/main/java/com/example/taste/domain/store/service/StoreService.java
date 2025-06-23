@@ -5,6 +5,7 @@ import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,12 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeDetailResponse;
+import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeRegion;
+import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeResult;
+import com.example.taste.domain.map.service.NaverMapService;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
 import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
@@ -35,6 +41,7 @@ public class StoreService {
 	private final CategoryRepository categoryRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final ReviewRepository reviewRepository;
+	private final NaverMapService naverMapService;
 
 	@Transactional
 	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
@@ -75,9 +82,9 @@ public class StoreService {
 
 	// 카테고리명 추출
 	private String extractCategory(String input) {
-		String[] tokens = input.split(">");
+		String[] tokens = input.split(">" );
 		for (int i = 0; i < tokens.length; i++) {
-			if (tokens[i].contains("음식점")) {
+			if (tokens[i].contains("음식점" )) {
 				if (i + 1 < tokens.length) {
 					return tokens[i + 1];
 				}
@@ -93,15 +100,23 @@ public class StoreService {
 			throw new CustomException(STORE_NOT_FOUND);
 		}
 		NaverLocalSearchResponseDto.Item item = dto.getItems().get(0);
+		// 좌표 정보 -> 네이버 지도 api -> 주소(행정동) 반환
+		ReverseGeocodeDetailResponse addressFromStringCoordinates = naverMapService.getAddressFromStringCoordinates(
+			getCoordinate(item));
+		// 행정동 주소 추출
+		Map<String, String> extractedArea = extractAdministrativeArea(addressFromStringCoordinates);
+		System.out.println("extractedArea = " + extractedArea);
+		// TODO  쿼리 파싱?
+
 		// 카테고리명 추출
 		String categoryName = extractCategory(item.getCategory());
 		// 카테고리 저장 or 조회
 		Category category = getOrCreateCategory(categoryName);
 		// 태그 제외한 가게명
 		String storeName = stripHtmlTags(item.getTitle());
-		BigDecimal longitude = new BigDecimal(item.getMapx()).divide(new BigDecimal("10000000"), 7,
+		BigDecimal longitude = new BigDecimal(item.getMapx()).divide(new BigDecimal("10000000" ), 7,
 			RoundingMode.HALF_UP);
-		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000"), 7,
+		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000" ), 7,
 			RoundingMode.HALF_UP);
 		if (storeRepository.existsByNameAndMapxAndMapy(storeName, longitude, latitude)) {
 			throw new CustomException(STORE_ALREADY_EXISTS);
@@ -121,7 +136,7 @@ public class StoreService {
 	private String stripHtmlTags(String input) {
 		if (input == null)
 			return null;
-		return input.replaceAll("<[^>]*>", "");
+		return input.replaceAll("<[^>]*>", "" );
 	}
 
 	@Transactional
@@ -145,4 +160,28 @@ public class StoreService {
 			});
 	}
 
+	private String getCoordinate(NaverLocalSearchResponseDto.Item item) {
+		return item.getMapx() + "," + item.getMapy();
+	}
+
+	// reverse geocoding -> 행정동 주소 추출
+	private Map<String, String> extractAdministrativeArea(ReverseGeocodeDetailResponse response) {
+		// "admcode" 타입 결과만 사용 (보통 이게 행정동 기준)
+		ReverseGeocodeResult admResult = response.getResults().stream()
+			.filter(result -> "admcode".equals(result.getName()))
+			.findFirst()
+			.orElseThrow(() -> new CustomException(StoreErrorCode.ADMCODE_NOT_FOUND));
+
+		ReverseGeocodeRegion region = admResult.getRegion();
+
+		String sido = region.getArea1().getName();
+		String sigungu = region.getArea2().getName();
+		String eupmyeondong = region.getArea3().getName();
+
+		return Map.of(
+			"sido", sido,    // 시/도
+			"sigungu", sigungu,    // 시/군/구
+			"eupmyeondong", eupmyeondong // 읍/면/동
+		);
+	}
 }

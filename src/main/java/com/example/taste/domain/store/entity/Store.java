@@ -1,6 +1,8 @@
 package com.example.taste.domain.store.entity;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Map;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
 
@@ -62,5 +64,10 @@ public class Store extends SoftDeletableEntity {
 		this.roadAddress = roadAddress;
 		this.mapx = mapx;
 		this.mapy = mapy;
+	}
+
+	public static Map<BigDecimal, BigDecimal> switchCoordinates(String lng, String lat) {
+		return Map.of(new BigDecimal(lng).setScale(7, RoundingMode.HALF_UP),
+			new BigDecimal(lat).setScale(7, RoundingMode.HALF_UP));
 	}
 }
