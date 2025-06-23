@@ -2,6 +2,8 @@ package com.example.taste.domain.event.batch;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
@@ -16,8 +18,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Configuration
 public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
+	private final DataSource dataSource;
+	private final PlatformTransactionManager transactionManager;
+
+	@Override
+	protected DataSource getDataSource() {
+		return dataSource;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTransactionManager() {
+		return transactionManager;
+	}
 
 	//재시도 로직
 	@Bean
