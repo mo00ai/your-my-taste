@@ -12,7 +12,7 @@ jobs:
 
     env:
       DB_HOST: localhost
-      DB_PORT: 3306
+      DB_PORT: 5432
       DB_NAME: taste_ci_test
       DB_USER: testuser
       DB_PASSWORD: test1234
@@ -30,14 +30,14 @@ jobs:
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
-      - name: Docker Compose Up (MySQL with init.sql)
-        run: docker-compose -f docker-compose.test.ci.yml up -d test-mysql
+      - name: Docker Compose Up (PostgreSQL with init.sql)
+        run: docker-compose -f docker-compose.test.ci.yml up -d test-postgres
 
-      - name: Wait for MySQL to be healthy
+      - name: Wait for PostgreSQL to be healthy
         run: |
           for i in {1..10}; do
-            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && break
-            echo "Waiting for MySQL..."
+            docker exec test-postgres pg_isready -U testuser && break
+            echo "Waiting for PostgreSQL..."
             sleep 5
           done
 
@@ -47,7 +47,7 @@ jobs:
       - name: Create .env for Jooq
         run: |
           echo "DB_HOST=localhost"     > .env
-          echo "DB_PORT=3306"         >> .env
+          echo "DB_PORT=5432"         >> .env
           echo "DB_NAME=taste_ci_test" >> .env
           echo "DB_USER=testuser"     >> .env
           echo "DB_PASSWORD=test1234" >> .env
@@ -55,27 +55,14 @@ jobs:
       - name: Generate Jooq & Build Jar
         run: ./gradlew clean generateJooq bootJar
 
-      - name: Upload Jooq Code
-        uses: actions/upload-artifact@v4
-        with:
-          name: jooq-code
-          path: build/generated-src/jooq
-
-      - name: Upload Built Jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: built-jar
-          path: build/libs/*.jar
-
   build-and-test:
     runs-on: ubuntu-latest
     needs: generate-jooq
 
     env:
       CI: true
-
       DB_HOST: localhost
-      DB_PORT: 3306
+      DB_PORT: 5432
       DB_NAME: taste_ci_test
       DB_USER: testuser
       DB_PASSWORD: test1234
@@ -134,10 +121,10 @@ jobs:
       - name: Docker Compose Up
         run: docker-compose -f docker-compose.test.ci.yml up -d
 
-      - name: Wait for MySQL & Redis
+      - name: Wait for PostgreSQL & Redis
         run: |
           for i in {1..10}; do
-            docker exec test-mysql mysqladmin ping -h localhost -uroot -proot1234 --silent && \
+            docker exec test-postgres pg_isready -U testuser && \
             docker exec test-redis redis-cli ping | grep -q PONG && break
             echo "Waiting..."
             sleep 5
