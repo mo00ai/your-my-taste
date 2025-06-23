@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -17,15 +19,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.review.dto.OcrRequestDto;
 import com.example.taste.domain.review.dto.OcrResponseDto;
 import com.example.taste.domain.review.exception.ReviewErrorCode;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.exception.StoreErrorCode;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
 
 import reactor.core.publisher.Mono;
 
@@ -33,20 +33,24 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OCRService {
 
-	private final EntityFetcher entityFetcher;
+	private final StoreRepository storeRepository;
 	private final RedisService redisService;
 	private final WebClient webClient;
 
-	@Value("${ocr_key}")
+	@Value("${ocr.key}")
 	private String secretKey;
+	@Value("${ocr.host}")
+	private String ocrHost;
+	@Value("${ocr.path}")
+	private String ocrPath;
 
 	// 영수증 인증 생성
-	public void createValidation(Long storeId, MultipartFile image, CustomUserDetails userDetails) throws
+	public void createValidation(Long storeId, MultipartFile image, User user) throws
 		IOException {
 
 		// api 요청 보내기 전에 유저, 가게부터 확인
-		User user = entityFetcher.getUserOrThrow(userDetails.getId());
-		Store store = entityFetcher.getStoreOrThrow(storeId);
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 
 		if (image == null) {
 			throw new CustomException(ReviewErrorCode.NO_IMAGE_REQUESTED);
@@ -68,10 +72,11 @@ public class OCRService {
 		// 이미지는 인코딩해서 api에 전달
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
 
+		// 프로퍼티로 뺄 것.
 		URI uri = UriComponentsBuilder.newInstance()
 			.scheme("https")
-			.host("dwyd1vrxhu.apigw.ntruss.com")
-			.path("/custom/v1/42612/f7152a2fe3e8899aaf3d099f7c46439dfd24c7a5c926edaed8d9a471ae0b563e/document/receipt")
+			.host(ocrHost)
+			.path(ocrPath)
 			.build()
 			.toUri();
 
@@ -99,7 +104,9 @@ public class OCRService {
 			.bodyToMono(OcrResponseDto.class);
 
 		OcrResponseDto ocrResponseDto = response.block(Duration.ofSeconds(10));
+		//todo 예외
 
+		//todo 맵 말고
 		ocrResponseDto.getImages();
 		// 가게 이름 (ex: 프랭크 버거)
 		String storeName = Optional.ofNullable(ocrResponseDto.getImages()).filter(images -> !images.isEmpty())

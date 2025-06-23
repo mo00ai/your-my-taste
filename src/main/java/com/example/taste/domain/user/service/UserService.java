@@ -30,7 +30,7 @@ import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
-import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
+import com.example.taste.domain.pk.repository.PkLogRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
@@ -43,7 +43,6 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
-import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Slf4j
@@ -57,9 +56,8 @@ public class UserService {
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final UserJdbcRepository userJdbcRepository;
-	private final PkLogJdbcRepository pkLogJdbcRepository;
 	private final StoreBucketRepository storeBucketRepository;
+	private final PkLogRepository pkLogRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -226,9 +224,25 @@ public class UserService {
 					.build())
 				.toList();
 
-			pkLogJdbcRepository.batchInsert(resetLogs);
+			//jdbc
+			// pkLogJdbcRepository.batchInsert(resetLogs);
+
+			//jpa
+			// pkLogRepository.saveAll(resetLogs);
+
+			//jooq
+			pkLogRepository.insertPkLogs(resetLogs);
+
 		}
 
-		userJdbcRepository.resetAllUserPoints();
+		//jdbc
+		// userJdbcRepository.resetAllUserPoints();
+
+		//jpa
+		// userRepository.resetAllPoints();
+
+		//jooq
+		userRepository.resetAllPoints();
+
 	}
 }

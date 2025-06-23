@@ -38,7 +38,7 @@ public class CommentController {
 		@RequestBody CreateCommentRequestDto requestDto,
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails));
+		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails.getUser()));
 	}
 
 	// 댓글 수정
@@ -48,7 +48,7 @@ public class CommentController {
 		@PathVariable Long boardId,
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails));
+		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails.getUser()));
 	}
 
 	// 댓글 삭제(소프트)
@@ -57,7 +57,7 @@ public class CommentController {
 		@PathVariable Long commentId,
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		commentService.deleteComment(commentId, userDetails);
+		commentService.deleteComment(commentId, userDetails.getUser());
 		return CommonResponse.ok();
 	}
 

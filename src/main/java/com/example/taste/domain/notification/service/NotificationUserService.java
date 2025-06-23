@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -14,17 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.user.entity.CustomUserDetails;
-import com.example.taste.domain.notification.NotificationCategory;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
+import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +33,7 @@ public class NotificationUserService {
 	private final NotificationInfoRepository notificationInfoRepository;
 
 	// 알림 개수 조회
-	public GetNotificationCountResponseDto getNotificationCount(CustomUserDetails userDetails) {
-		Long userId = userDetails.getId();
+	public GetNotificationCountResponseDto getNotificationCount(Long userId) {
 		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
 		String marketing = "notification:count:user:" + userId + ":" + NotificationCategory.MARKETING;
 		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBE;
@@ -54,9 +52,8 @@ public class NotificationUserService {
 	}
 
 	//최근 알림 조회(redis)
-	public Slice<NotificationResponseDto> getNotificationList(CustomUserDetails userDetails,
+	public Slice<NotificationResponseDto> getNotificationList(Long userId,
 		int index) {
-		Long userId = userDetails.getId();
 		// userId를 이용해 저장된 모든 알림을 가져옴
 		String listKey = "notification:list:user:" + userId;
 		List<String> keys = redisService.getKeysFromList(listKey, index - 1);
@@ -79,9 +76,8 @@ public class NotificationUserService {
 
 	// 오래된 알림 조회(mysql)
 	@Transactional(readOnly = true)
-	public Slice<NotificationResponseDto> getMoreNotificationList(CustomUserDetails userDetails,
+	public Slice<NotificationResponseDto> getMoreNotificationList(Long userId,
 		int index) {
-		Long userId = userDetails.getId();
 		//redis가 가지고 있는 유저의 모든 알림을 조회
 		String pattern = "notification:user:" + userId + "*";
 		Set<String> keys = getKeys(pattern);
@@ -104,8 +100,7 @@ public class NotificationUserService {
 	// 알림 읽음 처리
 	// 유저가 알림을 클릭하면 호출
 	@Transactional
-	public void markNotificationAsRead(CustomUserDetails userDetails, Long contentID) {
-		Long userId = userDetails.getId();
+	public void markNotificationAsRead(Long userId, Long contentID) {
 		// redis 알림 읽음 처리
 		String pattern = "notification:user:" + userId + ":id:" + contentID + "*";
 		Set<String> keys = getKeys(pattern);
@@ -115,7 +110,7 @@ public class NotificationUserService {
 
 			if (!dto.isRead()) {
 				String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
-				redisService.decreaseCount(countKey, 1L);
+				redisService.decreaseCount(countKey);
 			}
 			dto.readIt();
 			redisService.updateNotification(dto, key);
@@ -128,8 +123,7 @@ public class NotificationUserService {
 	}
 
 	// 모든 알림 읽음 처리
-	public void markAllNotificationAsRead(CustomUserDetails userDetails) {
-		Long userId = userDetails.getId();
+	public void markAllNotificationAsRead(Long userId) {
 		String pattern = "notification:user:" + userId + "*";
 		Set<String> keys = getKeys(pattern);
 
@@ -139,7 +133,7 @@ public class NotificationUserService {
 				NotificationDataDto dto = getNotificationOrThrow(key);
 				if (!dto.isRead()) {
 					String countKey = "notification:count:user:" + userId + ":" + dto.getCategory().name();
-					redisService.decreaseCount(countKey, 1L);
+					redisService.decreaseCount(countKey);
 				}
 				dto.readIt();
 				redisService.updateNotification(dto, key);
@@ -152,6 +146,8 @@ public class NotificationUserService {
 		List<Long> emptyList = new ArrayList<>();
 		markSqlNotificationAsRead(userId, emptyList);
 	}
+
+	// 읽음 처리 중복 코드 정리
 
 	private Set<String> getKeys(String pattern) {
 		return redisService.getKeys(pattern);

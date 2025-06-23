@@ -17,13 +17,13 @@ public class PkCriteriaResponseDto implements Serializable {
 	private Long id;
 	private String type;
 	private Integer point;
-	private boolean isActive;
+	private boolean active;
 
 	@Builder
-	public PkCriteriaResponseDto(Long id, String type, Integer point, boolean isActive) {
+	public PkCriteriaResponseDto(Long id, String type, Integer point, boolean active) {
 		this.id = id;
 		this.type = type;
 		this.point = point;
-		this.isActive = isActive;
+		this.active = active;
 	}
 }

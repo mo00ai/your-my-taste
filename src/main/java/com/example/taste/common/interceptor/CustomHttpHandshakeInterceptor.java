@@ -1,4 +1,4 @@
-package com.example.taste.common.websocket;
+package com.example.taste.common.interceptor;
 
 import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHENTICATED;
 
@@ -9,8 +9,6 @@ import jakarta.servlet.http.HttpSession;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -23,7 +21,6 @@ import com.example.taste.common.exception.CustomException;
 
 @Slf4j
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class CustomHttpHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
