@@ -26,7 +26,7 @@ public class PkCacheService {
 				.id(pk.getId())
 				.type(pk.getType().name())
 				.point(pk.getPoint())
-				.isActive(pk.isActive())
+				.active(pk.isActive())
 				.build())
 			.collect(Collectors.toList());
 	}
