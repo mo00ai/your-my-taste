@@ -248,10 +248,8 @@ public class RedisService {
 	}
 
 	public Long getListSize(String key) {
-		if (redisTemplate.opsForList().getFirst(key) != null) {
-			return redisTemplate.opsForList().size(key);
-		}
-		return null;
+		Long size = redisTemplate.opsForList().size(key);
+		return (size == null || size == 0) ? 0L : size;
 	}
 
 	public <T> T getLast(String key, Class<T> tClass) {

@@ -17,7 +17,7 @@ public class WebPushService {
 	private final WebPushRepository webPushRepository;
 
 	@Transactional
-	public void saveSubscribtion(User user, PushSubscribeRequestDto dto) {
+	public void saveSubscription(User user, PushSubscribeRequestDto dto) {
 		WebPushInformation information = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
 
 		if (information != null && information.getUser().isSameUser(user.getId())) {
@@ -37,7 +37,7 @@ public class WebPushService {
 		webPushRepository.save(information);
 	}
 
-	public void deleteInfomation(Long userId, String endpoint) {
+	public void deleteInformation(Long userId, String endpoint) {
 		WebPushInformation information = webPushRepository.getWebPushInformationByUserIdAndEndPoint(userId, endpoint);
 		if (information != null) {
 			webPushRepository.delete(information);

@@ -67,7 +67,7 @@ public class RedisConfig {
 		// 각 캐시별 TTL 설정
 		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(Duration.ofMinutes(10)));// 기본 유효기간 10분
-		cacheConfigurations.put("pkCriteriaCache", RedisCacheConfiguration.defaultCacheConfig());
+		cacheConfigurations.put("pkCriteriaCache", defaultConfig);
 		// Todo 캐싱할 데이터의 key값을 자유롭게 설정해서 입력해 주세요.
 
 		return RedisCacheManager.builder(connectionFactory)

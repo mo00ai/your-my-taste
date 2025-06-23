@@ -20,11 +20,11 @@ public class WebPushController {
 
 	private final WebPushService webPushService;
 
-	@PostMapping("/subscrive")
+	@PostMapping("/subscribe")
 	public CommonResponse<Void> subscribe(
 		@RequestBody PushSubscribeRequestDto dto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		webPushService.saveSubscribtion(userDetails.getUser(), dto);
+		webPushService.saveSubscription(userDetails.getUser(), dto);
 		return CommonResponse.ok();
 	}
 
