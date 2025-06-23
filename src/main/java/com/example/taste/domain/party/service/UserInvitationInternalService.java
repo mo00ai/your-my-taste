@@ -2,7 +2,6 @@ package com.example.taste.domain.party.service;
 
 import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
-import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
 
 import java.util.List;
 
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfo;
@@ -23,7 +21,6 @@ import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.validator.PartyInvitationValidator;
-import com.example.taste.domain.party.validator.PartyValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -33,20 +30,15 @@ public class UserInvitationInternalService {
 
 	// 유저가 랜덤 파티 초대 수락
 	@Transactional
-	public void confirmRandomPartyInvitation(PartyInvitation partyInvitation) {
-		PartyInvitationValidator.IS_WAITING_INVITATION
-			.and(PartyInvitationValidator.isInvitationOfParty(partyInvitation.getId()))
-			.isSatisfiedBy(partyInvitation);
-
+	public void confirmRandomPartyInvitation(Long userId, PartyInvitation partyInvitation) {
 		Party party = partyInvitation.getParty();
-		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
-			.isSatisfiedBy(party);
-
-		// 매칭 상태가 WAITING_USER 가 아닌 경우
 		UserMatchInfo userMatchInfo = partyInvitation.getUserMatchInfo();
-		if (!userMatchInfo.isStatus(MatchStatus.WAITING_USER)) {
-			throw new CustomException(INVALID_PARTY_INVITATION);
-		}
+
+		// 검증
+		PartyInvitationValidator.validateAvailableToJoin(party);
+		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
+		PartyInvitationValidator.validateUserMatchInfoStatus(
+			userMatchInfo, MatchStatus.WAITING_USER);
 
 		partyInvitation.updateInvitationStatus(CONFIRMED);
 		party.joinMember();
@@ -59,18 +51,15 @@ public class UserInvitationInternalService {
 			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 		}
-
 	}
 
 	@Transactional
-	public void confirmInvitedPartyInvitation(PartyInvitation partyInvitation) {
-		PartyInvitationValidator.IS_WAITING_INVITATION
-			.and(PartyInvitationValidator.isInvitationOfParty(partyInvitation.getId()))
-			.isSatisfiedBy(partyInvitation);
-
+	public void confirmInvitedPartyInvitation(Long userId, PartyInvitation partyInvitation) {
 		Party party = partyInvitation.getParty();
-		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
-			.isSatisfiedBy(party);
+
+		// 검증
+		PartyInvitationValidator.validateAvailableToJoin(party);
+		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
 
 		partyInvitation.updateInvitationStatus(CONFIRMED);
 		partyInvitation.getParty().joinMember();
@@ -79,14 +68,12 @@ public class UserInvitationInternalService {
 		if (party.isFull()) {
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 		}
-
 	}
 
 	@Transactional
-	public void cancelRequestedPartyInvitation(PartyInvitation partyInvitation) {
-		PartyInvitationValidator.IS_WAITING_INVITATION
-			.and(PartyInvitationValidator.isInvitationOfParty(partyInvitation.getId()))
-			.isSatisfiedBy(partyInvitation);
+	public void cancelRequestedPartyInvitation(Long userId, PartyInvitation partyInvitation) {
+		// 검증
+		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
 
 		partyInvitationRepository.deleteById(partyInvitation.getId());
 	}
@@ -94,23 +81,18 @@ public class UserInvitationInternalService {
 	// 유저가 랜덤 파티 초대 겨절
 	@Transactional
 	@MatchEventPublish(matchJobType = MatchJobType.USER_MATCH)
-	public List<Long> rejectRandomPartyInvitation(Long userId, PartyInvitation partyInvitation) {
-		PartyInvitationValidator.IS_WAITING_INVITATION
-			.and(PartyInvitationValidator.isInvitationOfParty(partyInvitation.getId()))
-			.isSatisfiedBy(partyInvitation);
+	public List<Long> rejectRandomPartyInvitation(
+		Long userId, PartyInvitation partyInvitation) {
+		// 검증
+		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
 
 		return List.of(userId);
 	}
 
 	@Transactional
-	public void rejectInvitedPartyInvitation(PartyInvitation partyInvitation) {
-		PartyInvitationValidator.IS_WAITING_INVITATION
-			.and(PartyInvitationValidator.isInvitationOfParty(partyInvitation.getId()))
-			.isSatisfiedBy(partyInvitation);
-
-		Party party = partyInvitation.getParty();
-		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
-			.isSatisfiedBy(party);
+	public void rejectInvitedPartyInvitation(Long userId, PartyInvitation partyInvitation) {
+		// 검증
+		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
 	}

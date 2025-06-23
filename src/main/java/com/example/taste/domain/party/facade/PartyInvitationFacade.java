@@ -36,8 +36,8 @@ public class PartyInvitationFacade {
 			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 
 		switch (partyInvitation.getInvitationType()) {
-			case RANDOM -> internalService.rejectRandomPartyInvitation(hostId, partyId, partyInvitation);
-			case INVITATION -> internalService.cancelInvitedPartyInvitation(hostId, partyId, partyInvitation);
+			case RANDOM -> internalService.rejectRandomPartyInvitation(hostId, partyInvitation);
+			case INVITATION -> internalService.cancelInvitedPartyInvitation(hostId, partyInvitation);
 			default -> throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
@@ -47,8 +47,8 @@ public class PartyInvitationFacade {
 			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 
 		switch (partyInvitation.getInvitationType()) {
-			case REQUEST -> internalService.rejectRequestedPartyInvitation(hostId, partyId, partyInvitation);
-			case RANDOM -> internalService.rejectRandomPartyInvitation(hostId, partyId, partyInvitation);
+			case REQUEST -> internalService.rejectRequestedPartyInvitation(hostId, partyInvitation);
+			case RANDOM -> internalService.rejectRandomPartyInvitation(hostId, partyInvitation);
 			default -> throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
