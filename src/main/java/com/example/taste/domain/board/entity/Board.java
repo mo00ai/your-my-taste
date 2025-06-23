@@ -137,10 +137,6 @@ public class Board extends SoftDeletableEntity {
 		}
 	}
 
-	public void updateAccessPolicyClosed() {
-		this.accessPolicy = AccessPolicy.CLOSED;
-	}
-
 	// 게시글의 공개 종료시각 <= 현재시각이면 true
 	public boolean isExpired() {
 		if (this.openTime == null || this.openLimit == null) {

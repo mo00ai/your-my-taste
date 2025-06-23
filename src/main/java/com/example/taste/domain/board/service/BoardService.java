@@ -110,7 +110,6 @@ public class BoardService {
 			.build());
 	}
 
-	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
 		Board board = findByBoardId(boardId);
 		User user = userRepository.findById(userId)
@@ -136,13 +135,12 @@ public class BoardService {
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
 		if (board.getAccessPolicy().isTimeAttack() && board.isExpired()) {
-			board.updateAccessPolicyClosed();
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
 		if (board.getAccessPolicy().isFcfs()) {
-			tryEnterFcfsQueueByLettuce(board, userId);
+			tryEnterFcfsQueueByRedisson(board, userId);
 		}
 
 		return new BoardResponseDto(board);
@@ -299,9 +297,11 @@ public class BoardService {
 			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
+
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt(); // 스레드 중단 요청
 			throw new CustomException(REDIS_FAIL_GET_LOCK);
+
 		} finally {
 			Long value = redisService.getKeyLongValue(lockKey);
 			if (value != null && value.equals(userId)) {
@@ -324,7 +324,6 @@ public class BoardService {
 
 		try {
 			boolean hasLock = lock.tryLock(1000, 3000, TimeUnit.MILLISECONDS);// 최대 1초 동안 락 획득 시도, 락 유지 시간 1초
-
 			if (!hasLock) {
 				throw new CustomException(REDIS_FAIL_GET_LOCK);
 			}
@@ -346,9 +345,11 @@ public class BoardService {
 			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
+
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt(); // 스레드 중단 요청
 			throw new CustomException(REDIS_FAIL_GET_LOCK);
+
 		} finally {
 			if (lock.isHeldByCurrentThread()) { // 현재 쓰레드가 락 소유자인지 확인
 				lock.unlock();
