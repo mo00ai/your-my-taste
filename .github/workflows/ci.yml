@@ -87,6 +87,7 @@ jobs:
       S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
       S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
       S3_REGION: ${{ secrets.S3_REGION }}
+      CLOUD_FRONT_DOMAIN: ${{ secrets.CLOUD_FRONT_DOMAIN }}
 
       # OCR
       OCR_KEY: ${{ secrets.OCR_KEY }}
