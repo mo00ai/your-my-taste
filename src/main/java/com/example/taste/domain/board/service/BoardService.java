@@ -364,7 +364,7 @@ public class BoardService {
 
 	@Transactional
 	public List<Long> findExpiredTimeAttackBoardIds(AccessPolicy policy) {
-		return boardRepository.findExpiredTimeAttackBoardIds(policy.name());
+		return boardRepository.findExpiredTimeAttackBoardIds(policy);
 	}
 
 	@Transactional
