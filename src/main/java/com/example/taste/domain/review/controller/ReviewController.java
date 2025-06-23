@@ -50,7 +50,7 @@ public class ReviewController {
 		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
 		return CommonResponse.created(
-			reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW, userDetails));
+			reviewService.createReview(requestDto, storeId, files, ImageType.REVIEW, userDetails.getUser()));
 	}
 
 	// 리뷰 업데이트
@@ -63,7 +63,7 @@ public class ReviewController {
 		@AuthenticationPrincipal CustomUserDetails userDetails)
 		throws IOException {
 		return CommonResponse.ok(
-			reviewService.updateReview(requestDto, reviewId, files, ImageType.REVIEW, userDetails));
+			reviewService.updateReview(requestDto, reviewId, files, ImageType.REVIEW, userDetails.getUser()));
 	}
 
 	// 가게의 모든 리뷰 조회
@@ -84,7 +84,7 @@ public class ReviewController {
 	@DeleteMapping("/{reviewId}")
 	public CommonResponse<Void> deleteReview(@PathVariable Long reviewId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		reviewService.deleteReview(reviewId, userDetails);
+		reviewService.deleteReview(reviewId, userDetails.getUser());
 		return CommonResponse.ok();
 	}
 
@@ -93,7 +93,7 @@ public class ReviewController {
 	public CommonResponse<Void> createValidation(@PathVariable Long storeId,
 		@RequestPart("image") MultipartFile image,
 		@AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
-		ocrService.createValidation(storeId, image, userDetails);
+		ocrService.createValidation(storeId, image, userDetails.getUser());
 		return CommonResponse.ok();
 	}
 }
