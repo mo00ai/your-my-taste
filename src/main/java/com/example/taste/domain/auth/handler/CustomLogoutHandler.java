@@ -26,8 +26,7 @@ public class CustomLogoutHandler implements LogoutHandler {
 			String sessionId = session.getId();
 
 			// 세션 키 삭제
-			String redisSessionKey = "spring:session:sessions:" + sessionId;
-			redisService.deleteZSetKey(redisSessionKey);
+			redisService.deleteZSetKey("spring:session:sessions:" + sessionId);
 
 			session.invalidate();                        // 로컬 세션 무효화
 			SecurityContextHolder.clearContext();        // Security Context 초기화

@@ -4,7 +4,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.entity.PartyMatchInfoFavor;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.entity.UserMatchInfoCategory;
-import com.example.taste.domain.match.entity.UserMatchInfoStore;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.match.repository.UserMatchInfoRepository;
 import com.example.taste.domain.party.entity.PartyInvitation;
@@ -101,33 +99,18 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		List<Long> bestScorePartyMatchInfoIdList = new ArrayList<>();
 
 		// 1. 필터링
-		Stream<PartyMatchInfo> partyStream = matchingPartyList.stream();
-
-		// 초대 이력이 없는 파티들만 필터링
 		List<Long> invitedPartyIdList = partyInvitationRepository.findAllPartyIdByUser(matchingUser.getUser().getId());
-		partyStream = partyStream.filter(p -> !invitedPartyIdList.contains(p.getParty().getId()));
 
-		// 가게 필터링
-		if (matchingUser.getStoreList() != null && !matchingUser.getStoreList().isEmpty()) {
-			partyStream = matchStore(matchingUser, partyStream);
-		}
-
-		// 위치 필터링
-		if (matchingUser.getRegion() != null) {
-			partyStream = matchRegion(matchingUser, partyStream);
-		}
-
-		// 성별 필터링
-		if (matchingUser.getUserGender() != null) {
-			partyStream = matchGender(matchingUser, partyStream);
-		}
-
-		// 나이 필터링
-		partyStream = matchAgeRange(matchingUser, partyStream);
+		List<PartyMatchInfo> filteredPartyList = matchingPartyList.stream()
+			.filter(p -> !invitedPartyIdList.contains(p.getParty().getId()))        // 초대 이력 없음
+			.filter(p -> isMatchStore(matchingUser, p))                                // 가게 일치 여부
+			.filter(p -> isMatchRegion(matchingUser, p))                            // 위치 일치 여부
+			.filter(p -> isMatchGender(matchingUser, p))                            // 성별 선호 일치 여부
+			.filter(p -> isMatchAgeRange(matchingUser, p))                            // 나이대 선호 일치 여부
+			.toList();
 
 		// 2. 가중치 계산
 		// 카테고리 일치, 입맛 일치, 날짜 범위
-		List<PartyMatchInfo> filteredPartyList = partyStream.toList();
 		for (PartyMatchInfo matchingParty : filteredPartyList) {
 			int nowMatchingScore = 0;
 			nowMatchingScore += calculateCategoryScore(matchingUser, matchingParty);
@@ -173,7 +156,7 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		}
 
 		if (selectedParty == null) {
-			log.warn("[runMatchingForParty] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMatchInfo ID: {}",
+			log.warn("[runMatchEngine] 랜덤 매칭 중 매칭 가능한 파티 찾기에 실패하였습니다. User ID: {}, UserMatchInfo ID: {}",
 				matchingUser.getUser().getId(), matchingUser.getId());
 			return null;
 		}
@@ -191,51 +174,39 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 			&& info.getAgeRange() == null;
 	}
 
-	private Stream<PartyMatchInfo> matchStore(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
-		return partyStream.filter(p -> p.getStore() != null
-			&& matchingUser.getStoreList().stream()
-			.map(UserMatchInfoStore::getStore)
-			.toList().contains(p.getStore()));
+	private boolean isMatchStore(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
+		if (partyMatchInfo.getStore() == null) {
+			return false;
+		}
+		return matchingUser.getStoreList().stream()
+			.anyMatch(userStore -> userStore.getStore().equals(partyMatchInfo.getStore()));
 	}
 
-	private Stream<PartyMatchInfo> matchRegion(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
-		return partyStream.filter(p -> p.getRegion() != null && p.getRegion().contains(matchingUser.getRegion()));
+	private boolean isMatchRegion(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
+		return partyMatchInfo.getRegion() != null &&
+			partyMatchInfo.getRegion().contains(matchingUser.getRegion());
 	}
 
-	private Stream<PartyMatchInfo> matchGender(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
-		return partyStream.filter(p -> {
-			if (p.getGender().equals(Gender.ANY)) {
-				return true;
-			}
-			return p.getGender().equals(matchingUser.getUserGender());
-		});
+	private boolean isMatchGender(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
+		Gender partyGender = partyMatchInfo.getGender();
+		return partyGender.equals(Gender.ANY) || partyGender.equals(matchingUser.getUserGender());
 	}
 
-	private Stream<PartyMatchInfo> matchAgeRange(UserMatchInfo matchingUser, Stream<PartyMatchInfo> partyStream) {
+	private boolean isMatchAgeRange(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
 		int userAge = matchingUser.getUserAge();
 		AgeRange userPrefAgeRange = matchingUser.getAgeRange();
+		AgeRange partyPrefAgeRange = partyMatchInfo.getAgeRange();
 
-		return partyStream.filter(p -> {
-			AgeRange partyPrefAgeRange = p.getAgeRange();
+		boolean isUserFitPartyPref = partyPrefAgeRange == null || partyPrefAgeRange.includes(userAge);
+		boolean isPartyFitUserPref = true;
 
-			boolean isUserFitPartyPref = true;
-			boolean isPartyFitUserPref = true;
+		if (userPrefAgeRange != null) {
+			List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
+			double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
+			isPartyFitUserPref = userPrefAgeRange.includes(avgAge);
+		}
 
-			// 파티의 나이 선호 조건이 있다면 --> 유저의 나이가 해당하는 지 체크
-			if (partyPrefAgeRange != null) {
-				isUserFitPartyPref = partyPrefAgeRange.includes(userAge);
-			}
-
-			// 유저의 나이 선호 조건이 있다면 --> 파티 구성원 평균 나이가 해당하는지 체크
-			if (userPrefAgeRange != null) {
-				List<PartyInvitation> partyInvitationList =
-					partyInvitationRepository.findByPartyId(p.getId());
-				isPartyFitUserPref = userPrefAgeRange.includes(
-					p.getParty().calculateAverageMemberAge(partyInvitationList));
-			}
-
-			return isUserFitPartyPref && isPartyFitUserPref;
-		});
+		return isUserFitPartyPref && isPartyFitUserPref;
 	}
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지

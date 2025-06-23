@@ -1,11 +1,8 @@
 package com.example.taste.domain.event.service;
 
-<<<<<<< HEAD
 import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
-=======
-import static com.example.taste.domain.event.exception.EventErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
->>>>>>> dev
+import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.time.LocalDate;
 import java.util.List;
