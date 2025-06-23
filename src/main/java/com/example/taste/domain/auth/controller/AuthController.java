@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +22,6 @@ import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.service.AuthService;
 
 @RestController
-@CrossOrigin(
-	origins = "http://localhost:3000", // 혹은 "*"
-	allowCredentials = "true"
-)
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
