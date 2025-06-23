@@ -3,7 +3,6 @@ package com.example.taste.domain.party.service;
 import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_CAPACITY_EXCEEDED;
 
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
@@ -28,7 +26,6 @@ import com.example.taste.domain.party.validator.PartyValidator;
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationInternalService {
-	private final EntityFetcher entityFetcher;
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 호스트가 랜덤 파티 초대 수락
@@ -39,7 +36,7 @@ public class PartyInvitationInternalService {
 			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
 			.isSatisfiedBy(partyInvitation);
 
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyInvitation.getParty();
 		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
 			.and(PartyValidator.isHostOfParty(hostId))
 			.isSatisfiedBy(party);
@@ -50,16 +47,13 @@ public class PartyInvitationInternalService {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 
-		if (!party.isFull()) {
-			userMatchInfo.updateMatchStatus(MatchStatus.WAITING_USER);
+		userMatchInfo.updateMatchStatus(MatchStatus.WAITING_USER);
 
-			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-			if (party.isFull()) {
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
-			}
-		} else {
-			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
+		// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
+		if (party.isFull()) {
+			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 		}
+
 	}
 
 	// 호스트가 가입 요청 타입(REQUEST) 수락
@@ -69,21 +63,19 @@ public class PartyInvitationInternalService {
 			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
 			.isSatisfiedBy(partyInvitation);
 
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyInvitation.getParty();
 		PartyValidator.IS_AVAILABLE_TO_JOIN_PARTY
 			.and(PartyValidator.isHostOfParty(hostId))
 			.isSatisfiedBy(party);
 
-		if (!party.isFull()) {
-			partyInvitation.updateInvitationStatus(CONFIRMED);
-			partyInvitation.getParty().joinMember();
-			// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-			if (party.isFull()) {
-				partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
-			}
-		} else {
-			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
+		partyInvitation.updateInvitationStatus(CONFIRMED);
+		partyInvitation.getParty().joinMember();
+
+		// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
+		if (party.isFull()) {
+			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
 		}
+
 	}
 
 	// 호스트가 파티 초대 취소
@@ -93,7 +85,7 @@ public class PartyInvitationInternalService {
 			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
 			.isSatisfiedBy(partyInvitation);
 
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyInvitation.getParty();
 		PartyValidator.isHostOfParty(hostId)
 			.isSatisfiedBy(party);
 
@@ -107,7 +99,7 @@ public class PartyInvitationInternalService {
 			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
 			.isSatisfiedBy(partyInvitation);
 
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyInvitation.getParty();
 		PartyValidator.isHostOfParty(hostId)
 			.isSatisfiedBy(party);
 
@@ -123,7 +115,7 @@ public class PartyInvitationInternalService {
 			.and(PartyInvitationValidator.isInvitationOfParty(partyId))
 			.isSatisfiedBy(partyInvitation);
 
-		Party party = entityFetcher.getPartyOrThrow(partyId);
+		Party party = partyInvitation.getParty();
 		PartyValidator.isHostOfParty(hostId)
 			.isSatisfiedBy(party);
 

@@ -32,16 +32,14 @@ public class UserInvitationController {
 	}
 
 	@PatchMapping("/{partyInvitationId}")
-	public CommonResponse<Void> confirmPartyInvitation(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyInvitationId) {
-		userInvitationFacade.confirmPartyInvitation(userDetails.getId(), partyInvitationId);
+	public CommonResponse<Void> confirmPartyInvitation(@PathVariable Long partyInvitationId) {
+		userInvitationFacade.confirmPartyInvitation(partyInvitationId);
 		return CommonResponse.ok();
 	}
 
 	@DeleteMapping("/{partyInvitationId}/cancel")
-	public CommonResponse<Void> cancelPartyInvitation(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyInvitationId) {
-		userInvitationFacade.cancelPartyInvitation(userDetails.getId(), partyInvitationId);
+	public CommonResponse<Void> cancelPartyInvitation(@PathVariable Long partyInvitationId) {
+		userInvitationFacade.cancelPartyInvitation(partyInvitationId);
 		return CommonResponse.ok();
 	}
 

@@ -20,24 +20,24 @@ public class UserInvitationFacade {
 	private final PartyInvitationRepository partyInvitationRepository;
 	private final UserInvitationInternalService internalService;
 
-	public void confirmPartyInvitation(Long userId, Long partyInvitationId) {
+	public void confirmPartyInvitation(Long partyInvitationId) {
 		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
 			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 
 		switch (partyInvitation.getInvitationType()) {
-			case RANDOM -> internalService.confirmRandomPartyInvitation(userId, partyInvitation);
-			case INVITATION -> internalService.confirmInvitedPartyInvitation(userId, partyInvitation);
+			case RANDOM -> internalService.confirmRandomPartyInvitation(partyInvitation);
+			case INVITATION -> internalService.confirmInvitedPartyInvitation(partyInvitation);
 			case REQUEST -> throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 			default -> throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
 
-	public void cancelPartyInvitation(Long userId, Long partyInvitationId) {
+	public void cancelPartyInvitation(Long partyInvitationId) {
 		PartyInvitation partyInvitation = partyInvitationRepository.findById(partyInvitationId)
 			.orElseThrow(() -> new CustomException(PARTY_INVITATION_NOT_FOUND));
 
 		if (partyInvitation.getInvitationType() == InvitationType.REQUEST) {
-			internalService.cancelRequestedPartyInvitation(userId, partyInvitation);
+			internalService.cancelRequestedPartyInvitation(partyInvitation);
 		} else {
 			throw new CustomException(INVALID_PARTY_INVITATION);
 		}
@@ -49,7 +49,7 @@ public class UserInvitationFacade {
 
 		switch (partyInvitation.getInvitationType()) {
 			case RANDOM -> internalService.rejectRandomPartyInvitation(userId, partyInvitation);
-			case INVITATION -> internalService.rejectInvitedPartyInvitation(userId, partyInvitation);
+			case INVITATION -> internalService.rejectInvitedPartyInvitation(partyInvitation);
 			default -> throw new CustomException(INVALID_PARTY_INVITATION);
 		}
 	}
