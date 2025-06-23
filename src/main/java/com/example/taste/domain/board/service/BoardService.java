@@ -111,7 +111,8 @@ public class BoardService {
 	}
 
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
-		Board board = findByBoardId(boardId);
+		Board board = boardRepository.findActiveBoard(boardId)
+			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
