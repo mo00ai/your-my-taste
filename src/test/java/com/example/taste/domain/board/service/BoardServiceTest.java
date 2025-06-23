@@ -37,6 +37,7 @@ import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.example.taste.property.AbstractIntegrationTest;
 import com.example.taste.fixtures.BoardFixture;
 import com.example.taste.fixtures.CategoryFixture;
 import com.example.taste.fixtures.ImageFixture;
@@ -45,10 +46,8 @@ import com.example.taste.fixtures.UserFixture;
 
 import jakarta.transaction.Transactional;
 
-//@ActiveProfiles("test-int")
-//@ActiveProfiles("test-int-docker")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class BoardServiceTest {
+class BoardServiceTest extends AbstractIntegrationTest {
 	@LocalServerPort
 	private int port;
 

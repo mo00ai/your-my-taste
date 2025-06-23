@@ -37,14 +37,13 @@ import com.example.taste.fixtures.StoreBucketFixture;
 import com.example.taste.fixtures.StoreBucketItemFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
+import com.example.taste.property.AbstractIntegrationTest;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-//@ActiveProfiles("test-int-docker")
-// @ActiveProfiles("test-int")
 @SpringBootTest
-class StoreBucketServiceTest {
+class StoreBucketServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private StoreBucketService storeBucketService;

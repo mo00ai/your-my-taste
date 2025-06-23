@@ -35,15 +35,15 @@ jobs:
             cd ~/your-my-taste
             git pull origin dev
             
-            echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" > .env
-            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}" >> .env
             echo "DEV_REDIS_PORT=${{ secrets.DEV_REDIS_PORT }}" >> .env
             echo "S3_BUCKET=${{ secrets.S3_BUCKET }}" >> .env
             echo "S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}" >> .env
             echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
+            echo "CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}" >> .env
             echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
             echo "OCR_KEY=${{ secrets.OCR_KEY }}" >> .env
             echo "NAVER_MAP_CLIENT_ID=${{ secrets.NAVER_MAP_CLIENT_ID }}" >> .env

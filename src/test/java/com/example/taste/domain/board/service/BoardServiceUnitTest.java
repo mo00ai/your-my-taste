@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.exception.CustomException;
@@ -34,7 +35,7 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
-//@ActiveProfiles("test-int")
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceUnitTest {
 	@InjectMocks
