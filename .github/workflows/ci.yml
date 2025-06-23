@@ -99,6 +99,10 @@ jobs:
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
 
+      # Vapid
+      VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
+      VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
