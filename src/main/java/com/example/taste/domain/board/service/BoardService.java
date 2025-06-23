@@ -2,6 +2,7 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.config.CacheConfig.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
@@ -13,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +72,7 @@ public class BoardService {
 	private final EntityManager entityManager;
 	private final ApplicationEventPublisher eventPublisher;
 	private final RedissonClient redissonClient;
+	private final CacheManager concurrentMapCacheManager;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -144,14 +149,33 @@ public class BoardService {
 			tryEnterFcfsQueueByRedisson(board, userId);
 		}
 
+		// 타임어택 게시글이면 캐싱 - 현재 메서드에 SRP 적용 안돼서 cacheable 어노테이션 사용 불가 -> 추후 개선
+		if (board.getAccessPolicy().isTimeAttack()) {
+			return getOrSetCache(board);
+		}
+
 		return new BoardResponseDto(board);
 	}
 
-	private void cacheIfTimeAttackBoard() {
+	private BoardResponseDto getOrSetCache(Board board) {
+		Cache cache = concurrentMapCacheManager.getCache(TIMEATTACK_CACHE_NAME);
 
+		if (cache == null) {
+			throw new CustomException(CACHE_NOT_FOUND);
+		}
+
+		BoardResponseDto cachedDto = cache.get(board.getId(), BoardResponseDto.class);
+		if (cachedDto != null) {
+			return cachedDto;
+		}
+
+		BoardResponseDto dto = new BoardResponseDto(board);
+		cache.put(board.getId(), dto);
+		return dto;
 	}
 
 	@Transactional
+	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
@@ -159,6 +183,7 @@ public class BoardService {
 	}
 
 	@Transactional
+	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
@@ -369,6 +394,17 @@ public class BoardService {
 
 	@Transactional
 	public long closeBoardsByIds(List<? extends Long> ids) {
-		return boardRepository.closeBoardsByIds(ids);
+		long closedCnt = boardRepository.closeBoardsByIds(ids);
+		evictCache(ids);
+		return closedCnt;
+	}
+
+	public void evictCache(List<? extends Long> ids) {
+		Cache cache = concurrentMapCacheManager.getCache(TIMEATTACK_CACHE_NAME);
+		if (cache != null) {
+			for (Long boardId : ids) {
+				cache.evict(boardId); // 개별 삭제
+			}
+		}
 	}
 }

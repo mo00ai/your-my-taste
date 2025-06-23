@@ -29,7 +29,10 @@ public enum ErrorCode implements BaseCode {
 	REDIS_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "R001", "Redis 작업 처리 중 오류가 발생했습니다."),
 	REDIS_SERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R002", "Redis 직렬화 중 오류가 발생했습니다."),
 	REDIS_DESERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R003", "Redis 역직렬화 중 오류가 발생했습니다."),
-	REDIS_FAIL_GET_LOCK(HttpStatus.INTERNAL_SERVER_ERROR, "R004", "Redis 락 점유 과정에서 오류가 발생했습니다.");
+	REDIS_FAIL_GET_LOCK(HttpStatus.INTERNAL_SERVER_ERROR, "R004", "Redis 락 점유 과정에서 오류가 발생했습니다."),
+
+	//Cache
+	CACHE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "CA001", "Cache가 존재하지 않습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
