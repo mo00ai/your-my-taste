@@ -3,6 +3,7 @@ package com.example.taste.domain.auth.filter;
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.common.exception.ErrorCode.METHOD_NOT_ALLOWED;
 import static com.example.taste.domain.auth.exception.AuthErrorCode.ALREADY_LOGIN;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import java.io.IOException;
 
@@ -21,7 +22,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.CommonResponse;
@@ -47,7 +47,7 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 		// 로그인(기존 세션) 확인
 		HttpSession session = request.getSession(false);
 		SecurityContext securityContext = (session != null) ?
-			(SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT") : null;
+			(SecurityContext)session.getAttribute(SPRING_SECURITY_CONTEXT_KEY) : null;
 
 		if (securityContext != null) {
 			Authentication auth = securityContext.getAuthentication();
@@ -75,12 +75,11 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 		// 인증 정보 저장
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(auth);
-		SecurityContextHolder.setContext(context);
 
 		// 세션에 스프링 시큐리티 컨텍스트 세팅
 		request.getSession(true).setAttribute(
-			HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-			SecurityContextHolder.getContext());
+			SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+		SecurityContextHolder.setContext(context);
 
 		// 로그인 성공 응답
 		response.setStatus(HttpStatus.OK.value());

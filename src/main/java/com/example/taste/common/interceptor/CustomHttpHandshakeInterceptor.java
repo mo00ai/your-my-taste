@@ -1,6 +1,7 @@
 package com.example.taste.common.interceptor;
 
 import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHENTICATED;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class CustomHttpHandshakeInterceptor extends HttpSessionHandshakeIntercep
 				throw new CustomException(UNAUTHENTICATED);
 			}
 
-			SecurityContext context = (SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT");
+			SecurityContext context = (SecurityContext)session.getAttribute(SPRING_SECURITY_CONTEXT_KEY);
 			if (context == null || context.getAuthentication() == null
 				|| !context.getAuthentication().isAuthenticated()) {
 				throw new CustomException(UNAUTHENTICATED);

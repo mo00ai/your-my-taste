@@ -60,25 +60,28 @@ public final class PartyInvitationValidator {
 		}
 	}
 
-	// 특정 파티 소속 초대인지 검증
+	// 파티에 소속된 초대인지 검증
 	public static void validateInvitationOfParty(PartyInvitation partyInvitation, Long partyId) {
 		if (!partyInvitation.getParty().getId().equals(partyId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 	}
 
+	// 파티에 소속된 초대이며 승인 대기 중인 초대인지 검증
 	public static void validatePartyOfWaitingInvitation(
 		PartyInvitation partyInvitation, Long partyId) {
 		validateWaitingInvitation(partyInvitation);
 		validateInvitationOfParty(partyInvitation, partyId);
 	}
 
+	// 파티 초대의 소유 유저이며 승인 대기 중인 초대인지 검증
 	public static void validateUserOfWaitingInvitation(
 		PartyInvitation partyInvitation, Long userId) {
 		validateWaitingInvitation(partyInvitation);
 		validateInvitationOfUser(partyInvitation, userId);
 	}
 
+	// 특정 상태의 유저 매칭 정보인지 검증
 	public static void validateUserMatchInfoStatus(
 		UserMatchInfo userMatchInfo, MatchStatus matchStatus) {
 		if (!userMatchInfo.isStatus(matchStatus)) {

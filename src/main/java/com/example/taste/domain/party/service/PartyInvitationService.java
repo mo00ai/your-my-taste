@@ -4,9 +4,7 @@ import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;
 import static com.example.taste.domain.party.exception.PartyErrorCode.ALREADY_EXISTS_PARTY_INVITATION;
 import static com.example.taste.domain.party.exception.PartyErrorCode.INVALID_PARTY_INVITATION;
-import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
-import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_CAPACITY_EXCEEDED;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_INVITATION_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.UNAVAILABLE_TO_REQUEST_PARTY_INVITATION;
@@ -27,9 +25,9 @@ import com.example.taste.domain.party.dto.response.UserInvitationResponseDto;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationType;
-import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
+import com.example.taste.domain.party.validator.PartyInvitationValidator;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
@@ -96,12 +94,12 @@ public class PartyInvitationService {
 		}
 
 		// 호스트가 자기 자신 초대하는 경우
-		if (party.isHostOfParty(hostId)) {
+		if (party.isHostOfParty(requestDto.getUserId())) {
 			throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 		}
 
 		// 파티 모집 중이 아닌 경우
-		validateActiveAndNotFullParty(party);
+		PartyInvitationValidator.validateAvailableToJoin(party);
 
 		// 유저 가져오기, 탈퇴 유저인 경우 예외 발생
 		User user = userRepository.findByIdAndDeletedAtIsNull(requestDto.getUserId())
@@ -136,7 +134,7 @@ public class PartyInvitationService {
 		}
 
 		// 파티 모집 중이 아닌 경우
-		validateActiveAndNotFullParty(party);
+		PartyInvitationValidator.validateAvailableToJoin(party);
 
 		// 초대 정보가 존재하는 경우
 		partyInvitationRepository.findByUserAndParty(userId, partyId)
@@ -175,15 +173,5 @@ public class PartyInvitationService {
 			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), WAITING);
 		return partyInvitationList.stream()
 			.map(PartyInvitationResponseDto::new).toList();
-	}
-
-	private void validateActiveAndNotFullParty(Party party) {
-		if (!party.isStatus(PartyStatus.ACTIVE)) {
-			throw new CustomException(PARTY_CAPACITY_EXCEEDED);
-		}
-
-		if (party.isFull()) {
-			throw new CustomException(NOT_ACTIVE_PARTY);
-		}
 	}
 }

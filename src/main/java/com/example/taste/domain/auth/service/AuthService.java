@@ -3,6 +3,7 @@ package com.example.taste.domain.auth.service;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,7 +66,7 @@ public class AuthService {
 
 		// 새 세션 생성 후 저장
 		httpRequest.getSession(true)
-			.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+			.setAttribute(SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 	}
 
 	public void signout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
