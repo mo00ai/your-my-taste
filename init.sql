@@ -2,7 +2,7 @@ create table batch_job_execution_seq
 (
     ID         bigint not null,
     UNIQUE_KEY char   not null,
-    constraint BATCH_JOB_EXEC_SEQ_UNIQUE_KEY_UN
+    constraint UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
 
@@ -50,7 +50,7 @@ create table batch_job_execution_params
     PARAMETER_NAME   varchar(100)  not null,
     PARAMETER_TYPE   varchar(100)  not null,
     PARAMETER_VALUE  varchar(2500) null,
-    IDENTIFYING      char(1)       not null,
+    IDENTIFYING      char          not null,
     constraint JOB_EXEC_PARAMS_FK
         foreign key (JOB_EXECUTION_ID) references batch_job_execution (JOB_EXECUTION_ID)
 );
@@ -59,7 +59,7 @@ create table batch_job_seq
 (
     ID         bigint not null,
     UNIQUE_KEY char   not null,
-    constraint BATCH_JOB_SEQ_UNIQUE_KEY_UN
+    constraint UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
 
@@ -85,7 +85,7 @@ create table batch_step_execution
     EXIT_CODE          varchar(2500) null,
     EXIT_MESSAGE       varchar(2500) null,
     LAST_UPDATED       datetime(6)   null,
-    constraint BATCH_STEP_EXEC_SEQ_UNIQUE_KEY_UN
+    constraint JOB_EXEC_STEP_FK
         foreign key (JOB_EXECUTION_ID) references batch_job_execution (JOB_EXECUTION_ID)
 );
 
@@ -101,8 +101,8 @@ create table batch_step_execution_context
 
 create table batch_step_execution_seq
 (
-    ID         bigint    not null,
-    UNIQUE_KEY char(255) not null,
+    ID         bigint not null,
+    UNIQUE_KEY char   not null,
     constraint UNIQUE_KEY_UN
         unique (UNIQUE_KEY)
 );
@@ -166,13 +166,9 @@ create table notification_content
     redirection_url varchar(255) null
 );
 
-create table pk_criteria
+create table party_match_info_favor_seq
 (
-    id        bigint auto_increment
-        primary key,
-    is_active bit                                               not null,
-    point     int                                               not null,
-    type      enum ('EVENT', 'LIKE', 'POST', 'RESET', 'REVIEW') not null
+    next_val bigint null
 );
 
 create table pk_term
@@ -416,6 +412,11 @@ create table user_match_info_category_seq
     next_val bigint null
 );
 
+create table user_match_info_favor_seq
+(
+    next_val bigint null
+);
+
 create table user_match_info_store_seq
 (
     next_val bigint null
@@ -464,7 +465,6 @@ create table board
     type          enum ('N', 'O')                               not null,
     store_id      bigint                                        not null,
     user_id       bigint                                        not null,
-    status        enum ('CLOSED', 'FCFS', 'OPEN', 'TIMEATTACK') not null,
     constraint FK5vlh90qyii65ixwsbnafd55ud
         foreign key (user_id) references users (id),
     constraint FKqrcx4shwcq3xlx22i147o9dps
@@ -573,14 +573,14 @@ create table likes
 
 create table notification_info
 (
-    id                      bigint                                                    not null
+    id                      bigint                                                                                                               not null
         primary key,
-    created_at              datetime(6)                                               null,
-    updated_at              datetime(6)                                               null,
-    category                enum ('INDIVIDUAL', 'MARKETING', 'SUBSCRIBERS', 'SYSTEM') not null,
-    is_read                 bit                                                       not null,
-    notification_content_id bigint                                                    not null,
-    notification_target     bigint                                                    not null,
+    created_at              datetime(6)                                                                                                          null,
+    updated_at              datetime(6)                                                                                                          null,
+    category                enum ('BOARD', 'CHAT', 'COMMENT', 'INDIVIDUAL', 'MARKETING', 'MATCH', 'PARTY', 'PK', 'STORE', 'SUBSCRIBE', 'SYSTEM') not null,
+    is_read                 bit                                                                                                                  not null,
+    notification_content_id bigint                                                                                                               not null,
+    notification_target     bigint                                                                                                               not null,
     constraint FKfv5v471g6r1lak3gu0smnjkhi
         foreign key (notification_target) references users (id),
     constraint FKpb3knrbekad3namogsk229sod
@@ -601,16 +601,18 @@ create table party
 (
     id                     bigint auto_increment
         primary key,
-    created_at             datetime(6)                                                   null,
-    description            varchar(255)                                                  null,
-    enable_random_matching bit                                                           not null,
-    max_members            int                                                           not null,
-    meeting_date           date                                                          null,
-    now_members            int                                                           not null,
-    party_status           enum ('CANCELED', 'DELETED', 'EXPIRED', 'FULL', 'RECRUITING') not null,
-    title                  varchar(255)                                                  not null,
-    user_id                bigint                                                        not null,
-    store_id               bigint                                                        null,
+    created_at             datetime(6)                null,
+    deleted_at             datetime(6)                null,
+    updated_at             datetime(6)                null,
+    description            varchar(255)               null,
+    enable_random_matching bit                        not null,
+    max_members            int                        not null,
+    meeting_date           date                       null,
+    now_members            int                        not null,
+    party_status           enum ('ACTIVE', 'EXPIRED') not null,
+    title                  varchar(255)               not null,
+    user_id                bigint                     not null,
+    store_id               bigint                     null,
     constraint FKgte0ch57rdjr9y17l6dtnp6oa
         foreign key (store_id) references store (id)
             on delete cascade,
@@ -654,6 +656,20 @@ create table party_match_info
         foreign key (store_id) references store (id),
     constraint FKglxrvco5qkyfs2nk7q1uybqh6
         foreign key (party_id) references party (id)
+            on delete cascade
+);
+
+create table party_match_info_favor
+(
+    id                  bigint not null
+        primary key,
+    favor_id            bigint not null,
+    party_match_info_id bigint not null,
+    constraint FKdf8kumdjnhb66xt3cydk53om1
+        foreign key (favor_id) references favor (id)
+            on delete cascade,
+    constraint FKjmdmov29xrfuwx20hidpp2322
+        foreign key (party_match_info_id) references party_match_info (id)
             on delete cascade
 );
 
@@ -792,6 +808,20 @@ create table user_match_info_category
             on delete cascade,
     constraint FKtclx38yl6r9qbusq5xl48220k
         foreign key (category_id) references category (id)
+            on delete cascade
+);
+
+create table user_match_info_favor
+(
+    id                 bigint not null
+        primary key,
+    favor_id           bigint not null,
+    user_match_info_id bigint not null,
+    constraint FK65kv7x2gbsn9gcpveu8w3r2ef
+        foreign key (user_match_info_id) references user_match_info (id)
+            on delete cascade,
+    constraint FK6e89k6djlsh8yb4f40defijp6
+        foreign key (favor_id) references favor (id)
             on delete cascade
 );
 
