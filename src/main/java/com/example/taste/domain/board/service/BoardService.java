@@ -331,7 +331,7 @@ public class BoardService {
 
 			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
-			if (board.isOverOpenLimit(size)) {
+			if (board.isOverOpenLimit(size)) { // NOTE 인원 다 찬 게시글과 순위 안에 든 유저 정보 테이블에 저장 @김채진
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
 
