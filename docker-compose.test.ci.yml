@@ -7,10 +7,10 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_DB: taste_ci_test
-      POSTGRES_USER: testuser
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test1234
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U testuser -d taste_ci_test" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d taste_ci_test" ]
       interval: 5s
       timeout: 5s
       retries: 5
