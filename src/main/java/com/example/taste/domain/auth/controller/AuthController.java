@@ -3,7 +3,6 @@ package com.example.taste.domain.auth.controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,10 +25,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@CrossOrigin(
-	origins = "http://localhost:3000", // 혹은 "*"
-	allowCredentials = "true"
-)
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
