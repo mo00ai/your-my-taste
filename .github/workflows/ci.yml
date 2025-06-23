@@ -78,7 +78,7 @@ jobs:
       DB_HOST: localhost
       DB_PORT: 5432
       DB_NAME: taste_ci_test
-      DB_USER: testuser
+      DB_USER: postgres
       DB_PASSWORD: test1234
       DB_SCHEMA: public
 
