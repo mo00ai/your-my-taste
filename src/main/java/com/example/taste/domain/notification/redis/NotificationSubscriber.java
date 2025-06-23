@@ -19,7 +19,7 @@ import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationType;
-import com.example.taste.domain.notification.repository.NotificationContentRepository;
+import com.example.taste.domain.notification.repository.notification.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;

@@ -58,7 +58,7 @@ public class AuthController {
 		HttpServletRequest httpRequest, @AuthenticationPrincipal CustomUserDetails userDetails,
 		// 로그아웃 시 등록된 web push 정보를 삭제
 		@RequestBody DeleteWebPushInfoDto dto) {
-		webPushService.deleteInformation(userDetails.getId(), dto.getEndpoint());
+		webPushService.deleteSubscription(userDetails.getId(), dto.getEndpoint());
 		authService.signout(httpRequest, userDetails);
 
 		return CommonResponse.ok();

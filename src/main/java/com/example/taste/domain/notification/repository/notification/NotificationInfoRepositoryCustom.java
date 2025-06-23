@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.repository;
+package com.example.taste.domain.notification.repository.notification;
 
 import java.util.List;
 

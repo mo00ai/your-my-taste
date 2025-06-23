@@ -39,3 +39,5 @@ out/
 .env.test
 /prometheus.yml
 src/main/generated
+/src/main/resources/index.html
+/src/main/resources/sw.js

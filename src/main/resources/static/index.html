@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login + Web Push 테스트</title>
+</head>
+<body>
+<h1>🔐 로그인 + Web Push 테스트</h1>
+
+<form id="login-form">
+    <label>Email: <input type="email" name="email" required></label><br>
+    <label>Password: <input type="password" name="password" required></label><br>
+    <button type="submit">로그인</button>
+</form>
+
+<script>
+    // base64url 인코딩 함수
+    const form = document.getElementById('login-form');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = form.email.value;
+        const password = form.password.value;
+
+        // 로그인 요청
+        const loginResponse = await fetch('/auth/signin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password}),
+            credentials: 'include'  // 세션 쿠키 전달 필수
+        });
+
+        if (!loginResponse.ok) {
+            alert('로그인 실패');
+            return;
+        }
+
+        const loginData = await loginResponse.json();
+        const vapidPublicKey = loginData.data.vapidPublicKey;
+
+        console.log('✅ 로그인 성공, 공개키:', vapidPublicKey);
+
+        // 서비스워커 등록
+        const reg = await navigator.serviceWorker.register('sw.js');
+        console.log('✅ 서비스워커 등록 완료');
+
+        const swRegistration = await navigator.serviceWorker.ready;
+        console.log('✅ 서비스워커 활성화 완료');
+
+        // Push 구독
+        const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        });
+
+        console.log('✅ 브라우저 구독 정보:', sub);
+
+        const subscriptionData = {
+            endPoint: sub.endpoint,
+            keys: {
+                p256dh: arrayBufferToBase64Url(sub.getKey("p256dh")),
+                auth: arrayBufferToBase64Url(sub.getKey("auth"))
+            }
+        };
+
+        console.log("✅ 서버로 보낼 구독 정보:", subscriptionData);
+
+        // 서버에 구독 정보 전송
+        await fetch('/web-push/subscribe', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(subscriptionData),
+            credentials: 'include'
+        });
+
+        alert('🎉 구독 완료! 이제 서버에서 알림을 보내보세요.');
+    });
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+    }
+
+    function arrayBufferToBase64Url(buffer) {
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+</script>
+</body>
+</html>

@@ -20,7 +20,7 @@ import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
-import com.example.taste.domain.notification.repository.NotificationInfoRepository;
+import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
