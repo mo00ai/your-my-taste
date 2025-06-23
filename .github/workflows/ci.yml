@@ -34,12 +34,6 @@ jobs:
       - name: Docker Compose Up (PostgreSQL with init.sql)
         run: docker-compose -f docker-compose.test.ci.yml up -d test-postgres
 
-      - name: Check Docker Containers
-        run: docker ps -a
-
-      - name: Show PostgreSQL Logs
-        run: docker logs test-postgres
-
       - name: Wait for PostgreSQL to be healthy
         run: |
           for i in {1..5}; do
@@ -47,9 +41,6 @@ jobs:
             echo "Waiting for PostgreSQL..."
             sleep 5
           done
-
-      - name: Show PostgreSQL Logs
-        run: docker logs test-postgres --tail 50
 
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
@@ -65,6 +56,18 @@ jobs:
 
       - name: Generate Jooq & Build Jar
         run: ./gradlew clean generateJooq bootJar
+
+      - name: Upload Jooq Code
+        uses: actions/upload-artifact@v4
+        with:
+          name: jooq-code
+          path: build/generated-src/jooq
+
+      - name: Upload Built Jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-jar
+          path: build/libs/*.jar
 
   build-and-test:
     runs-on: ubuntu-latest
