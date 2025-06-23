@@ -20,10 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
-import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogRepository;
@@ -44,8 +42,6 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	private final EntityFetcher entityFetcher;
-	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
@@ -71,7 +67,8 @@ public class UserService {
 	// 유저 탈퇴
 	@Transactional
 	public void deleteUser(Long userId, UserDeleteRequestDto requestDto) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
@@ -81,7 +78,8 @@ public class UserService {
 
 	@Transactional
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
 		List<Favor> favorList = favorRepository.findAll();                // 유효한 맵 리스트
 
@@ -141,8 +139,10 @@ public class UserService {
 
 	@Transactional
 	public void followUser(Long userId, Long followingUserId) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		User followingUser = userRepository.findById(followingUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (followRepository.existsByFollowerIdAndFollowingId(userId, followingUserId)) {
 			throw new CustomException(ALREADY_FOLLOWED);
 		}
@@ -153,8 +153,10 @@ public class UserService {
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
-		User follower = entityFetcher.getUserOrThrow(followerUserId);
-		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		User follower = userRepository.findById(followerUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		User followingUser = userRepository.findById(followingUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Follow follow = followRepository.findByFollowerIdAndFollowingId(followerUserId, followingUserId)
 			.orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
 
