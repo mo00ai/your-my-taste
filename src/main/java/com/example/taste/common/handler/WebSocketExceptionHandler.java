@@ -1,4 +1,4 @@
-package com.example.taste.common.websocket;
+package com.example.taste.common.handler;
 
 import lombok.extern.slf4j.Slf4j;
 

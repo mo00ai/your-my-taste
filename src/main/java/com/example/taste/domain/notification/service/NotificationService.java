@@ -7,11 +7,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
+import com.example.taste.domain.notification.redis.NotificationRedisService;
 import com.example.taste.domain.notification.repository.NotificationInfoRepository;
 import com.example.taste.domain.user.entity.User;
 
@@ -22,14 +22,14 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 
 	private final NotificationInfoRepository infoRepository;
-	private final RedisService redisService;
+	private final NotificationRedisService notificationRedisService;
 	private final EntityFetcher entityFetcher;
 
 	// 개별 알림
 	@Transactional // 둘 중 하나라도 저장 실패시 전부 롤백 하도록
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
 		User user = entityFetcher.getUserOrThrow(dataDto.getUserId());
-		redisService.storeNotification(dataDto.getUserId(), content.getId(), dataDto, Duration.ofDays(7));
+		notificationRedisService.storeNotification(dataDto.getUserId(), content.getId(), dataDto, Duration.ofDays(7));
 		infoRepository.save(NotificationInfo.builder()
 			.category(dataDto.getCategory())
 			.notificationContent(content)
@@ -42,13 +42,14 @@ public class NotificationService {
 	public void sendBunch(NotificationContent content, NotificationDataDto dataDto, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (User user : allUser) {
-			redisService.storeNotification(user.getId(), content.getId(), dataDto, Duration.ofDays(7));
+			notificationRedisService.storeNotification(user.getId(), content.getId(), dataDto, Duration.ofDays(7));
 			notificationInfos.add(NotificationInfo.builder()
 				.category(dataDto.getCategory())
 				.notificationContent(content)
 				.user(user)
 				.build());
 		}
+		// 여기서 삭제 메서드 호출
 		infoRepository.saveAll(notificationInfos);
 	}
 

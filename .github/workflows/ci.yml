@@ -101,12 +101,20 @@ jobs:
       OCR_KEY: ${{ secrets.OCR_KEY }}
 
       # Naver Map API
+      OCR_HOST: ${{ secrets.OCR_HOST }}
+      OCR_PATH: ${{ secrets.OCR_PATH }}
+
+      # Naver Map API
       NAVER_MAP_CLIENT_ID: ${{ secrets.NAVER_MAP_CLIENT_ID }}
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
 
       # Naver Datalab API
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
+
+      # Vapid
+      VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
+      VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
 
     steps:
       - name: Checkout source
