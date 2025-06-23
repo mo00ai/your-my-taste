@@ -22,4 +22,6 @@ public interface StoreBucketItemRepository
 
 	@EntityGraph(attributePaths = "storeBucket")
 	List<StoreBucketItem> findAllByIdIn(List<Long> ids);
+
+	List<StoreBucketItem> findAllByStoreBucket(StoreBucket storeBucket);
 }

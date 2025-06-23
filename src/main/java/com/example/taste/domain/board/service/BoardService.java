@@ -142,7 +142,7 @@ public class BoardService {
 
 		// 선착순 공개 게시글이면 순위 검증
 		if (board.getAccessPolicy().isFcfs()) {
-			tryEnterFcfsQueue(board, userId);
+			tryEnterFcfsQueueByLettuce(board, userId);
 		}
 
 		return new BoardResponseDto(board);
@@ -264,7 +264,7 @@ public class BoardService {
 	}
 
 	// lettuce 분산락으로 동시성 제어
-	public void tryEnterFcfsQueueByLock(Board board, Long userId) {
+	public void tryEnterFcfsQueueByLettuce(Board board, Long userId) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 
@@ -273,7 +273,7 @@ public class BoardService {
 			return;
 		}
 
-		boolean hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
+		boolean hasLock = redisService.setIfAbsent(lockKey, userId.toString(), Duration.ofMillis(30000));
 		int retry = 10;
 
 		try {

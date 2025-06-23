@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
@@ -41,7 +42,7 @@ import com.example.taste.fixtures.UserFixture;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-// @ActiveProfiles("test-int-docker")
+@ActiveProfiles("test-int-docker")
 // @ActiveProfiles("test-int")
 @SpringBootTest
 class StoreBucketServiceTest {
@@ -90,19 +91,20 @@ class StoreBucketServiceTest {
 			});
 
 			// then
-			List<StoreBucketItem> items = storeBucketItemRepository.findAll();
-			assertThat(items).isEmpty();
+			List<StoreBucketItem> items1 = storeBucketItemRepository.findAllByStoreBucket(storeBucket1);
+			List<StoreBucketItem> items2 = storeBucketItemRepository.findAllByStoreBucket(storeBucket2);
+			assertThat(items1).isEmpty();
+			assertThat(items2).isEmpty();
 		} finally {
 			// cleanUp
-			storeBucketItemRepository.deleteAll();
-			storeBucketRepository.deleteAll();
+			storeBucketRepository.deleteById(storeBucket1.getId());
+			storeBucketRepository.deleteById(storeBucket2.getId());
 
-			boardRepository.deleteAll();
-			storeRepository.deleteAll();
+			storeRepository.deleteById(store.getId());
+			categoryRepository.deleteById(category.getId());
 
-			categoryRepository.deleteAll();
-			userRepository.deleteAll();
-			imageRepository.deleteAll();
+			userRepository.deleteById(user1.getId());
+			userRepository.deleteById(user2.getId());
 		}
 	}
 

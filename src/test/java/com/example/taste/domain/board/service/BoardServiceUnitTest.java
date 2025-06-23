@@ -80,7 +80,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -108,7 +108,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -136,7 +136,7 @@ public class BoardServiceUnitTest {
 
 		// stub
 		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(entityFetcher.getUserOrThrow(anyLong())).willReturn(user);
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
