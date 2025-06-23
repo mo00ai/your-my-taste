@@ -1,5 +1,9 @@
 package com.example.taste.domain.comment.controller;
 
+import jakarta.validation.constraints.Min;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,17 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.comment.dto.CreateCommentRequestDto;
 import com.example.taste.domain.comment.dto.CreateCommentResponseDto;
 import com.example.taste.domain.comment.dto.GetCommentDto;
 import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
-
-import jakarta.validation.constraints.Min;
-
-import lombok.RequiredArgsConstructor;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class CommentController {
 		@RequestBody CreateCommentRequestDto requestDto,
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails.getUser()));
+		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails.getId()));
 	}
 
 	// 댓글 수정
@@ -48,7 +48,7 @@ public class CommentController {
 		@PathVariable Long boardId,
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails.getUser()));
+		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails.getId()));
 	}
 
 	// 댓글 삭제(소프트)
@@ -57,7 +57,7 @@ public class CommentController {
 		@PathVariable Long commentId,
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		commentService.deleteComment(commentId, userDetails.getUser());
+		commentService.deleteComment(commentId, userDetails.getId());
 		return CommonResponse.ok();
 	}
 
