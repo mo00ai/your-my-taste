@@ -14,7 +14,6 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -25,7 +24,7 @@ import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
 // @ActiveProfiles("test-int-docker")
-@ActiveProfiles("test-int")
+// @ActiveProfiles("test-int")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort
