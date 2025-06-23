@@ -15,7 +15,7 @@ public enum ErrorCode implements BaseCode {
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "내부 서버 오류가 발생했습니다."),
 	INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 타입의 값입니다."),
 	INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "C006", "요청 가능한 최대 페이지 크기를 초과했습니다."),
-	
+
 	//AUTH
 	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "A001", "인증되지 않은 사용자입니다."),
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A002", "접근 권한이 없습니다."),
@@ -28,7 +28,12 @@ public enum ErrorCode implements BaseCode {
 	//Redis
 	REDIS_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "R001", "Redis 작업 처리 중 오류가 발생했습니다."),
 	REDIS_SERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R002", "Redis 직렬화 중 오류가 발생했습니다."),
-	REDIS_DESERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R003", "Redis 역직렬화 중 오류가 발생했습니다.");
+	REDIS_DESERIALIZATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "R003", "Redis 역직렬화 중 오류가 발생했습니다."),
+
+	// embedding
+	EMBEDDING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "임베딩 생성에 실패했습니다: "),
+
+	;
 
 	private final HttpStatus httpStatus;
 	private final String code;
