@@ -147,6 +147,10 @@ public class BoardService {
 		return new BoardResponseDto(board);
 	}
 
+	private void cacheIfTimeAttackBoard() {
+
+	}
+
 	@Transactional
 	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
