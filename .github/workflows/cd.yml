@@ -25,6 +25,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
+      #OCR, VPC, CLOUDFRONT 추가되어야함
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
