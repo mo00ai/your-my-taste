@@ -87,7 +87,7 @@ public class MatchInfoService {
 		}
 
 		// 매칭 중이면 업데이트 불가
-		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
+		if (!matchInfo.isStatus(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
@@ -120,7 +120,7 @@ public class MatchInfoService {
 		}
 
 		// 매칭 중이면 삭제 불가
-		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
+		if (!matchInfo.isStatus(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 

@@ -103,8 +103,7 @@ public class PartyInvitationService {
 		partyInvitationRepository.findByUserAndParty(requestDto.getUserId(), partyId)
 			.ifPresent((pi) -> {
 					// 파티 수라가 대기-가입된 유저 재초대하는 경우 예외 발생
-					if (pi.getInvitationStatus().equals(WAITING)
-						|| pi.getInvitationStatus().equals(CONFIRMED)) {
+					if (pi.isStatus(WAITING) || pi.isStatus(CONFIRMED)) {
 						throw new CustomException(ALREADY_EXISTS_PARTY_INVITATION);
 					}
 					// 그 외 재초대 가능한 경우 삭제 후 새로 생성
