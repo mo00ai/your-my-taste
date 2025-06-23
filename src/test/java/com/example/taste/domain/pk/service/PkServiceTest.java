@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,15 +19,13 @@ import com.example.taste.domain.pk.repository.PkTermRankingRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.fixtures.UserFixture;
+import com.example.taste.property.AbstractIntegrationTest;
 
 import jakarta.persistence.EntityManager;
 
-// @ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
-// @ActiveProfiles("test-int-docker")
-// @ActiveProfiles("test-int")
 @SpringBootTest
 @Transactional
-class PkServiceTest {
+class PkServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private PkService pkService;
@@ -42,11 +39,6 @@ class PkServiceTest {
 	private RedisService redisService;
 	@Autowired
 	private EntityManager em;
-
-	@BeforeAll
-	static void printProfile() {
-		System.out.println("🔍 SYSTEM spring.profiles.active: " + System.getProperty("spring.profiles.active"));
-	}
 
 	// @Test
 	// void savePkLog_saveToRedis() {

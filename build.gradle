@@ -116,11 +116,13 @@ def getEnvOrDotenv = { key ->
 }
 
 def dbName = getEnvOrDotenv("DB_NAME")
+def dbSchema = getEnvOrDotenv("DB_SCHEMA")
 def dbHost = getEnvOrDotenv("DB_HOST")
 def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
 def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+
 
 jooq {
     version = '3.18.6'
@@ -128,7 +130,7 @@ jooq {
         main {
             generationTool {
                 jdbc {
-                    driver = 'org.postgresql.Driver' // ✅ 변경
+                    driver = 'org.postgresql.Driver'
                     url = dbUrl
                     user = dbUser
                     password = dbPassword
@@ -136,8 +138,8 @@ jooq {
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
-                        name = 'org.jooq.meta.postgres.PostgresDatabase' // ✅ 변경
-                        inputSchema = dbName
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = dbSchema
                     }
                     generate {
                         daos = true

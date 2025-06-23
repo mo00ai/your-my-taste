@@ -16,6 +16,7 @@ jobs:
       DB_NAME: taste_ci_test
       DB_USER: testuser
       DB_PASSWORD: test1234
+      DB_SCHEMA: public
 
     steps:
       - uses: actions/checkout@v3
@@ -51,6 +52,7 @@ jobs:
           echo "DB_NAME=taste_ci_test" >> .env
           echo "DB_USER=testuser"     >> .env
           echo "DB_PASSWORD=test1234" >> .env
+          echo "DB_SCHEMA=public" >> .env
 
       - name: Generate Jooq & Build Jar
         run: ./gradlew clean generateJooq bootJar
@@ -66,6 +68,7 @@ jobs:
       DB_NAME: taste_ci_test
       DB_USER: testuser
       DB_PASSWORD: test1234
+      DB_SCHEMA: public
 
       # Local DB
       #      LOCAL_DB_NAME: taste_ci_test
