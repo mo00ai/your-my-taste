@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
@@ -42,7 +43,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 // @ActiveProfiles("test-int-docker")
-// @ActiveProfiles("test-int")
+@ActiveProfiles("test-int")
 @SpringBootTest
 class StoreBucketServiceTest {
 

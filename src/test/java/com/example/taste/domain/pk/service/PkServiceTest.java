@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.service.RedisService;
@@ -23,9 +24,9 @@ import com.example.taste.fixtures.UserFixture;
 
 import jakarta.persistence.EntityManager;
 
-// @ActiveProfiles("test-int")
 // @ActiveProfiles("#{systemProperties['spring.profiles.active'] ?: 'test-int'}")
 // @ActiveProfiles("test-int-docker")
+@ActiveProfiles("test-int")
 @SpringBootTest
 @Transactional
 class PkServiceTest {

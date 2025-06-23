@@ -44,6 +44,14 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
+      - name: Create .env for Jooq
+        run: |
+          echo "DB_HOST=localhost"     > .env
+          echo "DB_PORT=3306"         >> .env
+          echo "DB_NAME=taste_ci_test" >> .env
+          echo "DB_USER=testuser"     >> .env
+          echo "DB_PASSWORD=test1234" >> .env
+
       - name: Generate Jooq & Build Jar
         run: ./gradlew clean generateJooq bootJar
 

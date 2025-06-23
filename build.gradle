@@ -105,11 +105,11 @@ def getEnvOrDotenv = { key ->
     return System.getenv(key) ?: dotenv.getProperty(key) ?: ''
 }
 
-def dbName = System.getenv("DB_NAME")
-def dbHost = System.getenv("DB_HOST")
-def dbPort = System.getenv("DB_PORT")
-def dbUser = System.getenv("DB_USER")
-def dbPassword = System.getenv("DB_PASSWORD")
+def dbName = getEnvOrDotenv("DB_NAME")
+def dbHost = getEnvOrDotenv("DB_HOST")
+def dbPort = getEnvOrDotenv("DB_PORT")
+def dbUser = getEnvOrDotenv("DB_USER")
+def dbPassword = getEnvOrDotenv("DB_PASSWORD")
 def dbUrl = "jdbc:mysql://${dbHost}:${dbPort}/${dbName}"
 
 jooq {
@@ -177,6 +177,23 @@ tasks.register("integrationTest", Test) {
 
     include '**/*Test*'
     exclude '**/*UnitTest*'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+tasks.register("performanceTest", Test) {
+    // CI 환경이면 task 실행되지 않도록
+    onlyIf {
+        System.getenv("CI") != "true"
+    }
+
+    useJUnitPlatform {
+        includeTags "Performance"
+    }
+
+    systemProperty "spring.profiles.active", "test-int"
+
     testLogging {
         events "passed", "skipped", "failed"
     }

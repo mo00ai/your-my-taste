@@ -24,8 +24,8 @@ import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
-//@ActiveProfiles("test-int")
-@ActiveProfiles("test-int-docker")
+// @ActiveProfiles("test-int-docker")
+@ActiveProfiles("test-int")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest {
 	@LocalServerPort

@@ -28,7 +28,7 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreBucketFixture;
 import com.example.taste.fixtures.UserFixture;
 
-@ActiveProfiles("test-int")
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class StoreBucketServiceUnitTest {
 	@InjectMocks
