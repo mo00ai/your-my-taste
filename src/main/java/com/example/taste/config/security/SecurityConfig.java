@@ -41,6 +41,7 @@ public class SecurityConfig {
 				// 소켓 연결 요청 허용
 				auth.requestMatchers("/ws/**", "/ws").permitAll();
 				auth.requestMatchers("/h2-console/**").permitAll();
+				auth.requestMatchers("/actuator/prometheus").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.userDetailsService(userDetailsService);
