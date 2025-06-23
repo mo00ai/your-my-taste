@@ -159,13 +159,4 @@ public class Party extends SoftDeletableEntity {
 	public void updatePartyStatus(PartyStatus status) {
 		this.partyStatus = status;
 	}
-
-	public boolean isConfirmedPartyMember(Long userId, List<PartyInvitation> partyInvitationList) {
-		for (PartyInvitation pi : partyInvitationList) {
-			if (pi.getUser().getId().equals(userId)) {
-				return true;
-			}
-		}
-		return false;
-	}
 }
