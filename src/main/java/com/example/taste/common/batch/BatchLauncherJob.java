@@ -1,4 +1,4 @@
-package com.example.taste.common.batchquartz.quartz.job;
+package com.example.taste.common.batch;
 
 import org.quartz.JobExecutionContext;
 import org.springframework.batch.core.Job;
@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class QuartzBatchLauncherJob extends QuartzJobBean {
+public class BatchLauncherJob extends QuartzJobBean {
 
 	@Autowired
 	private JobLauncher jobLauncher;

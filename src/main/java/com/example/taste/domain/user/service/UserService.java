@@ -1,9 +1,6 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
-import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
-import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -11,11 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import jakarta.persistence.EntityManager;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +25,7 @@ import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
+import com.example.taste.domain.pk.repository.PkLogRepository;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
@@ -48,6 +41,10 @@ import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -65,6 +62,7 @@ public class UserService {
 	private final PkLogJdbcRepository pkLogJdbcRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final StoreBucketRepository storeBucketRepository;
+	private final PkLogRepository pkLogRepository;
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
@@ -242,9 +240,25 @@ public class UserService {
 					.build())
 				.toList();
 
-			pkLogJdbcRepository.batchInsert(resetLogs);
+			//jdbc
+			// pkLogJdbcRepository.batchInsert(resetLogs);
+
+			//jpa
+			// pkLogRepository.saveAll(resetLogs);
+
+			//jooq
+			pkLogRepository.insertPkLogs(resetLogs);
+
 		}
 
-		userJdbcRepository.resetAllUserPoints();
+		//jdbc
+		// userJdbcRepository.resetAllUserPoints();
+
+		//jpa
+		// userRepository.resetAllPoints();
+
+		//jooq
+		userRepository.resetAllPoints();
+
 	}
 }

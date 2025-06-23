@@ -62,6 +62,7 @@ public class S3Service {
 		String uploadUrl = uri.toUriString();
 
 		return new S3ResponseDto(
+			null,
 			uploadUrl,
 			uploadFileName,
 			originalFileName
