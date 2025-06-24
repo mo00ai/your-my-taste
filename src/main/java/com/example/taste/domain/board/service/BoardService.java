@@ -1,12 +1,20 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.common.constant.RedisConst.*;
-import static com.example.taste.domain.board.exception.BoardErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.common.constant.RedisConst.OPENRUN_KEY_PREFIX;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
+import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_FOUND;
+import static com.example.taste.domain.board.exception.BoardErrorCode.BOARD_NOT_YET_OPEN;
+import static com.example.taste.domain.board.exception.BoardErrorCode.CLOSED_BOARD;
+import static com.example.taste.domain.board.exception.BoardErrorCode.EXCEED_OPEN_LIMIT;
+import static com.example.taste.domain.user.exception.UserErrorCode.POSTING_COUNT_OVERFLOW;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -17,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
@@ -44,9 +51,6 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -167,7 +171,7 @@ public class BoardService {
 	// 게시물 작성자와 현재 사용자가 일치하는지 검증
 	private void checkUser(Long userId, Board board) {
 		if (!board.getUser().getId().equals(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 	}
 
