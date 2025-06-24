@@ -15,7 +15,7 @@ public class WebPushRepositoryImpl implements WebPushRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public WebPushSubscription getWebPushInformationByUserIdAndEndPoint(Long userId, String endPoint) {
+	public WebPushSubscription getWebPushSubscriptionByUserIdAndEndpoint(Long userId, String endPoint) {
 		QWebPushSubscription qSubscription = QWebPushSubscription.webPushSubscription;
 		return queryFactory.selectFrom(qSubscription).where(
 			qSubscription.endpoint.eq(endPoint),

@@ -58,7 +58,7 @@ public class WebPushService {
 	}
 
 	public void deleteSubscription(Long userId, String endpoint) {
-		WebPushSubscription information = webPushRepository.getWebPushInformationByUserIdAndEndPoint(userId, endpoint);
+		WebPushSubscription information = webPushRepository.getWebPushSubscriptionByUserIdAndEndpoint(userId, endpoint);
 		if (information != null) {
 			webPushRepository.delete(information);
 		}
