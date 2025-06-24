@@ -37,7 +37,7 @@ import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class PartyService {        // TODO: 파티 만료 시 / 파티 다 찼을 시, 파티 초대 정보, 파티 채팅 등 연관 정보 삭제하는 기능 추후 추가 - @윤예진
+public class PartyService {
 	private final MatchService matchService;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;

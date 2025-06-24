@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.example.taste.domain.auth.handler.CustomAccessDeniedHandler;
+import com.example.taste.domain.auth.handler.CustomAuthenticationEntryPointHandler;
 import com.example.taste.domain.auth.service.CustomUserDetailsService;
 
 @Configuration
@@ -21,6 +23,8 @@ import com.example.taste.domain.auth.service.CustomUserDetailsService;
 @EnableMethodSecurity
 public class SecurityConfig {
 	private final CustomUserDetailsService userDetailsService;
+	private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -45,6 +49,10 @@ public class SecurityConfig {
 				auth.requestMatchers("/h2-console/**").permitAll();
 				auth.requestMatchers("/actuator/prometheus").permitAll();
 				auth.anyRequest().authenticated();
+			})
+			.exceptionHandling(exception -> {
+				exception.authenticationEntryPoint(customAuthenticationEntryPointHandler) // 인증 예외 핸들러
+					.accessDeniedHandler(customAccessDeniedHandler);           // 인가 예외 핸들러
 			})
 			.userDetailsService(userDetailsService);
 
