@@ -6,8 +6,8 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
+import com.example.taste.domain.match.entity.AgeRange;
 import com.example.taste.domain.match.entity.UserMatchInfo;
-import com.example.taste.domain.match.vo.AgeRange;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Getter

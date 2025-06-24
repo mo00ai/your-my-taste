@@ -1,11 +1,14 @@
 package com.example.taste.domain.event.service;
 
-import static com.example.taste.domain.event.exception.EventErrorCode.*;
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
+import static com.example.taste.domain.event.exception.EventErrorCode.NOT_FOUND_EVENT;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.event.dto.request.EventRequestDto;
@@ -23,8 +25,6 @@ import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.repository.EventRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +63,7 @@ public class EventService {
 
 	protected void checkUser(Long userId, Event event) {
 		if (!event.getUser().getId().equals(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 
 	}
