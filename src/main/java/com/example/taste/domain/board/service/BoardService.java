@@ -1,12 +1,12 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
 import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.config.CacheConfig.*;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
-import static com.example.taste.common.exception.ErrorCode.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -301,7 +301,7 @@ public class BoardService {
 			return;
 		}
 
-		boolean hasLock = redisService.setIfAbsent(lockKey, userId.toString(), Duration.ofMillis(30000));
+		boolean hasLock = redisService.setIfAbsent(lockKey, userId.toString(), Duration.ofMillis(3000));
 		int retry = 10;
 
 		try {
