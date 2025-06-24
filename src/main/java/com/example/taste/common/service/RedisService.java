@@ -1,5 +1,6 @@
 package com.example.taste.common.service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -175,22 +176,18 @@ public class RedisService {
 	public Set<Object> getZSetRangeByScore(String key, Long min, Long max) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
-
-	//TODO scan 방식 고려
+	
 	public Set<String> getKeys(String pattern) {
 		Set<String> keys = new HashSet<>();
+		RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
 
-		ScanOptions options = ScanOptions.scanOptions()
-			.match(pattern)
-			.count(1000)
-			.build();
-
-		Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
-			.getConnection()
-			.scan(options);
-
-		while (cursor.hasNext()) {
-			keys.add(new String(cursor.next()));
+		// 커서를 명시적으로 닫지 않고, 사용이 종료되면 알아서 닫히도록 try 안에서 사용함.
+		try (Cursor<byte[]> cursor = connection.keyCommands().scan(
+			ScanOptions.scanOptions().match(pattern).count(1000).build()
+		)) {
+			while (cursor.hasNext()) {
+				keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+			}
 		}
 
 		if (keys != null && !keys.isEmpty()) {
