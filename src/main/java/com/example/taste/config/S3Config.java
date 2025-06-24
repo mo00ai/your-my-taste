@@ -37,9 +37,13 @@ public class S3Config {
 
 	@Bean
 	public S3Presigner s3Presigner() {
+
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+
 		return S3Presigner.builder()
-			.credentialsProvider(credentialsProvider())
+			.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
 			.region(Region.of(region))
 			.build();
+
 	}
 }
