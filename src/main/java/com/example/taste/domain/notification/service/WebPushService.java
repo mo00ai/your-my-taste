@@ -95,7 +95,7 @@ public class WebPushService {
 			pushService.send(notification);
 		} catch (Exception e) {
 			log.error("WebPush send error", e);  // 로깅 프레임워크 사용 시
-			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION);
+			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION, e.toString());
 		}
 	}
 }
