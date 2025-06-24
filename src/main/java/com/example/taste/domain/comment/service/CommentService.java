@@ -1,6 +1,10 @@
 package com.example.taste.domain.comment.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+
 import java.time.LocalDateTime;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,17 +26,17 @@ import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.comment.exception.CommentErrorCode;
 import com.example.taste.domain.comment.repository.CommentRepository;
 import com.example.taste.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+	private final UserRepository userRepository;
 	private final CommentRepository commentRepository;
 	private final BoardRepository boardRepository;
 
 	public CreateCommentResponseDto createComment(CreateCommentRequestDto requestDto, Long boardId,
-		User user) {
+		Long userId) {
 		// 댓글 달 보드
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new CustomException(BoardErrorCode.BOARD_NOT_FOUND));
@@ -51,6 +55,7 @@ public class CommentService {
 			root = parent.getRoot() != null ? parent.getRoot() : parent;
 		}
 
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Comment comment = Comment.builder()
 			.contents(requestDto.getContents())
 			.parent(parent)
@@ -66,11 +71,13 @@ public class CommentService {
 
 	@Transactional
 	public UpdateCommentResponseDto updateComment(UpdateCommentRequestDto requestDto, Long commentId,
-		User user) {
+		Long userId) {
 		// 수정할 댓글
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+
 		// 유저 검증
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!comment.getUser().isSameUser(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
@@ -81,11 +88,13 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId, User user) {
+	public void deleteComment(Long commentId, Long userId) {
 		// 수정할 댓글
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+
 		// 유저 검증
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!comment.getUser().isSameUser(user.getId())) {
 			throw new CustomException(CommentErrorCode.COMMENT_USER_MISMATCH);
 		}
