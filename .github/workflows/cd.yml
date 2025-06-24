@@ -56,7 +56,8 @@ jobs:
             echo "NAVER_DATALAB_CLIENT_ID=${{ secrets.NAVER_DATALAB_CLIENT_ID }}" >> .env
             echo "NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}" >> .env
             echo "DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}" >> .env
-            echo "CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}" >> .env
+            echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
+            
             
             
             docker-compose down
