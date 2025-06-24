@@ -24,7 +24,7 @@ public class BoardRepositoryJooqCustomImpl implements BoardRepositoryJooqCustom 
 		return dsl.select(BOARD.ID)
 			.from(BOARD)
 			.where(BOARD.ACCESS_POLICY.eq(policy.name())) // Bind variable
-			.and(DSL.field("DATE_ADD({0}, INTERVAL {1} MINUTE)",
+			.and(DSL.field("{0} + ({1} * INTERVAL '1 minute')",
 					Timestamp.class,
 					BOARD.OPEN_TIME,
 					BOARD.OPEN_LIMIT)
