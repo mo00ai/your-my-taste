@@ -35,6 +35,9 @@ services:
       CLOUD_FRONT_DOMAIN: ${CLOUD_FRONT_DOMAIN}
       OCR_HOST: ${OCR_HOST}
       OCR_PATH: ${OCR_PATH}
+      RDS_PASSWORD: ${RDS_PASSWORD}
+      RDS_HOST: ${RDS_HOST}
+      RDS_PORT: ${RDS_PORT}
 
 #  db:
 #    image: postgres:16
