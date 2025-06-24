@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.image.entity.Image;
@@ -29,7 +28,6 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreBucketFixture;
 import com.example.taste.fixtures.UserFixture;
 
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class StoreBucketServiceUnitTest {
 	@InjectMocks
