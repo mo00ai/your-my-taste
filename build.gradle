@@ -103,7 +103,7 @@ dependencies {
 
     //web_push
     implementation 'nl.martijndwars:web-push:5.1.0'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.78'
 }
 
 def dotenv = new Properties()
@@ -122,7 +122,8 @@ def dbHost = getEnvOrDotenv("DB_HOST")
 def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
-def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+//def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ssl=false"
+def dbUrl = "jdbc:postgresql://localhost:5432/taste?ssl=false"
 
 
 jooq {
