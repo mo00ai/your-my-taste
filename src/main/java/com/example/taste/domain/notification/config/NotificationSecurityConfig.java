@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 
 @Configuration
-public class notificationSecurityConfig {
+public class NotificationSecurityConfig {
 
 	@PostConstruct
 	public void registerBCProvider() {
