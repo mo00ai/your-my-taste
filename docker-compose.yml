@@ -6,9 +6,9 @@ services:
     container_name: taste-app
     ports:
       - "8081:8080"
-    depends_on:
-      - db
-      - redis
+    #    depends_on:
+    #      - db
+    #      - redis
     environment:
       SPRING_PROFILES_ACTIVE: dev
       #      MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -35,28 +35,31 @@ services:
       CLOUD_FRONT_DOMAIN: ${CLOUD_FRONT_DOMAIN}
       OCR_HOST: ${OCR_HOST}
       OCR_PATH: ${OCR_PATH}
+      RDS_PASSWORD: ${RDS_PASSWORD}
+      RDS_HOST: ${RDS_HOST}
+      RDS_PORT: ${RDS_PORT}
 
-  db:
-    image: postgres:16
-    container_name: taste-db
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5433:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7.0
-    container_name: taste-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  pg_data:
-  redis_data:
+#  db:
+#    image: postgres:16
+#    container_name: taste-db
+#    restart: always
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    ports:
+#      - "5433:5432"
+#    volumes:
+#      - pg_data:/var/lib/postgresql/data
+#
+#  redis:
+#    image: redis:7.0
+#    container_name: taste-redis
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - redis_data:/data
+#
+#volumes:
+#  pg_data:
+#  redis_data:
