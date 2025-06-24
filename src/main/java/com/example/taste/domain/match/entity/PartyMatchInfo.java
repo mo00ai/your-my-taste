@@ -24,7 +24,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
-import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.store.entity.Store;
