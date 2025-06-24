@@ -9,6 +9,8 @@ services:
     #    depends_on:
     #      - db
     #      - redis
+    env_file:
+      - .env
     environment:
       SPRING_PROFILES_ACTIVE: dev
       #      MYSQL_DATABASE: ${MYSQL_DATABASE}
