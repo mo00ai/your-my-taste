@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
@@ -30,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class StoreService {
-	private final EntityFetcher entityFetcher;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
@@ -52,25 +50,20 @@ public class StoreService {
 	}
 
 	public StoreResponse getStore(Long id) {
-		Store store = entityFetcher.getStoreOrThrow(id);
+		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
 		List<String> imageUrls = reviewRepository.findTop3OrderByCreatedAtDesc(store).stream()
 			.map(review -> review.getImage().getUrl())
 			.toList();
 
-		return StoreResponse.create(store, imageUrls); // TODO 가게 정보에 리뷰 이미지 없을때/3개 미만/4개 이상일때 결과값 테스트코드 @김채진
+		return StoreResponse.create(store, imageUrls);
 	}
 
 	@Transactional
 	public void deleteStore(Long id) {
-		Store store = entityFetcher.getStoreOrThrow(id);
+		Store store = storeRepository.findById(id).orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 		storeBucketItemRepository.deleteAllByStore(store); // NOTE 유저에게 알림? @김채진
 		store.softDelete();
-	}
-
-	@Transactional(readOnly = true)
-	public Store findById(Long storeId) {
-		return entityFetcher.getStoreOrThrow(storeId);
 	}
 
 	// 카테고리명 추출
