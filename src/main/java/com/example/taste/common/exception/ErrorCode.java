@@ -1,9 +1,9 @@
 package com.example.taste.common.exception;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -15,11 +15,6 @@ public enum ErrorCode implements BaseCode {
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "내부 서버 오류가 발생했습니다."),
 	INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 타입의 값입니다."),
 	INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "C006", "요청 가능한 최대 페이지 크기를 초과했습니다."),
-	
-	//AUTH
-	INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "A001", "인증되지 않은 사용자입니다."),
-	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A002", "접근 권한이 없습니다."),
-	INVALID_ROLE(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 권한입니다."),
 
 	//File
 	FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "F001", "파일을 읽는 중 서버 오류가 발생했습니다."),
