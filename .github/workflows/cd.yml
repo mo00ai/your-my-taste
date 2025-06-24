@@ -36,35 +36,32 @@ jobs:
             cd ~/your-my-taste
             git pull origin dev
             
-            cat <<EOF > .env
-  POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-  POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-  POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-  DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}
-  DEV_REDIS_PORT=${{ secrets.DEV_REDIS_PORT }}
-  S3_BUCKET=${{ secrets.S3_BUCKET }}
-  S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
-  S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
-  CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}
-  S3_REGION=${{ secrets.S3_REGION }}
-  OCR_KEY=${{ secrets.OCR_KEY }}
-  OCR_HOST=${{ secrets.OCR_HOST }}
-  OCR_PATH=${{ secrets.OCR_PATH }}
-  VAPID_PUBLIC=${{ secrets.VAPID_PUBLIC }}
-  VAPID_PRIVATE=${{ secrets.VAPID_PRIVATE }}
-  NAVER_MAP_CLIENT_ID=${{ secrets.NAVER_MAP_CLIENT_ID }}
-  NAVER_MAP_CLIENT_SECRET=${{ secrets.NAVER_MAP_CLIENT_SECRET }}
-  NAVER_DATALAB_CLIENT_ID=${{ secrets.NAVER_DATALAB_CLIENT_ID }}
-  NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
-  DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}
-  KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}
-  RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
-  RDS_HOST=${{ secrets.RDS_HOST }}
-  RDS_PORT=${{ secrets.RDS_PORT }}
-  SPRING_PROFILES_ACTIVE=dev
-  EOF
-  
-  
-  docker-compose down
-  docker-compose pull
-  docker-compose up -d --build
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > .env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}" >> .env
+            echo "DEV_REDIS_PORT=${{ secrets.DEV_REDIS_PORT }}" >> .env
+            echo "S3_BUCKET=${{ secrets.S3_BUCKET }}" >> .env
+            echo "S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}" >> .env
+            echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
+            echo "CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}" >> .env
+            echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
+            echo "OCR_KEY=${{ secrets.OCR_KEY }}" >> .env
+            echo "OCR_HOST=${{ secrets.OCR_HOST }}" >> .env
+            echo "OCR_PATH=${{ secrets.OCR_PATH }}" >> .env
+            echo "VAPID_PUBLIC=${{ secrets.VAPID_PUBLIC }}" >> .env
+            echo "VAPID_PRIVATE=${{ secrets.VAPID_PRIVATE }}" >> .env            
+            echo "NAVER_MAP_CLIENT_ID=${{ secrets.NAVER_MAP_CLIENT_ID }}" >> .env
+            echo "NAVER_MAP_CLIENT_SECRET=${{ secrets.NAVER_MAP_CLIENT_SECRET }}" >> .env
+            echo "NAVER_DATALAB_CLIENT_ID=${{ secrets.NAVER_DATALAB_CLIENT_ID }}" >> .env
+            echo "NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}" >> .env
+            echo "DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}" >> .env
+            echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> .env
+            echo "RDS_PORT=${{ secrets.RDS_PORT }}" >> .env
+            
+            
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d --build
