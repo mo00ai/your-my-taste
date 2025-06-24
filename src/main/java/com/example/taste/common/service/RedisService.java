@@ -3,6 +3,7 @@ package com.example.taste.common.service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -10,7 +11,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -175,7 +178,21 @@ public class RedisService {
 
 	//TODO scan 방식 고려
 	public Set<String> getKeys(String pattern) {
-		Set<String> keys = redisTemplate.keys(pattern);
+		Set<String> keys = new HashSet<>();
+
+		ScanOptions options = ScanOptions.scanOptions()
+			.match(pattern)
+			.count(1000)
+			.build();
+
+		Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
+			.getConnection()
+			.scan(options);
+
+		while (cursor.hasNext()) {
+			keys.add(new String(cursor.next()));
+		}
+
 		if (keys != null && !keys.isEmpty()) {
 			return keys;
 		}
