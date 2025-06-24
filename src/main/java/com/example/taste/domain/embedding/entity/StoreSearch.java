@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import com.example.taste.common.entity.BaseEntity;
+import com.pgvector.PGvector;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,7 +62,7 @@ public class StoreSearch extends BaseEntity {
 
 	// 임베딩 벡터 (pgvector)
 	@Column(name = "embedding_vector", columnDefinition = "vector(1536)", nullable = false)
-	private String embeddingVector;
+	private PGvector embeddingVector;
 
 	@Enumerated(EnumType.STRING)
 	private SyncStatus syncStatus = SyncStatus.SYNCED;
@@ -70,7 +71,7 @@ public class StoreSearch extends BaseEntity {
 
 	@Builder
 	public StoreSearch(Long mysqlStoreId, String name, String sido, String sigungu, String eupmyeondong,
-		String categoryName, String latitude, String longitude, String embeddingVector) {
+		String categoryName, String latitude, String longitude, PGvector embeddingVector) {
 		this.mysqlStoreId = mysqlStoreId;
 		this.name = name;
 		this.sido = sido;

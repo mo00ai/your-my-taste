@@ -112,7 +112,7 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-openai' // 필요함
     // postgresql
     implementation 'org.postgresql:postgresql'
-
+    implementation 'com.pgvector:pgvector:0.1.4'
 }
 
 def dotenv = new Properties()
