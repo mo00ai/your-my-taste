@@ -11,10 +11,13 @@ services:
       - redis
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      #      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      #      MYSQL_USER: ${MYSQL_USER}
+      #      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      #      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DEV_REDIS_HOST: ${DEV_REDIS_HOST}
       DEV_REDIS_PORT: ${DEV_REDIS_PORT}
       S3_BUCKET: ${S3_BUCKET}
@@ -26,20 +29,25 @@ services:
       NAVER_MAP_CLIENT_SECRET: ${NAVER_MAP_CLIENT_SECRET}
       NAVER_DATALAB_CLIENT_ID: ${NAVER_DATALAB_CLIENT_ID}
       NAVER_DATALAB_CLIENT_SECRET: ${NAVER_DATALAB_CLIENT_SECRET}
+      VAPID_PUBLIC: ${VAPID_PUBLIC}
+      VAPID_PRIVATE: ${VAPID_PRIVATE}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      CLOUD_FRONT_DOMAIN: ${CLOUD_FRONT_DOMAIN}
+      OCR_HOST: ${OCR_HOST}
+      OCR_PATH: ${OCR_PATH}
 
   db:
-    image: mysql:8.0
+    image: postgres:16
     container_name: taste-db
     restart: always
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "3307:3306"
+      - "5433:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - pg_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7.0
@@ -50,5 +58,5 @@ services:
       - redis_data:/data
 
 volumes:
-  mysql_data:
+  pg_data:
   redis_data:

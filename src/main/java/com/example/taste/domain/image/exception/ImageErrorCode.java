@@ -20,7 +20,12 @@ public enum ImageErrorCode implements BaseCode {
 
 	FAILED_WRITE_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "I006", "파일을 저장하는 중 오류가 발생했습니다."),
 	IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "I007", "이미지를 찾을 수 없습니다."),
-	FAILED_DELETE_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "I008", "파일을 삭제하는 중 오류가 발생했습니다.");
+	FAILED_DELETE_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "I008", "파일을 삭제하는 중 오류가 발생했습니다."),
+
+	FAILED_EXPORT_MIMETYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "I009",
+		"presigned url에 이미지 업로드 중 mime type 확장자 추출 실패했습니다."),
+	FAILED_PRE_SIGNED_URL_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "I010", "presigned-url 이미지 업로드 실패했습니다."),
+	FAILED_FILE_READ(HttpStatus.INTERNAL_SERVER_ERROR, "I011", "파일을 조회 중 오류가 발생했습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

@@ -33,7 +33,6 @@ public class ImageService {
 
 		try {
 
-			// fileInfo = s3Service.upload(file);
 			fileInfo = s3PresignedUrlService.upload(file);
 
 			Image image = Image.builder()
@@ -78,7 +77,7 @@ public class ImageService {
 
 		try {
 
-			fileInfo = s3Service.upload(file);
+			fileInfo = s3PresignedUrlService.upload(file);
 
 			image.update(
 				fileInfo.getStaticUrl(),
