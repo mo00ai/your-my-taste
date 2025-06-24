@@ -35,7 +35,7 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
-@ActiveProfiles("test-int")
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceUnitTest {
 	@InjectMocks
