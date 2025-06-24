@@ -11,6 +11,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -124,6 +125,7 @@ public class RedisConfig {
 
 	//  로컬환경에서 Redis 서버 설정 편의상 스프링부트에서 강제로 설정
 	@Bean
+	@Profile("local")
 	public ApplicationRunner redisNotifyEventConfigurer(RedisConnectionFactory factory) {
 		return args -> {
 			RedisConnection connection = factory.getConnection();
