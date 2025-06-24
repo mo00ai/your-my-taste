@@ -17,10 +17,16 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
-import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
+import com.example.taste.domain.notification.entity.UserNotificationDenySetting;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
+import com.example.taste.domain.notification.redis.NotificationRedisService;
 import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
+import com.example.taste.domain.notification.repository.notification.UserNotificationDenySettingRepository;
+import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,25 +36,39 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NotificationUserService {
 	private final RedisService redisService;
+	private final UserRepository userRepository;
+	private final NotificationRedisService notificationRedisService;
 	private final NotificationInfoRepository notificationInfoRepository;
+	private final UserNotificationDenySettingRepository userNotificationDenySettingRepository;
 
 	// 알림 개수 조회
 	public GetNotificationCountResponseDto getNotificationCount(Long userId) {
-		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
-		String marketing = "notification:count:user:" + userId + ":" + NotificationCategory.MARKETING;
-		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBE;
-		// TODO 유저가 원하지 않는 카테고리 알림을 여기서 삭제.
-		Long count = 0L;
-		count += getCount(system);
-		count += getCount(marketing);
-		count += getCount(subscribers);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		List<UserNotificationDenySetting> settings = userNotificationDenySettingRepository.findAllByUser(user);
+		List<NotificationCategory> categories = new ArrayList<>();
+		for (UserNotificationDenySetting setting : settings) {
+			categories.add(setting.getNotificationCategory());
+		}
 
+		notificationRedisService.deleteNotificationOfCategorys(userId, categories);
+		notificationInfoRepository.deleteAllByUserAndCategories(userId, categories);
+		String pattern = "notification:count:user:" + userId + ":*";
+		Set<String> keys = redisService.getKeys(pattern);
+		Long count = 0L;
+		count += getCount(keys);
 		return new GetNotificationCountResponseDto(count);
 	}
 
-	private Long getCount(String key) {
-		Object value = redisService.getKeyValue(key);
-		return (value instanceof Number) ? ((Number)value).longValue() : 0L;
+	private Long getCount(Set<String> keys) {
+		Long count = 0L;
+		for (String key : keys) {
+			Object value = redisService.getKeyValue(key);
+			if (value instanceof Number) {
+				count += (long)value;
+			}
+		}
+		return count;
 	}
 
 	//최근 알림 조회(redis)
@@ -113,7 +133,7 @@ public class NotificationUserService {
 				redisService.decreaseCount(countKey);
 			}
 			dto.readIt();
-			redisService.updateNotification(dto, key);
+			notificationRedisService.updateNotification(dto, key);
 		}
 
 		// mysql 알림 읽음 처리
@@ -136,7 +156,7 @@ public class NotificationUserService {
 					redisService.decreaseCount(countKey);
 				}
 				dto.readIt();
-				redisService.updateNotification(dto, key);
+				notificationRedisService.updateNotification(dto, key);
 			}
 		} else {
 			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);

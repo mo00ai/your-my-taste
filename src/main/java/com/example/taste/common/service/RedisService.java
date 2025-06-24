@@ -105,14 +105,8 @@ public class RedisService {
 		}
 	}
 
-	//Notification publish
-	public void publishNotification(NotificationPublishDto publishDto) {
-		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, publishDto);
-	}
-
-	public void updateNotification(NotificationDataDto eventDto, String key) {
-		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
-		redisTemplate.opsForValue().set(key, eventDto, duration);
+	public void convertAndSend(String channel, NotificationPublishDto publishDto) {
+		redisTemplate.convertAndSend(channel, publishDto);
 	}
 
 	// 매칭 작업 이벤트 발행
@@ -120,7 +114,6 @@ public class RedisService {
 		redisTemplate.convertAndSend(RedisChannel.MATCH_CHANNEL, event);
 	}
 
-	// 알림 카운트 감소
 	public void decreaseCount(String key) {
 		redisTemplate.opsForValue().decrement(key);
 	}
@@ -176,7 +169,8 @@ public class RedisService {
 	public Set<Object> getZSetRangeByScore(String key, Long min, Long max) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
-	
+
+	//scan 방식으로 변경하였음 -황기하
 	public Set<String> getKeys(String pattern) {
 		Set<String> keys = new HashSet<>();
 		RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
@@ -195,7 +189,7 @@ public class RedisService {
 		}
 		return Collections.emptySet();
 	}
-
+	
 	public List<String> getKeysFromList(String listKey, int index) {
 		List<String> raw = stringRedisTemplate.opsForList().range(listKey, 0, 99);
 		if (raw == null || raw.isEmpty()) {
@@ -283,4 +277,8 @@ public class RedisService {
 	// 		throw new RuntimeException(e);
 	// 	}
 	// }
+
+	public Duration getExpire(String key, TimeUnit timeUnit) {
+		return Duration.ofSeconds(redisTemplate.getExpire(key, timeUnit));
+	}
 }
