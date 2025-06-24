@@ -26,6 +26,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Download JAR from build
+        uses: actions/download-artifact@v3
+        with:
+          name: app-jar
+          path: ./jar
+
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_IMAGE }} .
 
