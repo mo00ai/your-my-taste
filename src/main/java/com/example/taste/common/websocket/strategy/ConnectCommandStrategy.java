@@ -1,14 +1,15 @@
 package com.example.taste.common.websocket.strategy;
 
+import static com.example.taste.domain.auth.exception.AuthErrorCode.*;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.Authentication;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.websocket.manager.OpenRunPerformanceManager;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +30,7 @@ public class ConnectCommandStrategy implements StompCommandStrategy {
 		CustomUserDetails userDetails = (CustomUserDetails)(auth != null ? auth.getPrincipal() : null);
 
 		if (auth == null || !auth.isAuthenticated()) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 
 		// performanceManager에 세션 저장
