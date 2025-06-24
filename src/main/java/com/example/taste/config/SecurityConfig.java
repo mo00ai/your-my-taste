@@ -30,7 +30,7 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.csrf(AbstractHttpConfigurer::disable)
+		httpSecurity.csrf(AbstractHttpConfigurer::disable)        // MEMO: 개발 환경 전용
 			.cors(withDefaults())        // CORS Config 따름
 			.formLogin(AbstractHttpConfigurer::disable)        // 스프링 시큐리티 기본 로그인, 로그아웃 비활성화
 			.logout(AbstractHttpConfigurer::disable)

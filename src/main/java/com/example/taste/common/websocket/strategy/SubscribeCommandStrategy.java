@@ -13,9 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.websocket.manager.WebSocketSubscriptionManager;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @Slf4j
 @Component
@@ -46,7 +46,7 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 
 				if (!partyInvitationRepository.existsByUserIdAndPartyIdAndInvitationStatus(
 					userDetails != null ?
-						userDetails.getUser().getId() : null, partyId, InvitationStatus.CONFIRMED)) {
+						userDetails.getId() : null, partyId, InvitationStatus.CONFIRMED)) {
 					throw new IllegalAccessException();
 				}
 			} else {
