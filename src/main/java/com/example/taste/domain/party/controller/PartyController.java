@@ -6,6 +6,9 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,8 +49,10 @@ public class PartyController {
 	@GetMapping
 	public CommonResponse<List<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter) {
-		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
+		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter,
+		@PageableDefault(size = 10, sort = "MEETING_DATE", direction = Sort.Direction.ASC) Pageable pageable) {
+		return CommonResponse.ok(
+			partyService.getParties(userDetails.getId(), filter, pageable));
 	}
 
 	@GetMapping("/{partyId}")

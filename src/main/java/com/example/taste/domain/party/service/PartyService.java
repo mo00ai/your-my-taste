@@ -12,6 +12,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.PartyFilter;
+import com.example.taste.domain.party.enums.PartySort;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.store.entity.Store;
@@ -66,19 +69,22 @@ public class PartyService {
 		}
 	}
 
-	// TODO: 정렬 기준 추가 - @윤예진
-	public List<PartyResponseDto> getParties(Long userId, String filter) {
+	public List<PartyResponseDto> getParties(Long userId, String filter, Pageable pageable) {
+		validateSort(pageable.getSort());
+
 		PartyFilter partyFilter = PartyFilter.of(filter);
 		switch (partyFilter) {
 			case ALL -> {
 				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
-				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
+				return partyRepository.
+					findAllByActiveAndUserNotInSorted(userId, pageable).stream()
 					.map(PartyResponseDto::new)
 					.toList();
 			}
 			case MY -> {
-				// 유저가 참가, 호스트인 파티 모두 보여줌
-				return partyRepository.findAllByUserIn(userId).stream()
+				// 유저가 참가, 호스트인 파티 모두 보여줌 (deleted 제외)
+				return partyRepository
+					.findAllByUserInSorted(userId, pageable).stream()
 					.map(PartyResponseDto::new)
 					.toList();
 			}
@@ -146,5 +152,19 @@ public class PartyService {
 		}
 
 		partyRepository.delete(party);
+	}
+
+	private void validateSort(Sort sort) {
+		long sortCount = sort.stream().count();
+
+		if (sortCount > 1) {
+			throw new CustomException(INVALID_INPUT_VALUE, "파티 정렬 기준은 1개 이하만 허용됩니다.");
+		}
+
+		for (Sort.Order order : sort) {
+			if (!PartySort.isValid(order.getProperty())) {
+				throw new CustomException(INVALID_INPUT_VALUE, "파티 정렬 값이 유효하지 않습니다.");
+			}
+		}
 	}
 }
