@@ -1,22 +1,24 @@
 package com.example.taste.common.websocket.strategy;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.example.taste.common.websocket.manager.OpenRunPerformanceManager;
 import com.example.taste.common.websocket.manager.WebSocketSubscriptionManager;
 import com.example.taste.config.security.CustomUserDetails;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DisconnectCommandStrategy implements StompCommandStrategy {
 	private final WebSocketSubscriptionManager subscriptionManager;
+	private final OpenRunPerformanceManager performanceManager;
 
 	@Override
 	public boolean supports(StompCommand command) {
@@ -34,6 +36,7 @@ public class DisconnectCommandStrategy implements StompCommandStrategy {
 		}
 
 		subscriptionManager.clear(userDetails.getId());        // 유저의 구독 초기화
+		//performanceManager.remove(userDetails.getId());  // 전체 도메인 기준 커넥션 수 관리
 		return message;
 	}
 }
