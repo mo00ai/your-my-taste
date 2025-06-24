@@ -1,11 +1,12 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
 import static com.example.taste.common.constant.RedisConst.*;
-import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.config.CacheConfig.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.common.exception.ErrorCode.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
@@ -204,7 +204,7 @@ public class BoardService {
 	// 게시물 작성자와 현재 사용자가 일치하는지 검증
 	private void checkUser(Long userId, Board board) {
 		if (!board.getUser().isSameUser(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 	}
 

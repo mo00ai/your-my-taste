@@ -1,36 +1,33 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
+import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.image.enums.ImageType;
-import com.example.taste.domain.image.service.ImageService;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.enums.PkType;
-import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.pk.repository.PkLogRepository;
-import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
-import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
@@ -39,28 +36,17 @@ import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
-import com.example.taste.domain.user.repository.UserJdbcRepository;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	private final EntityManager em;
-	private final EntityFetcher entityFetcher;
-	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final UserFavorRepository userFavorRepository;
 	private final FavorRepository favorRepository;
 	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final UserJdbcRepository userJdbcRepository;
-	private final PkLogJdbcRepository pkLogJdbcRepository;
-	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final StoreBucketRepository storeBucketRepository;
 	private final PkLogRepository pkLogRepository;
 
@@ -78,41 +64,11 @@ public class UserService {
 		return new UserProfileResponseDto(user);
 	}
 
-	// 유저 정보 업데이트
-	@Transactional
-	public void updateUser(Long userId, UserUpdateRequestDto requestDto, MultipartFile file) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
-			throw new CustomException(INVALID_PASSWORD);
-		}
-		requestDto.setNewPassword(passwordEncoder.encode(requestDto.getNewPassword()));
-		user.update(requestDto);
-
-		// 프로필 이미지 저장
-		if (file != null) {
-			Image oldImage = user.getImage();
-
-			if (oldImage != null) {
-				try {
-					imageService.update(oldImage.getId(), ImageType.USER, file);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
-					log.warn("[AuthService] 유저 정보 수정 중에 유저 이미지 업데이트에 실패하였습니다. ID: {}", user.getId());
-				}
-			} else {
-				try {
-					Image image = imageService.saveImage(file, ImageType.USER);
-					user.setImage(image);
-				} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
-					log.warn("[AuthService] 유저 정보 수정 중에 유저 이미지 업로드에 실패하였습니다. ID: {}", user.getId());
-				}
-			}
-		}
-	}
-
 	// 유저 탈퇴
 	@Transactional
 	public void deleteUser(Long userId, UserDeleteRequestDto requestDto) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(INVALID_PASSWORD);
 		}
@@ -122,7 +78,8 @@ public class UserService {
 
 	@Transactional
 	public void updateUserFavors(Long userId, List<UserFavorUpdateRequestDto> requestDtoList) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		List<UserFavor> userFavorList = user.getUserFavorList();        // 기존 리스트
 		List<Favor> favorList = favorRepository.findAll();                // 유효한 맵 리스트
 
@@ -182,8 +139,10 @@ public class UserService {
 
 	@Transactional
 	public void followUser(Long userId, Long followingUserId) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		User followingUser = userRepository.findById(followingUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (followRepository.existsByFollowerIdAndFollowingId(userId, followingUserId)) {
 			throw new CustomException(ALREADY_FOLLOWED);
 		}
@@ -194,24 +153,15 @@ public class UserService {
 
 	@Transactional
 	public void unfollowUser(Long followerUserId, Long followingUserId) {
-		User follower = entityFetcher.getUserOrThrow(followerUserId);
-		User followingUser = entityFetcher.getUserOrThrow(followingUserId);
+		User follower = userRepository.findById(followerUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		User followingUser = userRepository.findById(followingUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Follow follow = followRepository.findByFollowerIdAndFollowingId(followerUserId, followingUserId)
 			.orElseThrow(() -> new CustomException(FOLLOW_NOT_FOUND));
 
 		follower.unfollow(follow);
 		followingUser.unfollowed();
-	}
-
-	private boolean isSameItem(UserFavorUpdateRequestDto update, UserFavor favor) {
-		if (update.getUserFavorId() != null) {
-			return Objects.equals(update.getUserFavorId(), favor.getId());
-		}
-		return update.getName().equals(favor.getFavor().getName());
-	}
-
-	private boolean isExistsItem(UserFavorUpdateRequestDto update, Favor favor) {
-		return update.getName().equals(favor.getName());
 	}
 
 	@Transactional
