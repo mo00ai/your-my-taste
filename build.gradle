@@ -122,8 +122,7 @@ def dbHost = getEnvOrDotenv("DB_HOST")
 def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
-//def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ssl=false"
-def dbUrl = "jdbc:postgresql://localhost:5432/taste?ssl=false"
+def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ssl=false"
 
 
 jooq {

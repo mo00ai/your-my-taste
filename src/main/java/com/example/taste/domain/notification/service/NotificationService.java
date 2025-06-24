@@ -18,7 +18,9 @@ import com.example.taste.domain.notification.repository.webPush.WebPushRepositor
 import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -33,6 +35,14 @@ public class NotificationService {
 	@Transactional // 둘 중 하나라도 저장 실패시 전부 롤백 하도록
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
 		User user = entityFetcher.getUserOrThrow(dataDto.getUserId());
+		List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUser(user);
+		for (WebPushSubscription subscription : webPushSubscriptions) {
+			try {
+				webPushService.send(subscription, dataDto, content.getId());
+			} catch (Exception e) {
+				log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
+			}
+		}
 		notificationRedisService.storeNotification(dataDto.getUserId(), content.getId(), dataDto, Duration.ofDays(7));
 		infoRepository.save(NotificationInfo.builder()
 			.category(dataDto.getCategory())
@@ -48,7 +58,12 @@ public class NotificationService {
 		for (User user : allUser) {
 			List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUser(user);
 			for (WebPushSubscription subscription : webPushSubscriptions) {
-				webPushService.send(subscription, dataDto, content.getId());
+				try {
+					webPushService.send(subscription, dataDto, content.getId());
+				} catch (Exception e) {
+					log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
+				}
+
 			}
 			notificationRedisService.storeNotification(user.getId(), content.getId(), dataDto, Duration.ofDays(7));
 			notificationInfos.add(NotificationInfo.builder()
