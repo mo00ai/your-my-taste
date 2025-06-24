@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(withDefaults())        // CORS Config 따름
 			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/auth/**", "/web-push/subscribe"))
+			.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository()))
 			//.csrf(csrf -> csrf.disable()) //테스트용 disable
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.sessionManagement(sm -> {
@@ -56,5 +59,13 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	//csrf 토큰 제공.
+	@Bean
+	public CsrfTokenRepository csrfTokenRepository() {
+		CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+		repo.setCookiePath("/");
+		return repo;
 	}
 }
