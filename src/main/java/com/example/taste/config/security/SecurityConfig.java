@@ -27,7 +27,7 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(withDefaults())        // CORS Config 따름
 			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/auth/**", "/web-push/subscribe"))
-			.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository()))
+			//.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository())) //일단은 disable로 작동
 			//.csrf(csrf -> csrf.disable()) //테스트용 disable
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.sessionManagement(sm -> {
