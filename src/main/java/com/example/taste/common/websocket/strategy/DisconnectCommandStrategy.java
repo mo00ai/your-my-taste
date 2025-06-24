@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.taste.common.websocket.manager.OpenRunPerformanceManager;
 import com.example.taste.common.websocket.manager.WebSocketSubscriptionManager;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

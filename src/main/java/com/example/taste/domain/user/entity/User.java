@@ -186,6 +186,10 @@ public class User extends SoftDeletableEntity {
 		return Objects.equals(this.id, userId);
 	}
 
+	public boolean isAdmin() {
+		return this.role == Role.ADMIN;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)

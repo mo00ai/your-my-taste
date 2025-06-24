@@ -20,6 +20,14 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 			.execute();
 	}
 
+	// @Override
+	// public long resetPostingCnt() {
+	// 	return queryFactory.update(user)
+	// 		.set(user.postingCount, 0)
+	// 		.where(user.postingCount.ne(0))
+	// 		.execute();
+	// }
+
 	@Override
 	public int increasePostingCount(Long userId, int limit) {
 		return (int)queryFactory.update(user)
