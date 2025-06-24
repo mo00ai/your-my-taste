@@ -101,8 +101,6 @@ jobs:
 
       # OCR
       OCR_KEY: ${{ secrets.OCR_KEY }}
-
-      # Naver Map API
       OCR_HOST: ${{ secrets.OCR_HOST }}
       OCR_PATH: ${{ secrets.OCR_PATH }}
 
@@ -117,6 +115,9 @@ jobs:
       # Vapid
       VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
       VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+
+      #KAKAO
+      KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
 
     steps:
       - name: Checkout source
