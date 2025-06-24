@@ -47,12 +47,18 @@ jobs:
             echo "CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}" >> .env
             echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
             echo "OCR_KEY=${{ secrets.OCR_KEY }}" >> .env
+            echo "OCR_HOST=${{ secrets.OCR_HOST }}" >> .env
+            echo "OCR_PATH=${{ secrets.OCR_PATH }}" >> .env
+            echo "VAPID_PUBLIC=${{ secrets.VAPID_PUBLIC }}" >> .env
+            echo "VAPID_PRIVATE=${{ secrets.VAPID_PRIVATE }}" >> .env            
             echo "NAVER_MAP_CLIENT_ID=${{ secrets.NAVER_MAP_CLIENT_ID }}" >> .env
             echo "NAVER_MAP_CLIENT_SECRET=${{ secrets.NAVER_MAP_CLIENT_SECRET }}" >> .env
             echo "NAVER_DATALAB_CLIENT_ID=${{ secrets.NAVER_DATALAB_CLIENT_ID }}" >> .env
             echo "NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}" >> .env
             echo "DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}" >> .env
-
+            echo "CLOUD_FRONT_DOMAIN=${{ secrets.CLOUD_FRONT_DOMAIN }}" >> .env
+            
+            
             docker-compose down
             docker-compose pull
             docker-compose up -d --build

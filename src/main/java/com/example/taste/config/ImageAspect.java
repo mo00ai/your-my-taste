@@ -41,10 +41,8 @@ public class ImageAspect {
 			if (arg instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof MultipartFile) {
 				List<MultipartFile> fileList = (List<MultipartFile>)list;
 				validateFileType(fileList, type);
-			} else if (arg instanceof MultipartFile file) {
-				if (!file.isEmpty()) {
-					validateFileType(List.of(file), type);
-				}
+			} else if (arg instanceof MultipartFile file && !file.isEmpty()) {
+				validateFileType(List.of(file), type);  // List로 감싸서 재사용
 			}
 
 		}
