@@ -4,13 +4,11 @@ import lombok.Getter;
 
 @Getter
 public class S3ResponseDto {
-	private final String preSignedUrl;
 	private final String staticUrl;
 	private final String uploadFileName;
 	private final String originalFileName;
 
-	public S3ResponseDto(String preSignedUrl, String staticUrl, String uploadFileName, String originalFileName) {
-		this.preSignedUrl = preSignedUrl;
+	public S3ResponseDto(String staticUrl, String uploadFileName, String originalFileName) {
 		this.staticUrl = staticUrl;
 		this.uploadFileName = uploadFileName;
 		this.originalFileName = originalFileName;

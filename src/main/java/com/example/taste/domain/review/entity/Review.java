@@ -40,7 +40,7 @@ public class Review extends BaseEntity {
 	@Column(nullable = false)
 	private String contents;
 
-	@Column(columnDefinition = "tinyint", nullable = false)
+	@Column(nullable = false)
 	private Integer score;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

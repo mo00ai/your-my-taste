@@ -8,7 +8,6 @@ import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.jooq.enums.PkLogPkType;
 import com.example.taste.domain.pk.entity.PkLog;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class PkLogRepositoryJooqCustomImpl implements PkLogRepositoryJooqCustom 
 
 		List<Query> batchQueries = pkLogs.stream()
 			.map(log -> (Query)dsl.insertInto(PK_LOG)
-				.set(PK_LOG.PK_TYPE, PkLogPkType.valueOf(log.getPkType().name()))
+				.set(PK_LOG.PK_TYPE, log.getPkType().name())
 				.set(PK_LOG.POINT, log.getPoint())
 				.set(PK_LOG.CREATED_AT, log.getCreatedAt())
 				.set(PK_LOG.USER_ID, log.getUser().getId()))
