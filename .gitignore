@@ -6,7 +6,6 @@ build/
 !**/src/test/**/build/
 
 ### STS ###
-.apt_generated
 .classpath
 .factorypath
 .project
@@ -38,3 +37,5 @@ out/
 
 .env
 .env.test
+/prometheus.yml
+src/main/generated

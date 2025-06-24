@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 public class S3Config {
@@ -21,12 +22,28 @@ public class S3Config {
 	@Value("${cloud.aws.region.static}")
 	private String region;
 
+	private StaticCredentialsProvider credentialsProvider() {
+		AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+		return StaticCredentialsProvider.create(credentials);
+	}
+
 	@Bean
-	public S3Client s3Client() { //aws 클라이언트 생성
-		AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey); // 접근 증명
+	public S3Client s3Client() {
 		return S3Client.builder()
-			.credentialsProvider(StaticCredentialsProvider.create(credentials))
+			.credentialsProvider(credentialsProvider())
 			.region(Region.of(region))
 			.build();
+	}
+
+	@Bean
+	public S3Presigner s3Presigner() {
+
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+
+		return S3Presigner.builder()
+			.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+			.region(Region.of(region))
+			.build();
+
 	}
 }

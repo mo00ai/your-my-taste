@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
@@ -38,14 +37,13 @@ import com.example.taste.fixtures.StoreBucketFixture;
 import com.example.taste.fixtures.StoreBucketItemFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
+import com.example.taste.property.AbstractIntegrationTest;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-// @ActiveProfiles("test-int")
 @SpringBootTest
-@ActiveProfiles("test-int-docker")
-class StoreBucketServiceTest {
+class StoreBucketServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private StoreBucketService storeBucketService;

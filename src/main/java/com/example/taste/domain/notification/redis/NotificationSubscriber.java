@@ -13,16 +13,17 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import com.example.taste.common.util.EntityFetcher;
-import com.example.taste.domain.notification.NotificationCategory;
-import com.example.taste.domain.notification.NotificationType;
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
+import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationContent;
+import com.example.taste.domain.notification.entity.NotificationType;
 import com.example.taste.domain.notification.repository.NotificationContentRepository;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserRepository;
 
@@ -38,7 +39,6 @@ public class NotificationSubscriber implements MessageListener {
 	private final FollowRepository followRepository;
 	private final NotificationContentRepository contentRepository;
 	private final GenericJackson2JsonRedisSerializer serializer;
-	private final EntityFetcher entityFetcher;
 
 	// 알림 발행시 자동으로 실행
 	@Override
@@ -75,6 +75,7 @@ public class NotificationSubscriber implements MessageListener {
 			}
 		}
 	}
+	//todo 전략 패턴
 
 	// 개인에게 보내는 알림
 	private void sendIndividual(NotificationPublishDto publishDto) {
@@ -92,12 +93,13 @@ public class NotificationSubscriber implements MessageListener {
 		long startLogging = System.currentTimeMillis();
 		// 유저를 100명 단위로 끊어와 보냄
 		int page = 0;
-		int size = 100;
+		int size = 1000;
 		Page<User> users;
 		do {
 			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
 			notificationService.sendBunch(notificationContent, dataDto, users.getContent());
 			page++;
+
 		} while (users.hasNext());
 		long endLogging = System.currentTimeMillis();
 		log.info("paging 타임 체크: {} ms", (endLogging - startLogging));
@@ -127,7 +129,7 @@ public class NotificationSubscriber implements MessageListener {
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
-		List<Follow> followList = followRepository.findAllByFollowing(publishDto.getUserId());
+		List<Follow> followList = followRepository.findByFollowingId(publishDto.getUserId());
 		// 팔로우 하는 모든 유저를 가져옴
 		List<User> followers = new ArrayList<>();
 		for (Follow follow : followList) {
@@ -153,7 +155,8 @@ public class NotificationSubscriber implements MessageListener {
 			category.equals(NotificationCategory.INDIVIDUAL)) {
 			return additionalText;
 		}
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
 		return user.getNickname() + " 이/가"
 			+ category.getCategoryText() + " 을/를"
 			+ type.getTypeString() + " 했습니다.\n"
@@ -172,4 +175,5 @@ public class NotificationSubscriber implements MessageListener {
 		dataDto.buildUrl(publishDto.getRedirectionUrl(), publishDto.getRedirectionEntityId());
 		return dataDto;
 	}
+
 }

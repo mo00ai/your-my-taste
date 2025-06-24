@@ -1,7 +1,9 @@
 package com.example.taste.domain.match.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -52,6 +55,9 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 
 	private String region;
 
+	@OneToMany(mappedBy = "partyMatchInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<PartyMatchInfoFavor> favorList;
+
 	@Enumerated(EnumType.STRING)
 	private MatchStatus matchStatus;
 
@@ -68,5 +74,12 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 
 	public void updateMatchStatus(MatchStatus matchStatus) {
 		this.matchStatus = matchStatus;
+	}
+
+	public void updateFavorList(List<PartyMatchInfoFavor> favorList) {
+		if (favorList != null) {
+			this.favorList.clear();
+			this.favorList.addAll(favorList);
+		}
 	}
 }

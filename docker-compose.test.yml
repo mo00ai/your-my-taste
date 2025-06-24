@@ -1,17 +1,17 @@
 version: '3.8'
 services:
-  test-mysql:
-    container_name: test-mysql
-    image: mysql:8.1
+  test-postgres:
+    container_name: test-postgres
+    image: postgres:16
     ports:
-      - "3306:3306"
+      - "5434:5432"
     environment:
-      MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: taste_ci_test
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: test1234
+      SPRING_PROFILES_ACTIVE: test-int
+      POSTGRES_DB: taste_ci_test
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: test1234
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234" ]
+      test: [ "CMD-SHELL", "pg_isready -U testuser -d taste_ci_test" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
     image: redis:7
     container_name: test-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s

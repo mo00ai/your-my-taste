@@ -1,24 +1,11 @@
 package com.example.taste.domain.image.service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import com.example.taste.domain.image.dto.S3ResponseDto;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -32,41 +19,41 @@ public class S3Service {
 
 	private final S3Client s3Client;
 
-	public S3ResponseDto upload(MultipartFile file) throws IOException {
-
-		// String originalFileName = file.getOriginalFilename();
-		// String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
-
-		String originalFileName = Optional.ofNullable(file.getOriginalFilename())
-			.map(StringUtils::cleanPath)   // 경로·제어 문자 제거
-			.filter(name -> !name.isBlank())
-			.orElse("file");
-		String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
-
-		PutObjectRequest request = PutObjectRequest.builder()
-			.bucket(bucketName)
-			.key(uploadFileName)
-			.contentType(file.getContentType())
-			.build();
-
-		s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-
-		UriComponents uri = UriComponentsBuilder.newInstance()
-			.scheme("https")
-			.host(bucketName + ".s3." + region + ".amazonaws.com")
-			.path("/" + uploadFileName)
-			.build()
-			.encode(StandardCharsets.UTF_8);
-		;
-
-		String uploadUrl = uri.toUriString();
-
-		return new S3ResponseDto(
-			uploadUrl,
-			uploadFileName,
-			originalFileName
-		);
-	}
+	// public S3ResponseDto upload(MultipartFile file) throws IOException {
+	//
+	// 	// String originalFileName = file.getOriginalFilename();
+	// 	// String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
+	//
+	// 	String originalFileName = Optional.ofNullable(file.getOriginalFilename())
+	// 		.map(StringUtils::cleanPath)   // 경로·제어 문자 제거
+	// 		.filter(name -> !name.isBlank())
+	// 		.orElse("file");
+	// 	String uploadFileName = UUID.randomUUID() + "_" + originalFileName;
+	//
+	// 	PutObjectRequest request = PutObjectRequest.builder()
+	// 		.bucket(bucketName)
+	// 		.key(uploadFileName)
+	// 		.contentType(file.getContentType())
+	// 		.build();
+	//
+	// 	s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+	//
+	// 	UriComponents uri = UriComponentsBuilder.newInstance()
+	// 		.scheme("https")
+	// 		.host(bucketName + ".s3." + region + ".amazonaws.com")
+	// 		.path("/" + uploadFileName)
+	// 		.build()
+	// 		.encode(StandardCharsets.UTF_8);
+	// 	;
+	//
+	// 	String uploadUrl = uri.toUriString();
+	//
+	// 	return new S3ResponseDto(
+	// 		uploadUrl,
+	// 		uploadFileName,
+	// 		originalFileName
+	// 	);
+	// }
 
 	public void delete(String uploadFileName) {
 		DeleteObjectRequest request = DeleteObjectRequest.builder()

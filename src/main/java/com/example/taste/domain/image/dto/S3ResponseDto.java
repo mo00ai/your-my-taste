@@ -1,25 +1,17 @@
 package com.example.taste.domain.image.dto;
 
+import lombok.Getter;
+
+@Getter
 public class S3ResponseDto {
-	private final String url;
+	private final String staticUrl;
 	private final String uploadFileName;
 	private final String originalFileName;
 
-	public S3ResponseDto(String url, String uploadFileName, String originalFileName) {
-		this.url = url;
+	public S3ResponseDto(String staticUrl, String uploadFileName, String originalFileName) {
+		this.staticUrl = staticUrl;
 		this.uploadFileName = uploadFileName;
 		this.originalFileName = originalFileName;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public String getUploadFileName() {
-		return uploadFileName;
-	}
-
-	public String getOriginalFileName() {
-		return originalFileName;
-	}
 }

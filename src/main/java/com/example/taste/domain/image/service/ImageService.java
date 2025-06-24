@@ -1,6 +1,7 @@
 package com.example.taste.domain.image.service;
 
 import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.domain.image.exception.ImageErrorCode.*;
 
 import java.io.IOException;
 
@@ -9,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.dto.ImageResponseDto;
 import com.example.taste.domain.image.dto.S3ResponseDto;
 import com.example.taste.domain.image.entity.Image;
@@ -21,8 +21,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-	private final EntityFetcher entityFetcher;
 	private final S3Service s3Service;
+	private final S3PresignedUrlService s3PresignedUrlService;
 	private final ImageRepository imageRepository;
 
 	@Transactional
@@ -33,11 +33,11 @@ public class ImageService {
 
 		try {
 
-			fileInfo = s3Service.upload(file);
+			fileInfo = s3PresignedUrlService.upload(file);
 
 			Image image = Image.builder()
 				.type(type)
-				.url(fileInfo.getUrl())
+				.url(fileInfo.getStaticUrl())
 				.uploadFileName(fileInfo.getUploadFileName())
 				.originFileName(fileInfo.getOriginalFileName())
 				.fileSize(file.getSize())
@@ -62,7 +62,7 @@ public class ImageService {
 
 	@Transactional(readOnly = true)
 	public ImageResponseDto findImage(Long imageId) {
-		Image image = entityFetcher.getImageOrThrow(imageId);
+		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
 
 		return new ImageResponseDto(image.getId(), image.getUrl(), image.getUploadFileName());
 	}
@@ -70,16 +70,17 @@ public class ImageService {
 	@Transactional
 	public void update(Long imageId, ImageType type, MultipartFile file) throws IOException {
 
-		Image image = entityFetcher.getImageOrThrow(imageId);
+		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
+
 		// 유효성 검사 등은 이쪽에서
 		S3ResponseDto fileInfo = null;
 
 		try {
 
-			fileInfo = s3Service.upload(file);
+			fileInfo = s3PresignedUrlService.upload(file);
 
 			image.update(
-				fileInfo.getUrl(),
+				fileInfo.getStaticUrl(),
 				fileInfo.getUploadFileName(),
 				fileInfo.getOriginalFileName(),
 				file.getSize(),
