@@ -29,6 +29,12 @@ services:
       NAVER_MAP_CLIENT_SECRET: ${NAVER_MAP_CLIENT_SECRET}
       NAVER_DATALAB_CLIENT_ID: ${NAVER_DATALAB_CLIENT_ID}
       NAVER_DATALAB_CLIENT_SECRET: ${NAVER_DATALAB_CLIENT_SECRET}
+      VAPID_PUBLIC: ${VAPID_PUBLIC}
+      VAPID_PRIVATE: ${VAPID_PRIVATE}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      CLOUD_FRONT_DOMAIN: ${CLOUD_FRONT_DOMAIN}
+      OCR_HOST: ${OCR_HOST}
+      OCR_PATH: ${OCR_PATH}
 
   db:
     image: postgres:16
@@ -52,5 +58,5 @@ services:
       - redis_data:/data
 
 volumes:
-  mysql_data:
+  pg_data:
   redis_data:
