@@ -1,5 +1,6 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,7 +75,7 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", "TIMEATTACK");
+		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
 		ReflectionTestUtils.setField(dto, "storeId", store.getId());
 		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
@@ -101,7 +102,7 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", "accessPolicy");
+		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
 		ReflectionTestUtils.setField(dto, "storeId", store.getId());
 		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
@@ -126,7 +127,7 @@ class BoardServiceTest extends AbstractIntegrationTest {
 	// 	ReflectionTestUtils.setField(dto, "title", "제목입니다");
 	// 	ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 	// 	ReflectionTestUtils.setField(dto, "type", "O");
-	// 	ReflectionTestUtils.setField(dto, "accessPolicy", "FCFS");
+	// 	ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
 	// 	ReflectionTestUtils.setField(dto, "openLimit", 1);
 	// 	ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
 	// 	Board board = boardRepository.saveAndFlush(BoardFixture.createFcfsOBoard(dto, store, user));
