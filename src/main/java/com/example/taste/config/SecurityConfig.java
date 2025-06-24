@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,13 +30,13 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity
+		httpSecurity.csrf(AbstractHttpConfigurer::disable)
 			.cors(withDefaults())        // CORS Config 따름
-			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
-			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+			.formLogin(AbstractHttpConfigurer::disable)        // 스프링 시큐리티 기본 로그인, 로그아웃 비활성화
+			.logout(AbstractHttpConfigurer::disable)
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 			.sessionManagement(sm -> {
-					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
-					sm.sessionFixation().changeSessionId();                        // 세션 고정 공격 방어
+					sm.sessionFixation().none();                        // 세션 고정 공격 방어
 				}
 			)
 			.authorizeHttpRequests(auth -> {
