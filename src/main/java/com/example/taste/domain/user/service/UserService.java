@@ -211,4 +211,9 @@ public class UserService {
 		userRepository.resetAllPoints();
 
 	}
+
+	@Transactional
+	public long resetPostingCnt() {
+		return userRepository.resetPostingCnt();
+	}
 }

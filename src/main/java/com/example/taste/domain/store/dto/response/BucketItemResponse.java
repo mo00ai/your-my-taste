@@ -2,27 +2,21 @@ package com.example.taste.domain.store.dto.response;
 
 import java.math.BigDecimal;
 
-import com.example.taste.domain.store.entity.StoreBucketItem;
-
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 public class BucketItemResponse {
-	private Long id;
-	private Long storeId;
-	private String name;
-	private BigDecimal mapx;
-	private BigDecimal mapy;
+	private final Long id;
+	private final Long storeId;
+	private final String name;
+	private final BigDecimal mapx;
+	private final BigDecimal mapy;
 
-	public static BucketItemResponse from(StoreBucketItem item) {
-		return BucketItemResponse.builder()
-			.id(item.getId())
-			.storeId(item.getStore().getId())
-			.name(item.getStore().getName())
-			.mapx(item.getStore().getMapx())
-			.mapy(item.getStore().getMapy())
-			.build();
+	public BucketItemResponse(Long id, Long storeId, String name, BigDecimal mapx, BigDecimal mapy) {
+		this.id = id;
+		this.storeId = storeId;
+		this.name = name;
+		this.mapx = mapx;
+		this.mapy = mapy;
 	}
 }

@@ -22,4 +22,15 @@ public enum AccessPolicy {
 		throw new CustomException(BoardErrorCode.BOARD_ACCESS_POLICY_NOT_FOUND);
 	}
 
+	public boolean isFcfs() {
+		return this == FCFS;
+	}
+
+	public boolean isTimeAttack() {
+		return this == TIMEATTACK;
+	}
+
+	public boolean isClosed() {
+		return this == CLOSED;
+	}
 }
