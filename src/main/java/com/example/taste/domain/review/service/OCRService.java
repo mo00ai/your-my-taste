@@ -1,5 +1,7 @@
 package com.example.taste.domain.review.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
@@ -7,6 +9,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -24,14 +28,14 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 public class OCRService {
-
+	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final RedisService redisService;
 	private final WebClient webClient;
@@ -44,7 +48,7 @@ public class OCRService {
 	private String ocrPath;
 
 	// 영수증 인증 생성
-	public void createValidation(Long storeId, MultipartFile image, User user) throws
+	public void createValidation(Long storeId, MultipartFile image, Long userId) throws
 		IOException {
 
 		// api 요청 보내기 전에 유저, 가게부터 확인
@@ -135,6 +139,8 @@ public class OCRService {
 
 		// TODO 가게 이름 저장하는 방식에 맞춰 수정할 것.
 		Boolean ocrResult = store.getName().contentEquals(fullName);
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
 		redisService.setKeyValue(key, ocrResult, Duration.ofMinutes(5));
 	}
