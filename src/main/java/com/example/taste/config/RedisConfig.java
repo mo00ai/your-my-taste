@@ -6,10 +6,12 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -38,6 +40,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @EnableCaching
 @EnableRedisHttpSession
 public class RedisConfig {
+
+	@Value("${spring.data.redis.host}")
+	private String redisHost;
+
+	@Value("${spring.data.redis.port}")
+	private int redisPort;
 
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -117,6 +125,7 @@ public class RedisConfig {
 
 	//  로컬환경에서 Redis 서버 설정 편의상 스프링부트에서 강제로 설정
 	@Bean
+	@Profile("local")
 	public ApplicationRunner redisNotifyEventConfigurer(RedisConnectionFactory factory) {
 		return args -> {
 			RedisConnection connection = factory.getConnection();
@@ -138,6 +147,8 @@ public class RedisConfig {
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+		redisStandaloneConfiguration.setHostName(redisHost);
+		redisStandaloneConfiguration.setPort(redisPort);
 		return new LettuceConnectionFactory(redisStandaloneConfiguration);
 	}
 }
