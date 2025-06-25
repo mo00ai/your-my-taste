@@ -15,11 +15,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 
-import lombok.RequiredArgsConstructor;
-
 import com.example.taste.domain.auth.handler.CustomAccessDeniedHandler;
 import com.example.taste.domain.auth.handler.CustomAuthenticationEntryPointHandler;
 import com.example.taste.domain.auth.service.CustomUserDetailsService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -54,7 +54,7 @@ public class SecurityConfig {
 				// 프로메테우스 허용
 				auth.requestMatchers("/actuator/prometheus").permitAll();
 				// 엔드투엔드 테스트용 index 접근 허용
-				auth.requestMatchers("/index.html", "/sw.js").permitAll();
+				// auth.requestMatchers("/index.html", "/sw.js").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.exceptionHandling(exception -> {
