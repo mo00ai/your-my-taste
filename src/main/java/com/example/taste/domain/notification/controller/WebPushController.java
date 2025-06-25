@@ -14,7 +14,7 @@ import com.example.taste.domain.notification.service.WebPushService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
-@RequestMapping("/push")
+@RequestMapping("/web-push")
 @RequiredArgsConstructor
 public class WebPushController {
 

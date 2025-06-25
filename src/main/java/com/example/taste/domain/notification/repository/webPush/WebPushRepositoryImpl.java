@@ -1,7 +1,10 @@
 package com.example.taste.domain.notification.repository.webPush;
 
-import com.example.taste.domain.notification.entity.QWebPushInformation;
-import com.example.taste.domain.notification.entity.WebPushInformation;
+import java.util.List;
+
+import com.example.taste.domain.notification.entity.QWebPushSubscription;
+import com.example.taste.domain.notification.entity.WebPushSubscription;
+import com.example.taste.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -12,11 +15,19 @@ public class WebPushRepositoryImpl implements WebPushRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public WebPushInformation getWebPushInformationByUserIdAndEndPoint(Long userId, String endPoint) {
-		QWebPushInformation qInfo = QWebPushInformation.webPushInformation;
-		return queryFactory.selectFrom(qInfo).where(
-			qInfo.endpoint.eq(endPoint),
-			qInfo.user.id.eq(userId)
+	public WebPushSubscription getWebPushSubscriptionByUserIdAndEndpoint(Long userId, String endPoint) {
+		QWebPushSubscription qSubscription = QWebPushSubscription.webPushSubscription;
+		return queryFactory.selectFrom(qSubscription).where(
+			qSubscription.endpoint.eq(endPoint),
+			qSubscription.user.id.eq(userId)
 		).fetchOne();
+	}
+
+	@Override
+	public List<WebPushSubscription> findByUser(User user) {
+		QWebPushSubscription qWebPushSubscription = QWebPushSubscription.webPushSubscription;
+		return queryFactory.selectFrom(qWebPushSubscription).where(
+			qWebPushSubscription.user.id.eq(user.getId())
+		).fetch();
 	}
 }
