@@ -1,21 +1,29 @@
 package com.example.taste.domain.notification.service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
+import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.entity.WebPushSubscription;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.example.taste.domain.notification.entity.enums.NotificationType;
 import com.example.taste.domain.notification.redis.NotificationRedisService;
+import com.example.taste.domain.notification.repository.notification.NotificationContentRepository;
 import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
 import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +38,8 @@ public class NotificationService {
 	private final EntityFetcher entityFetcher;
 	private final WebPushService webPushService;
 	private final WebPushRepository webPushRepository;
+	private final UserRepository userRepository;
+	private final NotificationContentRepository notificationContentRepository;
 
 	// 개별 알림
 	@Transactional // 둘 중 하나라도 저장 실패시 전부 롤백 하도록
@@ -92,4 +102,40 @@ public class NotificationService {
 		infoRepository.saveAll(notificationInfos);
 	}
 	 */
+
+	public NotificationDataDto makeDataDto(NotificationPublishDto publishDto) {
+		String contents = makeContent(publishDto.getUserId(), publishDto.getCategory(), publishDto.getType(),
+			publishDto.getAdditionalText());
+		NotificationDataDto dataDto = NotificationDataDto.builder()
+			.userId(publishDto.getUserId())
+			.category(publishDto.getCategory())
+			.contents(contents)
+			.createdAt(LocalDateTime.now())
+			.build();
+		dataDto.buildUrl(publishDto.getRedirectionUrl(), publishDto.getRedirectionEntityId());
+		return dataDto;
+	}
+
+	private String makeContent(Long userId, NotificationCategory category, NotificationType type,
+		String additionalText) {
+		if (category.equals(NotificationCategory.SYSTEM) ||
+			category.equals(NotificationCategory.MARKETING) ||
+			category.equals(NotificationCategory.INDIVIDUAL)) {
+			return additionalText;
+		}
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		return user.getNickname() + " 이/가"
+			+ category.getCategoryText() + " 을/를"
+			+ type.getTypeString() + " 했습니다.\n"
+			+ additionalText;
+	}
+
+	public NotificationContent saveContent(NotificationDataDto dataDto) {
+		NotificationContent notificationContent = notificationContentRepository.save(NotificationContent.builder()
+			.content(dataDto.getContents())
+			.redirectionUrl(dataDto.getRedirectionUrl())
+			.build());
+		return notificationContent;
+	}
 }
