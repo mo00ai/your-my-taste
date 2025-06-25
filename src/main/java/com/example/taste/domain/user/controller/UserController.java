@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.service.NotificationUserService;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
@@ -27,6 +28,7 @@ import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
 import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
+import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -117,11 +119,7 @@ public class UserController {
 	public CommonResponse<UserNotificationSettingResponseDto> setNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(
-			notificationUserService.userNotificationSetting(
-				dto.getNotificationCategory(),
-				true,
-				userDetails.getUser()));
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), true, dto.getNotificationCategory()));
 	}
 
 	// 유저 알림 수신 여부 세팅
@@ -129,10 +127,11 @@ public class UserController {
 	public CommonResponse<UserNotificationSettingResponseDto> unsetNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(
-			notificationUserService.userNotificationSetting(
-				dto.getNotificationCategory(),
-				false,
-				userDetails.getUser()));
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), false, dto.getNotificationCategory()));
+	}
+
+	private UserNotificationSettingResponseDto handleNotificaionSetting(
+		User user, boolean set, NotificationCategory category) {
+		return notificationUserService.userNotificationSetting(category, set, user);
 	}
 }
