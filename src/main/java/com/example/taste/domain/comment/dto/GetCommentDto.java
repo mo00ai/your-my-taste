@@ -1,8 +1,6 @@
 package com.example.taste.domain.comment.dto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.taste.domain.comment.entity.Comment;
 
@@ -17,7 +15,6 @@ public class GetCommentDto {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private LocalDateTime deletedAt;
-	private List<GetCommentDto> children = new ArrayList<>();
 
 	public GetCommentDto(Comment comment) {
 		this.id = comment.getId();
