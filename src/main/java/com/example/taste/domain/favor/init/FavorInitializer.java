@@ -6,12 +6,14 @@ import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 
-@Component    // TODO: 추후 프로필 추가하여 개발 환경과 배포 환경에서 분리 필요 - @윤예진
+@Profile("local")        // MEMO: 로컬 환경에만 적용
+@Component
 @RequiredArgsConstructor
 public class FavorInitializer {
 	private final FavorRepository favorRepository;
