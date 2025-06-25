@@ -38,14 +38,6 @@ public class NotificationUserController {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails.getId(), index));
 	}
 
-	// 알림 추가 접근
-	@GetMapping("/list/old")
-	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
-		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails.getId(), index));
-	}
-	//todo 합쳐라
-
 	// 알림 읽음 처리하기
 	@PatchMapping
 	public CommonResponse<Void> markNotificationAsRead(@AuthenticationPrincipal CustomUserDetails userDetails,

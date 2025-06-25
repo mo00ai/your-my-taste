@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ public class NotificationUserService {
 		}
 		return count;
 	}
-
+	
 	//최근 알림 조회(redis)
 	public Slice<NotificationResponseDto> getNotificationList(Long userId,
 		int index) {
@@ -80,45 +81,45 @@ public class NotificationUserService {
 		String listKey = "notification:list:user:" + userId;
 		List<String> keys = redisService.getKeysFromList(listKey, index - 1);
 		List<NotificationResponseDto> responseDtoList = new ArrayList<>();
-		boolean hasNext = keys.size() > 10;
-		if (hasNext) {
-			keys = keys.subList(0, 10);
+		boolean hasNext = false;
+		if (!keys.isEmpty()) {
+			if (keys.size() > 10) {
+				keys = keys.subList(0, 10);
+				hasNext = true;
+			}
+			for (String key : keys) {
+				String[] splitKey = key.split(":");
+				Long contentId = Long.parseLong(splitKey[splitKey.length - 2]);
+				NotificationDataDto notificationDataDto = (NotificationDataDto)redisService.getKeyValue(key);
+				NotificationResponseDto responseDto = new NotificationResponseDto(notificationDataDto);
+				responseDto.setContentId(contentId);
+				responseDtoList.add(responseDto);
+			}
 		}
-		for (String key : keys) {
-			String[] splitKey = key.split(":");
-			Long contentId = Long.parseLong(splitKey[splitKey.length - 2]);
-			NotificationDataDto notificationDataDto = (NotificationDataDto)redisService.getKeyValue(key);
-			NotificationResponseDto responseDto = new NotificationResponseDto(notificationDataDto);
-			responseDto.setContentId(contentId);
-			responseDtoList.add(responseDto);
+
+		if (responseDtoList.size() < 10) {
+			int remain = 10 - responseDtoList.size();
+			Set<String> redisKeySet = getKeys("notification:user:" + userId + "*");
+			List<Long> redisContentIds = redisKeySet.stream()
+				.map(this::extractContentIdFromKey)
+				.collect(Collectors.toList());
+
+			Pageable pageable = PageRequest.of(0, remain, Sort.by("createdAt").descending());
+			Slice<NotificationInfo> dbSlice = notificationInfoRepository.getMoreNotificationInfoWithContents(
+				userId, redisContentIds, pageable);
+
+			List<NotificationResponseDto> dbResults = dbSlice.stream()
+				.map(NotificationResponseDto::new)
+				.collect(Collectors.toList());
+
+			responseDtoList.addAll(dbResults);
+			hasNext = dbSlice.hasNext(); // DB에서 더 남은 게 있다면 true
 		}
 		Pageable pageable = PageRequest.of(index - 1, 10);
 		return new SliceImpl<>(responseDtoList, pageable, hasNext);
 	}
 
-	// 오래된 알림 조회(mysql)
-	@Transactional(readOnly = true)
-	public Slice<NotificationResponseDto> getMoreNotificationList(Long userId,
-		int index) {
-		//redis가 가지고 있는 유저의 모든 알림을 조회
-		String pattern = "notification:user:" + userId + "*";
-		Set<String> keys = getKeys(pattern);
-
-		//가져온 리스트에서 contentsId만 조회
-		List<Long> redisContents = new ArrayList<>();
-		if (!keys.isEmpty()) {
-			for (String key : keys) {
-				redisContents.add(extractContentIdFromKey(key));
-			}
-		}
-		//해당 contentsId 를 가지지 않은 모든 sql 알림을 조회.
-		Pageable pageable = PageRequest.of(index - 1, 10, Sort.by("createdAt"));
-		Slice<NotificationInfo> notificationInfos = notificationInfoRepository.getMoreNotificationInfoWithContents(
-			userId, redisContents, pageable);
-
-		return notificationInfos.map(NotificationResponseDto::new);
-	}
-
+	// TODO 중복 라인 메서드 처리
 	// 알림 읽음 처리
 	// 유저가 알림을 클릭하면 호출
 	@Transactional
