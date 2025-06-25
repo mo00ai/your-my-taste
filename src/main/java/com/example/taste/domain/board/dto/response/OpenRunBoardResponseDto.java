@@ -5,40 +5,40 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
 import java.time.LocalDateTime;
 
 import com.example.taste.domain.board.entity.AccessPolicy;
-import com.example.taste.domain.board.entity.Board;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 @JsonInclude(value = NON_NULL)
 public class OpenRunBoardResponseDto {
-	private Long userId;
-	private String userName;
-	private String userImageUrl;
-	private Long boardId;
-	private String title;
-	private LocalDateTime openTime;
-	private AccessPolicy accessPolicy;
-	private Integer openLimit; // 접근 허용 인원 수 or 시간
+	private final Long userId;
+	private final String userName;
+	private final String userImageUrl;
+	private final Long boardId;
+	private final String title;
+	private final LocalDateTime openTime;
+	private final AccessPolicy accessPolicy;
+	private final Integer openLimit; // 접근 허용 인원 수 or 시간
 	private Long remainingSlot; // 잔여 인원 수
 
 	// 공개 예정 게시글이면 openLimit, remainingSlot에 null 삽입
-	public static OpenRunBoardResponseDto create(Board board, Long remainingSlot) {
-		boolean isOpened = !board.getOpenTime().isAfter(LocalDateTime.now());
+	public OpenRunBoardResponseDto(Long userId, String userName, String userImageUrl, Long boardId, String title,
+		LocalDateTime openTime, AccessPolicy accessPolicy, Integer openLimit) {
+		boolean isOpened = !openTime.isAfter(LocalDateTime.now());
 
-		return OpenRunBoardResponseDto.builder()
-			.userId(board.getUser().getId())
-			.userName(board.getUser().getNickname())
-			.userImageUrl(board.getUser().getImage() != null ? board.getUser().getImage().getUrl() : null)
-			.boardId(board.getId())
-			.title(board.getTitle())
-			.openTime(board.getOpenTime())
-			.accessPolicy(board.getAccessPolicy())
-			.openLimit(isOpened ? board.getOpenLimit() : null)
-			.remainingSlot(isOpened ? remainingSlot : null)
-			.build();
+		this.userId = userId;
+		this.userName = userName;
+		this.userImageUrl = userImageUrl;
+		this.boardId = boardId;
+		this.title = title;
+		this.openTime = openTime;
+		this.accessPolicy = accessPolicy;
+		this.openLimit = isOpened ? openLimit : null;
+	}
+
+	public void setRemainingSlot(Long remainingSlot) {
+		boolean isOpened = !openTime.isAfter(LocalDateTime.now());
+		this.remainingSlot = isOpened ? remainingSlot : null;
 	}
 }

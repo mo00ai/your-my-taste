@@ -30,7 +30,9 @@ public class ChatService {
 	private final PartyInvitationRepository partyInvitationRepository;
 
 	// 보낸 메세지 저장
-	public ChatResponseDto saveMessage(User user, ChatCreateRequestDto dto) {
+	public ChatResponseDto saveMessage(Long userId, ChatCreateRequestDto dto) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Party party = partyRepository.findById(dto.getPartyId())
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		if (!partyInvitationRepository.isConfirmedPartyMember(dto.getPartyId(), user.getId())) {
@@ -43,7 +45,9 @@ public class ChatService {
 		return new ChatResponseDto(chat);
 	}
 
-	public List<ChatResponseDto> getChats(User user, Long partyId) {
+	public List<ChatResponseDto> getChats(Long userId, Long partyId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Party party = partyRepository.findById(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 		if (!partyInvitationRepository.isConfirmedPartyMember(partyId, user.getId())) {

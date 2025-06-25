@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.PageResponse;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.event.dto.request.EventRequestDto;
 import com.example.taste.domain.event.dto.request.EventUpdateRequestDto;
 import com.example.taste.domain.event.dto.response.EventResponseDto;

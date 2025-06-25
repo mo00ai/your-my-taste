@@ -36,7 +36,7 @@ jobs:
             cd ~/your-my-taste
             git pull origin dev
             
-            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > .env
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}" >> .env
@@ -57,7 +57,9 @@ jobs:
             echo "NAVER_DATALAB_CLIENT_SECRET=${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}" >> .env
             echo "DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}" >> .env
             echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
-            
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> .env
+            echo "RDS_PORT=${{ secrets.RDS_PORT }}" >> .env
             
             
             docker-compose down

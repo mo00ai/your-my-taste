@@ -27,7 +27,7 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.PageResponse;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
@@ -38,6 +38,7 @@ import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
 
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -3,8 +3,10 @@ package com.example.taste.domain.match.service;
 import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.match.exception.MatchErrorCode.FORBIDDEN_USER_MATCH_INFO;
+import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.CATEGORY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
 
 import java.util.List;
 
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
@@ -31,11 +32,12 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class MatchInfoService {
-	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
 	private final FavorRepository favorRepository;
@@ -44,7 +46,8 @@ public class MatchInfoService {
 	// MEMO : 맛집, 카테고리, 지역 중 특정 조합만 허용할 건지?
 	@Transactional
 	public void createUserMatchInfo(Long userId, UserMatchInfoCreateRequestDto requestDto) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		UserMatchInfo userMatchInfo = userMatchInfoRepository.save(
 			new UserMatchInfo(requestDto, user));
 
@@ -66,7 +69,8 @@ public class MatchInfoService {
 	}
 
 	public List<UserMatchInfoResponseDto> findUserMatchInfo(Long userId) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return userMatchInfoRepository.findAllByUser(user).stream()
 			.map(UserMatchInfoResponseDto::new)
 			.toList();
@@ -74,15 +78,18 @@ public class MatchInfoService {
 
 	@Transactional
 	public void updateUserMatchInfo(
-		User user, Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
-		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(userMatchInfoId);
+		Long userId, Long userMatchInfoId, UserMatchInfoUpdateRequestDto requestDto) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		UserMatchInfo matchInfo = userMatchInfoRepository.findById(userMatchInfoId)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
 		// 자신의 소유가 아닌 경우
 		if (!matchInfo.isOwner(user)) {
 			throw new CustomException(FORBIDDEN_USER_MATCH_INFO);
 		}
 
 		// 매칭 중이면 업데이트 불가
-		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
+		if (!matchInfo.isStatus(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
@@ -105,15 +112,18 @@ public class MatchInfoService {
 	}
 
 	@Transactional
-	public void deleteUserMatchInfo(User user, Long matchInfoId) {
-		UserMatchInfo matchInfo = entityFetcher.getUserMatchInfoOrThrow(matchInfoId);
+	public void deleteUserMatchInfo(Long userId, Long matchInfoId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		UserMatchInfo matchInfo = userMatchInfoRepository.findById(matchInfoId)
+			.orElseThrow(() -> new CustomException(USER_MATCH_INFO_NOT_FOUND));
 		// 자신의 소유가 아닌 경우
 		if (!matchInfo.isOwner(user)) {
 			throw new CustomException(FORBIDDEN_USER_MATCH_INFO);
 		}
 
 		// 매칭 중이면 삭제 불가
-		if (!matchInfo.getMatchStatus().equals(MatchStatus.IDLE)) {
+		if (!matchInfo.isStatus(MatchStatus.IDLE)) {
 			throw new CustomException(ACTIVE_MATCH_EXISTS);
 		}
 
