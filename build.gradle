@@ -111,7 +111,8 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     //web_push
-    implementation 'com.zerodeplibs:zerodep-web-push-java:2.1.2'
+    implementation 'nl.martijndwars:web-push:5.1.0'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
 }
 
 def dotenv = new Properties()
@@ -130,7 +131,7 @@ def dbHost = getEnvOrDotenv("DB_HOST")
 def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
-def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ssl=false"
 
 
 jooq {
