@@ -31,4 +31,18 @@ public class NotificationAdminService {
 		notificationPublisher.publish(publishDto);
 		sample.stop(meterRegistry.timer("testing"));
 	}
+
+	public void publishNotificationToUser(AdminNotificationRequestDto dto, Long userId) {
+		Timer.Sample sample = Timer.start(meterRegistry);
+		NotificationPublishDto publishDto = NotificationPublishDto.builder()
+			.category(NotificationCategory.INDIVIDUAL)
+			.type(NotificationType.CREATE)
+			.redirectionUrl(dto.getRedirectUrl())
+			.redirectionEntityId(dto.getRedirectEntityId())
+			.additionalText(dto.getContents())
+			.userId(userId)
+			.build();
+		notificationPublisher.publish(publishDto);
+		sample.stop(meterRegistry.timer("testing"));
+	}
 }
