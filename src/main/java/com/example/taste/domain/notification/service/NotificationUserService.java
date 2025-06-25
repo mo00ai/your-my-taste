@@ -2,10 +2,8 @@ package com.example.taste.domain.notification.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,35 +18,59 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
-import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
+import com.example.taste.domain.notification.entity.UserNotificationSetting;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
-import com.example.taste.domain.notification.repository.NotificationInfoRepository;
+import com.example.taste.domain.notification.redis.NotificationRedisService;
+import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
+import com.example.taste.domain.notification.repository.notification.UserNotificationSettingRepository;
+import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
+import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.exception.UserErrorCode;
+import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationUserService {
 	private final RedisService redisService;
+	private final UserRepository userRepository;
+	private final NotificationRedisService notificationRedisService;
 	private final NotificationInfoRepository notificationInfoRepository;
+	private final UserNotificationSettingRepository userNotificationSettingRepository;
 
 	// 알림 개수 조회
 	public GetNotificationCountResponseDto getNotificationCount(Long userId) {
-		String system = "notification:count:user:" + userId + ":" + NotificationCategory.SYSTEM;
-		String marketing = "notification:count:user:" + userId + ":" + NotificationCategory.MARKETING;
-		String subscribers = "notification:count:user:" + userId + ":" + NotificationCategory.SUBSCRIBE;
-		// TODO 유저가 원하지 않는 카테고리 알림을 여기서 삭제.
-		Long count = 0L;
-		count += getCount(system);
-		count += getCount(marketing);
-		count += getCount(subscribers);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		List<UserNotificationSetting> settings = userNotificationSettingRepository.findAllByUser(user);
+		List<NotificationCategory> categories = new ArrayList<>();
+		for (UserNotificationSetting setting : settings) {
+			categories.add(setting.getNotificationCategory());
+		}
 
+		notificationRedisService.deleteNotificationOfCategories(userId, categories);
+		notificationInfoRepository.deleteAllByUserAndCategories(userId, categories);
+		String pattern = "notification:count:user:" + userId + ":*";
+		Set<String> keys = redisService.getKeys(pattern);
+		Long count = 0L;
+		count += getCount(keys);
 		return new GetNotificationCountResponseDto(count);
 	}
 
-	private Long getCount(String key) {
-		Object value = redisService.getKeyValue(key);
-		return (value instanceof Number) ? ((Number)value).longValue() : 0L;
+	private Long getCount(Set<String> keys) {
+		Long count = 0L;
+		for (String key : keys) {
+			Object value = redisService.getKeyValue(key);
+			if (value instanceof Number) {
+				count += (long)value;
+			}
+		}
+		return count;
 	}
 
 	//최근 알림 조회(redis)
@@ -113,7 +135,7 @@ public class NotificationUserService {
 				redisService.decreaseCount(countKey);
 			}
 			dto.readIt();
-			redisService.updateNotification(dto, key);
+			notificationRedisService.updateNotification(dto, key);
 		}
 
 		// mysql 알림 읽음 처리
@@ -136,7 +158,7 @@ public class NotificationUserService {
 					redisService.decreaseCount(countKey);
 				}
 				dto.readIt();
-				redisService.updateNotification(dto, key);
+				notificationRedisService.updateNotification(dto, key);
 			}
 		} else {
 			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
@@ -145,6 +167,33 @@ public class NotificationUserService {
 		// mysql 알림 읽음 처리
 		List<Long> emptyList = new ArrayList<>();
 		markSqlNotificationAsRead(userId, emptyList);
+	}
+
+	@Transactional
+	public UserNotificationSettingResponseDto userNotificationSetting(
+		NotificationCategory category,
+		boolean isSet,
+		Long userId
+	) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		Optional<UserNotificationSetting> settingOpt =
+			userNotificationSettingRepository.findByUserAndNotificationCategory(user, category);
+
+		if (!isSet && settingOpt.isPresent()) {
+			userNotificationSettingRepository.delete(settingOpt.get());
+			return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
+		}
+
+		if (isSet && settingOpt.isEmpty()) {
+			UserNotificationSetting newSetting = UserNotificationSetting.builder()
+				.notificationCategory(category)
+				.user(user)
+				.build();
+			userNotificationSettingRepository.save(newSetting);
+		}
+
+		return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
 	}
 
 	// 읽음 처리 중복 코드 정리

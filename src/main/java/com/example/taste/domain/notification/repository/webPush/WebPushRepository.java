@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.taste.domain.notification.entity.WebPushInformation;
+import com.example.taste.domain.notification.entity.WebPushSubscription;
 
 @Repository
-public interface WebPushRepository extends JpaRepository<WebPushInformation, Long>, WebPushRepositoryCustom {
-	Optional<WebPushInformation> findByEndpoint(String endpoint);
+public interface WebPushRepository extends JpaRepository<WebPushSubscription, Long>, WebPushRepositoryCustom {
+	Optional<WebPushSubscription> findByEndpoint(String endpoint);
 }
