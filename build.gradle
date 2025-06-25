@@ -70,6 +70,15 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Redisson
+    implementation 'org.redisson:redisson:3.50.0'
+
+    // Redis
+    implementation 'io.lettuce:lettuce-core'
+
+    // Session
+    implementation 'org.springframework.session:spring-session-data-redis'      // Redis Session
+
     // QueryDSL
     implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

@@ -29,7 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 	@Query("select u.id from User u where u.deletedAt is null")
 	List<Long> findAllUserId();
 
-	// 리팩토링 전 코드 - 성능 비교때 사용할 예정
 	// @Modifying(clearAutomatically = true)
 	// @Query("UPDATE User u SET u.postingCount = 0")
 	// long resetPostingCnt();
