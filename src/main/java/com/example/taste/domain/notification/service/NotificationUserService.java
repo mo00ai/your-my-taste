@@ -53,7 +53,7 @@ public class NotificationUserService {
 			categories.add(setting.getNotificationCategory());
 		}
 
-		notificationRedisService.deleteNotificationOfCategorys(userId, categories);
+		notificationRedisService.deleteNotificationOfCategories(userId, categories);
 		notificationInfoRepository.deleteAllByUserAndCategories(userId, categories);
 		String pattern = "notification:count:user:" + userId + ":*";
 		Set<String> keys = redisService.getKeys(pattern);

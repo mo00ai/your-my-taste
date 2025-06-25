@@ -66,7 +66,7 @@ public class NotificationRedisService {
 		}
 	}
 
-	public void deleteNotificationOfCategorys(Long userId, List<NotificationCategory> categories) {
+	public void deleteNotificationOfCategories(Long userId, List<NotificationCategory> categories) {
 		Set<String> categoryStrings = new HashSet<>();
 		for (NotificationCategory category : categories) {
 			categoryStrings.add(category.name());
