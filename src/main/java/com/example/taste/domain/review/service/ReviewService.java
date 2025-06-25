@@ -1,11 +1,9 @@
 package com.example.taste.domain.review.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.util.List;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +32,8 @@ import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +79,6 @@ public class ReviewService {
 		return new CreateReviewResponseDto(saved);
 	}
 
-	//todo null 이 내용 지우기 일 수도 있슴
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
 		List<MultipartFile> files, ImageType imageType, Long userId) throws IOException {
@@ -95,7 +94,7 @@ public class ReviewService {
 
 		// 리뷰 수정 요소들. 요청에서 내용이 오지 않으면 기존 내용 유지.
 		String contents = null;
-		if (requestDto.getContents() != null && !requestDto.getContents().isEmpty()) {
+		if (requestDto.getContents() != null) {
 			contents = requestDto.getContents();
 		}
 
