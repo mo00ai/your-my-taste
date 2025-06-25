@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,9 +32,6 @@ import com.example.taste.domain.user.dto.response.UserNotificationSettingRespons
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.example.taste.config.security;
+package com.example.taste.config;
 
 import static org.springframework.security.config.Customizer.*;
 
@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -15,24 +17,28 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import com.example.taste.domain.auth.handler.CustomAccessDeniedHandler;
+import com.example.taste.domain.auth.handler.CustomAuthenticationEntryPointHandler;
+import com.example.taste.domain.auth.service.CustomUserDetailsService;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
 	private final CustomUserDetailsService userDetailsService;
+	private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity
+		httpSecurity.csrf(AbstractHttpConfigurer::disable)        // MEMO: 개발 환경 전용
 			.cors(withDefaults())        // CORS Config 따름
-			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/auth/**", "/web-push/subscribe"))
-			//.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository())) //일단은 disable로 작동
-			//.csrf(csrf -> csrf.disable()) //테스트용 disable
-			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+			.formLogin(AbstractHttpConfigurer::disable)        // 스프링 시큐리티 기본 로그인, 로그아웃 비활성화
+			.logout(AbstractHttpConfigurer::disable)
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 			.sessionManagement(sm -> {
-					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
-					sm.sessionFixation().changeSessionId();                        // 세션 고정 공격 방어
+					sm.sessionFixation().none();                        // 세션 고정 공격 방어
 				}
 			)
 			.authorizeHttpRequests(auth -> {
@@ -51,6 +57,10 @@ public class SecurityConfig {
 				auth.requestMatchers("/index.html", "/sw.js").permitAll();
 				auth.anyRequest().authenticated();
 			})
+			.exceptionHandling(exception -> {
+				exception.authenticationEntryPoint(customAuthenticationEntryPointHandler) // 인증 예외 핸들러
+					.accessDeniedHandler(customAccessDeniedHandler);           // 인가 예외 핸들러
+			})
 			.userDetailsService(userDetailsService);
 
 		return httpSecurity.build();
@@ -61,7 +71,7 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	//csrf 토큰 제공.
+	//csrf 토큰 제공(미사용).
 	@Bean
 	public CsrfTokenRepository csrfTokenRepository() {
 		CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();

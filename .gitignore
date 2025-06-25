@@ -43,3 +43,5 @@ src/main/generated
 /src/main/resources/sw.js
 /src/main/resources/static/index.html
 /src/main/resources/static/sw.js
+
+.DS_Store

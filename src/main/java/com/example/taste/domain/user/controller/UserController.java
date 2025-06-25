@@ -2,6 +2,11 @@ package com.example.taste.domain.user.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.service.NotificationUserService;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
@@ -28,12 +32,10 @@ import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
 import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
+import com.example.taste.domain.user.entity.CustomUserDetails;
+import com.example.taste.domain.user.facade.UserFacade;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.service.UserService;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -41,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
+	private final UserFacade userFacade;
 	private final NotificationUserService notificationUserService;
 
 	@GetMapping
@@ -61,7 +64,7 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestPart(name = "data") @Valid UserUpdateRequestDto requestDto,
 		@RequestPart(name = "file", required = false) MultipartFile file) {
-		userService.updateUser(userDetails.getId(), requestDto, file);
+		userFacade.updateUser(userDetails.getId(), requestDto, file);
 		return CommonResponse.ok();
 	}
 

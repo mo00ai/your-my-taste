@@ -99,7 +99,7 @@ public class RedisService {
 		redisTemplate.opsForZSet().remove(key, value);
 	}
 
-	public void deleteZSetKey(String key) {
+	public void deleteKey(String key) {
 		if (redisTemplate.hasKey(key)) {
 			redisTemplate.delete(key);
 		}

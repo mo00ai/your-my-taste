@@ -1,5 +1,9 @@
 package com.example.taste.domain.notification.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+
+import lombok.RequiredArgsConstructor;
+
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,18 +19,12 @@ import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import nl.martijndwars.webpush.Notification;
-import nl.martijndwars.webpush.PushService;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class WebPushService {
-
+	private final UserRepository userRepository;
 	private final WebPushRepository webPushRepository;
 	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
@@ -37,8 +35,10 @@ public class WebPushService {
 	private String vapidPrivate;
 
 	@Transactional
-	public void saveSubscription(User user, PushSubscribeRequestDto dto) {
-		WebPushSubscription information = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
+	public void saveSubscription(Long userId, PushSubscribeRequestDto dto) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		WebPushInformation information = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
 
 		if (information != null && information.getUser().isSameUser(user.getId())) {
 			information.setP256dhKey(dto.getKeys().getP256dh());
