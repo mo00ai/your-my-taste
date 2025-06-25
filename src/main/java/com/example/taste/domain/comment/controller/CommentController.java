@@ -22,6 +22,7 @@ import com.example.taste.domain.comment.dto.UpdateCommentRequestDto;
 import com.example.taste.domain.comment.dto.UpdateCommentResponseDto;
 import com.example.taste.domain.comment.service.CommentService;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +35,7 @@ public class CommentController {
 	// 댓글 생성
 	@PostMapping
 	public CommonResponse<CreateCommentResponseDto> createComment(
-		@RequestBody CreateCommentRequestDto requestDto,
+		@RequestBody @Valid CreateCommentRequestDto requestDto,
 		@PathVariable Long boardId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return CommonResponse.created(commentService.createComment(requestDto, boardId, userDetails.getUser()));
@@ -43,7 +44,7 @@ public class CommentController {
 	// 댓글 수정
 	@PatchMapping("/{commentId}")
 	public CommonResponse<UpdateCommentResponseDto> updateComment(
-		@RequestBody UpdateCommentRequestDto requestDto,
+		@RequestBody @Valid UpdateCommentRequestDto requestDto,
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return CommonResponse.ok(commentService.updateComment(requestDto, commentId, userDetails.getUser()));

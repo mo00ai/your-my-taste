@@ -118,7 +118,7 @@ public class UserController {
 	@PostMapping("/notification-setting")
 	public CommonResponse<UserNotificationSettingResponseDto> setNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserNotificationSettingRequestDto dto) {
+		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
 		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), true, dto.getNotificationCategory()));
 	}
 
@@ -126,7 +126,7 @@ public class UserController {
 	@DeleteMapping("/notification-setting")
 	public CommonResponse<UserNotificationSettingResponseDto> unsetNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody UserNotificationSettingRequestDto dto) {
+		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
 		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), false, dto.getNotificationCategory()));
 	}
 
