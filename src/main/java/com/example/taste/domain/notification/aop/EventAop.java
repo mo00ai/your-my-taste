@@ -10,7 +10,7 @@
 //
 // import com.example.taste.common.util.EntityFetcher;
 // import com.example.taste.domain.board.entity.Board;
-// import com.example.taste.domain.notification.entity.NotificationCategory;
+// import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 // import com.example.taste.domain.notification.dto.NotificationEventDto;
 // import com.example.taste.domain.notification.redis.NotificationPublisher;
 // import com.example.taste.domain.user.entity.User;

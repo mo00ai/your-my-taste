@@ -1,6 +1,14 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.domain.board.entity.AccessPolicy.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -14,15 +22,28 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.repository.BoardRepository;
+import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.store.entity.Category;
+import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
+import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.example.taste.fixtures.CategoryFixture;
+import com.example.taste.fixtures.ImageFixture;
+import com.example.taste.fixtures.StoreFixture;
+import com.example.taste.fixtures.UserFixture;
 import com.example.taste.property.AbstractIntegrationTest;
+
+import jakarta.transaction.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BoardServiceTest extends AbstractIntegrationTest {
@@ -40,58 +61,58 @@ class BoardServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	// @Test
-	// @Transactional
-	// void createBoard_whenOpenRunTypeRequest_thenIncreasePostingCnt() throws IOException {
-	// 	// given
-	// 	Image image = ImageFixture.create();
-	// 	User user = userRepository.save(UserFixture.create(image));
-	// 	Category category = categoryRepository.save(CategoryFixture.create());
-	// 	Store store = storeRepository.save(StoreFixture.create(category));
-	//
-	// 	OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-	// 	// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
-	// 	ReflectionTestUtils.setField(dto, "title", "제목입니다");
-	// 	ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-	// 	ReflectionTestUtils.setField(dto, "type", "O");
-	// 	ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
-	// 	ReflectionTestUtils.setField(dto, "storeId", store.getId());
-	// 	ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
-	// 	ReflectionTestUtils.setField(dto, "openLimit", 10);
-	// 	ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-	//
-	// 	// when
-	// 	boardService.createBoard(user.getId(), dto, new ArrayList<>());
-	//
-	// 	// then
-	// 	assertThat(userRepository.findById(user.getId()).get().getPostingCount()).isEqualTo(1);
-	// }
+	@Test
+	@Transactional
+	void createBoard_whenOpenRunTypeRequest_thenIncreasePostingCnt() throws IOException {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.save(UserFixture.create(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
 
-	// @Test
-	// @Transactional
-	// void createBoard_whenPostingCntIsLimit_thenThrowException() throws IOException {
-	// 	// given
-	// 	Image image = ImageFixture.create();
-	// 	User user = userRepository.save(UserFixture.createNoMorePosting(image));
-	// 	Category category = categoryRepository.save(CategoryFixture.create());
-	// 	Store store = storeRepository.save(StoreFixture.create(category));
-	//
-	// 	OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-	// 	// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
-	// 	ReflectionTestUtils.setField(dto, "title", "제목입니다");
-	// 	ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-	// 	ReflectionTestUtils.setField(dto, "type", "O");
-	// 	ReflectionTestUtils.setField(dto, "status", "TIMEATTACK");
-	// 	ReflectionTestUtils.setField(dto, "storeId", store.getId());
-	// 	ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
-	// 	ReflectionTestUtils.setField(dto, "openLimit", 10);
-	// 	ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-	//
-	// 	// when, then
-	// 	assertThrows(CustomException.class, () -> {
-	// 		boardService.createBoard(user.getId(), dto, new ArrayList<>());
-	// 	});
-	// }
+		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
+		// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
+		ReflectionTestUtils.setField(dto, "title", "제목입니다");
+		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
+		ReflectionTestUtils.setField(dto, "type", "O");
+		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
+		ReflectionTestUtils.setField(dto, "storeId", store.getId());
+		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
+		ReflectionTestUtils.setField(dto, "openLimit", 10);
+		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
+
+		// when
+		boardService.createBoard(user.getId(), dto, new ArrayList<>());
+
+		// then
+		assertThat(userRepository.findById(user.getId()).get().getPostingCount()).isEqualTo(1);
+	}
+
+	@Test
+	@Transactional
+	void createBoard_whenPostingCntIsLimit_thenThrowException() throws IOException {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.save(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+
+		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
+		// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
+		ReflectionTestUtils.setField(dto, "title", "제목입니다");
+		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
+		ReflectionTestUtils.setField(dto, "type", "O");
+		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
+		ReflectionTestUtils.setField(dto, "storeId", store.getId());
+		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
+		ReflectionTestUtils.setField(dto, "openLimit", 10);
+		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
+
+		// when, then
+		assertThrows(CustomException.class, () -> {
+			boardService.createBoard(user.getId(), dto, new ArrayList<>());
+		});
+	}
 
 	// @Test
 	// @Transactional
@@ -106,7 +127,7 @@ class BoardServiceTest extends AbstractIntegrationTest {
 	// 	ReflectionTestUtils.setField(dto, "title", "제목입니다");
 	// 	ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 	// 	ReflectionTestUtils.setField(dto, "type", "O");
-	// 	ReflectionTestUtils.setField(dto, "status", "FCFS");
+	// 	ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
 	// 	ReflectionTestUtils.setField(dto, "openLimit", 1);
 	// 	ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
 	// 	Board board = boardRepository.saveAndFlush(BoardFixture.createFcfsOBoard(dto, store, user));
@@ -148,8 +169,8 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		// tryEnterFcfsQueue() 테스트 완료 후 진행
 	}
 
-	// TODO 유저 posting count 초기화하는 스케줄러 테스트코드 @김채진
-	// TODO 타임어택 게시글 공개 시간 지나면 close 하는 스케줄러 테스트코드 @김채진
+	// 유저 posting count 초기화하는 스케줄러 테스트코드
+	// 타임어택 게시글 공개 시간 지나면 close 하는 스케줄러 테스트코드
 
 	private CompletableFuture<String> connectAndSubscribe(Long boardId) throws InterruptedException {
 		// WebSocket + STOMP 통신을 위한 클라이언트 클래스

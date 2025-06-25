@@ -20,24 +20,6 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Download JAR from build
-        uses: actions/download-artifact@v3
-        with:
-          name: app-jar
-          path: ./jar
-
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_IMAGE }} .
-
-      - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_IMAGE }}
-
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -54,7 +36,7 @@ jobs:
             cd ~/your-my-taste
             git pull origin dev
             
-            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > .env
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "DEV_REDIS_HOST=${{ secrets.DEV_REDIS_HOST }}" >> .env
@@ -78,7 +60,6 @@ jobs:
             echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> .env
             echo "RDS_PORT=${{ secrets.RDS_PORT }}" >> .env
-            
             
             
             docker-compose down

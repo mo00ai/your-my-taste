@@ -3,9 +3,6 @@ package com.example.taste.common.websocket.strategy;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -17,11 +14,15 @@ import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SubscribeCommandStrategy implements StompCommandStrategy {
 	private static final Pattern CHAT_SUB_PATTERN_COMPILED = Pattern.compile("^/sub/parties/(\\d+)/chat(?:/.*)?$");
+	private static final Pattern BOARD_SUB_PATTERN_COMPILED = Pattern.compile("^/sub/openrun/board/(\\d+)$");
 	private final PartyInvitationRepository partyInvitationRepository;
 	private final WebSocketSubscriptionManager subscriptionManager;
 
@@ -34,6 +35,7 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 	public Message<?> handle(StompHeaderAccessor headerAccessor, Message<?> message) {
 		String destination = headerAccessor.getDestination();
 		Matcher matcher = CHAT_SUB_PATTERN_COMPILED.matcher(destination);
+		Matcher boardMatcher = BOARD_SUB_PATTERN_COMPILED.matcher(destination);
 		Authentication auth = (headerAccessor.getUser() instanceof Authentication a) ? a : null;
 		CustomUserDetails userDetails = (CustomUserDetails)(auth != null ? auth.getPrincipal() : null);
 		try {
@@ -49,6 +51,8 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 						userDetails.getId() : null, partyId, InvitationStatus.CONFIRMED)) {
 					throw new IllegalAccessException();
 				}
+			} else if (boardMatcher.matches()) {
+				return message;
 			} else {
 				throw new IllegalArgumentException();
 			}
