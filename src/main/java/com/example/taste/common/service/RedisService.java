@@ -1,8 +1,10 @@
 package com.example.taste.common.service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -10,7 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -101,14 +105,8 @@ public class RedisService {
 		}
 	}
 
-	//Notification publish
-	public void publishNotification(NotificationPublishDto publishDto) {
-		redisTemplate.convertAndSend(RedisChannel.NOTIFICATION_CHANNEL, publishDto);
-	}
-
-	public void updateNotification(NotificationDataDto eventDto, String key) {
-		Duration duration = Duration.ofSeconds(redisTemplate.getExpire(key, TimeUnit.SECONDS));
-		redisTemplate.opsForValue().set(key, eventDto, duration);
+	public void convertAndSend(String channel, NotificationPublishDto publishDto) {
+		redisTemplate.convertAndSend(channel, publishDto);
 	}
 
 	// 매칭 작업 이벤트 발행
@@ -116,7 +114,6 @@ public class RedisService {
 		redisTemplate.convertAndSend(RedisChannel.MATCH_CHANNEL, event);
 	}
 
-	// 알림 카운트 감소
 	public void decreaseCount(String key) {
 		redisTemplate.opsForValue().decrement(key);
 	}
@@ -173,15 +170,26 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
-	//TODO scan 방식 고려
+	//scan 방식으로 변경하였음 -황기하
 	public Set<String> getKeys(String pattern) {
-		Set<String> keys = redisTemplate.keys(pattern);
+		Set<String> keys = new HashSet<>();
+		RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
+
+		// 커서를 명시적으로 닫지 않고, 사용이 종료되면 알아서 닫히도록 try 안에서 사용함.
+		try (Cursor<byte[]> cursor = connection.keyCommands().scan(
+			ScanOptions.scanOptions().match(pattern).count(1000).build()
+		)) {
+			while (cursor.hasNext()) {
+				keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+			}
+		}
+
 		if (keys != null && !keys.isEmpty()) {
 			return keys;
 		}
 		return Collections.emptySet();
 	}
-
+	
 	public List<String> getKeysFromList(String listKey, int index) {
 		List<String> raw = stringRedisTemplate.opsForList().range(listKey, 0, 99);
 		if (raw == null || raw.isEmpty()) {
@@ -269,4 +277,8 @@ public class RedisService {
 	// 		throw new RuntimeException(e);
 	// 	}
 	// }
+
+	public Duration getExpire(String key, TimeUnit timeUnit) {
+		return Duration.ofSeconds(redisTemplate.getExpire(key, timeUnit));
+	}
 }

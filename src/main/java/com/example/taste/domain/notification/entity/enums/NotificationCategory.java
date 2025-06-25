@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.entity;
+package com.example.taste.domain.notification.entity.enums;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
