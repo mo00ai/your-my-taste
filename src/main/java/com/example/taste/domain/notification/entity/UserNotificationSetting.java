@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +20,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserNotificationDenySetting extends BaseEntity {
+@Table(
+	uniqueConstraints = @UniqueConstraint(
+		columnNames = {"user_id", "notificationCategory"}
+	)
+)
+public class UserNotificationSetting extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,7 +36,7 @@ public class UserNotificationDenySetting extends BaseEntity {
 	private NotificationCategory notificationCategory;
 
 	@Builder
-	public UserNotificationDenySetting(User user, NotificationCategory notificationCategory) {
+	public UserNotificationSetting(User user, NotificationCategory notificationCategory) {
 		this.user = user;
 		this.notificationCategory = notificationCategory;
 	}

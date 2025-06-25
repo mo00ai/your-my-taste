@@ -2,6 +2,7 @@ package com.example.taste.domain.notification.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.domain.PageRequest;
@@ -18,12 +19,13 @@ import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.entity.NotificationInfo;
-import com.example.taste.domain.notification.entity.UserNotificationDenySetting;
+import com.example.taste.domain.notification.entity.UserNotificationSetting;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.redis.NotificationRedisService;
 import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
-import com.example.taste.domain.notification.repository.notification.UserNotificationDenySettingRepository;
+import com.example.taste.domain.notification.repository.notification.UserNotificationSettingRepository;
+import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.exception.UserErrorCode;
 import com.example.taste.domain.user.repository.UserRepository;
@@ -39,15 +41,15 @@ public class NotificationUserService {
 	private final UserRepository userRepository;
 	private final NotificationRedisService notificationRedisService;
 	private final NotificationInfoRepository notificationInfoRepository;
-	private final UserNotificationDenySettingRepository userNotificationDenySettingRepository;
+	private final UserNotificationSettingRepository userNotificationSettingRepository;
 
 	// 알림 개수 조회
 	public GetNotificationCountResponseDto getNotificationCount(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
-		List<UserNotificationDenySetting> settings = userNotificationDenySettingRepository.findAllByUser(user);
+		List<UserNotificationSetting> settings = userNotificationSettingRepository.findAllByUser(user);
 		List<NotificationCategory> categories = new ArrayList<>();
-		for (UserNotificationDenySetting setting : settings) {
+		for (UserNotificationSetting setting : settings) {
 			categories.add(setting.getNotificationCategory());
 		}
 
@@ -165,6 +167,31 @@ public class NotificationUserService {
 		// mysql 알림 읽음 처리
 		List<Long> emptyList = new ArrayList<>();
 		markSqlNotificationAsRead(userId, emptyList);
+	}
+
+	@Transactional
+	public UserNotificationSettingResponseDto userNotificationSetting(
+		NotificationCategory category,
+		boolean isSet,
+		User user
+	) {
+		Optional<UserNotificationSetting> settingOpt =
+			userNotificationSettingRepository.findByUserAndNotificationCategory(user, category);
+
+		if (!isSet && settingOpt.isPresent()) {
+			userNotificationSettingRepository.delete(settingOpt.get());
+			return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
+		}
+
+		if (isSet && settingOpt.isEmpty()) {
+			UserNotificationSetting newSetting = UserNotificationSetting.builder()
+				.notificationCategory(category)
+				.user(user)
+				.build();
+			userNotificationSettingRepository.save(newSetting);
+		}
+
+		return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
 	}
 
 	// 읽음 처리 중복 코드 정리
