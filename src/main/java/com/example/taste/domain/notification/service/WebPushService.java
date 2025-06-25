@@ -1,8 +1,6 @@
 package com.example.taste.domain.notification.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
-
-import lombok.RequiredArgsConstructor;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.nio.charset.StandardCharsets;
 
@@ -19,6 +17,12 @@ import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import nl.martijndwars.webpush.Notification;
+import nl.martijndwars.webpush.PushService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +30,6 @@ import com.example.taste.domain.user.repository.UserRepository;
 public class WebPushService {
 	private final UserRepository userRepository;
 	private final WebPushRepository webPushRepository;
-	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
 
 	@Value("${vapid.public}")
@@ -38,23 +41,23 @@ public class WebPushService {
 	public void saveSubscription(Long userId, PushSubscribeRequestDto dto) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-		WebPushInformation information = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
+		WebPushSubscription subscription = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
 
-		if (information != null && information.getUser().isSameUser(user.getId())) {
-			information.setP256dhKey(dto.getKeys().getP256dh());
-			information.setAuthKey(dto.getKeys().getAuth());
+		if (subscription != null && subscription.getUser().isSameUser(user.getId())) {
+			subscription.setP256dhKey(dto.getKeys().getP256dh());
+			subscription.setAuthKey(dto.getKeys().getAuth());
 			return;
-		} else if (information != null) {
-			webPushRepository.delete(information);
+		} else if (subscription != null) {
+			webPushRepository.delete(subscription);
 		}
 
-		information = WebPushSubscription.builder()
+		subscription = WebPushSubscription.builder()
 			.authKey(dto.getKeys().getAuth())
 			.endpoint(dto.getEndPoint())
 			.p256dhKey(dto.getKeys().getP256dh())
 			.user(user)
 			.build();
-		webPushRepository.save(information);
+		webPushRepository.save(subscription);
 	}
 
 	public void deleteSubscription(Long userId, String endpoint) {

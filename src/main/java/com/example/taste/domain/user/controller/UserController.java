@@ -2,11 +2,6 @@ package com.example.taste.domain.user.controller;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,8 +29,11 @@ import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.facade.UserFacade;
-import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.service.UserService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -122,7 +120,7 @@ public class UserController {
 	public CommonResponse<UserNotificationSettingResponseDto> setNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), true, dto.getNotificationCategory()));
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), true, dto.getNotificationCategory()));
 	}
 
 	// 유저 알림 수신 여부 세팅
@@ -130,11 +128,11 @@ public class UserController {
 	public CommonResponse<UserNotificationSettingResponseDto> unsetNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(handleNotificaionSetting(userDetails.getUser(), false, dto.getNotificationCategory()));
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), false, dto.getNotificationCategory()));
 	}
 
 	private UserNotificationSettingResponseDto handleNotificaionSetting(
-		User user, boolean set, NotificationCategory category) {
-		return notificationUserService.userNotificationSetting(category, set, user);
+		Long userId, boolean set, NotificationCategory category) {
+		return notificationUserService.userNotificationSetting(category, set, userId);
 	}
 }

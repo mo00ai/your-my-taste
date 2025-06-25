@@ -666,7 +666,7 @@ create table user_notification_setting
     updated_at            timestamp(6),
     notification_category smallint check (notification_category between 0 and 10),
     user_id               bigint
-        constraint FKdair81wsx5fq745jntidpc4pq
+        constraint fkdair81wsx5fq745jntidpc4pq
             references users
 );
 
