@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
@@ -34,21 +35,36 @@ public class NotificationRedisService {
 		redisService.increaseCount(countKey);
 		String listKey = "notification:list:user:" + userId;
 		String lockKey = "lock:" + listKey;
-		boolean locked = redisService.setIfAbsent(lockKey, key, Duration.ofSeconds(1));
-		if (locked) {
-			try {
-				redisService.listLeftPush(listKey, key);
-				deleteOldNotifications(listKey);
-			} finally {
-				Object lockValue = redisService.getKeyValue(lockKey);
-				if (lockValue.equals(key)) {
-					redisService.delete(lockKey);
+		int retryCount = 0;
+
+		while (retryCount < 3) {
+			boolean locked = redisService.setIfAbsent(lockKey, key, Duration.ofSeconds(3));
+			if (locked) {
+				try {
+					redisService.listLeftPush(listKey, key);
+					deleteOldNotifications(listKey);
+					// finally 실행 하고 return 함
+					return;
+				} finally {
+					Object lockValue = redisService.getKeyValue(lockKey);
+					if (lockValue.equals(key)) {
+						redisService.delete(lockKey);
+					}
+				}
+			} else {
+				retryCount++;
+				if (retryCount >= 3) {
+					log.error("락 획득 실패 {}", lockKey);
+				}
+				try {
+					// waiting jitter
+					// thread local random 을 쓰면 각 스레드 별로 난수 생성기를 사용(다른 스레드 난수 생성을 기다릴 필요 없음)
+					Thread.sleep(ThreadLocalRandom.current().nextInt(retryCount * 100) + 100);
+				} catch (InterruptedException e) {
+					throw new RuntimeException("Interrupted while waiting", e);
 				}
 			}
-		} else {
-			log.warn("락 획득 실패 {}", lockKey);
 		}
-
 	}
 
 	public void deleteOldNotifications(String listKey) {
