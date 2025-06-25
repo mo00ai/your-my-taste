@@ -3,6 +3,7 @@ package com.example.taste.domain.party.service;
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
@@ -110,12 +111,17 @@ public class PartyService {
 	@Transactional
 	public void updatePartyDetail(
 		Long hostId, Long partyId, PartyUpdateRequestDto requestDto) {
-		Party party = partyRepository.findById(partyId)
+		Party party = partyRepository.findByIdAndDeletedAtIsNotNull(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
+		}
+
+		// 만료된 경우
+		if (party.getDeletedAt() != null) {
+			throw new CustomException(NOT_ACTIVE_PARTY);
 		}
 
 		// 랜덤 매칭 중인 경우

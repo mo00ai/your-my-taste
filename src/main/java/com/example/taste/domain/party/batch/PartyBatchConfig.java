@@ -1,5 +1,8 @@
 package com.example.taste.domain.party.batch;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,21 +14,22 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.party.entity.Party;
+import com.example.taste.domain.party.repository.PartyRepository;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class PartyBatchConfig extends DefaultBatchConfiguration {
-	private final RedisService redisService;
+	private final PartyRepository partyRepository;
 
-	private static final int CHUNK_SIZE = 100;
+	private static final int CHUNK_SIZE = 1000;
 	private static final int RETRY_LIMIT = 3;
 
 	@Bean
@@ -40,29 +44,68 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 	@Bean
 	public Step updateExpiredPartyStep(JobRepository repo, PlatformTransactionManager transactionManager) {
 		return new StepBuilder("UpdateExpiredPartyStep", repo)
-			.<String, String>chunk(CHUNK_SIZE, transactionManager)
+			.<Long, Long>chunk(CHUNK_SIZE, transactionManager)
+			.reader(updateExpiredPartyReader())
+			.writer(updateExpiredPartyWriter())
+			.faultTolerant()
+			.retry(DataAccessException.class)
+			.retryLimit(RETRY_LIMIT)
 			.build();
 	}
 
 	@Bean
 	public Step updateSoftDeletePartyStep(JobRepository repo, PlatformTransactionManager transactionManager) {
 		return new StepBuilder("UpdateSoftDeletePartyStep", repo)
-			.<String, String>chunk(CHUNK_SIZE, transactionManager)
+			.<Long, Long>chunk(CHUNK_SIZE, transactionManager)
+			.reader(updateSoftDeletePartyReader())
+			.writer(updateSoftDeletePartyWriter())
+			.faultTolerant()
+			.retry(DataAccessException.class)
+			.retryLimit(RETRY_LIMIT)
 			.build();
 	}
 
 	@Bean
 	@StepScope
-	public ItemReader<Party> updateExpiredPartyReader() {
-		return new JdbcPagingItemReaderBuilder<Party>()
-			.pageSize(CHUNK_SIZE)
-			.dataSource(getDataSource()).build();
-
+	public ItemReader<Long> updateExpiredPartyReader() {
+		LocalDate before1days = LocalDate.now().minusDays(1);
+		List<Long> expiredPartyIds = partyRepository.findAllByMeetingDate(before1days);
+		log.debug("[UpdateExpiredPartyReader] 만료된 파티 ids: {}", expiredPartyIds);
+		return new IteratorItemReader<>(expiredPartyIds);
 	}
 
-	// @Bean
-	// @StepScope
-	// public ItemWriter<String> updateExpiredPartyWriter() {
-	//
-	// }
+	@Bean
+	@StepScope
+	public ItemWriter<Long> updateExpiredPartyWriter() {
+		return items -> {
+			if (items.isEmpty()) {
+				return;
+			}
+
+			long updatedCount = partyRepository.updateExpiredStateByIds(items.getItems());
+			log.info("[UpdateExpiredPartyWriter] {}개의 파티를 EXPIRED 상태로 업데이트 완료함", updatedCount);
+		};
+	}
+
+	@Bean
+	@StepScope
+	public ItemReader<Long> updateSoftDeletePartyReader() {
+		LocalDate before7days = LocalDate.now().minusDays(7);
+		List<Long> expiredPartyIds = partyRepository.findAllByMeetingDate(before7days);
+		log.debug("[UpdateSoftDeletePartyReader] 삭제된 파티 ids: {}", expiredPartyIds);
+		return new IteratorItemReader<>(expiredPartyIds);
+	}
+
+	@Bean
+	@StepScope
+	public ItemWriter<Long> updateSoftDeletePartyWriter() {
+		return items -> {
+			if (items.isEmpty()) {
+				return;
+			}
+
+			long updatedCount = partyRepository.updateExpiredStateByIds(items.getItems());
+			log.info("[UpdateSoftDeletePartyWriter] {}개의 파티를 삭제 상태로 업데이트 완료함", updatedCount);
+		};
+	}
 }
