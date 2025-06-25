@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.entity;
+package com.example.taste.domain.notification.entity.enums;
 
 public enum NotificationType {
 	CREATE("생성"),
