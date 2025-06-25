@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class KakaoMapConfig {
+	
 	@Value("${kakao.rest-api-key}")
 	private String apiKey;
 
