@@ -6,7 +6,6 @@ import static com.example.taste.domain.recommend.util.GridUtil.*;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +17,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.recommend.dto.response.FcstResponseDto;
 import com.example.taste.domain.recommend.dto.response.WeatherResponseDto;
-import com.example.taste.domain.user.entity.UserFavor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +32,7 @@ public class WeatherService {
 
 	private final WebClient weatherWebClient;
 
-	public Mono<WeatherResponseDto> loadWeather(double lat, double lon, List<UserFavor> userFavors) {
+	public Mono<WeatherResponseDto> loadWeather(double lat, double lon) {
 
 		// 좌표 변환
 		LatXLngY grid = convert(TO_GRID, lat, lon);

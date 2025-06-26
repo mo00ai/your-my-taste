@@ -46,7 +46,7 @@ public class RecommendService {
 	}
 
 	private Mono<RecommendResponseDto> getRecommendation(CoordinateResponseDto coord, User user, String message) {
-		return weatherService.loadWeather(coord.getLat(), coord.getLon(), user.getUserFavorList())
+		return weatherService.loadWeather(coord.getLat(), coord.getLon())
 			.flatMap(weather -> aiResponseService.recommendFood(
 						message,
 						user.getUserFavorList(),
