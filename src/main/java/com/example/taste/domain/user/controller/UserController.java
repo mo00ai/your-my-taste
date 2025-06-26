@@ -17,12 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.recommend.service.AddressService;
-import com.example.taste.domain.recommend.service.WeatherService;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.example.taste.domain.notification.service.NotificationUserService;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
+import com.example.taste.domain.user.dto.request.UserNotificationSettingRequestDto;
 import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.dto.response.UserMyProfileResponseDto;
+import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
 import com.example.taste.domain.user.dto.response.UserProfileResponseDto;
 import com.example.taste.domain.user.dto.response.UserSimpleResponseDto;
 import com.example.taste.domain.user.entity.CustomUserDetails;
@@ -40,13 +42,11 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 	private final UserService userService;
 	private final UserFacade userFacade;
-	private final AddressService addressService;
-	private final WeatherService weatherService;
+	private final NotificationUserService notificationUserService;
 
 	@GetMapping
 	public CommonResponse<UserMyProfileResponseDto> getMyProfile(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-
 		return CommonResponse.ok(userService.getMyProfile(userDetails.getId()));
 	}
 
@@ -113,5 +113,26 @@ public class UserController {
 	) {
 		userService.unfollowUser(userDetails.getId(), followingUserId);
 		return CommonResponse.ok();
+	}
+
+	// 유저 알림 수신 여부 세팅
+	@PostMapping("/notification-setting")
+	public CommonResponse<UserNotificationSettingResponseDto> setNotificationCategory(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), true, dto.getNotificationCategory()));
+	}
+
+	// 유저 알림 수신 여부 세팅
+	@DeleteMapping("/notification-setting")
+	public CommonResponse<UserNotificationSettingResponseDto> unsetNotificationCategory(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
+		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), false, dto.getNotificationCategory()));
+	}
+
+	private UserNotificationSettingResponseDto handleNotificaionSetting(
+		Long userId, boolean set, NotificationCategory category) {
+		return notificationUserService.userNotificationSetting(category, set, userId);
 	}
 }
