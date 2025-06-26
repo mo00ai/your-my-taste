@@ -100,7 +100,7 @@ public class WeatherService {
 	private String convertRainAmount(String rainAmount) {
 		String result;
 
-		if (rainAmount == null || rainAmount.equals("0") || rainAmount.equals("-")) {
+		if (rainAmount == null || "0".equals(rainAmount) || "-".equals(rainAmount)) {
 			return "강수 없음";
 		}
 		return rainAmount + "mm";
