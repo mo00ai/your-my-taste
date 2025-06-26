@@ -25,8 +25,7 @@ public class RecommendController {
 	@PostMapping
 	public Mono<CommonResponse<RecommendResponseDto>> recommend(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody(required = false) RecommendRequestDto dto) {
-		return recommendService.recommend(userDetails.getId(), dto)
-			.map(CommonResponse::ok);
+		return recommendService.recommend(userDetails.getId(), dto).map(CommonResponse::ok);
 	}
 
 }
