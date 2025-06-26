@@ -154,7 +154,7 @@ jobs:
           path: build/libs
 
       - name: Run Unit Tests
-        run: ./gradlew unitTest -x generateJooq #profiles는 build.gradle에서
+        run: ./gradlew unitTest -x generateJooq
 
       - name: Run Integration Tests
-        run: ./gradlew integrationTest #profiles는 build.gradle에서
+        run: ./gradlew integrationTest
