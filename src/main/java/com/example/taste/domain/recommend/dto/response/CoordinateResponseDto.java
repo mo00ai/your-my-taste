@@ -1,4 +1,4 @@
-package com.example.taste.domain.recommend.dto;
+package com.example.taste.domain.recommend.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
