@@ -94,6 +94,9 @@ public class WeatherService {
 
 	//데이터 변환 메서드들
 	private String addTempCelsius(String temp) {
+		if ("알 수 없음".equals(temp)) {
+			return temp;
+		}
 		return temp + "℃";
 	}
 
