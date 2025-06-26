@@ -49,6 +49,5 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 		}
 		notificationService.sendBunch(notificationContent, dataDto, followers);
 
-		// TODO 위의 시스템 알림에서 두 방식을 비교한 뒤 더 합리적인 방식을 여기에도 적용
 	}
 }

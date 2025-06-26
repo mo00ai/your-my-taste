@@ -8,19 +8,15 @@ import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.entity.enums.NotificationType;
 import com.example.taste.domain.notification.redis.NotificationPublisher;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationAdminService {
 	private final NotificationPublisher notificationPublisher;
-	private final MeterRegistry meterRegistry;
 
 	// 시스템 혹은 마케팅 알림
 	public void publishNotification(AdminNotificationRequestDto dto) {
-		Timer.Sample sample = Timer.start(meterRegistry);
 		NotificationPublishDto publishDto = NotificationPublishDto.builder()
 			.category(NotificationCategory.from(dto.getCategory()))
 			.type(NotificationType.CREATE)
@@ -29,11 +25,9 @@ public class NotificationAdminService {
 			.additionalText(dto.getContents())
 			.build();
 		notificationPublisher.publish(publishDto);
-		sample.stop(meterRegistry.timer("testing"));
 	}
 
 	public void publishNotificationToUser(AdminNotificationRequestDto dto, Long userId) {
-		Timer.Sample sample = Timer.start(meterRegistry);
 		NotificationPublishDto publishDto = NotificationPublishDto.builder()
 			.category(NotificationCategory.INDIVIDUAL)
 			.type(NotificationType.CREATE)
@@ -43,6 +37,5 @@ public class NotificationAdminService {
 			.userId(userId)
 			.build();
 		notificationPublisher.publish(publishDto);
-		sample.stop(meterRegistry.timer("testing"));
 	}
 }

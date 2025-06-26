@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -26,32 +27,54 @@ public class NotificationRedisService {
 	private final RedisService redisService;
 
 	//Notification store
-	public void storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
+	public Long storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
 		Duration duration) {
 		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
 		redisService.setKeyValue(key, dataDto, duration);
 		// 해당 카테고리에 대해 count 증가
 		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
 		redisService.increaseCount(countKey);
+
+		String listKey = "notification:list:user:" + userId;
+		redisService.listLeftPush(listKey, key);
+		return redisService.getListSize(listKey);
+	}
+
+	public void deleteOldNotifications(Long userId) {
+
+		redisService.getKeyValue("dummyKey");
+
+		String lockToken = UUID.randomUUID().toString();
 		String listKey = "notification:list:user:" + userId;
 		String lockKey = "lock:" + listKey;
 		int retryCount = 0;
-
 		while (retryCount < 3) {
-			boolean locked = redisService.setIfAbsent(lockKey, key, Duration.ofSeconds(3));
+			boolean locked = redisService.transactionalSetIfAbsent(lockKey, lockToken, Duration.ofDays(7));
 			if (locked) {
 				try {
-					redisService.listLeftPush(listKey, key);
-					deleteOldNotifications(listKey);
+					// 락 걸었으면
 					// finally 실행 하고 return 함
+					Long size = redisService.getListSize(listKey);
+					if (size != null && size > 100) {
+						long overflow = size - 100;
+						for (int i = 0; i < overflow; i++) {
+							// redis 에서만 삭제하기 때문에 count 는 유지
+							String oldestKey = redisService.getLast(listKey, String.class);
+							if (oldestKey != null) {
+								redisService.delete(oldestKey);
+							}
+						}
+						redisService.listTrim(listKey, 0, 99);
+					}
 					return;
 				} finally {
 					Object lockValue = redisService.getKeyValue(lockKey);
-					if (lockValue.equals(key)) {
+					if (lockValue.equals(lockToken)) {
 						redisService.delete(lockKey);
 					}
 				}
 			} else {
+				// 락 못 걸었으면(다른데서 락이 걸려있으면)
 				retryCount++;
 				if (retryCount >= 3) {
 					log.error("락 획득 실패 {}", lockKey);
@@ -63,21 +86,6 @@ public class NotificationRedisService {
 				} catch (InterruptedException e) {
 					throw new RuntimeException("Interrupted while waiting", e);
 				}
-			}
-		}
-	}
-
-	public void deleteOldNotifications(String listKey) {
-		Long size = redisService.getListSize(listKey);
-		if (size != null && size > 100) {
-			long overflow = size - 100;
-			for (int i = 0; i < overflow; i++) {
-				// redis 에서만 삭제하기 때문에 count 는 유지
-				String oldestKey = redisService.getLast(listKey, String.class);
-				if (oldestKey != null) {
-					redisService.delete(oldestKey);
-				}
-				redisService.deleteFromList(listKey, oldestKey, String.class);
 			}
 		}
 	}

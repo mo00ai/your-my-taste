@@ -2,6 +2,11 @@ package com.example.taste.domain.user.repository;
 
 import static com.example.taste.domain.user.entity.QUser.*;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -37,5 +42,21 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				user.postingCount.lt(limit)
 			)
 			.execute();
+	}
+
+	@Override
+	public Page<Long> getAllUserIdPage(PageRequest pageRequest) {
+		List<Long> userPage = queryFactory.select(user.id).from(user).where(
+				user.deletedAt.isNull()
+			)
+			.orderBy(user.id.asc())
+			.offset(pageRequest.getOffset())
+			.limit(pageRequest.getPageSize())
+			.fetch();
+		Long total = queryFactory.select(user.count())
+			.from(user)
+			.where(user.deletedAt.isNull())
+			.fetchOne();
+		return new PageImpl<>(userPage, pageRequest, total);
 	}
 }

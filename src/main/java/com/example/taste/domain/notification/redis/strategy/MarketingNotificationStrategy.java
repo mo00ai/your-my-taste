@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.util.MemoryTracker;
@@ -15,7 +14,6 @@ import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.redis.CategorySupport;
 import com.example.taste.domain.notification.service.NotificationService;
-import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SystemNotificationStrategy implements NotificationStrategy, CategorySupport {
+public class MarketingNotificationStrategy implements NotificationStrategy, CategorySupport {
 
 	private final MeterRegistry meterRegistry;
 	private final MemoryTracker memoryTracker;
@@ -39,7 +37,7 @@ public class SystemNotificationStrategy implements NotificationStrategy, Categor
 
 	@Override
 	public Set<NotificationCategory> getSupportedCategories() {
-		return Set.of(NotificationCategory.SYSTEM);
+		return Set.of(NotificationCategory.MARKETING);
 	}
 
 	@Override
@@ -49,21 +47,25 @@ public class SystemNotificationStrategy implements NotificationStrategy, Categor
 		NotificationDataDto dataDto = notificationService.makeDataDto(dto);
 		NotificationContent notificationContent = notificationService.saveContent(dataDto);
 
-		// 페이징 방식
-		// 유저를 1000명 단위로 끊어와 보냄
-		int page = 0;
-		int size = 1000;
-		Page<User> users;
+		// reference by id
+		int rPage = 0;
+		int rSize = 10000;
+		Page<Long> userIds;
 		do {
-			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
-			List<User> currentUsers = users.getContent();
-			memoryTracker.measureMemoryUsage("sendBunch", () -> {
-				notificationService.sendBunch(notificationContent, dataDto, currentUsers);
+			userIds = userRepository.getAllUserIdPage(PageRequest.of(rPage, rSize));
+			List<Long> currentUserId = userIds.getContent();
+			memoryTracker.measureMemoryUsage("reference", () -> {
+				notificationService.sendBunchUsingReference(notificationContent, dataDto, currentUserId);
 			});
 			entityManager.clear();
-			page++;
-		} while (users.hasNext());
-		sample.stop(meterRegistry.timer("sendBunch"));
+			rPage++;
+		} while (userIds.hasNext());
 
+		sample.stop(meterRegistry.timer("reference"));
+		/**
+		 * * @deprecated ID만 필요할 때는 JPA 프록시 참조를 얻기 위해
+		 *   entityManager.getReference(User.class, id) 또는
+		 *   userRepository.getReferenceById(id) 사용을 권장합니다.
+		 */
 	}
 }

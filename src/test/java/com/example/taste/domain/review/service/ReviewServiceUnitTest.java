@@ -2,7 +2,7 @@ package com.example.taste.domain.review.service;
 
 import org.junit.jupiter.api.Test;
 
-class ReviewServiceTest {
+class ReviewServiceUnitTest {
 
 	@Test
 	void createReview() {

@@ -73,8 +73,8 @@ public class NotificationUserService {
 		}
 		return count;
 	}
-	
-	//최근 알림 조회(redis)
+
+	//최근 알림 조회(redis + mySql)
 	public Slice<NotificationResponseDto> getNotificationList(Long userId,
 		int index) {
 		// userId를 이용해 저장된 모든 알림을 가져옴

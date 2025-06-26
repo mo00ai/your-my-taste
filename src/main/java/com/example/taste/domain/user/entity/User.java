@@ -204,4 +204,9 @@ public class User extends SoftDeletableEntity {
 	public int hashCode() {
 		return id != null ? id.hashCode() : 0;
 	}
+
+	// 더미 객체
+	public User(Long id) {
+		this.id = id;
+	}
 }
