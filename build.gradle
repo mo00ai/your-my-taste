@@ -55,7 +55,9 @@ dependencies {
     // DB
     runtimeOnly 'org.postgresql:postgresql'
     // postgresql pgvector
-    implementation 'com.pgvector:pgvector:0.1.4'
+//    implementation 'com.pgvector:pgvector:0.1.4'
+    // Critical: Hibernate Vector Module
+    implementation 'org.hibernate.orm:hibernate-vector:6.6.15.Final'
     implementation 'com.h2database:h2'
 
     // Lombok
@@ -77,6 +79,7 @@ dependencies {
 
     //QueryDsl
     implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    implementation 'com.querydsl:querydsl-apt:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api:2.1.1"
@@ -111,6 +114,11 @@ dependencies {
     // open ai api
     implementation platform("org.springframework.ai:spring-ai-bom:1.0.0") // BOM
     implementation 'org.springframework.ai:spring-ai-starter-model-openai' // 필요함
+
+    // 형태소 분석기 https://mvnrepository.com/artifact/org.openkoreantext/open-korean-text
+    implementation("org.openkoreantext:open-korean-text:2.3.1")
+    // csv
+    implementation 'org.apache.commons:commons-csv:1.10.0'
 }
 
 def dotenv = new Properties()
@@ -130,7 +138,6 @@ def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
 def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
-
 
 jooq {
     version = '3.18.6'
