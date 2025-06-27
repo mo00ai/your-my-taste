@@ -32,6 +32,7 @@ public enum ErrorCode implements BaseCode {
 
 	// embedding
 	EMBEDDING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "임베딩 생성에 실패했습니다: "),
+	EMBEDDING_TEXT_NOT_FOUND(HttpStatus.BAD_REQUEST, "E002", "임베딩할 텍스트가 없습니다."),
 
 	;
 

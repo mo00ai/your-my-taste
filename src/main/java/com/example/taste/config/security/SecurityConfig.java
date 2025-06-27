@@ -1,8 +1,6 @@
 package com.example.taste.config.security;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-import lombok.RequiredArgsConstructor;
+import static org.springframework.security.config.Customizer.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -24,7 +24,8 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 			.cors(withDefaults())        // CORS Config 따름
-			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+			// .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+			.csrf(csrf -> csrf.disable())
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.sessionManagement(sm -> {
 					sm.maximumSessions(1).maxSessionsPreventsLogin(true);        // 최대 세션 개수 1, 새 로그인 요청 차단
