@@ -9,12 +9,17 @@ import java.util.Map;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
+import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.util.EntityFetcher;
+import com.example.taste.domain.embedding.dto.StoreSearchCondition;
+import com.example.taste.domain.embedding.service.EmbeddingService;
 import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeDetailResponse;
 import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeRegion;
 import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeResult;
@@ -22,6 +27,7 @@ import com.example.taste.domain.map.service.NaverMapService;
 import com.example.taste.domain.review.repository.ReviewRepository;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 import com.example.taste.domain.store.dto.response.StoreResponse;
+import com.example.taste.domain.store.dto.response.StoreSearchResult;
 import com.example.taste.domain.store.dto.response.StoreSimpleResponseDto;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
@@ -32,7 +38,9 @@ import com.example.taste.domain.store.repository.StoreRepository;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoreService {
@@ -42,6 +50,7 @@ public class StoreService {
 	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final ReviewRepository reviewRepository;
 	private final NaverMapService naverMapService;
+	private final EmbeddingService embeddingService;
 
 	@Transactional
 	public StoreSimpleResponseDto createStore(NaverLocalSearchResponseDto naverLocalSearchResponseDto) {
@@ -82,9 +91,9 @@ public class StoreService {
 
 	// 카테고리명 추출
 	private String extractCategory(String input) {
-		String[] tokens = input.split(">" );
+		String[] tokens = input.split(">");
 		for (int i = 0; i < tokens.length; i++) {
-			if (tokens[i].contains("음식점" )) {
+			if (tokens[i].contains("음식점")) {
 				if (i + 1 < tokens.length) {
 					return tokens[i + 1];
 				}
@@ -99,36 +108,51 @@ public class StoreService {
 		if (dto.getItems().isEmpty()) {
 			throw new CustomException(STORE_NOT_FOUND);
 		}
+		// 첫번째 추출
 		NaverLocalSearchResponseDto.Item item = dto.getItems().get(0);
-		// 좌표 정보 -> 네이버 지도 api -> 주소(행정동) 반환
-		ReverseGeocodeDetailResponse addressFromStringCoordinates = naverMapService.getAddressFromStringCoordinates(
-			getCoordinate(item));
-		// 행정동 주소 추출
-		Map<String, String> extractedArea = extractAdministrativeArea(addressFromStringCoordinates);
-		System.out.println("extractedArea = " + extractedArea);
-		// TODO  쿼리 파싱?
 
+		// 태그 제외한 가게명
+		String storeName = stripHtmlTags(item.getTitle());
+		BigDecimal longitude = new BigDecimal(item.getMapx()).divide(new BigDecimal("10000000"), 7,
+			RoundingMode.HALF_UP);
+		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000"), 7,
+			RoundingMode.HALF_UP);
+		// 가게명, 좌표로 중복체크
+		if (storeRepository.existsByNameAndMapxAndMapy(storeName, longitude, latitude)) {
+			throw new CustomException(STORE_ALREADY_EXISTS);
+		}
 		// 카테고리명 추출
 		String categoryName = extractCategory(item.getCategory());
 		// 카테고리 저장 or 조회
 		Category category = getOrCreateCategory(categoryName);
-		// 태그 제외한 가게명
-		String storeName = stripHtmlTags(item.getTitle());
-		BigDecimal longitude = new BigDecimal(item.getMapx()).divide(new BigDecimal("10000000" ), 7,
-			RoundingMode.HALF_UP);
-		BigDecimal latitude = new BigDecimal(item.getMapy()).divide(new BigDecimal("10000000" ), 7,
-			RoundingMode.HALF_UP);
-		if (storeRepository.existsByNameAndMapxAndMapy(storeName, longitude, latitude)) {
-			throw new CustomException(STORE_ALREADY_EXISTS);
-		}
-		return Store.builder()
+
+		// 좌표 정보 -> 네이버 지도 api -> 주소(행정동) 반환
+		ReverseGeocodeDetailResponse addressFromStringCoordinates = naverMapService.getAddressFromStringCoordinates(
+			longitude + "," + latitude);
+		// 행정동 주소 추출
+		Map<String, String> extractedArea = extractAdministrativeArea(addressFromStringCoordinates);
+		// 행정동 주소 하나로
+		String address = String.join(" ",
+			extractedArea.get("sido"),
+			extractedArea.get("sigungu"),
+			extractedArea.get("eupmyeondong")
+		);
+
+		Store store = Store.builder()
 			.category(category)
 			.name(stripHtmlTags(item.getTitle()))
-			.address(item.getAddress())
-			.roadAddress(item.getRoadAddress())
+			.address(address)    // 행정동 주소
+			.roadAddress(item.getRoadAddress()) // 도로명 주소
+			.sido(extractedArea.get("sido"))
+			.sigungu(extractedArea.get("sigungu"))
+			.eupmyeondong(extractedArea.get("eupmyeondong"))
 			.mapx(longitude)
 			.mapy(latitude)
 			.build();
+
+		// 가중치 가게정보 -> 임베딩 -> store에 저장
+		store.setEmbeddingVector(embeddingService.createEmbedding(buildStoreEmbeddingText(store)));
+		return store;
 
 	}
 
@@ -136,7 +160,7 @@ public class StoreService {
 	private String stripHtmlTags(String input) {
 		if (input == null)
 			return null;
-		return input.replaceAll("<[^>]*>", "" );
+		return input.replaceAll("<[^>]*>", "");
 	}
 
 	@Transactional
@@ -160,10 +184,6 @@ public class StoreService {
 			});
 	}
 
-	private String getCoordinate(NaverLocalSearchResponseDto.Item item) {
-		return item.getMapx() + "," + item.getMapy();
-	}
-
 	// reverse geocoding -> 행정동 주소 추출
 	private Map<String, String> extractAdministrativeArea(ReverseGeocodeDetailResponse response) {
 		// "admcode" 타입 결과만 사용 (보통 이게 행정동 기준)
@@ -183,5 +203,46 @@ public class StoreService {
 			"sigungu", sigungu,    // 시/군/구
 			"eupmyeondong", eupmyeondong // 읍/면/동
 		);
+	}
+
+	public String buildStoreEmbeddingText(Store store) {
+		// 가게 위치 가중치
+		// final int LOCATION_WEIGHT = 3;
+		final int WEIGHT_SI = 1;   // 시
+		final int WEIGHT_GU = 2;   // 구
+		final int WEIGHT_DONG = 4;   // 동
+
+		// 가게명 가중치
+		final int WEIGHT_NAME = 3;
+		// 카테고리명 가중치
+		final int WEIGHT_CATEGORY = 2;
+		StringBuilder sb = new StringBuilder();
+
+		appendWithWeight(sb, store.getSido(), WEIGHT_SI);
+		appendWithWeight(sb, store.getSigungu(), WEIGHT_GU);
+		appendWithWeight(sb, store.getEupmyeondong(), WEIGHT_DONG);
+
+		appendWithWeight(sb, store.getName(), WEIGHT_NAME);
+		appendWithWeight(sb, store.getCategory().getName(), WEIGHT_CATEGORY);
+
+		return sb.toString().trim();
+	}
+
+	private void appendWithWeight(StringBuilder sb, String text, int weight) {
+		String textWithSpace = text + " ";
+		for (int i = 0; i < weight; i++) {
+			sb.append(textWithSpace);
+		}
+	}
+
+	public PageResponse<StoreSearchResult> searchStore(StoreSearchCondition request, Pageable pageable) {
+		String query = request.getQuery();
+		log.info("query: {}", query);
+
+		float[] embeddingVetor = embeddingService.search(query);
+		log.info("embeddingVetor: {} ", embeddingVetor);
+		Page<StoreSearchResult> page = storeRepository.searchByVector(embeddingVetor,
+			request.getSimilarityThreshold(), pageable);
+		return PageResponse.from(page);
 	}
 }
