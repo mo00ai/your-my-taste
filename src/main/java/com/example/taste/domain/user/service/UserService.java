@@ -243,7 +243,7 @@ public class UserService {
 		}
 
 		// 전체 포인트 일괄 초기화
-		userRepository.resetAllUserPoints(); // 기존 쿼리 유지: point != 0 → 0
+		userRepository.resetAllUserPoints();
 	}
 
 	@Transactional
