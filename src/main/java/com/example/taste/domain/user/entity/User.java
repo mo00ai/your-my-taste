@@ -206,12 +206,4 @@ public class User extends SoftDeletableEntity {
 		return id != null ? id.hashCode() : 0;
 	}
 
-	//jooq에서 UsersRecord를 사용하기 위해
-	//User 객체를 외래키용 프록시, 임시 객체로 생성하기 위해 만듦
-	public static User ofId(Long id) {
-		User user = new User();
-		user.setId(id);
-		return user;
-	}
-
 }

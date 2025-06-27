@@ -223,7 +223,10 @@ public class UserService {
 			while (cursor.hasNext()) {
 				UsersRecord jooqUser = cursor.fetchNext();
 
-				User user = User.ofId(jooqUser.getId());
+				// User user = User.ofId(jooqUser.getId());
+
+				//가짜 객체
+				User user = userRepository.getReferenceById(jooqUser.getId());
 
 				logs.add(PkLog.builder()
 					.pkType(PkType.RESET)
