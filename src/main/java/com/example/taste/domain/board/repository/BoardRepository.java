@@ -1,6 +1,7 @@
 package com.example.taste.domain.board.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -35,6 +36,18 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	// 	    WHERE id IN (:ids)
 	// 	""", nativeQuery = true)
 	// long closeBoardsByIds(@Param("ids") List<Long> ids);
+
+	//  pg_trgm을 이용한 텍스트 유사도 검색
+	@Query(value = """
+		SELECT * FROM posts 
+		WHERE similarity(title, :keyword) > 0.3 
+		   OR similarity(content, :keyword) > 0.3
+		ORDER BY GREATEST(
+		    similarity(title, :keyword), 
+		    similarity(content, :keyword)
+		) DESC
+		""", nativeQuery = true)
+	List<Board> findByTextSimilarity(@Param("keyword") String keyword);
 
 	Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);

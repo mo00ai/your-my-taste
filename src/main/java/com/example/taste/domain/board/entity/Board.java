@@ -37,6 +37,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @EqualsAndHashCode(of = "id", callSuper = false) // id값으로만 비교
 @Getter
@@ -66,6 +67,18 @@ public class Board extends SoftDeletableEntity {
 	private Integer openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
 
 	private LocalDateTime openTime;
+	@Setter
+	// 검색용 인덱스 추가
+	@Column(name = "search_keywords", columnDefinition = "TEXT")
+	private String searchKeywords;  // 전체 키워드 (공백으로 구분)
+
+	@Setter
+	@Column(name = "search_nouns", columnDefinition = "TEXT")
+	private String searchNouns;     // 명사만 (공백으로 구분)
+
+	@Setter
+	@Column(name = "search_phrases", columnDefinition = "TEXT")
+	private String searchPhrases;   // 구문만 (공백으로 구분)
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)

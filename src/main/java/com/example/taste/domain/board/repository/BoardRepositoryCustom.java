@@ -16,5 +16,10 @@ public interface BoardRepositoryCustom {
 	// 키워드 기반 검색
 	Page<BoardListResponseDto> searchBoardsByKeyword(BoardSearchCondition condition, Pageable pageable);
 
+	// TODO 구현할 메서드
+	// List<BoardListResponseDto> findByOktTrgmSearch(String searchKeywords, String originalQuery, int limit);
+	//
+	// List<BoardListResponseDto> findByHybridSearch(BoardSearchCondition condition);
+
 	long closeBoardsByIds(List<Long> ids);
 }
