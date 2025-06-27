@@ -2,6 +2,7 @@ package com.example.taste.domain.store.service;
 
 import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.dto.request.CreateBucketRequest;
 import com.example.taste.domain.store.dto.request.RemoveBucketItemRequest;
@@ -25,6 +25,7 @@ import com.example.taste.domain.store.entity.StoreBucket;
 import com.example.taste.domain.store.entity.StoreBucketItem;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
@@ -33,13 +34,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class StoreBucketService {
-	private final EntityFetcher entityFetcher;
 	private final StoreBucketRepository storeBucketRepository;
 	private final StoreBucketItemRepository storeBucketItemRepository;
 	private final UserRepository userRepository;
+	private final StoreRepository storeRepository;
 
 	public StoreBucketResponse createBucket(CreateBucketRequest request, Long userId) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 		// 버킷명 중복 확인
 		String name = makeUnduplicateName(request.getName(), user);
@@ -54,11 +55,15 @@ public class StoreBucketService {
 
 	@Transactional
 	public void addBucketItem(AddBucketItemRequest request, Long userId) {
-		Store store = entityFetcher.getStoreOrThrow(request.getStoreId());
+		Store store = storeRepository.findById(request.getStoreId())
+			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
+		List<StoreBucket> storeBuckets = storeBucketRepository.findAllByIdIn(request.getBucketIds());
 
-		for (Long bucketId : request.getBucketIds()) {
-			StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
+		if (storeBuckets.size() != request.getBucketIds().size()) {
+			throw new CustomException(BUCKET_NOT_FOUND);
+		}
 
+		for (StoreBucket storeBucket : storeBuckets) {
 			// 로그인 유저의 버킷인지 확인
 			if (!storeBucket.getUser().isSameUser(userId)) {
 				throw new CustomException(BUCKET_ACCESS_DENIED);
@@ -80,7 +85,8 @@ public class StoreBucketService {
 	// 내 버킷 조회 - (키워드로 검색)
 	public PageResponse<StoreBucketResponse> getMyBuckets(Long userId, String keyword, Pageable pageable) {
 
-		User me = entityFetcher.getUserOrThrow(userId);
+		User me = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Page<StoreBucket> bucketPage = storeBucketRepository.searchMyBuckets(me, keyword, pageable);
 		return PageResponse.from(bucketPage.map(StoreBucketResponse::from));
 	}
@@ -95,33 +101,37 @@ public class StoreBucketService {
 
 	// 남의 버킷 조회 - 공개된 것만(특정 유저의 맛집 리스트 조회(유저 프로필로 접근)
 	public PageResponse<StoreBucketResponse> getBucketsByUserId(Long targetUserId, Pageable pageable) {
-		User targetUser = entityFetcher.getUndeletedUserOrThrow(targetUserId); // 삭제되지 않은 유저만 조회
+		User targetUser = userRepository.findByIdAndDeletedAtIsNull(targetUserId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER)); // 삭제되지 않은 유저만 조회
 
 		// 공개된 버킷만 반환
-		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable)
-			.map(StoreBucketResponse::from);
+		Page<StoreBucketResponse> dtos = storeBucketRepository.findAllByUserAndIsOpened(targetUser, true, pageable);
+		//.map(StoreBucketResponse::from);
 
 		return PageResponse.from(dtos);
 	}
 
 	public PageResponse<BucketItemResponse> getBucketItems(Long bucketId, Long userId, Pageable pageable) {
-		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
+		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
+			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 타유저의 버킷 && 비공개 버킷이면 접근 불가
 		if (!storeBucket.getUser().isSameUser(userId) && !storeBucket.isOpened()) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable)
-			.map(BucketItemResponse::from);
+		Page<BucketItemResponse> dtos = storeBucketItemRepository.findAllByStoreBucket(storeBucket, pageable);
+		//.map(BucketItemResponse::from);
 
 		return PageResponse.from(dtos);
 	}
 
 	@Transactional
 	public StoreBucketResponse updateBucketName(Long bucketId, String name, Long userId) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
+			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
 		if (!storeBucket.getUser().isSameUser(userId)) {
@@ -137,7 +147,8 @@ public class StoreBucketService {
 
 	@Transactional
 	public void deleteBucket(Long bucketId, Long userId) {
-		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
+		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
+			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
 		if (!storeBucket.getUser().isSameUser(userId)) {
@@ -150,14 +161,16 @@ public class StoreBucketService {
 
 	@Transactional
 	public void removeBucketItem(Long bucketId, RemoveBucketItemRequest request, Long userId) {
-		StoreBucket storeBucket = entityFetcher.getStoreBucketOrThrow(bucketId);
+		StoreBucket storeBucket = storeBucketRepository.findById(bucketId)
+			.orElseThrow(() -> new CustomException(BUCKET_NOT_FOUND));
 
 		// 로그인 유저의 버킷인지 확인
 		if (!storeBucket.getUser().isSameUser(userId)) {
 			throw new CustomException(BUCKET_ACCESS_DENIED);
 		}
 
-		List<StoreBucketItem> items = storeBucketItemRepository.findAllById(request.getBucketItemIds());
+		List<StoreBucketItem> items = storeBucketItemRepository.findAllByIdIn(
+			request.getBucketItemIds());
 
 		// 일부 storeBucketItem의 id가 존재하지 않으면 error
 		if (items.size() != request.getBucketItemIds().size()) {

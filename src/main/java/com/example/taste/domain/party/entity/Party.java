@@ -94,10 +94,7 @@ public class Party extends SoftDeletableEntity {
 			this.meetingDate = requestDto.getMeetingDate();
 		}
 		if (requestDto.getMaxMembers() != null) {
-			this.maxMembers = requestDto.getMaxMembers();    // MEMO: 근데 이거 변경할때 invitation 도 안바뀌게 락 걸어야하나 - @윤예진
-		}
-		if (requestDto.getEnableRandomMatching() != null) {
-			this.enableRandomMatching = requestDto.getEnableRandomMatching();
+			this.maxMembers = requestDto.getMaxMembers();
 		}
 	}
 
@@ -114,9 +111,6 @@ public class Party extends SoftDeletableEntity {
 		if (requestDto.getMaxMembers() != null) {
 			this.maxMembers = requestDto.getMaxMembers();
 		}
-		if (requestDto.getEnableRandomMatching() != null) {
-			this.enableRandomMatching = requestDto.getEnableRandomMatching();
-		}
 	}
 
 	public void joinMember() {
@@ -129,6 +123,10 @@ public class Party extends SoftDeletableEntity {
 
 	public boolean isFull() {
 		return this.nowMembers == this.maxMembers;
+	}
+
+	public boolean isStatus(PartyStatus partyStatus) {
+		return this.partyStatus.equals(partyStatus);
 	}
 
 	public boolean isHostOfParty(Long hostId) {

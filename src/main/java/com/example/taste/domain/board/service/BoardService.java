@@ -1,15 +1,25 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.exception.ErrorCode.*;
+import static com.example.taste.config.CacheConfig.*;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
+import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.common.util.EntityFetcher;
@@ -39,13 +48,13 @@ import com.example.taste.domain.board.strategy.BoardCreationStrategy;
 import com.example.taste.domain.image.exception.ImageErrorCode;
 import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
-import com.example.taste.domain.notification.entity.NotificationCategory;
-import com.example.taste.domain.notification.entity.NotificationType;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.example.taste.domain.notification.entity.enums.NotificationType;
 import com.example.taste.domain.pk.enums.PkType;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Store;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
@@ -58,20 +67,24 @@ public class BoardService {
 	private final BoardImageService boardImageService;
 	private final BoardRepository boardRepository;
 	private final PkService pkService;
+	private final StoreRepository storeRepository;
 	private final HashtagService hashtagService;
-	private final EntityFetcher entityFetcher;
 	private final RedisService redisService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserRepository userRepository;
 	private final BoardCreationStrategyFactory strategyFactory;
 	private final EntityManager entityManager;
 	private final ApplicationEventPublisher eventPublisher;
+	private final RedissonClient redissonClient;
+	private final CacheManager concurrentMapCacheManager;
 	private final KoreanTextProcessor processor;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
-		User user = entityFetcher.getUserOrThrow(userId);
-		Store store = entityFetcher.getStoreOrThrow(requestDto.getStoreId());
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		Store store = storeRepository.findById(requestDto.getStoreId())
+			.orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
 		BoardCreationStrategy strategy = strategyFactory.getStrategy(BoardType.from(requestDto.getType()));
 		Board entity = strategy.createBoard(requestDto, store, user);
@@ -83,7 +96,7 @@ public class BoardService {
 		Board saved = boardRepository.save(entity);
 
 		// 오픈런 게시글 카운팅
-		if (BoardType.from(requestDto.getType()).equals(BoardType.O)) {
+		if (!saved.isNBoard()) {
 			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
 			entityManager.refresh(user);
 
@@ -109,43 +122,67 @@ public class BoardService {
 			.build());
 	}
 
-	@Transactional
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
-		Board board = findByBoardId(boardId);
-		User user = entityFetcher.getUserOrThrow(userId);
+		Board board = boardRepository.findActiveBoard(boardId)
+			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-		if (board.getType() == BoardType.N) {
+		if (board.isNBoard()) {
 			return new BoardResponseDto(board);
 		}
 
-		if (board.getUser().isSameUser(userId) || user.getRole() == Role.ADMIN) {
+		if (board.getUser().isSameUser(userId) || user.isAdmin()) {
 			return new BoardResponseDto(board);
 		}
 
 		// 게시글 공개시간 전이면 error
-		if (LocalDateTime.now().isBefore(board.getOpenTime())) {
+		if (!board.isOpenTimeNow()) {
 			throw new CustomException(BOARD_NOT_YET_OPEN);
 		}
 
 		// 비공개 게시글이면 error
-		if (board.getAccessPolicy() == AccessPolicy.CLOSED) {
+		if (board.getAccessPolicy().isClosed()) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.getAccessPolicy() == AccessPolicy.TIMEATTACK) {
-			board.validateAndCloseIfExpired();
+		if (board.getAccessPolicy().isTimeAttack() && board.isExpired()) {
+			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
-		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
-			tryEnterFcfsQueue(board, userId);
+		if (board.getAccessPolicy().isFcfs()) {
+			tryEnterFcfsQueueByRedisson(board, userId);
+		}
+
+		// 타임어택 게시글이면 캐싱 - 현재 메서드에 SRP 적용 안돼서 cacheable 어노테이션 사용 불가 -> 추후 개선
+		if (board.getAccessPolicy().isTimeAttack()) {
+			return getOrSetCache(board);
 		}
 
 		return new BoardResponseDto(board);
 	}
 
+	private BoardResponseDto getOrSetCache(Board board) {
+		Cache cache = concurrentMapCacheManager.getCache(TIMEATTACK_CACHE_NAME);
+
+		if (cache == null) {
+			throw new CustomException(CACHE_NOT_FOUND);
+		}
+
+		BoardResponseDto cachedDto = cache.get(board.getId(), BoardResponseDto.class);
+		if (cachedDto != null) {
+			return cachedDto;
+		}
+
+		BoardResponseDto dto = new BoardResponseDto(board);
+		cache.put(board.getId(), dto);
+		return dto;
+	}
+
 	@Transactional
+	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
@@ -153,11 +190,12 @@ public class BoardService {
 	}
 
 	@Transactional
+	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
-		if (board.getAccessPolicy() == AccessPolicy.FCFS) {
-			redisService.deleteZSetKey(OPENRUN_KEY_PREFIX + board.getId());
+		if (board.getAccessPolicy().isFcfs()) {
+			redisService.deleteKey(OPENRUN_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
@@ -172,8 +210,8 @@ public class BoardService {
 
 	// 게시물 작성자와 현재 사용자가 일치하는지 검증
 	private void checkUser(Long userId, Board board) {
-		if (!board.getUser().getId().equals(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+		if (!board.getUser().isSameUser(userId)) {
+			throw new CustomException(UNAUTHORIZED);
 		}
 	}
 
@@ -207,20 +245,19 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<Board> boards = boardRepository.findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType.O,
+		Page<OpenRunBoardResponseDto> dtos = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
 			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
-		Page<OpenRunBoardResponseDto> dtos = boards.map(board -> {
-			Long remainingSlot = null;
-			if (board.getAccessPolicy() == AccessPolicy.FCFS) {
-				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + board.getId());
-				remainingSlot = Math.max(0, board.getOpenLimit() - zSetSize);
+		Page<OpenRunBoardResponseDto> result = dtos.map(dto -> {
+			if (dto.getAccessPolicy().isFcfs()) {
+				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
+				long remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
+				dto.setRemainingSlot(remainingSlot);
 			}
-
-			return OpenRunBoardResponseDto.create(board, remainingSlot);
+			return dto;
 		});
 
-		return PageResponse.from(dtos);
+		return PageResponse.from(result);
 	}
 
 	// 게시글에 해시태그 전부 삭제
@@ -235,27 +272,146 @@ public class BoardService {
 	public void tryEnterFcfsQueue(Board board, Long userId) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 
+		// 순위가 없는 유저만 ZSet에 insert
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
+		}
+
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 		long size = redisService.getZSetSize(key);
-		if (size >= board.getOpenLimit()) {
+		if (board.isOverOpenLimit(size)) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
+		redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+		// 클라이언트에 잔여 인원 전송
+		String destination = "/sub/openrun/board/" + board.getId();
+		long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+		messagingTemplate.convertAndSend(destination, remainingSlot);
+
+		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
+		Long rank = redisService.getRank(key, userId);
+		if (rank != null && board.isOverOpenLimit(rank)) {
+			redisService.removeFromZSet(key, userId);
+			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
+	}
+
+	// lettuce 분산락으로 동시성 제어
+	public void tryEnterFcfsQueueByLettuce(Board board, Long userId) {
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+
 		// 순위가 없는 유저만 ZSet에 insert
-		if (!redisService.hasRankInZSet(key, userId)) {
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
+		}
+
+		boolean hasLock = redisService.setIfAbsent(lockKey, userId.toString(), Duration.ofMillis(3000));
+		int retry = 10;
+
+		try {
+			while (!hasLock && retry > 0) {
+				Thread.sleep(50);
+				hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
+				retry--;
+			}
+
+			if (!hasLock) {
+				throw new CustomException(REDIS_FAIL_GET_LOCK);
+			}
+
+			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+			long size = redisService.getZSetSize(key);
+			if (board.isOverOpenLimit(size)) {
+				throw new CustomException(EXCEED_OPEN_LIMIT);
+			}
+
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
 			String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
+
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt(); // 스레드 중단 요청
+			throw new CustomException(REDIS_FAIL_GET_LOCK);
+
+		} finally {
+			Long value = redisService.getKeyLongValue(lockKey);
+			if (value != null && value.equals(userId)) {
+				redisService.deleteKey(lockKey);
+			}
+		}
+	}
+
+	// Redisson 분산락으로 동시성 제어
+	public void tryEnterFcfsQueueByRedisson(Board board, Long userId) {
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+
+		// 순위가 없는 유저만 ZSet에 insert
+		if (redisService.hasRankInZSet(key, userId)) {
+			return;
 		}
 
-		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
-		Long rank = redisService.getRank(key, userId);
-		if (rank != null && rank >= board.getOpenLimit()) {
-			redisService.removeFromZSet(key, userId);
-			throw new CustomException(EXCEED_OPEN_LIMIT);
+		RLock lock = redissonClient.getLock(lockKey);
+
+		try {
+			boolean hasLock = lock.tryLock(1000, 3000, TimeUnit.MILLISECONDS);// 최대 1초 동안 락 획득 시도, 락 유지 시간 1초
+			if (!hasLock) {
+				throw new CustomException(REDIS_FAIL_GET_LOCK);
+			}
+
+			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
+			long size = redisService.getZSetSize(key);
+			if (board.isOverOpenLimit(size)) { // NOTE 인원 다 찬 게시글과 순위 안에 든 유저 정보 테이블에 저장 @김채진
+				throw new CustomException(EXCEED_OPEN_LIMIT);
+			}
+
+			// 순위가 없는 유저만 ZSet에 insert
+			if (redisService.hasRankInZSet(key, userId)) {
+				return;
+			}
+
+			redisService.addToZSet(key, userId, System.currentTimeMillis());
+
+			// 클라이언트에 잔여 인원 전송
+			String destination = "/sub/openrun/board/" + board.getId();
+			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+			messagingTemplate.convertAndSend(destination, remainingSlot);
+
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt(); // 스레드 중단 요청
+			throw new CustomException(REDIS_FAIL_GET_LOCK);
+
+		} finally {
+			if (lock.isHeldByCurrentThread()) { // 현재 쓰레드가 락 소유자인지 확인
+				lock.unlock();
+			}
+		}
+	}
+
+	@Transactional
+	public List<Long> findExpiredTimeAttackBoardIds(AccessPolicy policy) {
+		return boardRepository.findExpiredTimeAttackBoardIds(policy);
+	}
+
+	@Transactional
+	public long closeBoardsByIds(List<? extends Long> ids) {
+		long closedCnt = boardRepository.closeBoardsByIds(ids);
+		evictCache(ids);
+		return closedCnt;
+	}
+
+	public void evictCache(List<? extends Long> ids) {
+		Cache cache = concurrentMapCacheManager.getCache(TIMEATTACK_CACHE_NAME);
+		if (cache != null) {
+			for (Long boardId : ids) {
+				cache.evict(boardId); // 개별 삭제
+			}
 		}
 	}
 

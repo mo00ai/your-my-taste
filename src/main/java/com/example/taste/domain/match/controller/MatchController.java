@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.service.MatchService;
 

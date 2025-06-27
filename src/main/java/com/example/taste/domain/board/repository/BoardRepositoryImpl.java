@@ -2,12 +2,14 @@ package com.example.taste.domain.board.repository;
 
 import static com.example.taste.domain.board.entity.QBoard.*;
 import static com.example.taste.domain.image.entity.QBoardImage.*;
+import static com.example.taste.domain.image.entity.QImage.*;
 import static com.example.taste.domain.store.entity.QStore.*;
 import static com.example.taste.domain.user.entity.QUser.*;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.util.StringUtils;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
@@ -31,6 +34,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -112,12 +116,62 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	}
 
 	@Override
-	public long closeBoardsByIds(List<Long> ids) {
-		return queryFactory.update(board)
-			.set(board.accessPolicy, AccessPolicy.CLOSED)
-			.where(board.id.in(ids))
-			.execute();
+	public Page<OpenRunBoardResponseDto> findUndeletedBoardByTypeAndPolicy(BoardType type,
+		Collection<AccessPolicy> policies, Pageable pageable) {
+		JPAQuery<OpenRunBoardResponseDto> query = queryFactory
+			.select(Projections.constructor(OpenRunBoardResponseDto.class,
+				user.id,
+				user.nickname,
+				image.url,
+				board.id,
+				board.title,
+				board.openTime,
+				board.accessPolicy,
+				board.openLimit
+			))
+			.from(board)
+			.join(board.user, user)
+			.leftJoin(user.image, image) // image가 없는 유저도 반환하기 위해 left join
+			.where(board.type.eq(type),
+				board.accessPolicy.in(policies));
+
+		// 정렬 동적 적용
+		for (Sort.Order order : pageable.getSort()) {
+			// 문자열로 StoreBucket 필드 접근
+			PathBuilder<?> pathBuilder = new PathBuilder<>(Board.class, "board");
+			// 정렬 기준이 되는 필드 추출
+			String property = order.getProperty();
+			// 정렬 방향 추출
+			Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+
+			// QueryDSL용 정렬 객체 생성
+			OrderSpecifier<?> orderSpecifier = new OrderSpecifier(direction, pathBuilder.get(property));
+			query.orderBy(orderSpecifier);
+		}
+
+		// 페이징
+		List<OpenRunBoardResponseDto> result = query
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		Long total = queryFactory
+			.select(board.count())
+			.from(board)
+			.where(board.type.eq(type),
+				board.accessPolicy.in(policies))
+			.fetchOne();
+
+		return new PageImpl<>(result, pageable, total != null ? total : 0L);
 	}
+
+	// @Override
+	// public long closeBoardsByIds(List<? extends Long> ids) {
+	// 	return queryFactory.update(board)
+	// 		.set(board.accessPolicy, AccessPolicy.CLOSED)
+	// 		.where(board.id.in(ids))
+	// 		.execute();
+	// }
 
 	private List<OrderSpecifier<? extends Comparable>> getOrderSpecifier(Pageable pageable) {
 		List<OrderSpecifier<? extends Comparable>> orders = new ArrayList<>();

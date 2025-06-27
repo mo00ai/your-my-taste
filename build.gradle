@@ -46,6 +46,7 @@ dependencies {
     // Spring starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -73,11 +74,16 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Redisson
+    implementation 'org.redisson:redisson:3.50.0'
+
     // Redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce:lettuce-core'
 
-    //QueryDsl
+    // Session
+    implementation 'org.springframework.session:spring-session-data-redis'      // Redis Session
+
+    // QueryDSL
     implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
     implementation 'com.querydsl:querydsl-apt:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -110,6 +116,8 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     //web_push
+    implementation 'nl.martijndwars:web-push:5.1.0'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
     implementation 'com.zerodeplibs:zerodep-web-push-java:2.1.2'
     // open ai api
     implementation platform("org.springframework.ai:spring-ai-bom:1.0.0") // BOM
@@ -137,7 +145,8 @@ def dbHost = getEnvOrDotenv("DB_HOST")
 def dbPort = getEnvOrDotenv("DB_PORT")
 def dbUser = getEnvOrDotenv("DB_USER")
 def dbPassword = getEnvOrDotenv("DB_PASSWORD")
-def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+def dbUrl = "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ssl=false"
+
 
 jooq {
     version = '3.18.6'

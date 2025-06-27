@@ -37,6 +37,14 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	// 	""", nativeQuery = true)
 	// long closeBoardsByIds(@Param("ids") List<Long> ids);
 
+	// @EntityGraph(attributePaths = {"user", "user.image"})
+	// Page<Board> findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(BoardType type, Collection<AccessPolicy> statuses,
+	// 	Pageable pageable);
+	//
+	// default Page<Board> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
+	// 	Pageable pageable) {
+	// 	return findByTypeEqualsAndAccessPolicyInAndDeletedAtIsNull(type, statuses, pageable);
+	// }
 	//  pg_trgm을 이용한 텍스트 유사도 검색
 	@Query(value = """
 		SELECT * FROM posts 

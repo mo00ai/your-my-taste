@@ -7,14 +7,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class KakaoMapConfig {
-	@Value("${kakao.rest-api-key}")
-	private String apiKey;
+
+	@Value("${kakao.rest.api.key}")
+	private String kakaoKey;
 
 	@Bean
 	public WebClient kakaoWebClient() {
+
 		return WebClient.builder()
 			.baseUrl("https://dapi.kakao.com")
-			.defaultHeader("Authorization", "KakaoAK " + apiKey)
+			.defaultHeader("Authorization", "KakaoAK " + kakaoKey)
 			.build();
 	}
 }
