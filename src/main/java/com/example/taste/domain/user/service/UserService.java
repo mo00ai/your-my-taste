@@ -243,6 +243,8 @@ public class UserService {
 					pkLogRepository.insertPkLogs(batch);
 				}
 			}
+		} catch (Exception e) {
+			log.error("[PK Term] 유저 포인트 초기화 중 예외 발생", e);
 		}
 
 		// 전체 포인트 일괄 초기화
