@@ -29,5 +29,5 @@ public interface BoardRepositoryCustom {
 	//
 	// List<BoardListResponseDto> findByHybridSearch(BoardSearchCondition condition);
 
-	long closeBoardsByIds(List<Long> ids);
+	// long closeBoardsByIds(List<Long> ids);
 }

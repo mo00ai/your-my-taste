@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -31,7 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;

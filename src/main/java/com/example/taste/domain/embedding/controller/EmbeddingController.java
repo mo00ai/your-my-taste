@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.domain.embedding.dto.EmbeddingRequest;
 import com.example.taste.domain.embedding.service.EmbeddingService;
-import com.example.taste.domain.store.service.StoreEmbeddingUpdater;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EmbeddingController {
 
 	private final EmbeddingService embeddingService;
-	private final StoreEmbeddingUpdater updater;
+	// private final StoreEmbeddingUpdater updater;
 
 	@PostMapping
 	public CommonResponse<?> createEmbedding(
@@ -43,11 +42,11 @@ public class EmbeddingController {
 
 	}
 
-	@PostMapping("/run")
-	public CommonResponse<Void> runEmbedding() {
-		updater.fillEmptyEmbeddings();
-		return CommonResponse.ok();
-	}
+	// @PostMapping("/run")
+	// public CommonResponse<Void> runEmbedding() {
+	// 	updater.fillEmptyEmbeddings();
+	// 	return CommonResponse.ok();
+	// }
 
 	// @GetMapping("/line")
 	// public CommonResponse<?> test() {
