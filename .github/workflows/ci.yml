@@ -37,7 +37,7 @@ jobs:
       - name: Wait for PostgreSQL to be healthy
         run: |
           for i in {1..5}; do
-            docker exec test-postgres pg_isready -U testuser && break
+            docker exec test-postgres pg_isready -U postgres && break
             echo "Waiting for PostgreSQL..."
             sleep 5
           done

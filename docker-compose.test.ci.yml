@@ -2,7 +2,7 @@ version: '3.8'
 services:
   test-postgres:
     container_name: test-postgres
-    image: postgres:16
+    image: ankane/pgvector:latest
     ports:
       - "5432:5432"
     environment:
