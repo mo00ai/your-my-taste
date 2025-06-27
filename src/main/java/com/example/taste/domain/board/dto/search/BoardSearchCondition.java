@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.validation.Valid;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,4 +29,26 @@ public class BoardSearchCondition {
 	@Valid
 	private CreatedDateRange dateRange = new CreatedDateRange();
 
+	private String foodCategory;
+	private String location;
+
+	// 검색 전략 선택
+	@ValidEnum(target = SearchStrategy.class)
+	private String searchStrategy;
+
+	@Getter
+	public enum SearchStrategy {
+		EXACT("정확한 키워드 매칭"),
+		FUZZY("유사도 검색"),
+		HYBRID("하이브리드 검색"),
+		CATEGORY("카테고리 중심"),
+		LOCATION("지역 중심"),
+		;
+
+		private final String displayName;
+
+		SearchStrategy(String displayName) {
+			this.displayName = displayName;
+		}
+	}
 }

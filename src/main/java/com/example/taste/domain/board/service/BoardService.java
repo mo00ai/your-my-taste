@@ -11,7 +11,9 @@ import static com.example.taste.domain.user.exception.UserErrorCode.*;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -29,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
@@ -73,6 +76,7 @@ public class BoardService {
 	private final ApplicationEventPublisher eventPublisher;
 	private final RedissonClient redissonClient;
 	private final CacheManager concurrentMapCacheManager;
+	private final KoreanTextProcessor processor;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -86,6 +90,8 @@ public class BoardService {
 		if (requestDto.getHashtagList() != null && !requestDto.getHashtagList().isEmpty()) {
 			hashtagService.applyHashtagsToBoard(entity, requestDto.getHashtagList());
 		}
+		// 검색용 인덱스 추가
+		processAndSetSearchKeywords(entity);
 		Board saved = boardRepository.save(entity);
 
 		// 오픈런 게시글 카운팅
@@ -406,5 +412,32 @@ public class BoardService {
 				cache.evict(boardId); // 개별 삭제
 			}
 		}
+	}
+
+	// 검색용 인덱스 필드 초기화
+	private void processAndSetSearchKeywords(Board board) {
+		// 제목 + 내용 결합
+		String combinedText = board.getTitle() + " " + board.getContents();
+
+		// OKT로 키워드 추출
+		Set<String> keywords = processor.extractSearchKeywords(combinedText);
+		List<String> nouns = processor.extractNouns(combinedText);
+		List<String> phrases = processor.extractPhrases(combinedText);
+
+		// 중복 제거 및 필터링
+		Set<String> cleanNouns = nouns.stream()
+			.filter(noun -> noun.length() >= 2)
+			.collect(Collectors.toSet());
+
+		Set<String> cleanPhrases = phrases.stream()
+			.filter(phrase -> phrase.length() >= 3)
+			.filter(phrase -> phrase.split("\\s+").length <= 3)  // 3단어 이하만
+			.collect(Collectors.toSet());
+
+		// 데이터베이스 저장용 문자열로 변환
+		board.setSearchKeywords(String.join(" ", keywords));
+		board.setSearchNouns(String.join(" ", cleanNouns));
+		board.setSearchPhrases(String.join(" ", cleanPhrases));
+
 	}
 }
