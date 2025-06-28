@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.service;
+package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.party.enums.InvitationStatus.CONFIRMED;
 import static com.example.taste.domain.party.enums.InvitationStatus.WAITING;

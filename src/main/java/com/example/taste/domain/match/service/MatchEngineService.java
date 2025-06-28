@@ -173,21 +173,42 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	private boolean isMatchStore(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		if (partyMatchInfo.getStore() == null) {
+		boolean userHasCondition = matchingUser.getStoreList() != null && !matchingUser.getStoreList().isEmpty();
+		boolean partyHasCondition = partyMatchInfo.getStore() != null;
+
+		if (!userHasCondition) {
+			return true;
+		}
+		if (userHasCondition && !partyHasCondition) {
 			return false;
 		}
+
 		return matchingUser.getStoreList().stream()
 			.anyMatch(userStore -> userStore.getStore().equals(partyMatchInfo.getStore()));
 	}
 
 	private boolean isMatchRegion(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		return partyMatchInfo.getRegion() != null &&
-			partyMatchInfo.getRegion().contains(matchingUser.getRegion());
+		boolean userHasCondition = matchingUser.getRegion() != null;
+		boolean partyHasCondition = partyMatchInfo.getRegion() != null;
+
+		if (!userHasCondition) {
+			return true;
+		}
+		if (userHasCondition && !partyHasCondition) {
+			return false;
+		}
+
+		return partyMatchInfo.getRegion().contains(matchingUser.getRegion());
 	}
 
 	private boolean isMatchGender(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		Gender partyGender = partyMatchInfo.getGender();
-		return partyGender.equals(Gender.ANY) || partyGender.equals(matchingUser.getUserGender());
+		Gender partyPrefGender = partyMatchInfo.getGender();
+		Gender userGender = matchingUser.getUserGender();
+
+		if (partyPrefGender == null || partyPrefGender.equals(Gender.ANY))
+			return true;
+
+		return partyPrefGender.equals(userGender);
 	}
 
 	private boolean isMatchAgeRange(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
@@ -195,16 +216,25 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		AgeRange userPrefAgeRange = matchingUser.getAgeRange();
 		AgeRange partyPrefAgeRange = partyMatchInfo.getAgeRange();
 
-		boolean isUserFitPartyPref = partyPrefAgeRange == null || partyPrefAgeRange.includes(userAge);
-		boolean isPartyFitUserPref = true;
+		boolean userHasCondition = userPrefAgeRange != null;
+		boolean partyHasCondition = partyPrefAgeRange != null;
 
-		if (userPrefAgeRange != null) {
-			List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
-			double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
-			isPartyFitUserPref = userPrefAgeRange.includes(avgAge);
+		if (!userHasCondition && !partyHasCondition) {
+			return true;
 		}
 
-		return isUserFitPartyPref && isPartyFitUserPref;
+		if (!userHasCondition && partyHasCondition) {
+			return partyPrefAgeRange.includes(userAge);
+		}
+
+		List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
+		double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
+
+		if (userHasCondition && !partyHasCondition) {
+			return userPrefAgeRange.includes(avgAge);
+		}
+
+		return partyPrefAgeRange.includes(userAge) && userPrefAgeRange.includes(avgAge);
 	}
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지

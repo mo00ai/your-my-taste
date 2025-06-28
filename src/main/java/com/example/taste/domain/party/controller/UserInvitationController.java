@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.match.service.PartyInvitationService;
 import com.example.taste.domain.party.dto.response.UserInvitationResponseDto;
 import com.example.taste.domain.party.facade.UserInvitationFacade;
-import com.example.taste.domain.party.service.PartyInvitationService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController

@@ -1,10 +1,12 @@
 package com.example.taste.domain.party.repository;
 
-import static com.example.jooq.Tables.*;
+import static com.example.jooq.Tables.PARTY;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
@@ -12,13 +14,10 @@ import org.springframework.stereotype.Repository;
 import com.example.taste.domain.party.enums.PartyStatus;
 
 @Repository
-public class PartyRepositoryJooqImpl implements PartyRepositoryJooqCustom {
+@RequiredArgsConstructor
+public class PartyRepositoryJooqCustomImpl implements PartyRepositoryJooqCustom {
 
 	private final DSLContext dsl;
-
-	public PartyRepositoryJooqImpl(DSLContext dsl) {
-		this.dsl = dsl;
-	}
 
 	@Override
 	public List<Long> findAllByMeetingDate(LocalDate meetingDate) {

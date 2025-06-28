@@ -23,6 +23,5 @@ public class MatchEvent implements Serializable {
 		@JsonProperty("userMatchInfoIdList") List<Long> userMatchInfoIdList) {
 		this.matchJobType = matchJobType;
 		this.userMatchInfoIdList = userMatchInfoIdList != null ? userMatchInfoIdList : List.of(-1L);
-		;
 	}
 }

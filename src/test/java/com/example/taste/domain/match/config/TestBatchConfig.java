@@ -1,11 +1,9 @@
 package com.example.taste.domain.match.config;
 
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableAutoConfiguration
-@EnableBatchProcessing
-public class TestPartyBatchConfig {
+public class TestBatchConfig {
 }

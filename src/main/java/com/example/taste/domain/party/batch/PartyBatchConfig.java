@@ -27,26 +27,26 @@ import com.example.taste.domain.party.repository.PartyRepository;
 @Configuration
 @RequiredArgsConstructor
 public class PartyBatchConfig extends DefaultBatchConfiguration {
-	private final PartyRepository partyRepository;
 
 	private static final int CHUNK_SIZE = 1000;
 	private static final int RETRY_LIMIT = 3;
 
-	@Bean
+	@Bean(name = "updatePartyJob")
 	public Job updatePartyJob(
 		JobRepository repo, Step updateExpiredPartyStep, Step updateSoftDeletePartyStep) {
-		return new JobBuilder("UpdatePartyBatchJob", repo)
+		return new JobBuilder("updatePartyJob", repo)
 			.start(updateExpiredPartyStep)
 			.next(updateSoftDeletePartyStep)
 			.build();
 	}
 
 	@Bean
-	public Step updateExpiredPartyStep(JobRepository repo, PlatformTransactionManager transactionManager) {
-		return new StepBuilder("UpdateExpiredPartyStep", repo)
+	public Step updateExpiredPartyStep(JobRepository repo, PlatformTransactionManager transactionManager,
+		PartyRepository partyRepository) {
+		return new StepBuilder("updateExpiredPartyStep", repo)
 			.<Long, Long>chunk(CHUNK_SIZE, transactionManager)
-			.reader(updateExpiredPartyReader())
-			.writer(updateExpiredPartyWriter())
+			.reader(updateExpiredPartyReader(partyRepository))
+			.writer(updateExpiredPartyWriter(partyRepository))
 			.faultTolerant()
 			.retry(DataAccessException.class)
 			.retryLimit(RETRY_LIMIT)
@@ -54,11 +54,12 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 	}
 
 	@Bean
-	public Step updateSoftDeletePartyStep(JobRepository repo, PlatformTransactionManager transactionManager) {
-		return new StepBuilder("UpdateSoftDeletePartyStep", repo)
+	public Step updateSoftDeletePartyStep(JobRepository repo, PlatformTransactionManager transactionManager,
+		PartyRepository partyRepository) {
+		return new StepBuilder("updateSoftDeletePartyStep", repo)
 			.<Long, Long>chunk(CHUNK_SIZE, transactionManager)
-			.reader(updateSoftDeletePartyReader())
-			.writer(updateSoftDeletePartyWriter())
+			.reader(updateSoftDeletePartyReader(partyRepository))
+			.writer(updateSoftDeletePartyWriter(partyRepository))
 			.faultTolerant()
 			.retry(DataAccessException.class)
 			.retryLimit(RETRY_LIMIT)
@@ -67,7 +68,7 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 
 	@Bean
 	@StepScope
-	public ItemReader<Long> updateExpiredPartyReader() {
+	public ItemReader<Long> updateExpiredPartyReader(PartyRepository partyRepository) {
 		LocalDate before1days = LocalDate.now().minusDays(1);
 		List<Long> expiredPartyIds = partyRepository.findAllByMeetingDate(before1days);
 		log.debug("[UpdateExpiredPartyReader] 만료된 파티 ids: {}", expiredPartyIds);
@@ -76,7 +77,7 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 
 	@Bean
 	@StepScope
-	public ItemWriter<Long> updateExpiredPartyWriter() {
+	public ItemWriter<Long> updateExpiredPartyWriter(PartyRepository partyRepository) {
 		return items -> {
 			if (items.isEmpty()) {
 				return;
@@ -89,7 +90,7 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 
 	@Bean
 	@StepScope
-	public ItemReader<Long> updateSoftDeletePartyReader() {
+	public ItemReader<Long> updateSoftDeletePartyReader(PartyRepository partyRepository) {
 		LocalDate before7days = LocalDate.now().minusDays(7);
 		List<Long> expiredPartyIds = partyRepository.findAllByMeetingDate(before7days);
 		log.debug("[UpdateSoftDeletePartyReader] 삭제된 파티 ids: {}", expiredPartyIds);
@@ -98,13 +99,13 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 
 	@Bean
 	@StepScope
-	public ItemWriter<Long> updateSoftDeletePartyWriter() {
+	public ItemWriter<Long> updateSoftDeletePartyWriter(PartyRepository partyRepository) {
 		return items -> {
 			if (items.isEmpty()) {
 				return;
 			}
 
-			long updatedCount = partyRepository.updateExpiredStateByIds(items.getItems());
+			long updatedCount = partyRepository.softDeleteByIds(items.getItems());
 			log.info("[UpdateSoftDeletePartyWriter] {}개의 파티를 삭제 상태로 업데이트 완료함", updatedCount);
 		};
 	}

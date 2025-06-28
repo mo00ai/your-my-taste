@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.match.service.PartyInvitationService;
+import com.example.taste.domain.match.service.PartyService;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.enums.PartyFilter;
-import com.example.taste.domain.party.service.PartyInvitationService;
-import com.example.taste.domain.party.service.PartyService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController

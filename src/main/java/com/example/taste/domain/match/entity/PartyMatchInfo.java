@@ -8,9 +8,11 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -42,7 +44,7 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Party party;
 
-	@OneToOne(optional = true)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Store store;
 	private LocalDate meetingDate;
 

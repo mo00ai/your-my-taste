@@ -1,4 +1,4 @@
-package com.example.taste.domain.party.service;
+package com.example.taste.domain.match.service;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
-import com.example.taste.domain.match.service.MatchService;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
