@@ -1,7 +1,6 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
-import static com.example.taste.config.CacheConfig.*;
 import static com.example.taste.domain.auth.exception.AuthErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -116,9 +114,12 @@ public class BoardService {
 		// 게시글 유효성 검증
 		validateBoard(board, user);
 
-		// 타임 어택 게시글은 캐시 데이터 반환
+		// 캐시 데이터 반환
 		if (board.getAccessPolicy().isTimeAttack()) {
-			return boardCacheService.getOrSetCache(board);
+			return boardCacheService.getInMemoryCache(board);
+		}
+		if (board.getAccessPolicy().isFcfs()) {
+			return boardCacheService.getRedisCache(board);
 		}
 
 		return new BoardResponseDto(board);
@@ -156,15 +157,16 @@ public class BoardService {
 	}
 
 	@Transactional
-	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void updateBoard(Long userId, Long boardId, BoardUpdateRequestDto requestDto) throws IOException {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		board.update(requestDto);
+		if (!board.isNBoard()) {
+			boardCacheService.evictCache(board);
+		}
 	}
 
 	@Transactional
-	@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#boardId")
 	public void deleteBoard(Long userId, Long boardId) {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
@@ -173,6 +175,9 @@ public class BoardService {
 		}
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
+		if (!board.isNBoard()) {
+			boardCacheService.evictCache(board);
+		}
 	}
 
 	@Transactional(readOnly = true)
@@ -255,9 +260,9 @@ public class BoardService {
 	}
 
 	@Transactional
-	public long closeBoardsByIds(List<? extends Long> ids) {
+	public long closeTimeAttackBoardsByIds(List<? extends Long> ids) {
 		long closedCnt = boardRepository.closeBoardsByIds(ids);
-		boardCacheService.evictCache(ids);
+		boardCacheService.evictTimeAttackCaches(ids);
 		return closedCnt;
 	}
 }
