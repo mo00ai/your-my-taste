@@ -15,25 +15,28 @@ import org.springframework.stereotype.Service;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class BoardCacheService {
 
 	private final CacheManager concurrentMapCacheManager;
-	//private final CacheManager redisCacheManager;
 
 	public BoardCacheService(CacheManager concurrentMapCacheManager,
 		@Qualifier(value = "redisCacheManager") CacheManager redisCacheManager) {
 		this.concurrentMapCacheManager = concurrentMapCacheManager;
-		//this.redisCacheManager = redisCacheManager;
 	}
 
 	@Cacheable(value = TIMEATTACK_CACHE_NAME, key = "#board.id", condition = "!#board.accessPolicy.closed")
 	public BoardResponseDto getInMemoryCache(Board board) {
+		log.debug("타임어택 게시글 캐시 저장 : id = {}", board.getId());
 		return new BoardResponseDto(board);
 	}
 
 	@Cacheable(value = FCFS_CACHE_NAME, key = "#board.id", condition = "#board.canCaching()", cacheManager = "redisCacheManager")
 	public BoardResponseDto getRedisCache(Board board) {
+		log.debug("선착순 게시글 캐시 저장 : id = {}", board.getId());
 		return new BoardResponseDto(board);
 	}
 
@@ -45,6 +48,7 @@ public class BoardCacheService {
 				cache.evict(boardId); // 개별 삭제
 			}
 		}
+		log.debug("공개 만료된 타임어택 게시글 캐시 삭제 : id = {}", ids);
 	}
 
 	@Caching(evict = {
@@ -52,5 +56,6 @@ public class BoardCacheService {
 		@CacheEvict(value = FCFS_CACHE_NAME, key = "#board.id", cacheManager = "redisCacheManager")
 	})
 	public void evictCache(Board board) {
+		log.debug("오픈런 게시글 캐시 삭제 : id = {}", board.getId());
 	}
 }
