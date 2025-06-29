@@ -91,7 +91,7 @@ dependencies {
     // AWS SDK v2 for S3 + Presigned URL + cloudfront
     implementation platform("software.amazon.awssdk:bom:2.31.6")
     implementation "software.amazon.awssdk:s3"
-    implementation("software.amazon.cloudfront:cloudfront-signer:1.0.1")
+    implementation("software.amazon.awssdk:cloudfront:2.25.4")
 
     // bcrypt
     implementation 'at.favre.lib:bcrypt:0.10.2'
