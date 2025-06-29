@@ -15,6 +15,7 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,24 @@ public class NotificationRedisService {
 		return redisService.getListSize(listKey);
 	}
 
+	public void testStoreAndTrimNotification(Long userId, Long contentId, NotificationDataDto dataDto) {
+		if (userId == 0 || contentId == null || dataDto == null || dataDto.getCategory() == null) {
+			throw new IllegalArgumentException("Invalid params");
+		}
+
+		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
+		String listKey = "notification:list:user:" + userId;
+		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
+
+		// Lua로 redis 일괄 작업 (삭제 포함)
+		try {
+			redisService.execute(countKey, listKey, key, dataDto);
+		} catch (JsonProcessingException e) {
+			log.warn("redis 저장 실패");
+		}
+
+	}
+
 	public void deleteOldNotifications(Long userId) {
 
 		redisService.getKeyValue("dummyKey");
@@ -49,27 +68,27 @@ public class NotificationRedisService {
 		String lockKey = "lock:" + listKey;
 		int retryCount = 0;
 		while (retryCount < 3) {
-			boolean locked = redisService.transactionalSetIfAbsent(lockKey, lockToken, Duration.ofDays(7));
+			boolean locked = redisService.transactionalSetIfAbsent(lockKey, lockToken, Duration.ofSeconds(3));
 			if (locked) {
 				try {
 					// 락 걸었으면
 					// finally 실행 하고 return 함
 					Long size = redisService.getListSize(listKey);
 					if (size != null && size > 100) {
-						long overflow = size - 100;
-						for (int i = 0; i < overflow; i++) {
-							// redis 에서만 삭제하기 때문에 count 는 유지
-							String oldestKey = redisService.getLast(listKey, String.class);
-							if (oldestKey != null) {
-								redisService.delete(oldestKey);
+						List<Object> toDelete = redisService.getListRange(listKey, 100, -1); // 101번째부터 끝까지
+						for (Object key : toDelete) {
+							if (key instanceof String) {
+								log.info("deleting {}", key);
+								redisService.delete((String)key); // 알림 실제 내용 삭제
 							}
 						}
+						// 리스트를 100개로 자름
 						redisService.listTrim(listKey, 0, 99);
 					}
 					return;
 				} finally {
 					Object lockValue = redisService.getKeyValue(lockKey);
-					if (lockValue.equals(lockToken)) {
+					if (lockValue != null && lockValue.equals(lockToken)) {
 						redisService.delete(lockKey);
 					}
 				}

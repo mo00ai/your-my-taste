@@ -43,7 +43,28 @@ public class NotificationService {
 	private final RedisService redisService;
 
 	// 개별 알림
-	// 둘 중 하나라도 저장 실패시 전부 롤백 하도록
+	public void testIndividual(NotificationContent content, NotificationDataDto dataDto) {
+		User user = userRepository.findById(dataDto.getUserId())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+
+		List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(user.getId());
+		for (WebPushSubscription subscription : webPushSubscriptions) {
+			try {
+				webPushService.send(subscription, dataDto, content.getId());
+			} catch (Exception e) {
+				log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
+			}
+		}
+		notificationRedisService.testStoreAndTrimNotification(dataDto.getUserId(), content.getId(),
+			dataDto);
+
+		infoRepository.save(NotificationInfo.builder()
+			.category(dataDto.getCategory())
+			.notificationContent(content)
+			.user(user)
+			.build());
+	}
+
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
 		User user = userRepository.findById(dataDto.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
