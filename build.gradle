@@ -88,9 +88,10 @@ dependencies {
     // Image 검증
     implementation 'org.apache.tika:tika-core:2.9.0'
 
-    // AWS SDK v2 for S3 + Presigned URL
+    // AWS SDK v2 for S3 + Presigned URL + cloudfront
     implementation platform("software.amazon.awssdk:bom:2.31.6")
     implementation "software.amazon.awssdk:s3"
+    implementation("software.amazon.cloudfront:cloudfront-signer:1.0.1")
 
     // bcrypt
     implementation 'at.favre.lib:bcrypt:0.10.2'
