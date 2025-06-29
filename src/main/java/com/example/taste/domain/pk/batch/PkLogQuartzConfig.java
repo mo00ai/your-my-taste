@@ -28,7 +28,7 @@ public class PkLogQuartzConfig {
 			.forJob(pkLogJobDetail)
 			.withIdentity("PkLogBatchTrigger")
 			.withPriority(10)
-			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 12 * * ?")) // 매일 자정
+			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?")) // 매일 자정
 			.withPriority(1)
 			// .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * * * ?"))
 			.build();
