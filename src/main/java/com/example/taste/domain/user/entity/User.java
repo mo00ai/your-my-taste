@@ -44,7 +44,6 @@ import lombok.Setter;
 @Table(name = "users")
 public class User extends SoftDeletableEntity {
 
-	@Setter
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
