@@ -22,13 +22,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class FcfsJoinService {
+public class FcfsQueueService {
 
 	private final RedisService redisService;
 	private final RedissonClient redissonClient;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final FcfsInformationRepository fcfsInformationRepository;
-	private final FcfsPersistService fcfsPersistService;
+	private final FcfsInformationService fcfsInformationService;
 
 	// 선착순 queue에 데이터 insert
 	public void tryEnterFcfsQueue(Board board, Long userId) {
@@ -132,7 +132,7 @@ public class FcfsJoinService {
 			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
 			if (board.isOverOpenLimit(size)) {
-				fcfsPersistService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+				fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
 				redisService.deleteKey(key);
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}

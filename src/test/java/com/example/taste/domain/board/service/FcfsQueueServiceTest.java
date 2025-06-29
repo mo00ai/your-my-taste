@@ -53,7 +53,7 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-class FcfsJoinServiceTest extends AbstractIntegrationTest {
+class FcfsQueueServiceTest extends AbstractIntegrationTest {
 	@LocalServerPort
 	private int port;
 
@@ -70,7 +70,7 @@ class FcfsJoinServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private CategoryRepository categoryRepository;
 	@Autowired
-	private FcfsJoinService fcfsJoinService;
+	private FcfsQueueService fcfsQueueService;
 
 	@Test
 	@Transactional
@@ -123,7 +123,7 @@ class FcfsJoinServiceTest extends AbstractIntegrationTest {
 		CompletableFuture<String> future = connectAndSubscribe(board.getId(), sessionId);
 
 		// when
-		fcfsJoinService.tryEnterFcfsQueueByRedisson(board, user);
+		fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
 		Thread.sleep(500);
 
 		// then

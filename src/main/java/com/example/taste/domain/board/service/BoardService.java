@@ -62,7 +62,7 @@ public class BoardService {
 	private final EntityManager entityManager;
 	private final ApplicationEventPublisher eventPublisher;
 	private final BoardCacheService boardCacheService;
-	private final FcfsJoinService fcfsJoinService;
+	private final FcfsQueueService fcfsQueueService;
 
 	@Transactional
 	public void createBoard(Long userId, BoardRequestDto requestDto, List<MultipartFile> files) {
@@ -152,7 +152,7 @@ public class BoardService {
 
 		// 선착순 공개 게시글이면 순위 검증
 		if (board.getAccessPolicy().isFcfs()) {
-			fcfsJoinService.tryEnterFcfsQueueByRedisson(board, user);
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
 		}
 	}
 

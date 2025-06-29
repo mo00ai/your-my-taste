@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class FcfsPersistService {
+public class FcfsInformationService {
 
 	private final FcfsInformationRepository fcfsInformationRepository;
 	private final RedisService redisService;
