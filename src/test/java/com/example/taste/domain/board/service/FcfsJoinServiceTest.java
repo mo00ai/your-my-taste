@@ -123,7 +123,7 @@ class FcfsJoinServiceTest extends AbstractIntegrationTest {
 		CompletableFuture<String> future = connectAndSubscribe(board.getId(), sessionId);
 
 		// when
-		fcfsJoinService.tryEnterFcfsQueueByRedisson(board, 99L);
+		fcfsJoinService.tryEnterFcfsQueueByRedisson(board, user);
 		Thread.sleep(500);
 
 		// then

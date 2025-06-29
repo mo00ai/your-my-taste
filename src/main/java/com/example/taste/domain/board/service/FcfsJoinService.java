@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.repository.FcfsInformationRepository;
+import com.example.taste.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,8 @@ public class FcfsJoinService {
 	private final RedisService redisService;
 	private final RedissonClient redissonClient;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final FcfsInformationRepository fcfsInformationRepository;
+	private final FcfsPersistService fcfsPersistService;
 
 	// 선착순 queue에 데이터 insert
 	public void tryEnterFcfsQueue(Board board, Long userId) {
@@ -103,13 +107,18 @@ public class FcfsJoinService {
 	}
 
 	// Redisson 분산락으로 동시성 제어
-	public void tryEnterFcfsQueueByRedisson(Board board, Long userId) {
+	public void tryEnterFcfsQueueByRedisson(Board board, User user) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 
 		// 순위가 이미 존재하는 유저는 바로 리턴
-		if (redisService.hasRankInZSet(key, userId)) {
+		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
+		} else if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
+			return;
+		} // 이미 순위가 다 차서 DB에 선착순 정보가 저장된 게시글이면 error
+		else if (fcfsInformationRepository.existsByBoardId(board.getId())) {
+			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
 		RLock lock = redissonClient.getLock(lockKey);
@@ -122,11 +131,13 @@ public class FcfsJoinService {
 
 			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
-			if (board.isOverOpenLimit(size)) { // NOTE 인원 다 찬 게시글과 순위 안에 든 유저 정보 테이블에 저장 @김채진
+			if (board.isOverOpenLimit(size)) {
+				fcfsPersistService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+				redisService.deleteKey(key);
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
 
-			redisService.addToZSet(key, userId, System.currentTimeMillis());
+			redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
 			String destination = "/sub/openrun/board/" + board.getId();

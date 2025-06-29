@@ -152,7 +152,7 @@ public class BoardService {
 
 		// 선착순 공개 게시글이면 순위 검증
 		if (board.getAccessPolicy().isFcfs()) {
-			fcfsJoinService.tryEnterFcfsQueueByRedisson(board, user.getId());
+			fcfsJoinService.tryEnterFcfsQueueByRedisson(board, user);
 		}
 	}
 
