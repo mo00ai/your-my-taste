@@ -204,4 +204,5 @@ public class User extends SoftDeletableEntity {
 	public int hashCode() {
 		return id != null ? id.hashCode() : 0;
 	}
+
 }

@@ -1,24 +1,21 @@
 package com.example.taste.domain.user.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.ALREADY_FOLLOWED;
-import static com.example.taste.domain.user.exception.UserErrorCode.FOLLOW_NOT_FOUND;
-import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
+import org.jooq.Cursor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.jooq.tables.records.UsersRecord;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
@@ -37,6 +34,9 @@ import com.example.taste.domain.user.entity.UserFavor;
 import com.example.taste.domain.user.repository.FollowRepository;
 import com.example.taste.domain.user.repository.UserFavorRepository;
 import com.example.taste.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -174,42 +174,81 @@ public class UserService {
 		return userRepository.findAllByOrderByPointDesc(PageRequest.of(0, 100));
 	}
 
+	// @Transactional
+	// public void resetUsersPoint() {
+	//
+	// 	List<User> usersWithPoints = userRepository.findByPointGreaterThan(0);
+	//
+	// 	if (!usersWithPoints.isEmpty()) {
+	//
+	// 		List<PkLog> resetLogs = usersWithPoints.stream()
+	// 			.map(user -> PkLog.builder()
+	// 				.pkType(PkType.RESET)
+	// 				.point(0)
+	// 				.user(user)
+	// 				.createdAt(LocalDateTime.now())
+	// 				.build())
+	// 			.toList();
+	//
+	// 		//jdbc
+	// 		// pkLogJdbcRepository.batchInsert(resetLogs);
+	//
+	// 		//jpa
+	// 		// pkLogRepository.saveAll(resetLogs);
+	//
+	// 		//jooq
+	// 		pkLogRepository.insertPkLogs(resetLogs);
+	//
+	// 	}
+	//
+	// 	//jdbc
+	// 	// userJdbcRepository.resetAllUserPoints();
+	//
+	// 	//jpa
+	// 	// userRepository.resetAllPoints();
+	//
+	// 	//jooq
+	// 	userRepository.resetAllUserPoints();
+	//
+	// }
+
 	@Transactional
 	public void resetUsersPoint() {
 
-		List<User> usersWithPoints = userRepository.findByPointGreaterThan(0);
+		int batchSize = 1000;
+		List<PkLog> logs = new ArrayList<>();
 
-		if (!usersWithPoints.isEmpty()) {
+		try (Cursor<UsersRecord> cursor = userRepository.findByPointWithJooqCursor(0)) {
 
-			List<PkLog> resetLogs = usersWithPoints.stream()
-				.map(user -> PkLog.builder()
+			while (cursor.hasNext()) {
+				UsersRecord jooqUser = cursor.fetchNext();
+
+				// User user = User.ofId(jooqUser.getId());
+
+				//가짜 객체
+				User user = userRepository.getReferenceById(jooqUser.getId());
+
+				logs.add(PkLog.builder()
 					.pkType(PkType.RESET)
 					.point(0)
 					.user(user)
 					.createdAt(LocalDateTime.now())
-					.build())
-				.toList();
+					.build());
+			}
 
-			//jdbc
-			// pkLogJdbcRepository.batchInsert(resetLogs);
-
-			//jpa
-			// pkLogRepository.saveAll(resetLogs);
-
-			//jooq
-			pkLogRepository.insertPkLogs(resetLogs);
-
+			if (!logs.isEmpty()) {
+				for (int i = 0; i < logs.size(); i += batchSize) {
+					int end = Math.min(i + batchSize, logs.size());
+					List<PkLog> batch = logs.subList(i, end);
+					pkLogRepository.insertPkLogs(batch);
+				}
+			}
+		} catch (Exception e) {
+			log.error("[PK Term] 유저 포인트 초기화 중 예외 발생", e);
 		}
 
-		//jdbc
-		// userJdbcRepository.resetAllUserPoints();
-
-		//jpa
-		// userRepository.resetAllPoints();
-
-		//jooq
-		userRepository.resetAllPoints();
-
+		// 전체 포인트 일괄 초기화
+		userRepository.resetAllUserPoints();
 	}
 
 	@Transactional

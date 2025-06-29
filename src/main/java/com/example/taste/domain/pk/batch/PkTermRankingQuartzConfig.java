@@ -27,6 +27,7 @@ public class PkTermRankingQuartzConfig {
 			.forJob(pkTermJobDetail)
 			.withIdentity("pkTermRankingTrigger")
 			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 1 * ?")) // 매월 1일 00시
+			.withPriority(100)
 			// .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * * * ?"))
 			.build();
 	}
