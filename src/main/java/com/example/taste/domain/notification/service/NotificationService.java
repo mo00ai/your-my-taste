@@ -1,6 +1,5 @@
 package com.example.taste.domain.notification.service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class NotificationService {
 				log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 			}
 		}
-		notificationRedisService.testStoreAndTrimNotification(dataDto.getUserId(), content.getId(),
+		notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
 			dataDto);
 
 		infoRepository.save(NotificationInfo.builder()
@@ -77,10 +76,8 @@ public class NotificationService {
 				log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 			}
 		}
-		notificationRedisService
-			.storeNotification(dataDto.getUserId(), content.getId(), dataDto, Duration.ofDays(7));
-
-		notificationRedisService.deleteOldNotifications(dataDto.getUserId());
+		notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
+			dataDto);
 
 		infoRepository.save(NotificationInfo.builder()
 			.category(dataDto.getCategory())
@@ -93,7 +90,6 @@ public class NotificationService {
 	@Transactional
 	public void sendBunch(NotificationContent content, NotificationDataDto dataDto, List<User> allUser) {
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
-		List<User> bigListUser = new ArrayList<>();
 		for (User user : allUser) {
 			Long userId = user.getId();
 			List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(userId);
@@ -105,24 +101,14 @@ public class NotificationService {
 				}
 
 			}
-			Long size = notificationRedisService
-				.storeNotification(userId, content.getId(), dataDto, Duration.ofDays(7));
-			if (size > 100) {
-				bigListUser.add(user);
-			}
+			notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
+				dataDto);
 
 			notificationInfos.add(NotificationInfo.builder()
 				.category(dataDto.getCategory())
 				.notificationContent(content)
 				.user(user)
 				.build());
-		}
-		for (User user : bigListUser) {
-			try {
-				notificationRedisService.deleteOldNotifications(user.getId());
-			} catch (Exception e) {
-				log.warn("리스트 정리 작업 실패 user : {}", user.getId(), e);
-			}
 		}
 		infoRepository.saveAll(notificationInfos);
 	}
@@ -144,11 +130,9 @@ public class NotificationService {
 				}
 
 			}
-			Long size = notificationRedisService
-				.storeNotification(id, content.getId(), dataDto, Duration.ofDays(7));
-			if (size > 100) {
-				bigListUserId.add(id);
-			}
+			notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
+				dataDto);
+
 			notificationInfos.add(NotificationInfo.builder()
 				.category(dataDto.getCategory())
 				.notificationContent(content)
@@ -156,15 +140,7 @@ public class NotificationService {
 				.user(new User(id))
 				.build());
 		}
-		for (Long userId : bigListUserId) {
-			try {
-				notificationRedisService.deleteOldNotifications(userId);
-			} catch (Exception e) {
-				log.warn("리스트 정리 작업 실패 user : {}", userId, e);
-			}
-		}
 		infoRepository.saveAll(notificationInfos);
-
 	}
 
 	public NotificationDataDto makeDataDto(NotificationPublishDto publishDto) {

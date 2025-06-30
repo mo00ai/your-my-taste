@@ -41,7 +41,7 @@ public class NotificationRedisService {
 		return redisService.getListSize(listKey);
 	}
 
-	public void testStoreAndTrimNotification(Long userId, Long contentId, NotificationDataDto dataDto) {
+	public void storeAndTrimNotification(Long userId, Long contentId, NotificationDataDto dataDto) {
 		if (userId == 0 || contentId == null || dataDto == null || dataDto.getCategory() == null) {
 			throw new IllegalArgumentException("Invalid params");
 		}
