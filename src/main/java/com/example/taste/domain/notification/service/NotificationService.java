@@ -79,7 +79,7 @@ public class NotificationService {
 				}
 
 			}
-			notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
+			notificationRedisService.storeAndTrimNotification(userId, content.getId(),
 				dataDto);
 
 			notificationInfos.add(NotificationInfo.builder()
@@ -108,7 +108,7 @@ public class NotificationService {
 				}
 
 			}
-			notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
+			notificationRedisService.storeAndTrimNotification(id, content.getId(),
 				dataDto);
 
 			notificationInfos.add(NotificationInfo.builder()
