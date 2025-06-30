@@ -93,43 +93,23 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: test1234
       DB_SCHEMA: public
-
-      # Local DB
-      #      LOCAL_DB_NAME: taste_ci_test
-      #      LOCAL_DB_USERNAME: testuser
-      #      LOCAL_DB_PASSWORD: test1234
-      #      LOCAL_ROOT_PASSWORD: root1234
-      #
-      #      # Redis
-      #      LOCAL_REDIS_HOST: localhost
-      #      LOCAL_REDIS_PORT: 6379
-
-      # AWS S3
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
       S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
       S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
       S3_REGION: ${{ secrets.S3_REGION }}
       CLOUD_FRONT_DOMAIN: ${{ secrets.CLOUD_FRONT_DOMAIN }}
-
-      # OCR
       OCR_KEY: ${{ secrets.OCR_KEY }}
       OCR_HOST: ${{ secrets.OCR_HOST }}
       OCR_PATH: ${{ secrets.OCR_PATH }}
-
-      # Naver Map API
       NAVER_MAP_CLIENT_ID: ${{ secrets.NAVER_MAP_CLIENT_ID }}
       NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
-
-      # Naver Datalab API
       NAVER_DATALAB_CLIENT_ID: ${{ secrets.NAVER_DATALAB_CLIENT_ID }}
       NAVER_DATALAB_CLIENT_SECRET: ${{ secrets.NAVER_DATALAB_CLIENT_SECRET }}
-
-      # Vapid
       VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
       VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
-
-      #KAKAO
       KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+      WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - name: Checkout source
@@ -174,7 +154,7 @@ jobs:
           path: build/libs
 
       - name: Run Unit Tests
-        run: ./gradlew unitTest -x generateJooq #profiles는 build.gradle에서
+        run: ./gradlew unitTest -x generateJooq
 
       - name: Run Integration Tests
-        run: ./gradlew integrationTest #profiles는 build.gradle에서
+        run: ./gradlew integrationTest
