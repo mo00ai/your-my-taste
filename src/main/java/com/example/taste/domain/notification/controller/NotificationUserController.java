@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.notification.dto.GetNotificationCountResponseDto;
 import com.example.taste.domain.notification.dto.NotificationResponseDto;
 import com.example.taste.domain.notification.service.NotificationUserService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.constraints.Min;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class NotificationUserController {
 
 	private final NotificationUserService notificationUserService;
-	//todo 서비스에 detail 넘겨주지 말 것.
 
 	// 알림 카운트 접근(전체)(원하지 않는 카테고리 알림 삭제)
 	@GetMapping
@@ -39,14 +37,6 @@ public class NotificationUserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
 		return CommonResponse.ok(notificationUserService.getNotificationList(userDetails.getId(), index));
 	}
-
-	// 알림 추가 접근
-	@GetMapping("/list/old")
-	public CommonResponse<Slice<NotificationResponseDto>> getOldNotificationList(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(defaultValue = "1") @Min(1) int index) {
-		return CommonResponse.ok(notificationUserService.getMoreNotificationList(userDetails.getId(), index));
-	}
-	//todo 합쳐라
 
 	// 알림 읽음 처리하기
 	@PatchMapping

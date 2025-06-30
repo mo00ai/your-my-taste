@@ -6,6 +6,11 @@ import static com.example.taste.domain.user.entity.QUserFavor.*;
 
 import java.util.Optional;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.user.entity.User;
@@ -56,4 +61,20 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 		);
 	}
 
+
+	@Override
+	public Page<Long> getAllUserIdPage(PageRequest pageRequest) {
+		List<Long> userPage = queryFactory.select(user.id).from(user).where(
+				user.deletedAt.isNull()
+			)
+			.orderBy(user.id.asc())
+			.offset(pageRequest.getOffset())
+			.limit(pageRequest.getPageSize())
+			.fetch();
+		Long total = queryFactory.select(user.count())
+			.from(user)
+			.where(user.deletedAt.isNull())
+			.fetchOne();
+		return new PageImpl<>(userPage, pageRequest, total);
+	}
 }
