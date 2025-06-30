@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.domain.board.dto.mq.BoardStatusDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.mq.BoardStatusPublisher;
 import com.example.taste.domain.board.repository.FcfsInformationRepository;
 import com.example.taste.domain.user.entity.User;
 
@@ -29,6 +31,7 @@ public class FcfsQueueService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final FcfsInformationRepository fcfsInformationRepository;
 	private final FcfsInformationService fcfsInformationService;
+	private final BoardStatusPublisher boardStatusPublisher;
 
 	// 선착순 queue에 데이터 insert
 	public void tryEnterFcfsQueue(Board board, Long userId) {
@@ -124,7 +127,7 @@ public class FcfsQueueService {
 		RLock lock = redissonClient.getLock(lockKey);
 
 		try {
-			boolean hasLock = lock.tryLock(1000, 3000, TimeUnit.MILLISECONDS);// 최대 1초 동안 락 획득 시도, 락 유지 시간 1초
+			boolean hasLock = lock.tryLock(1000, 3000, TimeUnit.MILLISECONDS);// 최대 1초 동안 락 획득 시도, 락 유지 시간 3초
 			if (!hasLock) {
 				throw new CustomException(REDIS_FAIL_GET_LOCK);
 			}
@@ -140,9 +143,10 @@ public class FcfsQueueService {
 			redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			String destination = "/sub/openrun/board/" + board.getId();
+			//String destination = "/sub/openrun/board/" + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
-			messagingTemplate.convertAndSend(destination, remainingSlot);
+			//messagingTemplate.convertAndSend(destination, remainingSlot);
+			boardStatusPublisher.publish(new BoardStatusDto(board.getId(), remainingSlot)); // 메세지큐 적용 -> 메세지 전송 성능 향상
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt(); // 스레드 중단 요청

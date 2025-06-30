@@ -106,12 +106,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
-    //prometheus
+    // prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    //web_push
+    // web_push
     implementation 'com.zerodeplibs:zerodep-web-push-java:2.1.2'
+
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 def dotenv = new Properties()
