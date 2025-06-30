@@ -35,8 +35,7 @@ public class IndividualNotificationStrategy implements NotificationStrategy, Cat
 		NotificationDataDto dataDto = notificationService.makeDataDto(dto);
 		NotificationContent notificationContent = notificationService.saveContent(dataDto);
 		memoryTracker.measureMemoryUsage("individual", () -> {
-			notificationService.testIndividual(notificationContent, dataDto);
-			//notificationService.sendIndividual(notificationContent, dataDto);
+			notificationService.sendIndividual(notificationContent, dataDto);
 		});
 		sample.stop(meterRegistry.timer("individual"));
 	}
