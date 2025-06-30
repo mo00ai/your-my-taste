@@ -14,10 +14,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
@@ -84,23 +82,6 @@ public class RedisService {
 	public boolean setIfAbsent(String key, Object value, Duration validityTime) {
 		return Boolean.TRUE.equals(
 			redisTemplate.opsForValue().setIfAbsent(key, value, validityTime));
-	}
-
-	public boolean transactionalSetIfAbsent(String key, Object value, Duration ttl) {
-		List<Object> txResults = redisTemplate.execute(new SessionCallback<>() {
-			@Override
-			public List<Object> execute(RedisOperations operations) {
-				operations.multi();
-				operations.expire(key, ttl); // TTL도 같이 설정하고 싶으면
-				Boolean result = operations.opsForValue().setIfAbsent(key, value);
-				return operations.exec(); // 실제 실행
-			}
-		});
-
-		if (txResults == null || txResults.isEmpty())
-			return false;
-		Object result = txResults.get(0);
-		return result instanceof Boolean && (Boolean)result;
 	}
 
 	// key, String
