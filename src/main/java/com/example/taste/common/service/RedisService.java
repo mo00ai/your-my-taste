@@ -165,9 +165,9 @@ public class RedisService {
 		redisTemplate.opsForList().trim(listKey, here, there);
 	}
 
-	public <T> void execute(String countKey, String listKey, String key, NotificationDataDto dataDto) throws
+	public <T> void execute(String countKey, String listKey, String key, Object dto) throws
 		JsonProcessingException {
-		redisTemplate.opsForValue().set(key, dataDto, Duration.ofDays(7));
+		redisTemplate.opsForValue().set(key, dto, Duration.ofDays(7));
 
 		// redis에서 접근해야 할 키들은 list로 넘기고 KEY[]로 받아줘야 함
 		// 새로 만들 키, 값 들의 경우 매개변수로 보내줘야 함.
