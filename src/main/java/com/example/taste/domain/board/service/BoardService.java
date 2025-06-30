@@ -24,6 +24,7 @@ import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardQueryDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.AccessPolicy;
@@ -224,23 +225,24 @@ public class BoardService {
 	// 오픈런 게시글 목록 조회
 	// 클라이언트에서 조회 후 소켓 연결 요청하는 시나리오
 	public PageResponse<OpenRunBoardResponseDto> findOpenRunBoardList(Pageable pageable) {
-		Page<OpenRunBoardResponseDto> dtos = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
+		Page<OpenRunBoardQueryDto> dtos = boardRepository.findUndeletedBoardByTypeAndPolicy(BoardType.O,
 			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> result = dtos.map(dto -> {
 			boolean isClosed = dto.getOpenTime().isAfter(LocalDateTime.now());
+			Long remainingSlot = null;
+			Integer openLimit = dto.getOpenLimit();
 
 			if (dto.getAccessPolicy().isFcfs() && !isClosed) {
 				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
-				long remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
-				dto.setRemainingSlot(remainingSlot);
+				remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
 			}
 
 			if (isClosed) {
-				dto.setOpenLimit(null);
+				openLimit = null;
 			}
 
-			return dto;
+			return OpenRunBoardResponseDto.createFromDto(dto, openLimit, remainingSlot);
 		});
 
 		return PageResponse.from(result);
