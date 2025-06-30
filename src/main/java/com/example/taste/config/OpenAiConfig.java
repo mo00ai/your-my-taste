@@ -6,17 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class KakaoMapConfig {
+public class OpenAiConfig {
 
-	@Value("${kakao.rest.api.key}")
-	private String kakaoKey;
+	@Value("${openai.api.key}")
+	private String aiKey;
 
 	@Bean
-	public WebClient kakaoWebClient() {
+	public WebClient aiWebClient() {
 
 		return WebClient.builder()
-			.baseUrl("https://dapi.kakao.com")
-			.defaultHeader("Authorization", "KakaoAK " + kakaoKey)
+			.baseUrl("https://api.openai.com/v1")
+			.defaultHeader("Authorization", "Bearer " + aiKey)
+			.defaultHeader("Content-Type", "application/json")
 			.build();
 	}
+
 }
