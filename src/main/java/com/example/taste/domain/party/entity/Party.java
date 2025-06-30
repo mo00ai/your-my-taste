@@ -162,6 +162,20 @@ public class Party extends SoftDeletableEntity {
 			.average().orElse(0.0);
 	}
 
+	public double calculateAvgAgeAfterJoin(double oldAvgAge, int newMemberAge) {
+		int oldMembersCount = this.nowMembers - 1;
+		return (oldAvgAge * oldMembersCount + newMemberAge) / (oldMembersCount + 1);
+	}
+
+	public double calculateAvgAgeAfterLeave(double oldAvgAge, int leavedMemberAge) {
+		int oldMembersCount = this.nowMembers + 1;
+		return switch (this.nowMembers) {
+			case 0 -> 0;
+			case 1 -> this.hostUser.getAge();
+			default -> (oldAvgAge * oldMembersCount - leavedMemberAge) / (oldMembersCount - 1);
+		};
+	}
+
 	public void updateHost(User user) {
 		this.hostUser = user;
 	}

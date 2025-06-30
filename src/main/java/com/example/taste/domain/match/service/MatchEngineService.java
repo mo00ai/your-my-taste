@@ -25,6 +25,9 @@ import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.user.enums.Gender;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,30 +35,39 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
+	private final MeterRegistry meterRegistry;
 
 	// 유저 한 명에게 파티 추천
 	@Transactional
 	public void runMatchingForUser(List<Long> userMatchInfoIdList) {
 		// MEMO : 다 불러와도 되나?
-		List<UserMatchInfo> matchingUserList =
-			userMatchInfoRepository.findAllById(userMatchInfoIdList);
+		Timer.Sample sample = Timer.start(meterRegistry);
+		try {
+			List<UserMatchInfo> matchingUserList =
+				userMatchInfoRepository.findAllById(userMatchInfoIdList);
 
-		List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
-		// 매칭 중인 파티가 없는 경우
-		if (matchingPartyList.isEmpty()) {
-			return;
-		}
-
-		// 매칭 알고리즘
-		List<PartyInvitation> matchedList = new ArrayList<>();
-
-		for (UserMatchInfo matchingUser : matchingUserList) {
-			PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
-			if (partyInvitation != null) {
-				matchedList.add(partyInvitation);
+			List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
+			// 매칭 중인 파티가 없는 경우
+			if (matchingPartyList.isEmpty()) {
+				return;
 			}
+
+			// 매칭 알고리즘
+			List<PartyInvitation> matchedList = new ArrayList<>();
+
+			for (UserMatchInfo matchingUser : matchingUserList) {
+				PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
+				if (partyInvitation != null) {
+					matchedList.add(partyInvitation);
+				}
+			}
+			partyInvitationRepository.saveAll(matchedList);
+		} finally {
+			sample.stop(Timer.builder("party.match.execution.time")
+				.description("파티 매칭 알고리즘 실행 시간 (ms)")
+				.publishPercentileHistogram()
+				.register(meterRegistry));
 		}
-		partyInvitationRepository.saveAll(matchedList);
 		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진 MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
 	}
 

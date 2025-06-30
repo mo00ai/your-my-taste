@@ -21,7 +21,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.taste.TasteApplication;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.config.TestBatchConfig;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.batch.PartyBatchConfig;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.enums.PartyStatus;
@@ -37,6 +39,15 @@ import com.example.taste.property.AbstractIntegrationTest;
 @SpringBatchTest
 @SpringBootTest(classes = {TasteApplication.class, TestBatchConfig.class, PartyBatchConfig.class})
 public class MatchBatchTest extends AbstractIntegrationTest {
+	@Autowired
+	private RedisService redisService;
+
+	@Autowired
+	private PartyMatchInfoRepository partyMatchInfoRepository;
+
+	@Autowired
+	private MatchEngineService matchEngineService;
+
 	@Autowired
 	private JobLauncherTestUtils jobLauncherTestUtils;
 

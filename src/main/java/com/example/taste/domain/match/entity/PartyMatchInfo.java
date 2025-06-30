@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -35,7 +36,7 @@ import com.example.taste.domain.user.enums.Gender;
 @Getter
 @NoArgsConstructor
 @Table(name = "party_match_info")
-public class PartyMatchInfo extends BaseCreatedAtEntity {
+public class PartyMatchInfo extends BaseCreatedAtEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

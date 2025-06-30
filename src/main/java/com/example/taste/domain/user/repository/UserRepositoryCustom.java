@@ -4,4 +4,6 @@ public interface UserRepositoryCustom {
 	long resetPostingCnt();
 
 	int increasePostingCount(Long userId, int limit);
+
+	Integer findAgeByUserId(Long userId);
 }

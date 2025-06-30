@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
+import com.example.taste.domain.match.dto.PartyMatchInfoDto;
 import com.example.taste.domain.match.enums.MatchJobType;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
@@ -22,7 +25,9 @@ import com.example.taste.domain.party.validator.PartyInvitationValidator;
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationInternalService {
+	private final RedisService redisService;
 	private final PartyInvitationRepository partyInvitationRepository;
+	private final PartyMatchInfoRepository partyMatchInfoRepository;
 
 	// 호스트가 랜덤 파티 초대 수락
 	@Transactional
@@ -37,12 +42,6 @@ public class PartyInvitationInternalService {
 			partyInvitation.getUserMatchInfo(), MatchStatus.WAITING_HOST);
 
 		partyInvitation.getUserMatchInfo().updateMatchStatus(MatchStatus.WAITING_USER);
-
-		// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
-		if (party.isFull()) {
-			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
-		}
-
 	}
 
 	// 호스트가 가입 요청 타입(REQUEST) 수락
@@ -61,8 +60,26 @@ public class PartyInvitationInternalService {
 		// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 		if (party.isFull()) {
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(partyId, WAITING);
+
+			partyMatchInfoRepository.findPartyMatchInfoByParty(party)
+				.ifPresent((partyMatchInfo) -> {
+						String key = "partyMatchInfo" + partyMatchInfo.getId();
+						redisService.delete(key);
+					}
+				);
+			return;
 		}
 
+		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				int userAge = partyInvitation.getUser().getAge();
+				cachedDto.updateAvgAge(
+					party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userAge));
+				redisService.setKeyValue(key, cachedDto);
+			});
 	}
 
 	// 호스트가 파티 초대 취소

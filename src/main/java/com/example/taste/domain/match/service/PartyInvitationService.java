@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
+import com.example.taste.domain.match.dto.PartyMatchInfoDto;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.dto.request.PartyInvitationRequestDto;
 import com.example.taste.domain.party.dto.response.PartyInvitationResponseDto;
 import com.example.taste.domain.party.dto.response.UserInvitationResponseDto;
@@ -34,9 +37,11 @@ import com.example.taste.domain.user.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class PartyInvitationService {
+	private final RedisService redisService;
 	private final UserRepository userRepository;
 	private final PartyRepository partyRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
+	private final PartyMatchInfoRepository partyMatchInfoRepository;
 
 	@Transactional
 	public void leaveParty(Long userId, Long partyId) {
@@ -62,6 +67,17 @@ public class PartyInvitationService {
 
 			party.updateHost(newHostUser);
 		}
+
+		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				int userAge = partyInvitation.getUser().getAge();
+				cachedDto.updateAvgAge(
+					party.calculateAvgAgeAfterLeave(cachedDto.getAvgAge(), userAge));
+				redisService.setKeyValue(key, cachedDto);
+			});
 	}
 
 	// 강퇴
@@ -81,6 +97,17 @@ public class PartyInvitationService {
 
 		// 파티에서 현재 멤버 수 차감
 		party.leaveMember();
+
+		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				int userAge = partyInvitation.getUser().getAge();
+				cachedDto.updateAvgAge(
+					party.calculateAvgAgeAfterLeave(cachedDto.getAvgAge(), userAge));
+				redisService.setKeyValue(key, cachedDto);
+			});
 	}
 
 	public void inviteUserToParty(

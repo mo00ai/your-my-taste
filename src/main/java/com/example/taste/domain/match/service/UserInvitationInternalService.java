@@ -10,8 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
-import com.example.taste.domain.match.entity.PartyMatchInfo;
+import com.example.taste.domain.match.dto.PartyMatchInfoDto;
 import com.example.taste.domain.match.entity.UserMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
@@ -21,10 +22,13 @@ import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.validator.PartyInvitationValidator;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class UserInvitationInternalService {
+	private final RedisService redisService;
+	private final UserRepository userRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 
@@ -46,11 +50,25 @@ public class UserInvitationInternalService {
 
 		// 가입 후 정원이 다 찼다면
 		if (party.isFull()) {
-			PartyMatchInfo partyMatchInfo =
-				partyMatchInfoRepository.findPartyMatchInfoByParty(party);
-			partyMatchInfo.updateMatchStatus(MatchStatus.IDLE);
+			partyMatchInfoRepository.findPartyMatchInfoByParty(party)
+				.ifPresent((partyMatchInfo) -> {
+						String key = "partyMatchInfo" + partyMatchInfo.getId();
+						redisService.delete(key);
+					}
+				);
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
+			return;
 		}
+
+		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				cachedDto.updateAvgAge(
+					party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userMatchInfo.getUserAge()));
+				redisService.setKeyValue(key, cachedDto);
+			});
 	}
 
 	@Transactional
@@ -67,7 +85,26 @@ public class UserInvitationInternalService {
 		// 파티가 다 찬 경우 WAITING 상태인 파티 초대들을 삭제
 		if (party.isFull()) {
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
+
+			partyMatchInfoRepository.findPartyMatchInfoByParty(party)
+				.ifPresent((partyMatchInfo) -> {
+						String key = "partyMatchInfo" + partyMatchInfo.getId();
+						redisService.delete(key);
+					}
+				);
+			return;
 		}
+
+		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				int userAge = partyInvitation.getUser().getAge();
+				cachedDto.updateAvgAge(
+					party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userAge));
+				redisService.setKeyValue(key, cachedDto);
+			});
 	}
 
 	@Transactional

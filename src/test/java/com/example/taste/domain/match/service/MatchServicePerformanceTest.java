@@ -1,5 +1,8 @@
 package com.example.taste.domain.match.service;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -11,17 +14,40 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.dto.MatchEvent;
+import com.example.taste.domain.match.dto.PartyMatchInfoDto;
+import com.example.taste.domain.match.entity.PartyMatchInfo;
 import com.example.taste.domain.match.enums.MatchJobType;
 import com.example.taste.domain.match.redis.MatchPublisher;
+import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
+import com.example.taste.domain.party.entity.PartyInvitation;
+import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
 
 @Tag("Performance")
 @ActiveProfiles("local")
 @SpringBootTest
 public class MatchServicePerformanceTest {
+	@Autowired
+	private RedisService redisService;
+
+	@Autowired
+	private PartyMatchInfoRepository partyMatchInfoRepository;
+
+	@Autowired
+	private PartyInvitationRepository partyInvitationRepository;
+
+	@Autowired
+	private MatchEngineService matchEngineService;
+
+	@Autowired
+	private MatchEngineCacheService matchEngineCacheService;
+
 	@Autowired
 	private static JdbcTemplate jdbcTemplate;
 
@@ -30,6 +56,121 @@ public class MatchServicePerformanceTest {
 
 	@Autowired
 	private MatchPublisher matchPublisher;
+
+	@Test
+	@Transactional
+	@Rollback(false)
+	@DisplayName("파티 매칭 캐시 등록")
+	public void cachePartyMatchInfoTest() {
+		List<PartyMatchInfo> partyMatchInfoList
+			= partyMatchInfoRepository.findAll();
+
+		for (PartyMatchInfo partyMatchInfo : partyMatchInfoList) {
+			// 캐싱 적용
+			String key = "partyMatchInfo" + partyMatchInfo.getId();
+			long ttlDays = ChronoUnit.DAYS.between(LocalDate.now(), partyMatchInfo.getMeetingDate()) + 1;
+			List<PartyInvitation> partyInvitationList
+				= partyInvitationRepository.findByPartyId(partyMatchInfo.getParty().getId());
+			Double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
+			PartyMatchInfoDto matchInfoDto = new PartyMatchInfoDto(partyMatchInfo, avgAge);
+
+			if (ttlDays > 0) {
+				redisService.setKeyValue(key, matchInfoDto, Duration.ofDays(ttlDays));
+			}
+
+			System.out.println("등록 대상 Key = " + key);
+			System.out.println("등록 대상 TTL = " + ttlDays);
+			System.out.println("등록 대상 DTO = " + matchInfoDto);
+			Object cached = redisService.getKeyValue("partyMatchInfo" + partyMatchInfo.getId());
+			System.out.println("Redis 조회 결과: " + cached);
+		}
+	}
+
+	@Test
+	@Transactional
+	@Rollback(value = true)
+	@DisplayName("파티 매칭 엔진 동작 시간 측정")
+	public void runPartyMatchEngineTest() {
+		long start = System.nanoTime();
+
+		matchEngineService.runMatchingForUser(List.of(1L));
+
+		long end = System.nanoTime();
+
+		System.out.println("파티 매칭 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+	}
+
+	@Test
+	@Transactional
+	@Rollback(value = true)
+	@DisplayName("파티 매칭 병렬 500건 테스트")
+	public void runPartyMatchEngineParallelTest() throws InterruptedException {
+		int taskCount = 500;
+		ExecutorService executor = Executors.newFixedThreadPool(50); // 적절한 스레드 풀 크기 지정
+		CountDownLatch latch = new CountDownLatch(taskCount);
+
+		long start = System.nanoTime();
+
+		for (long i = 1; i <= taskCount; i++) {
+			long userId = i;
+			executor.submit(() -> {
+				try {
+					matchEngineService.runMatchingForUser(List.of(userId));
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await(); // 모든 작업 완료 대기
+		long end = System.nanoTime();
+
+		executor.shutdown();
+
+		System.out.println("파티 매칭 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("파티 매칭 캐시 엔진 동작 시간 측정")
+	public void runPartyMatchEngineCacheTest() {
+		long start = System.nanoTime();
+
+		matchEngineCacheService.runMatchingForUser(List.of(1L));
+
+		long end = System.nanoTime();
+
+		System.out.println("파티 매칭 캐싱 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("파티 매칭 캐시 병렬 500건 테스트")
+	public void runPartyMatchEngineCacheParallelTest() throws InterruptedException {
+		int taskCount = 500;
+		ExecutorService executor = Executors.newFixedThreadPool(50); // 시스템 자원에 따라 조정
+		CountDownLatch latch = new CountDownLatch(taskCount);
+
+		long start = System.nanoTime();
+
+		for (long i = 1; i <= taskCount; i++) {
+			long userId = i;
+			executor.submit(() -> {
+				try {
+					matchEngineCacheService.runMatchingForUser(List.of(userId));
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+		long end = System.nanoTime();
+
+		executor.shutdown();
+
+		System.out.println("파티 매칭 캐싱 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+	}
 
 	// @BeforeAll
 	// public static void dummyUserAndRandomMatchPartyBulkInsert() {

@@ -1,12 +1,12 @@
 package com.example.taste.domain.user.repository;
 
-import static com.example.taste.domain.user.entity.QUser.*;
+import static com.example.taste.domain.user.entity.QUser.user;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,5 +37,14 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				user.postingCount.lt(limit)
 			)
 			.execute();
+	}
+
+	@Override
+	public Integer findAgeByUserId(Long userId) {
+		return queryFactory
+			.select(user.age)
+			.from(user)
+			.where(user.id.eq(userId))
+			.fetchOne();
 	}
 }
