@@ -1,17 +1,17 @@
 package com.example.taste.domain.user.repository;
 
-import static com.example.taste.domain.favor.entity.QFavor.*;
-import static com.example.taste.domain.user.entity.QUser.*;
-import static com.example.taste.domain.user.entity.QUserFavor.*;
+import static com.example.taste.domain.favor.entity.QFavor.favor;
+import static com.example.taste.domain.user.entity.QUser.user;
+import static com.example.taste.domain.user.entity.QUserFavor.userFavor;
 
 import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Repository;
 
 import com.example.taste.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -51,9 +51,9 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				.selectFrom(user)
 				.leftJoin(user.userFavorList, userFavor).fetchJoin()
 				.leftJoin(userFavor.favor, favor).fetchJoin()
-				.where(user.id.eq(userId))
+				.where(user.id.eq(userId)
+					.and(user.deletedAt.isNotNull()))
 				.fetchOne()
 		);
 	}
-
 }

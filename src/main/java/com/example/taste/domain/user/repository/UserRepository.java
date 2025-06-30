@@ -16,9 +16,6 @@ import com.example.taste.domain.user.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom, UserRepositoryJooqCustom {
 	Optional<User> findUserByEmail(String email);
 
-	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userFavorList WHERE u.id = :id")
-	Optional<User> findByIdWithUserFavorList(@Param("id") Long id);
-
 	boolean existsByEmail(String email);
 
 	List<User> findAllByOrderByPointDesc(PageRequest of);
