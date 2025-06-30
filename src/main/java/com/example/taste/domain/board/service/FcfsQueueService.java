@@ -117,10 +117,12 @@ public class FcfsQueueService {
 		// 순위가 이미 존재하는 유저는 바로 리턴
 		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
-		} else if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
+		}
+		if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
 			return;
-		} // 이미 순위가 다 차서 DB에 선착순 정보가 저장된 게시글이면 error
-		else if (fcfsInformationRepository.existsByBoardId(board.getId())) {
+		}
+		// 이미 순위가 다 차서 DB에 선착순 정보가 저장된 게시글이면 error
+		if (fcfsInformationRepository.existsByBoardId(board.getId())) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 

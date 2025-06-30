@@ -21,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class BoardCacheService {
 
-	private final CacheManager concurrentMapCacheManager;
+	private final CacheManager cacheManager;
 
-	public BoardCacheService(CacheManager concurrentMapCacheManager,
+	public BoardCacheService(CacheManager cacheManager,
 		@Qualifier(value = "redisCacheManager") CacheManager redisCacheManager) {
-		this.concurrentMapCacheManager = concurrentMapCacheManager;
+		this.cacheManager = cacheManager;
 	}
 
 	@Cacheable(value = TIMEATTACK_CACHE_NAME, key = "#board.id", condition = "!#board.accessPolicy.closed")
@@ -42,13 +42,13 @@ public class BoardCacheService {
 
 	// 공개시간 만료된 타임어택 게시글 캐시 삭제
 	public void evictTimeAttackCaches(List<? extends Long> ids) {
-		Cache cache = concurrentMapCacheManager.getCache(TIMEATTACK_CACHE_NAME);
+		Cache cache = cacheManager.getCache(TIMEATTACK_CACHE_NAME);
 		if (cache != null) {
 			for (Long boardId : ids) {
 				cache.evict(boardId); // 개별 삭제
 			}
+			log.debug("공개 만료된 타임어택 게시글 캐시 삭제 : id = {}", ids);
 		}
-		log.debug("공개 만료된 타임어택 게시글 캐시 삭제 : id = {}", ids);
 	}
 
 	@Caching(evict = {

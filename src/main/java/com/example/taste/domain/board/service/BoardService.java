@@ -231,15 +231,11 @@ public class BoardService {
 		Page<OpenRunBoardResponseDto> result = dtos.map(dto -> {
 			boolean isClosed = dto.getOpenTime().isAfter(LocalDateTime.now());
 			Long remainingSlot = null;
-			Integer openLimit = dto.getOpenLimit();
+			Integer openLimit = isClosed ? null : dto.getOpenLimit();
 
 			if (dto.getAccessPolicy().isFcfs() && !isClosed) {
 				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
 				remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
-			}
-
-			if (isClosed) {
-				openLimit = null;
 			}
 
 			return OpenRunBoardResponseDto.createFromDto(dto, openLimit, remainingSlot);

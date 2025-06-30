@@ -55,7 +55,7 @@ class StoreServiceTest extends AbstractIntegrationTest {
 
 	@Test
 	@Transactional
-	void getStore_resultInclude2Images_returnImages() {
+	void getStore_whenResultInclude2Images_thenReturnImages() {
 		// given
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
@@ -77,7 +77,7 @@ class StoreServiceTest extends AbstractIntegrationTest {
 
 	@Test
 	@Transactional
-	void getStore_resultInclude4Images_returnLatest3Reviews() {
+	void getStore_thenResultInclude4Images_thenReturnLatest3Reviews() {
 		// given
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
@@ -106,7 +106,7 @@ class StoreServiceTest extends AbstractIntegrationTest {
 
 	@Test
 	@Transactional
-	void deleteStore_thenCascadeDeleteBucketItem() {
+	void deleteStore_cascadeDeleteBucketItem() {
 		// given
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));

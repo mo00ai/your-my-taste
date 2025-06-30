@@ -1,6 +1,8 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -12,6 +14,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +35,8 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -71,6 +77,10 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 	private CategoryRepository categoryRepository;
 	@Autowired
 	private FcfsQueueService fcfsQueueService;
+	@Autowired
+	private RedisService redisService;
+	@Autowired
+	private RedissonClient redissonClient;
 
 	@Test
 	@Transactional
@@ -90,7 +100,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
 		ReflectionTestUtils.setField(dto, "openLimit", 1);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createFcfsOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
 
 		// HTTP 로그인 요청으로 세션 획득
 		String json = """
@@ -124,7 +134,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 		// when
 		fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
-		Thread.sleep(500);
+		//Thread.sleep(100);
 
 		// then
 		String receivedMessage = future.get(5, TimeUnit.SECONDS);
@@ -133,14 +143,97 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	@Transactional
-	void tryEnterFcfsQueue_zsetSizeOverOpenLimit_thenError() {
+	void tryEnterFcfsQueue_whenZSetSizeOverOpenLimit_thenDeleteAndError() {
+		// given
+		Image image1 = ImageFixture.create();
+		Image image2 = ImageFixture.create();
+		User user1 = userRepository.save(UserFixture.createNoMorePosting(image1));
+		User user2 = userRepository.save(UserFixture.createNoMorePosting(image2));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.save(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
+				LocalDateTime.now(), store, user1));
+
+		fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user1);
+
+		// when, then
+		assertThrows(CustomException.class, () -> {
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user2);
+		});
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		assertThat(redisService.getZSetRange(key)).isEmpty();
+
+		// clean-up
+		boardRepository.deleteById(board.getId());
+		userRepository.deleteById(user1.getId());
+		userRepository.deleteById(user2.getId());
+		storeRepository.deleteById(store.getId());
+		categoryRepository.deleteById(category.getId());
 	}
 
 	@Test
 	@Transactional
-	void tryEnterFcfsQueue_isLocked_thenRetryOrError() {
-		// 동시성 테스트(락 점유 중일때 접근 실패 확인)
+	void tryEnterFcfsQueue_whenFailedHasLock_thenError() {
+		// given
+		Image image1 = ImageFixture.create();
+		User user = userRepository.save(UserFixture.createNoMorePosting(image1));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.save(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
+				LocalDateTime.now(), store, user));
+
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+		RLock lock = redissonClient.getLock(lockKey);
+
+		// 다른 스레드에서 락을 점유
+		Thread lockerThread = new Thread(() -> {
+			try {
+				lock.lock(3, TimeUnit.SECONDS); // 3초간 점유
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		lockerThread.start();
+
+		// when, then
+		assertThrows(CustomException.class, () -> {
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
+		});
+	}
+
+	@Test
+	@Transactional
+	void tryEnterFcfsQueue_whenIsLocked_thenRetryAndSuccess() {
+		// given
+		Image image1 = ImageFixture.create();
+		User user = userRepository.save(UserFixture.createNoMorePosting(image1));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.save(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
+				LocalDateTime.now(), store, user));
+
+		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+		RLock lock = redissonClient.getLock(lockKey);
+
+		try {
+			// 다른 스레드에서 락을 점유
+			Thread lockerThread = new Thread(() -> {
+
+				lock.lock(1, TimeUnit.SECONDS); // 1초간 점유
+			});
+			lockerThread.start();
+
+			// 현재 스레드는 0.1초 대기 후 메서드 실행
+			Thread.sleep(100);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		// when, then
+		assertDoesNotThrow(() -> fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user));
 	}
 
 	private CompletableFuture<String> connectAndSubscribe(Long boardId, String sessionId) throws Exception {
