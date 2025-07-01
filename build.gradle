@@ -41,6 +41,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'io.projectreactor:reactor-test'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
     // Spring starters
