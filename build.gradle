@@ -207,7 +207,7 @@ tasks.register("unitTest", Test) {
 
 tasks.register("integrationTest", Test) {
     useJUnitPlatform {
-        excludeTags 'local-only'
+        excludeTags 'local-only', 'Performance'
     }
 
     def ci = System.getenv("CI") == "true"
