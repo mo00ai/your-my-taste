@@ -1,7 +1,5 @@
 package com.example.taste.domain.recommend.rabbitmq;
 
-import static com.example.taste.config.RabbitConfig.*;
-
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,6 +20,7 @@ public class ErrorMonitoringProducer {
 		props.setExpiration("600000"); // 10분 TTL
 
 		Message amqpMessage = new Message(payload.getBytes(), props);
-		rabbitTemplate.convertAndSend(ERROR_QUEUE_NAME, payload);
+
+		rabbitTemplate.send("recommend-error-queue", amqpMessage);
 	}
 }
