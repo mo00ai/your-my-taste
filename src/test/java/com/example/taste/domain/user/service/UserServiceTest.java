@@ -1,4 +1,6 @@
 package com.example.taste.domain.user.service;
 
-public class UserServiceTest {
+import com.example.taste.property.AbstractIntegrationTest;
+
+public class UserServiceTest extends AbstractIntegrationTest {
 }
