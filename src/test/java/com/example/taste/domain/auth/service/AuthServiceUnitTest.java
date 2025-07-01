@@ -3,13 +3,13 @@ package com.example.taste.domain.auth.service;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -34,10 +34,11 @@ public class AuthServiceUnitTest {
 		// given
 		User deletedUser = UserFixture.createSoftDeletedUser(null);
 		SigninRequestDto requestDto = new SigninRequestDto(deletedUser.getEmail(), deletedUser.getPassword());
+		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		// when & then
 		CustomException e = assertThrows(CustomException.class,
-			() -> authService.signin(any(), requestDto));
+			() -> authService.signin(request, requestDto));
 		assertEquals(DEACTIVATED_USER.getMessage(), e.getMessage());
 	}
 }
