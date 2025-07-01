@@ -7,4 +7,5 @@ public abstract class RedisConst {
 	public final static String DEFAULT = "default";
 	public final static String OPENRUN_KEY_PREFIX = "board:";
 	public final static String OPENRUN_LOCK_KEY_PREFIX = "lock:board:";
+
 }
