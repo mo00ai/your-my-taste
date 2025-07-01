@@ -96,7 +96,7 @@ public class StoreService {
 		return tokens[0];
 	}
 
-	private Store toStoreEntity(NaverLocalSearchResponseDto dto) {
+	protected Store toStoreEntity(NaverLocalSearchResponseDto dto) {
 		// 결과 리스트 유효성 검사
 		if (dto.getItems().isEmpty()) {
 			throw new CustomException(STORE_NOT_FOUND);
@@ -233,7 +233,6 @@ public class StoreService {
 		log.info("query: {}", query);
 
 		float[] embeddingVetor = embeddingService.search(query);
-		log.info("embeddingVetor: {} ", embeddingVetor);
 		Page<StoreSearchResult> page = storeRepository.searchByVector(embeddingVetor,
 			request.getSimilarityThreshold(), pageable);
 		return PageResponse.from(page);
