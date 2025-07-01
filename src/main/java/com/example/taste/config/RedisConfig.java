@@ -1,11 +1,13 @@
 package com.example.taste.config;
 
+import static com.example.taste.common.constant.CacheConst.*;
 import static com.example.taste.common.constant.RedisConst.*;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jooq.impl.DefaultConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cache.annotation.EnableCaching;
@@ -41,11 +43,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @EnableRedisHttpSession
 public class RedisConfig {
 
+	private final DefaultConfiguration defaultConfiguration;
 	@Value("${spring.data.redis.host}")
 	private String redisHost;
 
 	@Value("${spring.data.redis.port}")
 	private int redisPort;
+
+	public RedisConfig(DefaultConfiguration defaultConfiguration) {
+		this.defaultConfiguration = defaultConfiguration;
+	}
 
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -78,8 +85,9 @@ public class RedisConfig {
 
 		// 각 캐시별 TTL 설정
 		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(Duration.ofMinutes(10)));// 기본 유효기간 10분
+		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(DEFAULT_TTL));
 		cacheConfigurations.put("pkCriteriaCache", defaultConfig);
+		cacheConfigurations.put(FCFS_CACHE_NAME, defaultConfig);
 		// Todo 캐싱할 데이터의 key값을 자유롭게 설정해서 입력해 주세요.
 
 		return RedisCacheManager.builder(connectionFactory)
