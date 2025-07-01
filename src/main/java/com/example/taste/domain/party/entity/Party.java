@@ -65,7 +65,7 @@ public class Party extends SoftDeletableEntity {
 	@Column(nullable = false)
 	private boolean enableRandomMatching = false;
 
-	@Builder
+	@Builder(builderMethodName = "oDtoBuilder", buildMethodName = "buildDto")
 	public Party(PartyCreateRequestDto requestDto, User hostUser, Store store) {
 		this.hostUser = hostUser;
 		this.title = requestDto.getTitle();
@@ -80,6 +80,22 @@ public class Party extends SoftDeletableEntity {
 		this.enableRandomMatching =
 			requestDto.getEnableRandomMatching() != null ? requestDto.getEnableRandomMatching() : false;
 		this.partyStatus = PartyStatus.ACTIVE;
+	}
+
+	@Builder(builderMethodName = "oPartyBuilder", buildMethodName = "buildParty")
+	public Party(Long id, User hostUser, String title, String description,
+		PartyStatus partyStatus, Store store, LocalDate meetingDate,
+		int maxMembers, int nowMembers, boolean enableRandomMatching) {
+		this.id = id;
+		this.hostUser = hostUser;
+		this.title = title;
+		this.description = description;
+		this.partyStatus = partyStatus;
+		this.store = store;
+		this.meetingDate = meetingDate;
+		this.maxMembers = maxMembers;
+		this.nowMembers = nowMembers;
+		this.enableRandomMatching = enableRandomMatching;
 	}
 
 	public void update(PartyUpdateRequestDto requestDto, Store store) {
@@ -144,6 +160,20 @@ public class Party extends SoftDeletableEntity {
 			.filter(pi -> pi.getInvitationStatus().equals(InvitationStatus.CONFIRMED))
 			.mapToInt(pi -> pi.getUser().getAge())
 			.average().orElse(0.0);
+	}
+
+	public double calculateAvgAgeAfterJoin(double oldAvgAge, int newMemberAge) {
+		int oldMembersCount = this.nowMembers - 1;
+		return (oldAvgAge * oldMembersCount + newMemberAge) / (oldMembersCount + 1);
+	}
+
+	public double calculateAvgAgeAfterLeave(double oldAvgAge, int leavedMemberAge) {
+		int oldMembersCount = this.nowMembers + 1;
+		return switch (this.nowMembers) {
+			case 0 -> 0;
+			case 1 -> this.hostUser.getAge();
+			default -> (oldAvgAge * oldMembersCount - leavedMemberAge) / (oldMembersCount - 1);
+		};
 	}
 
 	public void updateHost(User user) {
