@@ -41,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Repository
-public class BoardRepositoryImpl implements BoardRepositoryCustom {
+public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
