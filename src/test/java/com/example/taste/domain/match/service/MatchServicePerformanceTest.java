@@ -28,7 +28,7 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 
 @Tag("Performance")
-@ActiveProfiles("local")
+@ActiveProfiles("test-int")
 @SpringBootTest
 public class MatchServicePerformanceTest {
 	@Autowired

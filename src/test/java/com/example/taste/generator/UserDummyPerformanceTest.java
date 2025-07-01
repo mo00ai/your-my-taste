@@ -29,7 +29,7 @@ import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Tag("Performance")
-@ActiveProfiles("local")    // 로컬 테스트
+@ActiveProfiles("test-int")    // 로컬 테스트
 @SpringBootTest
 public class UserDummyPerformanceTest {
 	@Autowired
