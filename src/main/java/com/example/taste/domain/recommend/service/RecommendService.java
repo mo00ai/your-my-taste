@@ -1,6 +1,6 @@
 package com.example.taste.domain.recommend.service;
 
-import static com.example.taste.config.RabbitConfig.*;
+import static com.example.taste.common.constant.RabbitConst.*;
 import static com.example.taste.domain.recommend.exception.RecommendErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
