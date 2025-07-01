@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -61,15 +59,9 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now());
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10, LocalDateTime.now(), store,
+				user));
 
 		// when
 		BoardResponseDto result = boardCacheService.getInMemoryCache(board);
@@ -90,15 +82,8 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now());
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10, LocalDateTime.now(), store, user));
 
 		// when
 		BoardResponseDto result = boardCacheService.getInMemoryCache(board);
@@ -116,15 +101,9 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusMinutes(10));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10, LocalDateTime.now().minusMinutes(10),
+				store, user));
 
 		// when
 		BoardResponseDto result = boardCacheService.getRedisCache(board);
@@ -142,15 +121,9 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusMinutes(10));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+				LocalDateTime.now().minusMinutes(10), store, user));
 
 		cacheManager.getCache(TIMEATTACK_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
 
@@ -169,15 +142,9 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusMinutes(10));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+				LocalDateTime.now().minusMinutes(10), store, user));
 
 		cacheManager.getCache(TIMEATTACK_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
 
@@ -196,15 +163,9 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusMinutes(10));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10, LocalDateTime.now().minusMinutes(10),
+				store, user));
 
 		redisCacheManager.getCache(FCFS_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
 

@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.store.entity.Category;
@@ -39,16 +38,8 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-
-		Board board = BoardFixture.createOBoard(dto, store, user1);
+		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+			LocalDateTime.now().plusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -66,16 +57,8 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-
-		Board board = BoardFixture.createOBoard(dto, store, user1);
+		Board board = BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10,
+			LocalDateTime.now().plusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -93,16 +76,8 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
-
-		Board board = BoardFixture.createOBoard(dto, store, user1);
+		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+			LocalDateTime.now().minusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {

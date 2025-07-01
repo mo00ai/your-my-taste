@@ -27,7 +27,6 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -37,7 +36,6 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
@@ -92,15 +90,9 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		User user = userRepository.saveAndFlush(UserFixture.createWithEncodedPw(image, encoded));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 1);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
-		Board board = boardRepository.saveAndFlush(BoardFixture.createOBoard(dto, store, user));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1, LocalDateTime.now().minusDays(1), store,
+				user));
 
 		// HTTP 로그인 요청으로 세션 획득
 		String json = """
