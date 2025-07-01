@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -26,8 +28,6 @@ import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -338,5 +338,18 @@ public class RedisService {
 
 	public Duration getExpire(String key, TimeUnit timeUnit) {
 		return Duration.ofSeconds(redisTemplate.getExpire(key, timeUnit));
+	}
+
+	public <T> List<T> getValuesByKeysAsClass(List<String> keys, Class<T> clazz) {
+		if (keys.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+		return values.stream()
+			.filter(Objects::nonNull)
+			.map(clazz::cast)  // 안전하게 타입 캐스팅
+			.toList();
 	}
 }
