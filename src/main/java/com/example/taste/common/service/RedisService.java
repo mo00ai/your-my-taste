@@ -3,6 +3,7 @@ package com.example.taste.common.service;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -10,11 +11,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +26,8 @@ import com.example.taste.common.constant.RedisChannel;
 import com.example.taste.domain.match.dto.MatchEvent;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -34,6 +37,29 @@ public class RedisService {
 	private final RedisTemplate<String, String> stringRedisTemplate;
 	private final ObjectMapper objectMapper;
 	private final GenericJackson2JsonRedisSerializer serializer;
+
+	private static final DefaultRedisScript<Long> STORE_AND_TRIM_SCRIPT;
+
+	static {
+		STORE_AND_TRIM_SCRIPT = new DefaultRedisScript<>();
+		STORE_AND_TRIM_SCRIPT.setScriptText(
+			"local listKey = KEYS[1]\n"
+				+ "local countKey = KEYS[2]\n"
+				+ "local newKey = KEYS[3]\n"
+				+ "redis.call('LPUSH', listKey, newKey)\n"
+				+ "redis.call('INCR', countKey)\n"
+				+ "local size = redis.call('LLEN', listKey)\n"
+				+ "if size > 100 then\n"
+				+ "  local overflow = redis.call('LRANGE', listKey, 100, -1)\n"
+				+ "  for i, k in ipairs(overflow) do\n"
+				+ "    redis.call('DEL', k)\n"
+				+ "  end\n"
+				+ "  redis.call('LTRIM', listKey, 0, 99)\n"
+				+ "end\n"
+				+ "return size"
+		);
+		STORE_AND_TRIM_SCRIPT.setResultType(Long.class);
+	}
 
 	public RedisService(RedisTemplate<String, Object> redisTemplate,
 		RedisTemplate<String, String> stringRedisTemplate,
@@ -133,6 +159,21 @@ public class RedisService {
 	public <T> void deleteFromList(String key, T value, Class<T> tClass) {
 		T serializedValue = objectMapper.convertValue(value, tClass);
 		redisTemplate.opsForList().remove(key, 1, serializedValue);
+	}
+
+	public void listTrim(String listKey, int here, int there) {
+		redisTemplate.opsForList().trim(listKey, here, there);
+	}
+
+	public <T> void execute(String countKey, String listKey, String key, Object dto) throws
+		JsonProcessingException {
+		redisTemplate.opsForValue().set(key, dto, Duration.ofDays(7));
+
+		// redis에서 접근해야 할 키들은 list로 넘기고 KEY[]로 받아줘야 함
+		// 새로 만들 키, 값 들의 경우 매개변수로 보내줘야 함.
+		// 새로 만들 키는 키인데 매개변수로 보내는 이유는, redis에 아직 존재하지 않는 키이기 때문
+		// 이러면 list로 보낸 키들은 해싱을 해서 redis의 기존 데이터들과 비교를 하면서 쓰고, 매개변수로 보낸 값들은 데이터 그대로 사용됨.
+		redisTemplate.execute(STORE_AND_TRIM_SCRIPT, Arrays.asList(listKey, countKey, key));
 	}
 
 	/**
@@ -264,6 +305,11 @@ public class RedisService {
 		return (size == null || size == 0) ? 0L : size;
 	}
 
+	public List<Object> getListRange(String key, long here, long there) {
+		List<Object> values = redisTemplate.opsForList().range(key, here, there);
+		return values != null ? values : Collections.emptyList();
+	}
+
 	// public <T> T getLast(String key, Class<T> tClass) {
 	// 	Object obj = redisTemplate.opsForList().getLast(key);
 	// 	if (obj == null) {
@@ -292,5 +338,18 @@ public class RedisService {
 
 	public Duration getExpire(String key, TimeUnit timeUnit) {
 		return Duration.ofSeconds(redisTemplate.getExpire(key, timeUnit));
+	}
+
+	public <T> List<T> getValuesByKeysAsClass(List<String> keys, Class<T> clazz) {
+		if (keys.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+		return values.stream()
+			.filter(Objects::nonNull)
+			.map(clazz::cast)  // 안전하게 타입 캐스팅
+			.toList();
 	}
 }

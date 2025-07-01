@@ -1,16 +1,13 @@
 package com.example.taste.domain.review.service;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -30,6 +27,7 @@ import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -106,31 +104,22 @@ public class OCRService {
 					.flatMap(e -> Mono.error(new CustomException(ReviewErrorCode.OCR_CALL_FAILED))))
 			.bodyToMono(OcrResponseDto.class);
 
-		OcrResponseDto ocrResponseDto = response.block(Duration.ofSeconds(10));
-		//todo 예외
+		OcrResponseDto ocrResponseDto;
 
-		//todo 맵 말고
-		ocrResponseDto.getImages();
+		try {
+			ocrResponseDto = response.block(Duration.ofSeconds(10));
+		} catch (Exception e) {
+			throw new CustomException(ReviewErrorCode.OCR_CALL_FAILED, e.toString());
+		}
+
 		// 가게 이름 (ex: 프랭크 버거)
-		String storeName = Optional.ofNullable(ocrResponseDto.getImages()).filter(images -> !images.isEmpty())
-			.map(images -> images.get(0))
-			.map(i -> i.getReceipt())
-			.map(receipt -> receipt.getResult())
-			.map(result -> result.getStoreInfo())
-			.map(storeInfo -> storeInfo.getName())
-			.map(name -> name.getText())
-			.orElseThrow(() -> new CustomException(ReviewErrorCode.STORE_NAME_NOT_FOUND));
+		String storeName = ocrResponseDto.getStoreName();
+		if (storeName == null || storeName.isEmpty()) {
+			throw new CustomException(ReviewErrorCode.BAD_OCR_RESPONSE);
+		}
 
 		// 가게 이름 상세 (ex: 성수점, 덕명점 1호 어쩌구...)
-		String storeSubName = Optional.ofNullable(ocrResponseDto.getImages())
-			.filter(images -> !images.isEmpty())
-			.map(images -> images.get(0))
-			.map(i -> i.getReceipt())
-			.map(receipt -> receipt.getResult())
-			.map(result -> result.getStoreInfo())
-			.map(storeInfo -> storeInfo.getSubName())
-			.map(subName -> subName.getText())
-			.orElse(null);  // 없으면 null 반환
+		String storeSubName = ocrResponseDto.getStoreSubName();
 
 		StringBuilder fullName = new StringBuilder().append(storeName);
 		if (storeSubName != null && !storeSubName.isBlank()) {

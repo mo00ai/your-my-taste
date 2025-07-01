@@ -2,10 +2,14 @@ package com.example.taste.domain.match.service;
 
 import static com.example.taste.domain.favor.exception.FavorErrorCode.NOT_FOUND_FAVOR;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
+import static com.example.taste.domain.match.exception.MatchErrorCode.PARTY_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.match.exception.MatchErrorCode.USER_MATCH_INFO_NOT_FOUND;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
 import com.example.taste.domain.match.annotation.MatchEventPublish;
@@ -37,6 +42,7 @@ import com.example.taste.domain.party.repository.PartyRepository;
 @Service
 @RequiredArgsConstructor
 public class MatchService {
+	private final RedisService redisService;
 	private final PartyRepository partyRepository;
 	private final FavorRepository favorRepository;
 	private final UserMatchInfoRepository userMatchInfoRepository;
@@ -80,6 +86,15 @@ public class MatchService {
 		if (requestDto.getFavorList() != null) {
 			partyMatchInfo.updateFavorList(getValidPartyMatchInfoFavors(requestDto.getFavorList(), partyMatchInfo));
 		}
+
+		// 캐싱 적용
+		String key = "partyMatchInfo" + partyMatchInfo.getId();
+		long ttlDays = ChronoUnit.DAYS.between(LocalDate.now(), party.getMeetingDate()) + 1;
+
+		if (ttlDays > 0) {
+			redisService.setKeyValue(key, partyMatchInfo, Duration.ofDays(ttlDays));
+		}
+
 	}
 
 	@Transactional
@@ -111,7 +126,13 @@ public class MatchService {
 				party.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 
 		partyInvitationRepository.deleteAll(pendingInvitationList);        // 초대 정보 삭제
-		partyMatchInfoRepository.deleteByParty(party);            // 파티 매칭 삭제
+		Long partyMatchInfoId = partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.orElseThrow(() -> new CustomException(PARTY_MATCH_INFO_NOT_FOUND));
+		partyMatchInfoRepository.deleteById(partyMatchInfoId);
+
+		// 캐시 삭제
+		String key = "partyMatchInfo" + partyMatchInfoId;
+		redisService.delete(key);
 
 		return pendingInvitationList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID
 			.map(pi -> pi.getUserMatchInfo().getId())

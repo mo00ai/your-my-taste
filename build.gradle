@@ -66,6 +66,8 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Validation
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -209,7 +211,7 @@ tasks.register("unitTest", Test) {
 
 tasks.register("integrationTest", Test) {
     useJUnitPlatform {
-        excludeTags 'local-only'
+        excludeTags 'local-only', 'Performance'
     }
 
     def ci = System.getenv("CI") == "true"

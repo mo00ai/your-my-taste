@@ -21,6 +21,7 @@ public class UserRepositoryJooqCustomImpl implements UserRepositoryJooqCustom {
 
 	@Override
 	public void resetAllUserPoints() {
+
 		try {
 			int updatedRows = dsl.update(USERS)
 				.set(USERS.POINT, 0)
