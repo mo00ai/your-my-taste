@@ -29,5 +29,4 @@ public class PartyUpdateRequestDto {
 
 	@Range(min = 2, max = 16, message = "파티 인원은 2 ~ 16명 사이입니다.")
 	private Integer maxMembers;
-	private Boolean enableRandomMatching;
 }

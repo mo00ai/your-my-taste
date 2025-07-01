@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
@@ -27,6 +26,7 @@ import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.service.PartyInvitationService;
 import com.example.taste.domain.party.service.PartyService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
 @RequestMapping("/parties")
@@ -65,7 +65,7 @@ public class PartyController {
 	}
 
 	// 파티 나가기 (호스트 포함)
-	@DeleteMapping("/{partyId}/leave")
+	@DeleteMapping("/{partyId}/members")
 	public CommonResponse<Void> leaveParty(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
 		partyInvitationService.leaveParty(userDetails.getId(), partyId);
@@ -80,12 +80,4 @@ public class PartyController {
 		partyInvitationService.removePartyMember(userDetails.getId(), userId, partyId);
 		return CommonResponse.ok();
 	}
-
-	// 파티 삭제
-	// @DeleteMapping("/{partyId}")
-	// public CommonResponse<Void> removeParty(
-	// 	@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long partyId) {
-	// 	partyService.removeParty(userDetails.getId(), partyId);
-	// 	return CommonResponse.ok();
-	// }
 }

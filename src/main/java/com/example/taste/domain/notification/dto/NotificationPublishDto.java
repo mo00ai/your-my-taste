@@ -3,8 +3,8 @@ package com.example.taste.domain.notification.dto;
 import java.io.Serial;
 import java.io.Serializable;
 
-import com.example.taste.domain.notification.entity.NotificationCategory;
-import com.example.taste.domain.notification.entity.NotificationType;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.example.taste.domain.notification.entity.enums.NotificationType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.validation.constraints.NotNull;

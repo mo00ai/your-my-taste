@@ -1,20 +1,20 @@
 package com.example.taste.domain.event.service;
 
-import static com.example.taste.domain.event.exception.EventErrorCode.*;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHORIZED;
+import static com.example.taste.domain.event.exception.EventErrorCode.EVENT_REGISTER_BLOCKED;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.event.entity.BoardEvent;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.exception.EventErrorCode;
 import com.example.taste.domain.event.repository.BoardEventRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +63,7 @@ public class BoardEventService {
 
 	private void checkUser(Board board, Long userId) {
 		if (!board.getUser().getId().equals(userId)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
+			throw new CustomException(UNAUTHORIZED);
 		}
 	}
 }

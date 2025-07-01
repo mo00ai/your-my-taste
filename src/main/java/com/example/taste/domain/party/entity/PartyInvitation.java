@@ -82,4 +82,8 @@ public class PartyInvitation extends BaseCreatedAtEntity {
 	public void updateInvitationStatus(InvitationStatus status) {
 		this.invitationStatus = status;
 	}
+
+	public boolean isStatus(InvitationStatus invitationStatus) {
+		return this.invitationStatus.equals(invitationStatus);
+	}
 }

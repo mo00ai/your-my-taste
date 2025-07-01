@@ -1,6 +1,7 @@
 package com.example.taste.domain.notification.entity;
 
 import com.example.taste.common.entity.BaseEntity;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;

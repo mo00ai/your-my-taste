@@ -2,8 +2,8 @@ package com.example.taste.domain.notification.dto;
 
 import java.time.LocalDateTime;
 
-import com.example.taste.domain.notification.entity.NotificationCategory;
 import com.example.taste.domain.notification.entity.NotificationInfo;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 import com.example.taste.common.annotation.ValidEnum;
-import com.example.taste.domain.match.vo.AgeRange;
+import com.example.taste.domain.match.entity.AgeRange;
 import com.example.taste.domain.user.enums.Gender;
 
 @Getter

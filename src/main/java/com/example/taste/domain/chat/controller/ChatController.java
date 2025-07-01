@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.chat.dto.ChatResponseDto;
 import com.example.taste.domain.chat.service.ChatService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +24,6 @@ public class ChatController {
 	public CommonResponse<List<ChatResponseDto>> getChats(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long partyId) {
-		return CommonResponse.ok(chatService.getChats(userDetails.getUser(), partyId));
+		return CommonResponse.ok(chatService.getChats(userDetails.getId(), partyId));
 	}
 }

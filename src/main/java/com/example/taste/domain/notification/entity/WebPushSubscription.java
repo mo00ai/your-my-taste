@@ -21,13 +21,13 @@ import lombok.Setter;
 @EqualsAndHashCode
 @NoArgsConstructor
 @Getter
-public class WebPushInformation {
+public class WebPushSubscription {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true)
+	@Column(unique = true, length = 1000)
 	private String endpoint;
 	@Setter
 	private String p256dhKey;
@@ -40,7 +40,7 @@ public class WebPushInformation {
 	private User user;
 
 	@Builder
-	public WebPushInformation(String authKey, String p256dhKey, String endpoint, User user) {
+	public WebPushSubscription(String authKey, String p256dhKey, String endpoint, User user) {
 		this.authKey = authKey;
 		this.p256dhKey = p256dhKey;
 		this.endpoint = endpoint;

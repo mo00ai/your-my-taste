@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.store.dto.request.AddBucketItemRequest;
 import com.example.taste.domain.store.entity.Store;
@@ -22,6 +22,7 @@ import com.example.taste.domain.store.entity.StoreBucket;
 import com.example.taste.domain.store.entity.StoreBucketItem;
 import com.example.taste.domain.store.repository.StoreBucketItemRepository;
 import com.example.taste.domain.store.repository.StoreBucketRepository;
+import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreBucketFixture;
@@ -36,7 +37,7 @@ public class StoreBucketServiceUnitTest {
 	@Mock
 	private StoreBucketItemRepository storeBucketItemRepository;
 	@Mock
-	private EntityFetcher entityFetcher;
+	private StoreRepository storeRepository;
 
 	@Test
 	void addBucketItem_whenUserNotBucketOwner_thenThrowException() {
@@ -50,8 +51,8 @@ public class StoreBucketServiceUnitTest {
 		StoreBucket storeBucket = mock(StoreBucket.class);
 		User user = mock(User.class);
 
-		given(entityFetcher.getStoreOrThrow(request.getStoreId())).willReturn(store);
-		given(entityFetcher.getStoreBucketOrThrow(bucketId)).willReturn(storeBucket);
+		given(storeRepository.findById(request.getStoreId())).willReturn(Optional.ofNullable(store));
+		given(storeBucketRepository.findAllByIdIn(request.getBucketIds())).willReturn(List.of(storeBucket));
 		given(storeBucket.getUser()).willReturn(user);
 		given(storeBucket.getUser().isSameUser(requestUserId)).willReturn(false);
 
@@ -73,8 +74,8 @@ public class StoreBucketServiceUnitTest {
 		StoreBucket storeBucket = mock(StoreBucket.class);
 		User user = mock(User.class);
 
-		given(entityFetcher.getStoreOrThrow(request.getStoreId())).willReturn(store);
-		given(entityFetcher.getStoreBucketOrThrow(bucketId)).willReturn(storeBucket);
+		given(storeRepository.findById(request.getStoreId())).willReturn(Optional.ofNullable(store));
+		given(storeBucketRepository.findAllByIdIn(request.getBucketIds())).willReturn(List.of(storeBucket));
 		given(storeBucket.getUser()).willReturn(user);
 		given(storeBucket.getUser().isSameUser(userId)).willReturn(true);
 		given(storeBucketItemRepository.existsByStoreBucketAndStore(storeBucket, store)).willReturn(true);

@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.taste.domain.notification.dto.AdminNotificationRequestDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
-import com.example.taste.domain.notification.entity.NotificationCategory;
-import com.example.taste.domain.notification.entity.NotificationType;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.example.taste.domain.notification.entity.enums.NotificationType;
 import com.example.taste.domain.notification.redis.NotificationPublisher;
 
 import io.micrometer.core.instrument.MeterRegistry;

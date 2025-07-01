@@ -32,7 +32,6 @@ import com.example.taste.common.entity.BaseCreatedAtEntity;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.match.dto.request.UserMatchInfoCreateRequestDto;
 import com.example.taste.domain.match.dto.request.UserMatchInfoUpdateRequestDto;
-import com.example.taste.domain.match.vo.AgeRange;
 import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;

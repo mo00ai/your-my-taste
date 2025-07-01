@@ -1,30 +1,23 @@
 package com.example.taste.common.entity;
 
-import jakarta.persistence.Column;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class SoftDeletableEntity {
+public abstract class SoftDeletableEntity extends BaseEntity {
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
+	private LocalDateTime deletedAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
-
-    public void softDelete() {
-        this.deletedAt = LocalDateTime.now();
-    }
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }
 

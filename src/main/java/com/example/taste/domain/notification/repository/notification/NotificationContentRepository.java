@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.repository;
+package com.example.taste.domain.notification.repository.notification;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

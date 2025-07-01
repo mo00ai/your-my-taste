@@ -1,7 +1,15 @@
 package com.example.taste.common.exception;
 
+import static com.example.taste.domain.auth.exception.AuthErrorCode.INVALID_ROLE;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
+
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +27,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.ErrorResponse;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
-import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Builder
 @RestControllerAdvice
@@ -37,9 +40,9 @@ public class GlobalExceptionHandler {
 		log.error("AccessDeniedException: {}", ex.getMessage());
 
 		return new ResponseEntity<>(
-			CommonResponse.error(ErrorCode.INVALID_ROLE.getHttpStatus(), ErrorCode.INVALID_ROLE.getCode(),
-				ErrorCode.INVALID_ROLE.getMessage()),
-			ErrorCode.INVALID_ROLE.getHttpStatus()
+			CommonResponse.error(INVALID_ROLE.getHttpStatus(), INVALID_ROLE.getCode(),
+				INVALID_ROLE.getMessage()),
+			INVALID_ROLE.getHttpStatus()
 		);
 	}
 

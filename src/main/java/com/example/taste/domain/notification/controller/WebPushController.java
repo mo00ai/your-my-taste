@@ -1,5 +1,7 @@
 package com.example.taste.domain.notification.controller;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,14 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.notification.dto.PushSubscribeRequestDto;
 import com.example.taste.domain.notification.service.WebPushService;
-
-import lombok.RequiredArgsConstructor;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
-@RequestMapping("/push")
+@RequestMapping("/web-push")
 @RequiredArgsConstructor
 public class WebPushController {
 
@@ -24,7 +24,7 @@ public class WebPushController {
 	public CommonResponse<Void> subscribe(
 		@RequestBody PushSubscribeRequestDto dto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		webPushService.saveSubscription(userDetails.getUser(), dto);
+		webPushService.saveSubscription(userDetails.getId(), dto);
 		return CommonResponse.ok();
 	}
 

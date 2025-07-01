@@ -1,7 +1,11 @@
 package com.example.taste.domain.review.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+
 import java.io.IOException;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
 import com.example.taste.domain.image.service.ImageService;
@@ -30,13 +33,12 @@ import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
+import com.example.taste.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final ReviewRepository reviewRepository;
 	private final RedisService redisService;
@@ -45,7 +47,7 @@ public class ReviewService {
 
 	@Transactional
 	public CreateReviewResponseDto createReview(CreateReviewRequestDto requestDto, Long storeId,
-		List<MultipartFile> files, ImageType imageType, User userFromDetails) throws IOException {
+		List<MultipartFile> files, ImageType imageType, Long userId) throws IOException {
 		// 이미지 요청이 왔으면 등록, 없으면 null
 		Image image = null;
 		if (files != null && !files.isEmpty()) {
@@ -55,7 +57,8 @@ public class ReviewService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomException(StoreErrorCode.STORE_NOT_FOUND));
 		// 리뷰 작성할 유저
-		User user = userFromDetails;
+		User user = userRepository.findById(userId).orElseThrow(
+			() -> new CustomException(NOT_FOUND_USER));
 
 		// 영수증 인증 결과 조회
 		String key = "reviewValidation:user:" + user.getId() + ":store:" + store.getId();
@@ -79,13 +82,13 @@ public class ReviewService {
 	//todo null 이 내용 지우기 일 수도 있슴
 	@Transactional
 	public UpdateReviewResponseDto updateReview(UpdateReviewRequestDto requestDto, Long reviewId,
-		List<MultipartFile> files, ImageType imageType, User userFromDetails) throws IOException {
+		List<MultipartFile> files, ImageType imageType, Long userId) throws IOException {
 
 		// 수정할 리뷰
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		// 유저 검증
-		User user = userFromDetails;
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!review.getUser().isSameUser(user.getId())) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}
@@ -140,11 +143,11 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void deleteReview(Long reviewId, User userFromDetails) {
+	public void deleteReview(Long reviewId, Long userId) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		// 유저 검증
-		User user = userFromDetails;
+		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		if (!review.getUser().isSameUser(user.getId())) {
 			throw new CustomException(ReviewErrorCode.REVIEW_USER_MISMATCH);
 		}

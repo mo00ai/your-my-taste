@@ -1,7 +1,8 @@
-package com.example.taste.domain.match.vo;
+package com.example.taste.domain.match.entity;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 
+import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Positive;
 
 import lombok.Builder;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import com.example.taste.common.exception.CustomException;
 
 @Getter
+@Embeddable
 @NoArgsConstructor
 public class AgeRange {
 	@Positive

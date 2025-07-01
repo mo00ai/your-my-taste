@@ -1,14 +1,13 @@
 package com.example.taste.domain.auth.service;
 
-import static com.example.taste.domain.auth.exception.AuthErrorCode.ALREADY_LOGIN;
-import static com.example.taste.domain.user.exception.UserErrorCode.CONFLICT_EMAIL;
 import static com.example.taste.domain.user.exception.UserErrorCode.DEACTIVATED_USER;
 import static com.example.taste.domain.user.exception.UserErrorCode.INVALID_PASSWORD;
 import static com.example.taste.domain.user.exception.UserErrorCode.NOT_FOUND_USER;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
-import java.io.IOException;
-
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import lombok.RequiredArgsConstructor;
@@ -20,72 +19,26 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.config.security.CustomUserDetails;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
-import com.example.taste.domain.auth.dto.SignupRequestDto;
-import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.image.enums.ImageType;
-import com.example.taste.domain.image.service.ImageService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-import com.example.taste.domain.user.service.UserService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private final UserService userService;
 	private final UserRepository userRepository;
-	private final ImageService imageService;
 	private final PasswordEncoder passwordEncoder;
-
-	// 회원 가입
-	@Transactional
-	public void signup(SignupRequestDto requestDto, MultipartFile file) {
-		// 유저 이메일(아이디) 중복 검사
-		if (isExistsEmail(requestDto.getEmail())) {
-			throw new CustomException(CONFLICT_EMAIL);
-		}
-
-		// 비밀번호 인코딩
-		String encodedPwd = passwordEncoder.encode(requestDto.getPassword());
-		requestDto.setPassword(encodedPwd);
-
-		// 유저 정보 저장
-		User user = new User(requestDto);
-		userRepository.save(user);
-
-		// 입맛 취향 정보 저장
-		userService.updateUserFavors(user.getId(), requestDto.getFavorList());
-
-		// 프로필 이미지 저장
-		if (file != null) {
-			try {
-				Image image = imageService.saveImage(file, ImageType.USER);
-				user.setImage(image);
-				userRepository.save(user);
-			} catch (IOException e) {    // 이미지 저장 실패하더라도 회원가입 진행 (Checked 이므로 롤백 X)
-				log.warn("[AuthService] 회원 가입 중에 유저 이미지 저장에 실패하였습니다. ID: {}", user.getId());
-			}
-		}
-	}
 
 	public void signin(HttpServletRequest httpRequest, SigninRequestDto requestDto) {
 		// 로그인(기존 세션) 확인
-		HttpSession session = httpRequest.getSession(false);
-
-		SecurityContext securityContext = (session != null) ?
-			(SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT") : null;
-
-		if (securityContext != null) {
-			Authentication auth = securityContext.getAuthentication();
-			if (auth != null && auth.isAuthenticated()) {
-				throw new CustomException(ALREADY_LOGIN);
-			}
+		HttpSession oldSession = httpRequest.getSession(false);
+		if (oldSession != null) {
+			oldSession.invalidate();    // 기존 세션 무효화
+			SecurityContextHolder.clearContext(); // 기존 인증 정보 초기화
 		}
 
 		// 이메일 검증
@@ -110,22 +63,26 @@ public class AuthService {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(auth);
 		SecurityContextHolder.setContext(context);
+
+		// 새 세션 생성 후 저장
 		httpRequest.getSession(true)
-			.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+			.setAttribute(SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 	}
 
-	public void signout(HttpServletRequest httpRequest, CustomUserDetails userDetails) {
+	public void signout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		HttpSession session = httpRequest.getSession(false);
 
 		if (session != null) {
 			session.invalidate();
 		}
-		SecurityContextHolder.clearContext();
-	}
 
-	// 중복 이메일 검사
-	private boolean isExistsEmail(String email) {
-		return userRepository.existsByEmail(email);
+		SecurityContextHolder.clearContext();
+
+		// 쿠키 삭제
+		Cookie cookie = new Cookie("JSESSIONID", null);
+		cookie.setPath("/");
+		cookie.setMaxAge(0);
+		httpResponse.addCookie(cookie);
 	}
 
 	// 비밀번호 일치 검사

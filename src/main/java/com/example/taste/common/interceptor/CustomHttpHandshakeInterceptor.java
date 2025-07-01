@@ -1,6 +1,7 @@
 package com.example.taste.common.interceptor;
 
-import static com.example.taste.common.exception.ErrorCode.INVALID_SIGNATURE;
+import static com.example.taste.domain.auth.exception.AuthErrorCode.UNAUTHENTICATED;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import java.util.Map;
 
@@ -31,13 +32,13 @@ public class CustomHttpHandshakeInterceptor extends HttpSessionHandshakeIntercep
 			HttpSession session = httpRequest.getSession(false);
 
 			if (session == null) {
-				throw new CustomException(INVALID_SIGNATURE);
+				throw new CustomException(UNAUTHENTICATED);
 			}
 
-			SecurityContext context = (SecurityContext)session.getAttribute("SPRING_SECURITY_CONTEXT");
+			SecurityContext context = (SecurityContext)session.getAttribute(SPRING_SECURITY_CONTEXT_KEY);
 			if (context == null || context.getAuthentication() == null
 				|| !context.getAuthentication().isAuthenticated()) {
-				throw new CustomException(INVALID_SIGNATURE);
+				throw new CustomException(UNAUTHENTICATED);
 			}
 
 			// 필요 시 사용자 정보 저장
