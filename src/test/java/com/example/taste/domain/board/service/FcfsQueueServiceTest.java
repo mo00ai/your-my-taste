@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -80,6 +81,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private RedissonClient redissonClient;
 
+	@Tag("local-only")
 	@Test
 	@Transactional
 	void tryEnterFcfsQueue_whenConvertAndSend_thenClientReceiveMsg() {

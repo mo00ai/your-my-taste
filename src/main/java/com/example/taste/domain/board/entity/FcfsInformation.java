@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "fcfs_information")
+@Table(
+	name = "fcfs_information",
+	uniqueConstraints = @UniqueConstraint(name = "uk_fcfs_board_user", columnNames = {"board_id", "user_id"})
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class FcfsInformation {
