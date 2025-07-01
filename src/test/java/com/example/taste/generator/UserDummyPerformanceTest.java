@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +45,9 @@ public class UserDummyPerformanceTest {
 	static int TOTAL = BATCH_SIZE * 5;
 	static int DAYS_AFTER_NOW = 2;
 
+	@Value("${TEST_PASSWORD}")
+	private static String TEST_PASSWORD_HASH;
+
 	@Test
 	@DisplayName("유저 1000개 더미 데이터 생성")
 	void dummyUserBulkInsert() {
@@ -64,7 +68,7 @@ public class UserDummyPerformanceTest {
 
 					ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
 					ps.setString(2, "test" + (index + 1) + "@email.com");  //
-					ps.setString(3, "$2a$10$qPYsAOs.Ai3woO0w5IuFcO8Hn.hsK.UeANOTPCJM0cR.Hg45kNTKm");    // 비번: asdf@1234
+					ps.setString(3, TEST_PASSWORD_HASH);    // 비번: asdf@1234
 					ps.setString(4, "address");
 					ps.setInt(5, 30);
 					ps.setInt(6, 0);

@@ -126,12 +126,12 @@ public class MatchService {
 				party.getId(), InvitationType.RANDOM, InvitationStatus.WAITING);
 
 		partyInvitationRepository.deleteAll(pendingInvitationList);        // 초대 정보 삭제
-		PartyMatchInfo partyMatchInfo = partyMatchInfoRepository.findPartyMatchInfoByParty(party)
+		Long partyMatchInfoId = partyMatchInfoRepository.findIdByPartyId(party.getId())
 			.orElseThrow(() -> new CustomException(PARTY_MATCH_INFO_NOT_FOUND));
-		partyInvitationRepository.deleteById(partyMatchInfo.getId());
+		partyMatchInfoRepository.deleteById(partyMatchInfoId);
 
 		// 캐시 삭제
-		String key = "partyMatchInfo" + partyMatchInfo.getId();
+		String key = "partyMatchInfo" + partyMatchInfoId;
 		redisService.delete(key);
 
 		return pendingInvitationList.stream()     // 매칭 대상이 될 유저 매칭 조건 ID

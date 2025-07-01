@@ -56,11 +56,6 @@ public class PartyRepositoryImpl implements PartyRepositoryCustom {
 			.limit(pageable.getPageSize() + 1)
 			.fetch();
 
-		boolean hasNext = results.size() > pageable.getPageSize();
-		if (results.size() > pageable.getPageSize()) {
-			results.remove(results.size() - 1);
-		}
-
 		return hasNext(results, pageable);
 	}
 
@@ -74,6 +69,9 @@ public class PartyRepositoryImpl implements PartyRepositoryCustom {
 			.join(p.hostUser, user).fetchJoin()
 			.leftJoin(p.store).fetchJoin()
 			.where(pi.user.id.eq(userId))
+			.orderBy(getOrderSpecifier(pageable))
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1)
 			.fetch();
 
 		return hasNext(results, pageable);

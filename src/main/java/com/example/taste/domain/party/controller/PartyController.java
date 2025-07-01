@@ -1,12 +1,11 @@
 package com.example.taste.domain.party.controller;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,7 +46,7 @@ public class PartyController {
 	}
 
 	@GetMapping
-	public CommonResponse<List<PartyResponseDto>> getParties(
+	public CommonResponse<SliceImpl<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter,
 		@PageableDefault(size = 10, sort = "MEETING_DATE", direction = Sort.Direction.ASC) Pageable pageable) {

@@ -69,15 +69,7 @@ public class PartyInvitationService {
 		}
 
 		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
-		partyMatchInfoRepository.findIdByPartyId(party.getId())
-			.ifPresent((partyMatchInfoId) -> {
-				String key = "partyMatchInfo" + partyMatchInfoId;
-				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
-				int userAge = partyInvitation.getUser().getAge();
-				cachedDto.updateAvgAge(
-					party.calculateAvgAgeAfterLeave(cachedDto.getAvgAge(), userAge));
-				redisService.setKeyValue(key, cachedDto);
-			});
+		updatePartyMatchInfoCacheAfterLeave(party, partyInvitation.getUser().getAge());
 	}
 
 	// 강퇴
@@ -99,15 +91,7 @@ public class PartyInvitationService {
 		party.leaveMember();
 
 		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
-		partyMatchInfoRepository.findIdByPartyId(party.getId())
-			.ifPresent((partyMatchInfoId) -> {
-				String key = "partyMatchInfo" + partyMatchInfoId;
-				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
-				int userAge = partyInvitation.getUser().getAge();
-				cachedDto.updateAvgAge(
-					party.calculateAvgAgeAfterLeave(cachedDto.getAvgAge(), userAge));
-				redisService.setKeyValue(key, cachedDto);
-			});
+		updatePartyMatchInfoCacheAfterLeave(party, partyInvitation.getUser().getAge());
 	}
 
 	public void inviteUserToParty(
@@ -200,5 +184,18 @@ public class PartyInvitationService {
 			partyInvitationRepository.findByPartyAndInvitationStatus(party.getId(), WAITING);
 		return partyInvitationList.stream()
 			.map(PartyInvitationResponseDto::new).toList();
+	}
+
+	private void updatePartyMatchInfoCacheAfterLeave(Party party, int userAge) {
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				if (cachedDto != null) {
+					PartyMatchInfoDto newCacheDto = cachedDto.withUpdatedAvgAge(
+						cachedDto, party.calculateAvgAgeAfterLeave(cachedDto.getAvgAge(), userAge));
+					redisService.setKeyValue(key, newCacheDto);
+				}
+			});
 	}
 }

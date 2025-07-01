@@ -92,9 +92,9 @@ public class PartyBatchConfig extends DefaultBatchConfiguration {
 	@StepScope
 	public ItemReader<Long> updateSoftDeletePartyReader(PartyRepository partyRepository) {
 		LocalDate before7days = LocalDate.now().minusDays(7);
-		List<Long> expiredPartyIds = partyRepository.findAllByMeetingDate(before7days);
-		log.debug("[UpdateSoftDeletePartyReader] 삭제된 파티 ids: {}", expiredPartyIds);
-		return new IteratorItemReader<>(expiredPartyIds);
+		List<Long> softDeletedPartyIds = partyRepository.findAllByMeetingDate(before7days);
+		log.debug("[UpdateSoftDeletePartyReader] 삭제된 파티 ids: {}", softDeletedPartyIds);
+		return new IteratorItemReader<>(softDeletedPartyIds);
 	}
 
 	@Bean

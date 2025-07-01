@@ -50,9 +50,9 @@ public class UserInvitationInternalService {
 
 		// 가입 후 정원이 다 찼다면
 		if (party.isFull()) {
-			partyMatchInfoRepository.findPartyMatchInfoByParty(party)
-				.ifPresent((partyMatchInfo) -> {
-						String key = "partyMatchInfo" + partyMatchInfo.getId();
+			partyMatchInfoRepository.findIdByPartyId(party.getId())
+				.ifPresent((partyMatchInfoId) -> {
+						String key = "partyMatchInfo" + partyMatchInfoId;
 						redisService.delete(key);
 					}
 				);
@@ -61,14 +61,7 @@ public class UserInvitationInternalService {
 		}
 
 		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
-		partyMatchInfoRepository.findIdByPartyId(party.getId())
-			.ifPresent((partyMatchInfoId) -> {
-				String key = "partyMatchInfo" + partyMatchInfoId;
-				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
-				cachedDto.updateAvgAge(
-					party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userMatchInfo.getUserAge()));
-				redisService.setKeyValue(key, cachedDto);
-			});
+		updatePartyMatchInfoCacheAfterJoin(party, userMatchInfo.getUserAge());
 	}
 
 	@Transactional
@@ -86,9 +79,9 @@ public class UserInvitationInternalService {
 		if (party.isFull()) {
 			partyInvitationRepository.deleteAllByPartyAndInvitationStatus(party.getId(), WAITING);
 
-			partyMatchInfoRepository.findPartyMatchInfoByParty(party)
-				.ifPresent((partyMatchInfo) -> {
-						String key = "partyMatchInfo" + partyMatchInfo.getId();
+			partyMatchInfoRepository.findIdByPartyId(party.getId())
+				.ifPresent((partyMatchInfoId) -> {
+						String key = "partyMatchInfo" + partyMatchInfoId;
 						redisService.delete(key);
 					}
 				);
@@ -96,15 +89,7 @@ public class UserInvitationInternalService {
 		}
 
 		// 랜덤 매칭 상태인 경우 캐시에 평균 나이 업데이트
-		partyMatchInfoRepository.findIdByPartyId(party.getId())
-			.ifPresent((partyMatchInfoId) -> {
-				String key = "partyMatchInfo" + partyMatchInfoId;
-				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
-				int userAge = partyInvitation.getUser().getAge();
-				cachedDto.updateAvgAge(
-					party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userAge));
-				redisService.setKeyValue(key, cachedDto);
-			});
+		updatePartyMatchInfoCacheAfterJoin(party, partyInvitation.getUser().getAge());
 	}
 
 	@Transactional
@@ -132,5 +117,18 @@ public class UserInvitationInternalService {
 		PartyInvitationValidator.validateUserOfWaitingInvitation(partyInvitation, userId);
 
 		partyInvitation.updateInvitationStatus(InvitationStatus.REJECTED);
+	}
+
+	private void updatePartyMatchInfoCacheAfterJoin(Party party, int userAge) {
+		partyMatchInfoRepository.findIdByPartyId(party.getId())
+			.ifPresent((partyMatchInfoId) -> {
+				String key = "partyMatchInfo" + partyMatchInfoId;
+				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
+				if (cachedDto != null) {
+					PartyMatchInfoDto newCacheDto = cachedDto.withUpdatedAvgAge(
+						cachedDto, party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userAge));
+					redisService.setKeyValue(key, newCacheDto);
+				}
+			});
 	}
 }

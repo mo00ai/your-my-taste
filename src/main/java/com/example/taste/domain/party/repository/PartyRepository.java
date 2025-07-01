@@ -9,5 +9,5 @@ import com.example.taste.domain.party.entity.Party;
 
 @Repository
 public interface PartyRepository extends JpaRepository<Party, Long>, PartyRepositoryCustom, PartyRepositoryJooqCustom {
-	Optional<Party> findByIdAndDeletedAtIsNotNull(Long partyId);
+	Optional<Party> findByIdAndDeletedAtIsNull(Long partyId);
 }

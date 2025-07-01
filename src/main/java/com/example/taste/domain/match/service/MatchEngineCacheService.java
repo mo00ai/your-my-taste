@@ -220,8 +220,7 @@ public class MatchEngineCacheService {
 		if (!userHasCondition && partyHasCondition) {
 			return partyPrefAgeRange.includes(userAge);
 		}
-
-		List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
+		
 		double avgAge = partyMatchInfo.getAvgAge();
 
 		if (userHasCondition && !partyHasCondition) {

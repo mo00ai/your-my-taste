@@ -14,6 +14,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,24 +71,24 @@ public class PartyService {
 		}
 	}
 
-	public List<PartyResponseDto> getParties(Long userId, String filter, Pageable pageable) {
+	public SliceImpl<PartyResponseDto> getParties(Long userId, String filter, Pageable pageable) {
 		validateSort(pageable.getSort());
 
 		PartyFilter partyFilter = PartyFilter.of(filter);
 		switch (partyFilter) {
 			case ALL -> {
 				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
-				return partyRepository.
-					findAllByActiveAndUserNotInSorted(userId, pageable).stream()
+				Slice<Party> partySlice = partyRepository.findAllByActiveAndUserNotInSorted(userId, pageable);
+				return new SliceImpl<>(partySlice.getContent().stream()
 					.map(PartyResponseDto::new)
-					.toList();
+					.toList(), pageable, partySlice.hasNext());
 			}
 			case MY -> {
 				// 유저가 참가, 호스트인 파티 모두 보여줌 (deleted 제외)
-				return partyRepository
-					.findAllByUserInSorted(userId, pageable).stream()
+				Slice<Party> partySlice = partyRepository.findAllByUserInSorted(userId, pageable);
+				return new SliceImpl<>(partySlice.getContent().stream()
 					.map(PartyResponseDto::new)
-					.toList();
+					.toList(), pageable, partySlice.hasNext());
 			}
 			default -> throw new CustomException(INVALID_INPUT_VALUE);
 		}
@@ -110,7 +112,7 @@ public class PartyService {
 	@Transactional
 	public void updatePartyDetail(
 		Long hostId, Long partyId, PartyUpdateRequestDto requestDto) {
-		Party party = partyRepository.findByIdAndDeletedAtIsNotNull(partyId)
+		Party party = partyRepository.findByIdAndDeletedAtIsNull(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면

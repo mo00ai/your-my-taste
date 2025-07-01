@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ import com.example.taste.domain.match.redis.MatchPublisher;
 import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
-import com.example.taste.domain.party.repository.PartyRepository;
 
 @Tag("Performance")
 @ActiveProfiles("local")
@@ -47,12 +45,6 @@ public class MatchServicePerformanceTest {
 
 	@Autowired
 	private MatchEngineCacheService matchEngineCacheService;
-
-	@Autowired
-	private static JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private static PartyRepository partyRepository;
 
 	@Autowired
 	private MatchPublisher matchPublisher;
@@ -109,25 +101,26 @@ public class MatchServicePerformanceTest {
 		ExecutorService executor = Executors.newFixedThreadPool(50); // 적절한 스레드 풀 크기 지정
 		CountDownLatch latch = new CountDownLatch(taskCount);
 
-		long start = System.nanoTime();
+		try {
+			long start = System.nanoTime();
 
-		for (long i = 1; i <= taskCount; i++) {
-			long userId = i;
-			executor.submit(() -> {
-				try {
-					matchEngineService.runMatchingForUser(List.of(userId));
-				} finally {
-					latch.countDown();
-				}
-			});
+			for (long i = 1; i <= taskCount; i++) {
+				long userId = i;
+				executor.submit(() -> {
+					try {
+						matchEngineService.runMatchingForUser(List.of(userId));
+					} finally {
+						latch.countDown();
+					}
+				});
+			}
+
+			latch.await(); // 모든 작업 완료 대기
+			long end = System.nanoTime();
+			System.out.println("파티 매칭 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+		} finally {
+			executor.shutdown();
 		}
-
-		latch.await(); // 모든 작업 완료 대기
-		long end = System.nanoTime();
-
-		executor.shutdown();
-
-		System.out.println("파티 매칭 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
 	}
 
 	@Test
@@ -151,25 +144,27 @@ public class MatchServicePerformanceTest {
 		ExecutorService executor = Executors.newFixedThreadPool(50); // 시스템 자원에 따라 조정
 		CountDownLatch latch = new CountDownLatch(taskCount);
 
-		long start = System.nanoTime();
+		try {
+			long start = System.nanoTime();
 
-		for (long i = 1; i <= taskCount; i++) {
-			long userId = i;
-			executor.submit(() -> {
-				try {
-					matchEngineCacheService.runMatchingForUser(List.of(userId));
-				} finally {
-					latch.countDown();
-				}
-			});
+			for (long i = 1; i <= taskCount; i++) {
+				long userId = i;
+				executor.submit(() -> {
+					try {
+						matchEngineCacheService.runMatchingForUser(List.of(userId));
+					} finally {
+						latch.countDown();
+					}
+				});
+			}
+
+			latch.await();
+			long end = System.nanoTime();
+
+			System.out.println("파티 매칭 캐싱 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
+		} finally {
+			executor.shutdown();
 		}
-
-		latch.await();
-		long end = System.nanoTime();
-
-		executor.shutdown();
-
-		System.out.println("파티 매칭 캐싱 병렬 500건 실행 시간: " + (end - start) / 1_000_000.0 + " ms");
 	}
 
 	// @BeforeAll
