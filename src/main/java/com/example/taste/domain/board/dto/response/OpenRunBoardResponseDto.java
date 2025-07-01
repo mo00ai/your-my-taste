@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import com.example.taste.domain.board.entity.AccessPolicy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -20,13 +21,11 @@ public class OpenRunBoardResponseDto {
 	private final LocalDateTime openTime;
 	private final AccessPolicy accessPolicy;
 	private final Integer openLimit; // 접근 허용 인원 수 or 시간
-	private Long remainingSlot; // 잔여 인원 수
+	private final Long remainingSlot; // 선착순 게시글의 잔여 인원 수
 
-	// 공개 예정 게시글이면 openLimit, remainingSlot에 null 삽입
+	@Builder
 	public OpenRunBoardResponseDto(Long userId, String userName, String userImageUrl, Long boardId, String title,
-		LocalDateTime openTime, AccessPolicy accessPolicy, Integer openLimit) {
-		boolean isOpened = !openTime.isAfter(LocalDateTime.now());
-
+		LocalDateTime openTime, AccessPolicy accessPolicy, Integer openLimit, Long remainingSlot) {
 		this.userId = userId;
 		this.userName = userName;
 		this.userImageUrl = userImageUrl;
@@ -34,11 +33,22 @@ public class OpenRunBoardResponseDto {
 		this.title = title;
 		this.openTime = openTime;
 		this.accessPolicy = accessPolicy;
-		this.openLimit = isOpened ? openLimit : null;
+		this.openLimit = openLimit;
+		this.remainingSlot = remainingSlot;
 	}
 
-	public void setRemainingSlot(Long remainingSlot) {
-		boolean isOpened = !openTime.isAfter(LocalDateTime.now());
-		this.remainingSlot = isOpened ? remainingSlot : null;
+	public static OpenRunBoardResponseDto createFromDto(OpenRunBoardQueryDto dto, Integer openLimit,
+		Long remainingSlot) {
+		return OpenRunBoardResponseDto.builder()
+			.userId(dto.getUserId())
+			.userName(dto.getUserName())
+			.userImageUrl(dto.getUserImageUrl())
+			.boardId(dto.getBoardId())
+			.title(dto.getTitle())
+			.openTime(dto.getOpenTime())
+			.accessPolicy(dto.getAccessPolicy())
+			.openLimit(openLimit)
+			.remainingSlot(remainingSlot)
+			.build();
 	}
 }

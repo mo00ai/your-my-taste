@@ -37,7 +37,7 @@ jobs:
       - name: Wait for PostgreSQL to be healthy
         run: |
           for i in {1..5}; do
-            docker exec test-postgres pg_isready -U testuser && break
+            docker exec test-postgres pg_isready -U postgres && break
             echo "Waiting for PostgreSQL..."
             sleep 5
           done
@@ -50,7 +50,7 @@ jobs:
           echo "DB_HOST=localhost"     > .env
           echo "DB_PORT=5432"         >> .env
           echo "DB_NAME=taste_ci_test" >> .env
-          echo "DB_USER=testuser"     >> .env
+          echo "DB_USER=postgres"     >> .env
           echo "DB_PASSWORD=test1234" >> .env
           echo "DB_SCHEMA=public" >> .env
 
@@ -110,6 +110,12 @@ jobs:
       KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    #      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+    #      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
+    #      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+    #      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+    #      RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_USERNAME }}
+    #      RABBITMQ_DEFAULT_PASS: ${{ Rsecrets.ABBITMQ_PASSWORD }}
 
     steps:
       - name: Checkout source
@@ -129,12 +135,13 @@ jobs:
       - name: Docker Compose Up
         run: docker-compose -f docker-compose.test.ci.yml up -d
 
-      - name: Wait for PostgreSQL & Redis
+      - name: Wait for PostgreSQL & Redis & RabbitMQ
         run: |
           for i in {1..10}; do
-            docker exec test-postgres pg_isready -U testuser && \
-            docker exec test-redis redis-cli ping | grep -q PONG && break
-            echo "Waiting..."
+            docker exec test-postgres pg_isready -U postgres &&
+            docker exec test-redis redis-cli ping | grep -q PONG &&
+            docker exec test-rabbitmq rabbitmqctl status && break
+            echo "Waiting for containers to be healthy..."
             sleep 5
           done
 

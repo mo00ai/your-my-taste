@@ -170,6 +170,10 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public Set<Object> getZSetRange(String key) {
+		return redisTemplate.opsForZSet().range(key, 0, -1);
+	}
+
 	//scan 방식으로 변경하였음 -황기하
 	public Set<String> getKeys(String pattern) {
 		Set<String> keys = new HashSet<>();
@@ -189,7 +193,7 @@ public class RedisService {
 		}
 		return Collections.emptySet();
 	}
-	
+
 	public List<String> getKeysFromList(String listKey, int index) {
 		List<String> raw = stringRedisTemplate.opsForList().range(listKey, 0, 99);
 		if (raw == null || raw.isEmpty()) {
@@ -260,8 +264,16 @@ public class RedisService {
 		return (size == null || size == 0) ? 0L : size;
 	}
 
+	// public <T> T getLast(String key, Class<T> tClass) {
+	// 	Object obj = redisTemplate.opsForList().getLast(key);
+	// 	if (obj == null) {
+	// 		return null;
+	// 	}
+	// 	return objectMapper.convertValue(obj, tClass);
+	// }
+
 	public <T> T getLast(String key, Class<T> tClass) {
-		Object obj = redisTemplate.opsForList().getLast(key);
+		Object obj = redisTemplate.opsForList().index(key, -1); // 마지막 요소
 		if (obj == null) {
 			return null;
 		}
