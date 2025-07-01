@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 	public static final String EXCHANGE_NAME = "board-status-exchange";
 	public static final String QUEUE_NAME = "board-status-queue";
+	public static final String ERROR_QUEUE_NAME = "recommend-error-queue";
 
 	@Bean
 	public TopicExchange exchange() {
@@ -24,6 +26,16 @@ public class RabbitConfig {
 	@Bean
 	public Queue queue() {
 		return new Queue(QUEUE_NAME, false); // NOTE 테스트 원활하도록 false로 임시 설정
+	}
+
+	@Bean
+	public Queue recommendErrorQueue() {
+		return new Queue(ERROR_QUEUE_NAME, true);
+	}
+
+	@Bean
+	public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+		return new RabbitAdmin(connectionFactory);
 	}
 
 	@Bean
