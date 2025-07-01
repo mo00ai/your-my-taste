@@ -88,8 +88,7 @@ public class NotificationUserService {
 				hasNext = true;
 			}
 			for (String key : keys) {
-				String[] splitKey = key.split(":");
-				Long contentId = Long.parseLong(splitKey[splitKey.length - 2]);
+				Long contentId = extractContentIdFromKey(key);
 				NotificationDataDto notificationDataDto = (NotificationDataDto)redisService.getKeyValue(key);
 				NotificationResponseDto responseDto = new NotificationResponseDto(notificationDataDto);
 				responseDto.setContentId(contentId);
@@ -161,8 +160,6 @@ public class NotificationUserService {
 				dto.readIt();
 				notificationRedisService.updateNotification(dto, key);
 			}
-		} else {
-			throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
 		}
 
 		// mysql 알림 읽음 처리
@@ -178,6 +175,7 @@ public class NotificationUserService {
 	) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		// 없어도 에러 던지면 안되서 optional로 받음
 		Optional<UserNotificationSetting> settingOpt =
 			userNotificationSettingRepository.findByUserAndNotificationCategory(user, category);
 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
@@ -38,8 +37,6 @@ public class NotificationService {
 	private final WebPushRepository webPushRepository;
 	private final UserRepository userRepository;
 	private final NotificationContentRepository notificationContentRepository;
-
-	private final RedisService redisService;
 
 	// 개별 알림
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
@@ -96,7 +93,6 @@ public class NotificationService {
 	public void sendBunchUsingReference(NotificationContent content, NotificationDataDto dataDto,
 		List<Long> allUserId) {
 
-		List<Long> bigListUserId = new ArrayList<>();
 		List<NotificationInfo> notificationInfos = new ArrayList<>();
 		for (Long id : allUserId) {
 			List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(id);
@@ -106,7 +102,6 @@ public class NotificationService {
 				} catch (Exception e) {
 					log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 				}
-
 			}
 			notificationRedisService.storeAndTrimNotification(id, content.getId(),
 				dataDto);

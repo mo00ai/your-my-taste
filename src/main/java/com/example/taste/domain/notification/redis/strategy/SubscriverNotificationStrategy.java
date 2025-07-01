@@ -13,7 +13,6 @@ import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.redis.CategorySupport;
 import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
-import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.FollowRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -43,11 +42,11 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
 		List<Follow> followList = followRepository.findByFollowingId(dto.getUserId());
 		// 팔로우 하는 모든 유저를 가져옴
-		List<User> followers = new ArrayList<>();
+		List<Long> followerIds = new ArrayList<>();
 		for (Follow follow : followList) {
-			followers.add(follow.getFollower());
+			followerIds.add(follow.getFollower().getId());
 		}
-		notificationService.sendBunch(notificationContent, dataDto, followers);
+		notificationService.sendBunchUsingReference(notificationContent, dataDto, followerIds);
 
 	}
 }

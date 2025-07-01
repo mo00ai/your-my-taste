@@ -26,19 +26,6 @@ public class NotificationRedisService {
 	private final RedisService redisService;
 
 	//Notification store
-	public Long storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
-		Duration duration) {
-		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
-		redisService.setKeyValue(key, dataDto, duration);
-		// 해당 카테고리에 대해 count 증가
-		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
-		redisService.increaseCount(countKey);
-
-		String listKey = "notification:list:user:" + userId;
-		redisService.listLeftPush(listKey, key);
-		return redisService.getListSize(listKey);
-	}
-
 	public void storeAndTrimNotification(Long userId, Long contentId, NotificationDataDto dataDto) {
 		if (userId == 0 || contentId == null || dataDto == null || dataDto.getCategory() == null) {
 			throw new IllegalArgumentException("Invalid params");
