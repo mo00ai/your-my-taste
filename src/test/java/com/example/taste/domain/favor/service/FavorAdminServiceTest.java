@@ -41,6 +41,53 @@ public class FavorAdminServiceTest extends AbstractIntegrationTest {
 	EntityManager em;
 
 	@Test
+	@DisplayName("관리자가 입맛 업데이트 시 유저 입맛도 업데이트 된다")
+	public void updateFavorWithUserFavor() {
+		// given
+		favorAdminService.createFavor(favorList.stream()
+			.map(FavorAdminRequestDto::new).toList());
+		em.flush();
+		em.clear();
+
+		User user = userRepository.save(UserFixture.create(null));
+		List<UserFavorUpdateRequestDto> userFavorList = favorList.stream()
+			.map(f -> new UserFavorUpdateRequestDto(null, f))
+			.toList();
+		userService.updateUserFavors(user.getId(), userFavorList);
+		em.flush();
+		em.clear();
+
+		// when
+		List<String> updateFavorList = List.of(favorList.get(0));
+		List<Long> favorIdList = favorRepository.findAllByNameIn(
+				updateFavorList)
+			.stream()
+			.map(Favor::getId).toList();
+		List<String> updateFavorNameList = updateFavorList.stream()
+			.map(uf -> "new" + uf)
+			.toList();
+		List<FavorAdminRequestDto> updateFavorDtoList = updateFavorNameList.stream()
+			.map(FavorAdminRequestDto::new)
+			.toList();
+
+		for (int i = 0; i < favorIdList.size(); i++) {
+			Long favorId = favorIdList.get(i);
+			FavorAdminRequestDto requestDto = updateFavorDtoList.get(i);
+
+			favorAdminService.updateFavor(favorId, requestDto);
+		}
+
+		// then
+		assertThat(favorRepository.findAllByNameIn(updateFavorNameList)).isNotEmpty()
+			.as("FavorRepo 에 업데이트 입맛이 존재한다");
+
+		assertThat(userFavorRepository.findAll().stream()
+			.map(uf -> uf.getFavor().getName())
+			.anyMatch(updateFavorNameList::contains)).isTrue()
+			.as("UserFavorRepo 에서도 입맛이 업데이트 되었다");
+	}
+
+	@Test
 	@DisplayName("관리자가 입맛 삭제 시 유저 입맛도 삭제된다")
 	public void deleteFavorWithUserFavor() {
 		// given
