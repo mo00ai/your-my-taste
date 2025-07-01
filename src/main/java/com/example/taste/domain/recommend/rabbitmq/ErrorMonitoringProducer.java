@@ -1,5 +1,9 @@
 package com.example.taste.domain.recommend.rabbitmq;
 
+import static com.example.taste.config.RabbitConfig.*;
+
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +17,11 @@ public class ErrorMonitoringProducer {
 
 	public void send(Long userId, String message) {
 		String payload = userId + "|" + message;
-		rabbitTemplate.convertAndSend("recommend-error-queue", payload);
+
+		MessageProperties props = new MessageProperties();
+		props.setExpiration("600000"); // 10분 TTL
+
+		Message amqpMessage = new Message(payload.getBytes(), props);
+		rabbitTemplate.convertAndSend(ERROR_QUEUE_NAME, payload);
 	}
 }
