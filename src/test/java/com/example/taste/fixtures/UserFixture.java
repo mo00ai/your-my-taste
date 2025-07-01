@@ -17,7 +17,27 @@ public class UserFixture {
 		User user = User.builder()
 			.nickname("testUser")
 			.email("testUser+" + UUID.randomUUID() + "@example.com")
-			.password("encoded-password")
+			.password("password")
+			.address("서울특별시 00구 00동")
+			.gender(ANY)
+			.age(20)
+			.role(Role.USER)
+			.level(Level.NORMAL)
+			.postingCount(0)
+			.point(0)
+			.follower(0)
+			.following(0)
+			.build();
+
+		user.setImage(image);
+		return user;
+	}
+
+	public static User createWithEncodedPw(Image image, String pw) {
+		User user = User.builder()
+			.nickname("testUser")
+			.email("testUser+" + UUID.randomUUID() + "@example.com")
+			.password(pw)
 			.address("서울특별시 00구 00동")
 			.gender(ANY)
 			.age(20)

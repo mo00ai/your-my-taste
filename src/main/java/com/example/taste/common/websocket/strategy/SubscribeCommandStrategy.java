@@ -9,6 +9,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.example.taste.common.websocket.manager.OpenRunPerformanceManager;
 import com.example.taste.common.websocket.manager.WebSocketSubscriptionManager;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
@@ -25,6 +26,7 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 	private static final Pattern BOARD_SUB_PATTERN_COMPILED = Pattern.compile("^/sub/openrun/board/(\\d+)$");
 	private final PartyInvitationRepository partyInvitationRepository;
 	private final WebSocketSubscriptionManager subscriptionManager;
+	private final OpenRunPerformanceManager openRunPerformanceManager;
 
 	@Override
 	public boolean supports(StompCommand command) {
@@ -34,7 +36,11 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 	@Override
 	public Message<?> handle(StompHeaderAccessor headerAccessor, Message<?> message) {
 		String destination = headerAccessor.getDestination();
-		Matcher matcher = CHAT_SUB_PATTERN_COMPILED.matcher(destination);
+		if (destination == null) {
+			return null;
+		}
+
+		Matcher chatMatcher = CHAT_SUB_PATTERN_COMPILED.matcher(destination);
 		Matcher boardMatcher = BOARD_SUB_PATTERN_COMPILED.matcher(destination);
 		Authentication auth = (headerAccessor.getUser() instanceof Authentication a) ? a : null;
 		CustomUserDetails userDetails = (CustomUserDetails)(auth != null ? auth.getPrincipal() : null);
@@ -42,17 +48,19 @@ public class SubscribeCommandStrategy implements StompCommandStrategy {
 			if (auth == null || !auth.isAuthenticated()) {
 				throw new IllegalAccessException("인증 정보 없음");
 			}
-
-			if (matcher.matches()) {
-				Long partyId = Long.valueOf(matcher.group(1));
+			if (boardMatcher.matches()) {
+				subscriptionManager.add(userDetails.getId(), destination);
+				openRunPerformanceManager.add(userDetails.getId());
+				return message;
+			}
+			if (chatMatcher.matches()) {
+				Long partyId = Long.valueOf(chatMatcher.group(1));
 
 				if (!partyInvitationRepository.existsByUserIdAndPartyIdAndInvitationStatus(
 					userDetails != null ?
 						userDetails.getId() : null, partyId, InvitationStatus.CONFIRMED)) {
 					throw new IllegalAccessException();
 				}
-			} else if (boardMatcher.matches()) {
-				return message;
 			} else {
 				throw new IllegalArgumentException();
 			}
