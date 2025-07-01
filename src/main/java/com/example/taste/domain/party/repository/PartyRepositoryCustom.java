@@ -3,12 +3,15 @@ package com.example.taste.domain.party.repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+
 import com.example.taste.domain.party.entity.Party;
 
 public interface PartyRepositoryCustom {
-	List<Party> findAllByRecruitingAndUserNotIn(Long userId);
+	Slice<Party> findAllByActiveAndUserNotInSorted(Long userId, Pageable pageable);
 
-	List<Party> findAllByUserIn(Long userId);
+	Slice<Party> findAllByUserInSorted(Long userId, Pageable pageable);
 
 	List<Party> findAllMeetingDateAndDeleteAtIsNull(LocalDate meetingDate);
 }
