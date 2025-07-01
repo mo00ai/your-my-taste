@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -271,11 +270,14 @@ public class BoardService {
 		return closedCnt;
 	}
 
-
 	// 검색용 인덱스 필드 초기화
 	private void processAndSetSearchKeywords(Board board) {
+		final int MIN_NOUN_LENGTH = 2;
+		final int MIN_PHRASE_LENGTH = 3;
 		// 제목 + 내용 결합
-		String combinedText = board.getTitle() + " " + board.getContents();
+		String title = board.getTitle() != null ? board.getTitle() : "";
+		String contents = board.getContents() != null ? board.getContents() : "";
+		String combinedText = title + " " + contents;
 
 		// OKT로 키워드 추출
 		Set<String> keywords = processor.extractSearchKeywords(combinedText);
@@ -284,12 +286,12 @@ public class BoardService {
 
 		// 중복 제거 및 필터링
 		Set<String> cleanNouns = nouns.stream()
-			.filter(noun -> noun.length() >= 2)
+			.filter(noun -> noun.length() >= MIN_NOUN_LENGTH)
 			.collect(Collectors.toSet());
 
 		Set<String> cleanPhrases = phrases.stream()
-			.filter(phrase -> phrase.length() >= 3)
-			.filter(phrase -> phrase.split("\\s+").length <= 3)  // 3단어 이하만
+			.filter(phrase -> phrase.length() >= MIN_PHRASE_LENGTH)
+			.filter(phrase -> phrase.split("\\s+").length <= MIN_PHRASE_LENGTH)  // 3단어 이하만
 			.collect(Collectors.toSet());
 
 		// 데이터베이스 저장용 문자열로 변환
