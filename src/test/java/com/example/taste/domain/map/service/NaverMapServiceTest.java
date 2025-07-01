@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.domain.map.dto.geocode.GeoMapDetailResponse;
 import com.example.taste.property.AbstractIntegrationTest;
 
+@ActiveProfiles("test-int")
 @SpringBootTest
-@Transactional
 public class NaverMapServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private NaverMapService naverMapService;
@@ -32,4 +32,25 @@ public class NaverMapServiceTest extends AbstractIntegrationTest {
 		assertThat(response.getAddresses()).isNotNull();
 		assertThat(response.getAddresses().size()).isGreaterThan(0);
 	}
+
+	// @Test
+	// @DisplayName("리버스 지오코딩 성공 - 행정동 주소 반환")
+	// void reverseGeocode_success() {
+	// 	// given
+	// 	String coordinates = "126.9782752,37.5666421";
+	//
+	// 	// when
+	// 	ReverseGeocodeDetailResponse response = naverMapService.getAddressFromStringCoordinates(coordinates);
+	//
+	// 	// then
+	// 	assertThat(response).isNotNull();
+	// 	assertThat(response.getResults()).isNotEmpty();
+	//
+	// 	// 행정동 타입(admcode)만 필터링해서 검증해도 좋음
+	// 	var admResult = response.getResults().stream()
+	// 		.filter(r -> r.getName().equals("admcode"))
+	// 		.findFirst()
+	// 		.orElseThrow();
+	// 	assertThat(admResult.getRegion().getArea1().getName()).isEqualTo("서울특별시");
+	// }
 }
