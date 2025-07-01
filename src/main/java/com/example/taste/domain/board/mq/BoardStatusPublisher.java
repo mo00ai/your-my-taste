@@ -1,6 +1,6 @@
 package com.example.taste.domain.board.mq;
 
-import static com.example.taste.config.RabbitConfig.*;
+import static com.example.taste.common.constant.RabbitConst.*;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
