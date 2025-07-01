@@ -22,5 +22,6 @@ public class ErrorMonitoringProducer {
 		Message amqpMessage = new Message(payload.getBytes(), props);
 
 		rabbitTemplate.send("recommend-error-queue", amqpMessage);
+
 	}
 }
