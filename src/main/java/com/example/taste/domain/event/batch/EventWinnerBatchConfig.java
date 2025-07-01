@@ -3,6 +3,8 @@ package com.example.taste.domain.event.batch;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -30,6 +32,18 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @RequiredArgsConstructor
 public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
+	private final DataSource dataSource;
+	private final PlatformTransactionManager transactionManager;
+
+	@Override
+	protected DataSource getDataSource() {
+		return dataSource;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTransactionManager() {
+		return transactionManager;
+	}
 
 	private final EventService eventService;
 	private final PkService pkService;
@@ -59,7 +73,7 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 		List<Event> events = RetryUtils.executeWithRetry(
 			() -> eventService.findEndedEventList(yesterday),
 			RETRY_LIMIT,
-			"Reader - [Event] 종료된 이벤트 목록 조회");
+			"Reader - [Event] 종료된 이벤트 목록 조회" );
 
 		log.info("[Event] 종료된 이벤트 수: {}", events.size());
 		return new ListItemReader<>(events);
