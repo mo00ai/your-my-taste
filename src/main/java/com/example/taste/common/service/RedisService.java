@@ -170,6 +170,10 @@ public class RedisService {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
+	public Set<Object> getZSetRange(String key) {
+		return redisTemplate.opsForZSet().range(key, 0, -1);
+	}
+
 	//scan 방식으로 변경하였음 -황기하
 	public Set<String> getKeys(String pattern) {
 		Set<String> keys = new HashSet<>();

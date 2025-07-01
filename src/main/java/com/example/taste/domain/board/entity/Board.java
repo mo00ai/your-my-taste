@@ -1,5 +1,7 @@
 package com.example.taste.domain.board.entity;
 
+import static com.example.taste.common.constant.CacheConst.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -153,6 +155,10 @@ public class Board extends SoftDeletableEntity {
 
 	public boolean isOpenTimeNow() {
 		return !LocalDateTime.now().isBefore(this.openTime);
+	}
+
+	public boolean canCaching() {
+		return LocalDateTime.now().isBefore(this.openTime.plus(DEFAULT_TTL));
 	}
 
 	public boolean isOverOpenLimit(Long num) {
