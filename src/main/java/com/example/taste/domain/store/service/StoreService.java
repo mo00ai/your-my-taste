@@ -232,8 +232,9 @@ public class StoreService {
 		String query = request.getQuery();
 		log.info("query: {}", query);
 
-		float[] embeddingVetor = embeddingService.search(query);
-		Page<StoreSearchResult> page = storeRepository.searchByVector(embeddingVetor,
+		float[] embeddingVector = embeddingService.search(query);
+		log.info("embeddingVector length: {}", embeddingVector.length);
+		Page<StoreSearchResult> page = storeRepository.searchByVector(embeddingVector,
 			request.getSimilarityThreshold(), pageable);
 		return PageResponse.from(page);
 	}

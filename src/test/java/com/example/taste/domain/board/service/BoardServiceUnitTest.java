@@ -96,89 +96,61 @@ public class BoardServiceUnitTest {
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 공개 전 게시글!)")
 	@Test
-	public void findBoard_whenNotOpenYet_ThrowException() {
+	public void validateBoard_whenNotOpenYet_ThrowException() {
 		// given
 		Image image = ImageFixture.create();
-		User user = UserFixture.create(image);
+		User user1 = UserFixture.create(image);
+		User user2 = UserFixture.create(image);
+		ReflectionTestUtils.setField(user1, "id", 1L);
+		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-
-		Board board = BoardFixture.createTimeAttackBoard(dto, store, user);
-		long boardId = 999L, userId = 999L;
-
-		// stub
-		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+			LocalDateTime.now().plusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.findBoard(boardId, userId);
+			boardService.validateBoard(board, user2);
 		});
 	}
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 비공개 게시글!)")
 	@Test
-	public void findBoard_whenClosedBoard_ThrowException() {
+	public void validateBoard_whenClosedBoard_ThrowException() {
 		// given
 		Image image = ImageFixture.create();
-		User user = UserFixture.create(image);
+		User user1 = UserFixture.create(image);
+		User user2 = UserFixture.create(image);
+		ReflectionTestUtils.setField(user1, "id", 1L);
+		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-		Board board = BoardFixture.createClosedOBoard(dto, store, user);
-		long boardId = 999L, userId = 999L;
-
-		// stub
-		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		Board board = BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10,
+			LocalDateTime.now().plusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.findBoard(boardId, userId);
+			boardService.validateBoard(board, user2);
 		});
 	}
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 타임어택 공개시간 만료!)")
 	@Test
-	public void findBoard_whenTimeExceededBoard_ThrowException() {
+	public void validateBoard_whenTimeExceededBoard_ThrowException() {
 		// given
 		Image image = ImageFixture.create();
-		User user = UserFixture.create(image);
+		User user1 = UserFixture.create(image);
+		User user2 = UserFixture.create(image);
+		ReflectionTestUtils.setField(user1, "id", 1L);
+		ReflectionTestUtils.setField(user2, "id", 2L);
 		Category category = CategoryFixture.create();
 		Store store = StoreFixture.create(category);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
-		Board board = BoardFixture.createTimeLimitedOBoard(dto, store, user);
-		long boardId = 999L, userId = 999L;
-
-		// stub
-		given(boardRepository.findActiveBoard(anyLong())).willReturn(Optional.of(board));
-		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+			LocalDateTime.now().minusDays(1), store, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.findBoard(boardId, userId);
+			boardService.validateBoard(board, user2);
 		});
 	}
 

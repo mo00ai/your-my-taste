@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,7 @@ import lombok.ToString;
 @ToString
 public class StoreSearchCondition {
 	// 필수: 임베딩 기반 의미적 검색
-	// @NotBlank(message = "검색어는 필수입니다")
+	@NotBlank(message = "검색어는 필수입니다")
 	private String query;
 
 	// 선택적 필터들

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
-import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardQueryDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.BoardType;
@@ -22,7 +22,7 @@ public interface BoardRepositoryCustom {
 
 	//long closeBoardsByIds(List<? extends Long> ids);
 
-	Page<OpenRunBoardResponseDto> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
+	Page<OpenRunBoardQueryDto> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);
 	// TODO 구현할 메서드
 	// List<BoardListResponseDto> findByOktTrgmSearch(String searchKeywords, String originalQuery, int limit);
