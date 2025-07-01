@@ -191,7 +191,7 @@ class NotificationServiceUnitTest {
 		}
 
 		@Test
-		void makeDaaDto() {
+		void makeDataDto() {
 			// given
 			ReflectionTestUtils.setField(publishDto, "category", NotificationCategory.BOARD);
 			given(userRepository.findById(everyId)).willReturn(Optional.of(user));

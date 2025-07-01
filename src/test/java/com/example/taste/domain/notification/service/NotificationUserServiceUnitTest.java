@@ -111,9 +111,9 @@ class NotificationUserServiceUnitTest {
 			settings.add(setting);
 			given(userNotificationSettingRepository.findAllByUser(any(User.class))).willReturn(settings);
 
-			String pattern = "notification:count:user:" + everyId + ":*";
+			String key = "notification:count:user:" + everyId + ":INDIVIDUAL";
 			Set<String> keys = new HashSet<>();
-			keys.add(pattern);
+			keys.add(key);
 			given(redisService.getKeys(anyString())).willReturn(keys);
 
 			// when
