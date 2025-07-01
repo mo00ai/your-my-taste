@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
-import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardQueryDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
@@ -116,10 +116,10 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 	}
 
 	@Override
-	public Page<OpenRunBoardResponseDto> findUndeletedBoardByTypeAndPolicy(BoardType type,
+	public Page<OpenRunBoardQueryDto> findUndeletedBoardByTypeAndPolicy(BoardType type,
 		Collection<AccessPolicy> policies, Pageable pageable) {
-		JPAQuery<OpenRunBoardResponseDto> query = queryFactory
-			.select(Projections.constructor(OpenRunBoardResponseDto.class,
+		JPAQuery<OpenRunBoardQueryDto> query = queryFactory
+			.select(Projections.constructor(OpenRunBoardQueryDto.class,
 				user.id,
 				user.nickname,
 				image.url,
@@ -150,7 +150,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 		}
 
 		// 페이징
-		List<OpenRunBoardResponseDto> result = query
+		List<OpenRunBoardQueryDto> result = query
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
