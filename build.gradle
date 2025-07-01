@@ -43,6 +43,7 @@ dependencies {
     testImplementation 'org.springframework.batch:spring-batch-test'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
+
     // Spring starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -88,9 +89,10 @@ dependencies {
     // Image 검증
     implementation 'org.apache.tika:tika-core:2.9.0'
 
-    // AWS SDK v2 for S3 + Presigned URL
+    // AWS SDK v2 for S3 + Presigned URL + cloudfront
     implementation platform("software.amazon.awssdk:bom:2.31.6")
     implementation "software.amazon.awssdk:s3"
+    implementation("software.amazon.awssdk:cloudfront:2.25.4")
 
     // bcrypt
     implementation 'at.favre.lib:bcrypt:0.10.2'
@@ -113,6 +115,13 @@ dependencies {
     //web_push
     implementation 'nl.martijndwars:web-push:5.1.0'
     implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
+
+    //circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    //rabbitmq
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 def dotenv = new Properties()
