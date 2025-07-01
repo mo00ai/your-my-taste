@@ -4,11 +4,10 @@ import static com.example.taste.domain.favor.entity.QFavor.favor;
 import static com.example.taste.domain.user.entity.QUser.user;
 import static com.example.taste.domain.user.entity.QUserFavor.userFavor;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,9 +68,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				.fetchOne()
 		);
 	}
-<<<<<<< HEAD
-=======
-
 
 	@Override
 	public Page<Long> getAllUserIdPage(PageRequest pageRequest) {
@@ -88,5 +84,4 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 			.fetchOne();
 		return new PageImpl<>(userPage, pageRequest, total);
 	}
->>>>>>> dev
 }
