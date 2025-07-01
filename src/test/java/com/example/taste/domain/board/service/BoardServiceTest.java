@@ -1,34 +1,29 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.StompFrameHandler;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.response.PageResponse;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
+import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
+import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.entity.BoardType;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.store.entity.Category;
@@ -37,6 +32,7 @@ import com.example.taste.domain.store.repository.CategoryRepository;
 import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.example.taste.fixtures.BoardFixture;
 import com.example.taste.fixtures.CategoryFixture;
 import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
@@ -45,11 +41,8 @@ import com.example.taste.property.AbstractIntegrationTest;
 
 import jakarta.transaction.Transactional;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class BoardServiceTest extends AbstractIntegrationTest {
-	@LocalServerPort
-	private int port;
-
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -57,9 +50,11 @@ class BoardServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private BoardService boardService;
 	@Autowired
+	private CategoryRepository categoryRepository;
+	@Autowired
 	private BoardRepository boardRepository;
 	@Autowired
-	private CategoryRepository categoryRepository;
+	private RedisService redisService;
 
 	@Test
 	@Transactional
@@ -71,7 +66,6 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		Store store = storeRepository.save(StoreFixture.create(category));
 
 		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
@@ -98,7 +92,6 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		Store store = storeRepository.save(StoreFixture.create(category));
 
 		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		// BoardRequestDto-OpenRunRequestDto의 상속구조로 강제 set 필요
 		ReflectionTestUtils.setField(dto, "title", "제목입니다");
 		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
 		ReflectionTestUtils.setField(dto, "type", "O");
@@ -114,114 +107,129 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		});
 	}
 
-	// @Test
-	// @Transactional
-	// void tryEnterFcfsQueue_whenConvertAndSend_thenClientReceiveMsg() throws Exception {
-	// 	// given
-	// 	Image image = ImageFixture.create();
-	// 	User user = userRepository.save(UserFixture.create(image));
-	// 	Category category = categoryRepository.save(CategoryFixture.create());
-	// 	Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
-	//
-	// 	OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-	// 	ReflectionTestUtils.setField(dto, "title", "제목입니다");
-	// 	ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-	// 	ReflectionTestUtils.setField(dto, "type", "O");
-	// 	ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
-	// 	ReflectionTestUtils.setField(dto, "openLimit", 1);
-	// 	ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusDays(1));
-	// 	Board board = boardRepository.saveAndFlush(BoardFixture.createFcfsOBoard(dto, store, user));
-	//
-	// 	// 연결 및 구독하고 서버에서 메시지 수신 대기 (최대 5초)
-	// 	CompletableFuture<String> future = connectAndSubscribe(board.getId());
-	//
-	// 	// when
-	// 	boardService.tryEnterFcfsQueue(board, 99L);
-	// 	Thread.sleep(500);
-	//
-	// 	// then
-	// 	String receivedMessage = future.get(5, TimeUnit.SECONDS);
-	// 	assertNotNull(receivedMessage);
-	// 	System.out.println("수신 메시지: " + receivedMessage);
-	// }
-
 	@Test
-	void tryEnterFcfsQueue() {
-		// 테스트용 docker redis 사용 -> 만약 추후에 redis를 docker에 올리게 되면 둘이 구분 가능?
-		// 테스트 요소 1. openLimit 보다 zSet size가 크면 error
-		// 2. 이미 zSet에 있는 유저가 다시 접근하면 데이터 삽입 안하고 기존 저장된 순위 반환
-		// 3. addToZSet 수행하고 convertAndSend 수행하는지
-		// 4. 동시성 문제로 인해 zSet에 삽입은 됐는데 순위가 limit을 넘어간 경우 Remove + error
-	}
-
-	@Test
-	public void findBoard_whenRankExceededBoard_ThrowException() {
-		// tryEnterFcfsQueue() 테스트 완료 후 진행
-	}
-
-	@Test
-	public void findBoard_whenIsOpenedAndRankInFcfsBoard_thenSuccess() {
-		// tryEnterFcfsQueue() 테스트 완료 후 진행
-	}
-
-	@Test
+	@Transactional
 	void deleteBoard_whenFcfsBoard_thenZSetSizeIsZero() {
-		// tryEnterFcfsQueue() 테스트 완료 후 진행
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.saveAndFlush(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.save(
+			BoardFixture.createOBoard("title", "contents", BoardType.O.name(), FCFS.name(), 10, LocalDateTime.now(),
+				store, user));
+		String key = OPENRUN_KEY_PREFIX + board.getId();
+		redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
+
+		// when
+		boardService.deleteBoard(user.getId(), board.getId());
+
+		// then
+		assertThat(redisService.getKeyLongValue(key)).isNull();
 	}
 
-	// 유저 posting count 초기화하는 스케줄러 테스트코드
-	// 타임어택 게시글 공개 시간 지나면 close 하는 스케줄러 테스트코드
+	@Test
+	@Transactional
+	void findOpenRunBoardList_whenOpenedFcfs_thenResultIncludeOpenLimitAndSlot() {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.saveAndFlush(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.save(
+			BoardFixture.createOBoard("title", "contents", BoardType.O.name(), FCFS.name(), 10, LocalDateTime.now(),
+				store, user));
+		Pageable pageable = PageRequest.of(0, 10);
 
-	private CompletableFuture<String> connectAndSubscribe(Long boardId) throws InterruptedException {
-		// WebSocket + STOMP 통신을 위한 클라이언트 클래스
-		WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+		// when
+		PageResponse<OpenRunBoardResponseDto> boardList = boardService.findOpenRunBoardList(pageable);
 
-		// JSON -> Object로 자동 변환하는 클래스
-		stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+		// then
+		OpenRunBoardResponseDto targetDto = boardList.getContent().stream()
+			.filter(dto -> dto.getBoardId().equals(board.getId()))
+			.findFirst()
+			.orElseThrow();
 
-		// WebSocket + STOMP 헤더 설정
-		WebSocketHttpHeaders webSocketHttpHeaders = new WebSocketHttpHeaders();
-		StompHeaders connectHeaders = new StompHeaders();
-		connectHeaders.setAcceptVersion("1.2");
+		assertThat(targetDto.getOpenLimit()).isNotNull();
+		assertThat(targetDto.getRemainingSlot()).isNotNull();
+	}
 
-		// 연결 결과 수신 (future는 비동기 작업의 결과 수신)
-		CompletableFuture<String> futureMessage = new CompletableFuture<>();
-		CountDownLatch subscribeLatch = new CountDownLatch(1); // 구독 완료 기다리기용
+	@Test
+	@Transactional
+	void findOpenRunBoardList_whenClosedFcfs_thenResultExcludeOpenLimitAndSlot() {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.saveAndFlush(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10,
+				LocalDateTime.now().plusDays(1), store, user));
+		Pageable pageable = PageRequest.of(0, 10);
 
-		stompClient.connectAsync(
-			"ws://localhost:" + port + "/ws",
-			webSocketHttpHeaders,
-			connectHeaders,
-			new StompSessionHandlerAdapter() {
-				@Override
-				public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-					// 연결되면 구독 시작
-					session.subscribe("/sub/openrun/board/" + boardId, new StompFrameHandler() {
-						@Override
-						public Type getPayloadType(StompHeaders headers) {
-							return String.class;
-						}
+		// when
+		PageResponse<OpenRunBoardResponseDto> boardList = boardService.findOpenRunBoardList(pageable);
 
-						@Override
-						public void handleFrame(StompHeaders headers, Object payload) {
-							// 서버에서 받은 메시지를 future에 전달하여 테스트가 종료되게 함
-							futureMessage.complete((String)payload);
-						}
-					});
-					subscribeLatch.countDown();
-				}
+		// then
+		OpenRunBoardResponseDto targetDto = boardList.getContent().stream()
+			.filter(dto -> dto.getBoardId().equals(board.getId()))
+			.findFirst()
+			.orElseThrow();
 
-				@Override
-				public void handleTransportError(StompSession session, Throwable exception) {
-					futureMessage.completeExceptionally(exception); // 연결 실패 시
-				}
-			}
-		);
+		assertThat(targetDto.getOpenLimit()).isNull();
+		assertThat(targetDto.getRemainingSlot()).isNull();
+	}
 
-		if (!subscribeLatch.await(5, TimeUnit.SECONDS)) {
-			throw new RuntimeException("STOMP 구독 완료 대기 시간 초과");
-		}
+	@Test
+	@Transactional
+	void findOpenRunBoardList_whenOpenedTimeAttack_thenResultIncludeOpenLimitNotSlot() {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.saveAndFlush(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+				LocalDateTime.now(),
+				store, user));
+		Pageable pageable = PageRequest.of(0, 10);
 
-		return futureMessage;
+		// when
+		PageResponse<OpenRunBoardResponseDto> boardList = boardService.findOpenRunBoardList(pageable);
+
+		// then
+		OpenRunBoardResponseDto targetDto = boardList.getContent().stream()
+			.filter(dto -> dto.getBoardId().equals(board.getId()))
+			.findFirst()
+			.orElseThrow();
+
+		assertThat(targetDto.getOpenLimit()).isNotNull();
+		assertThat(targetDto.getRemainingSlot()).isNull();
+	}
+
+	@Test
+	@Transactional
+	void findOpenRunBoardList_whenClosedTimeAttack_thenResultExcludeOpenLimitAndSlot() {
+		// given
+		Image image = ImageFixture.create();
+		User user = userRepository.saveAndFlush(UserFixture.createNoMorePosting(image));
+		Category category = categoryRepository.save(CategoryFixture.create());
+		Store store = storeRepository.save(StoreFixture.create(category));
+		Board board = boardRepository.saveAndFlush(
+			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
+				LocalDateTime.now().plusDays(1), store, user));
+		Pageable pageable = PageRequest.of(0, 10);
+
+		// when
+		PageResponse<OpenRunBoardResponseDto> boardList = boardService.findOpenRunBoardList(pageable);
+
+		// then
+		OpenRunBoardResponseDto targetDto = boardList.getContent().stream()
+			.filter(dto -> dto.getBoardId().equals(board.getId()))
+			.findFirst()
+			.orElseThrow();
+
+		assertThat(targetDto.getOpenLimit()).isNull();
+		assertThat(targetDto.getRemainingSlot()).isNull();
 	}
 }

@@ -84,7 +84,7 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 				return;
 			}
 
-			long updatedCount = boardService.closeBoardsByIds(items.getItems());
+			long updatedCount = boardService.closeTimeAttackBoardsByIds(items.getItems());
 			log.info("[BoardScheduler] 다음 게시글들을 CLOSED로 변경함: {}", items.getItems());
 			log.info("[BoardScheduler] 총 {}건 게시글 상태 변경 완료", updatedCount);
 		};
