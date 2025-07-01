@@ -2,7 +2,7 @@ version: '3.8'
 services:
   test-postgres:
     container_name: test-postgres
-    image: postgres:16
+    image: ankane/pgvector:latest
     ports:
       - "5432:5432"
     environment:
@@ -26,4 +26,19 @@ services:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 5s
+      retries: 5
+
+  test-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: test-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 10s
       retries: 5
