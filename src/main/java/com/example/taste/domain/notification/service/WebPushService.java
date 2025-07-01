@@ -31,6 +31,7 @@ public class WebPushService {
 	private final UserRepository userRepository;
 	private final WebPushRepository webPushRepository;
 	private final ObjectMapper objectMapper;
+	private final PushService pushService;
 
 	@Value("${vapid.public}")
 	private String vapidPublic;
@@ -70,7 +71,7 @@ public class WebPushService {
 
 	public void send(WebPushSubscription subscription, NotificationDataDto dataDto, Long contentId) {
 		try {
-			PushService pushService = new PushService()
+			PushService configuredPushService = pushService
 				.setPublicKey(vapidPublic)
 				.setPrivateKey(vapidPrivate)
 				.setSubject("some-admin-email@example.com");
@@ -95,7 +96,7 @@ public class WebPushService {
 			);
 			log.info(notification.toString());
 
-			pushService.send(notification);
+			configuredPushService.send(notification);
 		} catch (Exception e) {
 			log.error("WebPush send error", e);  // 로깅 프레임워크 사용 시
 			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION, e.toString());
