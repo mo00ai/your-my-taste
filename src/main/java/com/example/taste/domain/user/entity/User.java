@@ -209,4 +209,5 @@ public class User extends SoftDeletableEntity {
 	public User(Long id) {
 		this.id = id;
 	}
+
 }
