@@ -3,9 +3,11 @@ package com.example.taste.domain.user.repository;
 import static com.example.jooq.Tables.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
+import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.springframework.dao.DataAccessException;
 
+import com.example.jooq.tables.records.UsersRecord;
 import com.example.taste.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
@@ -28,5 +30,12 @@ public class UserRepositoryJooqCustomImpl implements UserRepositoryJooqCustom {
 		} catch (DataAccessException e) {
 			throw new CustomException(USER_POINT_RESET_FAILED);
 		}
+	}
+
+	@Override
+	public Cursor<UsersRecord> findByPointWithJooqCursor(int point) {
+		return dsl.selectFrom(USERS)
+			.where(USERS.POINT.gt(point))
+			.fetchLazy();
 	}
 }
