@@ -23,7 +23,6 @@ import com.example.taste.domain.user.dto.request.UserUpdateRequestDto;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Role;
-import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.domain.user.service.UserInternalService;
 import com.example.taste.domain.user.service.UserService;
 import com.example.taste.fixtures.UserFixture;
@@ -32,8 +31,6 @@ import com.example.taste.fixtures.UserFixture;
 public class UserFacadeUnitTest {
 	@InjectMocks
 	private UserFacade userFacade;
-	@Mock
-	private UserRepository userRepository;
 	@Mock
 	private UserInternalService userInternalService;
 	@Mock
