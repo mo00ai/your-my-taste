@@ -8,6 +8,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import com.example.taste.domain.match.repository.PartyMatchInfoRepository;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 
+@Slf4j
 @Tag("Performance")
 @SpringBootTest
 public class MatchServicePerformanceTest {
@@ -201,35 +204,37 @@ public class MatchServicePerformanceTest {
 	@Test
 	@DisplayName("배치 레디스 메세지 100,000 건 부하 테스트")
 	void publishMatchMessagePerformanceTest() {
-		int count = 100000;
-		int threadCount = 10;
-		int perThreadCount = count / threadCount;
+		int MESSAGE_COUNT = 100000;
+		int PUBLISHER_THREAD_COUNT = 10;
+		int PER_THREAD_COUNT = MESSAGE_COUNT / PUBLISHER_THREAD_COUNT;
 
-		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-		CountDownLatch latch = new CountDownLatch(threadCount);
-
-		long start = System.currentTimeMillis();
-
-		for (int i = 0; i < threadCount; i++) {
-			executor.submit(() -> {
-				for (long j = 0; j < perThreadCount; j++) {
-					MatchEvent event = new MatchEvent(MatchJobType.USER_MATCH, List.of(j));
-					matchPublisher.publish(event);
-				}
-				latch.countDown();
-			});
-		}
-
+		ExecutorService executor = Executors.newFixedThreadPool(PUBLISHER_THREAD_COUNT);
+		CountDownLatch latch = new CountDownLatch(PUBLISHER_THREAD_COUNT);
 		try {
-			latch.await();  // 모든 스레드 작업 완료 대기
-		} catch (InterruptedException e) {
-			System.out.println("예외 발생: " + e.getMessage());
-		}
-		long end = System.currentTimeMillis();
-		double seconds = (end - start) / 1000.0;
-		double tps = count / seconds;
+			long start = System.currentTimeMillis();
 
-		executor.shutdown();
-		System.out.printf("총 %d개 발행(병렬 %d개 스레드), 소요시간: %.2f초, TPS: %.2f%n", count, threadCount, seconds, tps);
+			for (int i = 0; i < PUBLISHER_THREAD_COUNT; i++) {
+				executor.submit(() -> {
+					for (long j = 0; j < PER_THREAD_COUNT; j++) {
+						MatchEvent event = new MatchEvent(MatchJobType.USER_MATCH, List.of(j));
+						matchPublisher.publish(event);
+					}
+					latch.countDown();
+				});
+			}
+
+			try {
+				latch.await();  // 모든 스레드 작업 완료 대기
+			} catch (InterruptedException e) {
+				System.out.println("예외 발생: " + e.getMessage());
+			}
+			long end = System.currentTimeMillis();
+			double seconds = (end - start) / 1000.0;
+			double tps = MESSAGE_COUNT / seconds;
+			log.info("총 {}개 발행(병렬 {}개 스레드), 소요시간: {:.2f}초, TPS: {:.2f}",
+				+MESSAGE_COUNT, PUBLISHER_THREAD_COUNT, seconds, tps);
+		} finally {
+			executor.shutdown();
+		}
 	}
 }

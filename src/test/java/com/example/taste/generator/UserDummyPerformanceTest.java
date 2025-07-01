@@ -44,7 +44,7 @@ public class UserDummyPerformanceTest {
 	static int DAYS_AFTER_NOW = 2;
 
 	@Value("${TEST_PASSWORD}")
-	private static String TEST_PASSWORD_HASH;
+	private String TEST_PASSWORD_HASH;
 
 	@Test
 	@DisplayName("유저 1000개 더미 데이터 생성")
