@@ -84,7 +84,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 	@Test
 	@Transactional
-	void tryEnterFcfsQueue_whenConvertAndSend_thenClientReceiveMsg() throws Exception {
+	void tryEnterFcfsQueue_whenConvertAndSend_thenClientReceiveMsg() {
 		// given
 		Image image = ImageFixture.create();
 		String pw = "password";
@@ -114,32 +114,36 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 			.contentType(MediaType.APPLICATION_JSON_VALUE)
 			.content(json);
 
-		MvcResult loginResult = mockMvc.perform(loginRequest)
-			.andExpect(status().isOk())
-			.andReturn();
+		try {
+			MvcResult loginResult = mockMvc.perform(loginRequest)
+				.andExpect(status().isOk())
+				.andReturn();
 
-		System.out.println(loginRequest);
+			System.out.println(loginRequest);
 
-		Cookie[] cookies = loginResult.getResponse().getCookies();
-		String sessionId = null;
-		for (Cookie cookie : cookies) {
-			if ("JSESSIONID".equals(cookie.getName())) {
-				sessionId = cookie.getValue();
-				break;
+			Cookie[] cookies = loginResult.getResponse().getCookies();
+			String sessionId = null;
+			for (Cookie cookie : cookies) {
+				if ("JSESSIONID".equals(cookie.getName())) {
+					sessionId = cookie.getValue();
+					break;
+				}
 			}
+
+			// 연결 및 구독하고 서버에서 메시지 수신 대기 (최대 5초)
+			CompletableFuture<String> future = connectAndSubscribe(board.getId(), sessionId);
+
+			// when
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
+			//Thread.sleep(100);
+
+			// then
+			String receivedMessage = future.get(5, TimeUnit.SECONDS);
+			assertNotNull(receivedMessage);
+			System.out.println("수신 메시지: " + receivedMessage);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-
-		// 연결 및 구독하고 서버에서 메시지 수신 대기 (최대 5초)
-		CompletableFuture<String> future = connectAndSubscribe(board.getId(), sessionId);
-
-		// when
-		fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
-		//Thread.sleep(100);
-
-		// then
-		String receivedMessage = future.get(5, TimeUnit.SECONDS);
-		assertNotNull(receivedMessage);
-		System.out.println("수신 메시지: " + receivedMessage);
 	}
 
 	@Test
@@ -236,7 +240,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		assertDoesNotThrow(() -> fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user));
 	}
 
-	private CompletableFuture<String> connectAndSubscribe(Long boardId, String sessionId) throws Exception {
+	private CompletableFuture<String> connectAndSubscribe(Long boardId, String sessionId) {
 		WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
 		stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
@@ -278,8 +282,12 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 			}
 		);
 
-		if (!subscribeLatch.await(5, TimeUnit.SECONDS)) {
-			throw new RuntimeException("STOMP 구독 완료 대기 시간 초과");
+		try {
+			if (!subscribeLatch.await(5, TimeUnit.SECONDS)) {
+				throw new RuntimeException("STOMP 구독 완료 대기 시간 초과");
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 
 		return futureMessage;
