@@ -1,5 +1,6 @@
 package com.example.taste.fixtures;
 
+import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.store.entity.Store;
@@ -56,5 +57,16 @@ public class BoardFixture {
 			.store(store)
 			.user(user)
 			.buildOpenRun();
+	}
+
+	public static Board createNormalBoard(NormalBoardRequestDto dto, Store store, User user) {
+		return Board.nBoardBuilder()
+			.title(dto.getTitle())
+			.contents(dto.getContents())
+			.type(dto.getType())
+			.accessPolicy(dto.getAccessPolicy())
+			.store(store)
+			.user(user)
+			.buildNormal();
 	}
 }
