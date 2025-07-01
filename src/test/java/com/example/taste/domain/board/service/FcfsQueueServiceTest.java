@@ -170,6 +170,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		categoryRepository.deleteById(category.getId());
 	}
 
+	@Tag("local-only")
 	@Test
 	@Transactional
 	void tryEnterFcfsQueue_whenFailedHasLock_thenError() {
