@@ -47,6 +47,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    implementation 'org.springframework.data:spring-data-redis:3.2.2'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -114,6 +115,13 @@ dependencies {
     //web_push
     implementation 'nl.martijndwars:web-push:5.1.0'
     implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
+
+    //circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    //rabbitmq
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 def dotenv = new Properties()
