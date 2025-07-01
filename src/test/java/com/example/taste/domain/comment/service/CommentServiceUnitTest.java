@@ -81,7 +81,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			ReflectionTestUtils.setField(board, "id", everyID);
 			Comment saved = Comment.builder()
 				.board(board)
@@ -119,7 +119,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			Comment parent = Comment.builder().board(board).build();
 			ReflectionTestUtils.setField(board, "id", everyID);
 			Comment saved = Comment.builder()
@@ -159,7 +159,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			Comment grandParent = Comment.builder()
 				.board(board).build();
 			Comment parent = Comment.builder()
@@ -205,7 +205,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			ReflectionTestUtils.setField(user, "id", everyId);
 			Comment comment = Comment.builder()
 				.user(user)
@@ -241,7 +241,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			Comment comment = Comment.builder()
 				.user(otherUser)
 				.board(board)
@@ -275,7 +275,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			ReflectionTestUtils.setField(user, "id", everyId);
 			Comment comment = spy(Comment.builder()
 				.user(user)
@@ -308,7 +308,7 @@ class CommentServiceUnitTest {
 			ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 			ReflectionTestUtils.setField(dto, "openLimit", 10);
 			ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-			Board board = BoardFixture.createClosedOBoard(dto, store, user);
+			Board board = BoardFixture.createOBoard(dto, store, user);
 			ReflectionTestUtils.setField(user, "id", everyId);
 			Comment comment = spy(Comment.builder()
 				.user(otherUser)
@@ -340,7 +340,7 @@ class CommentServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-		Board board = BoardFixture.createClosedOBoard(dto, store, user);
+		Board board = BoardFixture.createOBoard(dto, store, user);
 		ReflectionTestUtils.setField(user, "id", everyId);
 		Comment comment = spy(Comment.builder()
 			.user(user)
@@ -378,7 +378,7 @@ class CommentServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-		Board board = BoardFixture.createClosedOBoard(dto, store, user);
+		Board board = BoardFixture.createOBoard(dto, store, user);
 		ReflectionTestUtils.setField(user, "id", everyId);
 		Comment comment = spy(Comment.builder()
 			.user(user)
@@ -417,7 +417,7 @@ class CommentServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "accessPolicy", CLOSED.name());
 		ReflectionTestUtils.setField(dto, "openLimit", 10);
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-		Board board = BoardFixture.createClosedOBoard(dto, store, user);
+		Board board = BoardFixture.createOBoard(dto, store, user);
 		ReflectionTestUtils.setField(user, "id", everyId);
 		Comment comment = spy(Comment.builder()
 			.user(user)
