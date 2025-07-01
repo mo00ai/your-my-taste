@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @SpringBootApplication
 public class TasteApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(TasteApplication.class, args);
 	}
