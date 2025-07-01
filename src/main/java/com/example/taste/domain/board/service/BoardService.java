@@ -229,11 +229,11 @@ public class BoardService {
 			List.of(AccessPolicy.FCFS, AccessPolicy.TIMEATTACK), pageable);
 
 		Page<OpenRunBoardResponseDto> result = dtos.map(dto -> {
-			boolean isClosed = dto.getOpenTime().isAfter(LocalDateTime.now());
+			boolean isBeforeOpen = dto.getOpenTime().isAfter(LocalDateTime.now());
 			Long remainingSlot = null;
-			Integer openLimit = isClosed ? null : dto.getOpenLimit();
+			Integer openLimit = isBeforeOpen ? null : dto.getOpenLimit();
 
-			if (dto.getAccessPolicy().isFcfs() && !isClosed) {
+			if (dto.getAccessPolicy().isFcfs() && !isBeforeOpen) {
 				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
 				remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
 			}

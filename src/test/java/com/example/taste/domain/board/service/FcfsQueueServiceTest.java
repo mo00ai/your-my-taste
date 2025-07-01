@@ -1,6 +1,7 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.constant.SocketConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,6 +96,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1, LocalDateTime.now().minusDays(1), store,
 				user));
+		String key = BOARD_SOCKET_DESTINATION + board.getId();
 
 		// HTTP 로그인 요청으로 세션 획득
 		String json = """
@@ -113,8 +115,6 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-			System.out.println(loginRequest);
-
 			Cookie[] cookies = loginResult.getResponse().getCookies();
 			String sessionId = null;
 			for (Cookie cookie : cookies) {
@@ -129,12 +129,13 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 			// when
 			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
-			Thread.sleep(100);
 
 			// then
-			String receivedMessage = future.get(15, TimeUnit.SECONDS);
+			String receivedMessage = future.get(5, TimeUnit.SECONDS);
 			assertNotNull(receivedMessage);
-			System.out.println("수신 메시지: " + receivedMessage);
+
+			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+			assertThat(receivedMessage).contains(String.valueOf(remainingSlot));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -186,15 +187,16 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 		RLock lock = redissonClient.getLock(lockKey);
 
-		// 다른 스레드에서 락을 점유
-		Thread lockerThread = new Thread(() -> {
-			try {
+		try {
+			// 다른 스레드에서 락을 점유
+			Thread lockerThread = new Thread(() -> {
 				lock.lock(3, TimeUnit.SECONDS); // 3초간 점유
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
-		lockerThread.start();
+			});
+			lockerThread.start();
+			lockerThread.join(); // 스레드 정리
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
@@ -227,6 +229,9 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 			// 현재 스레드는 0.1초 대기 후 메서드 실행
 			Thread.sleep(100);
+
+			// 스레드 정리
+			lockerThread.join();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -256,7 +261,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 			new StompSessionHandlerAdapter() {
 				@Override
 				public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-					session.subscribe("/sub/openrun/board/" + boardId, new StompFrameHandler() {
+					session.subscribe(BOARD_SOCKET_DESTINATION + boardId, new StompFrameHandler() {
 						@Override
 						public Type getPayloadType(StompHeaders headers) {
 							return String.class;
