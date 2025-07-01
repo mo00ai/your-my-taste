@@ -261,7 +261,7 @@ class NotificationUserServiceUnitTest {
 			// given
 			Long everyId = 1L;
 
-			String key = "notification:user:" + everyId + ":id:" + everyId + "INDIVIDUAL";
+			String key = "notification:user:" + everyId + ":id:" + everyId + ":INDIVIDUAL";
 			Set<String> keys = new HashSet<>();
 			keys.add(key);
 			given(redisService.getKeys(anyString())).willReturn(keys);

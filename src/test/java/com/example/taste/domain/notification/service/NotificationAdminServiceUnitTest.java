@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.taste.domain.notification.dto.AdminNotificationRequestDto;
-import com.example.taste.domain.notification.dto.NotificationPublishDto;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.redis.NotificationPublisher;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +31,12 @@ class NotificationAdminServiceUnitTest {
 		// when
 		notificationAdminService.publishNotification(dto);
 		// then
-		then(notificationPublisher).should().publish(any(NotificationPublishDto.class));
+		then(notificationPublisher).should().publish(
+			argThat(publishDto ->
+				NotificationCategory.SYSTEM.equals(publishDto.getCategory()) &&
+					"test".equals(publishDto.getAdditionalText()) &&
+					everyId.equals(publishDto.getRedirectionEntityId())
+			));
 	}
 
 	@Test
@@ -39,11 +44,15 @@ class NotificationAdminServiceUnitTest {
 		// given
 		Long everyId = 1L;
 		AdminNotificationRequestDto dto = new AdminNotificationRequestDto(
-			"SYSTEM", "test", "testUrl", everyId, everyId
+			"INDIVIDUAL", "test", "testUrl", everyId, everyId
 		);
 		// when
 		notificationAdminService.publishNotificationToUser(dto, everyId);
 		// then
-		then(notificationPublisher).should().publish(any(NotificationPublishDto.class));
+		then(notificationPublisher).should().publish(argThat(publishDto ->
+			NotificationCategory.INDIVIDUAL.equals(publishDto.getCategory()) &&
+				"test".equals(publishDto.getAdditionalText()) &&
+				everyId.equals(publishDto.getRedirectionEntityId())
+		));
 	}
 }
