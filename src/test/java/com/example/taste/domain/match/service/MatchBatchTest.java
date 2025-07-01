@@ -17,7 +17,6 @@ import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.taste.TasteApplication;
@@ -34,7 +33,6 @@ import com.example.taste.fixtures.PartyFixture;
 import com.example.taste.fixtures.UserFixture;
 import com.example.taste.property.AbstractIntegrationTest;
 
-@ActiveProfiles("local")
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
 @SpringBootTest(classes = {TasteApplication.class, TestBatchConfig.class, PartyBatchConfig.class})

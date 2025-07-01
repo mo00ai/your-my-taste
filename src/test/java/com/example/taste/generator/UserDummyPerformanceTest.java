@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
@@ -29,7 +28,6 @@ import com.example.taste.domain.user.enums.Role;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Tag("Performance")
-@ActiveProfiles("test-int")    // 로컬 테스트
 @SpringBootTest
 public class UserDummyPerformanceTest {
 	@Autowired

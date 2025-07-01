@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.service.RedisService;
@@ -28,7 +27,6 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 
 @Tag("Performance")
-@ActiveProfiles("test-int")
 @SpringBootTest
 public class MatchServicePerformanceTest {
 	@Autowired
