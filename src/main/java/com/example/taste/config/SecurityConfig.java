@@ -1,8 +1,6 @@
 package com.example.taste.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-import lombok.RequiredArgsConstructor;
+import static org.springframework.security.config.Customizer.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +12,14 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 
 import com.example.taste.domain.auth.handler.CustomAccessDeniedHandler;
 import com.example.taste.domain.auth.handler.CustomAuthenticationEntryPointHandler;
 import com.example.taste.domain.auth.service.CustomUserDetailsService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -49,7 +51,10 @@ public class SecurityConfig {
 				// 소켓 연결 요청 허용
 				auth.requestMatchers("/ws/**", "/ws").permitAll();
 				auth.requestMatchers("/h2-console/**").permitAll();
+				// 프로메테우스 허용
 				auth.requestMatchers("/actuator/prometheus").permitAll();
+				// 엔드투엔드 테스트용 index 접근 허용
+				// auth.requestMatchers("/index.html", "/sw.js").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.exceptionHandling(exception -> {
@@ -64,5 +69,13 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	//csrf 토큰 제공(미사용).
+	@Bean
+	public CsrfTokenRepository csrfTokenRepository() {
+		CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+		repo.setCookiePath("/");
+		return repo;
 	}
 }

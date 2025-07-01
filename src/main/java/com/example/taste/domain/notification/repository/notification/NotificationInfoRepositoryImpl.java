@@ -1,4 +1,4 @@
-package com.example.taste.domain.notification.repository;
+package com.example.taste.domain.notification.repository.notification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.springframework.data.domain.SliceImpl;
 import com.example.taste.domain.notification.entity.NotificationInfo;
 import com.example.taste.domain.notification.entity.QNotificationContent;
 import com.example.taste.domain.notification.entity.QNotificationInfo;
+import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -53,5 +54,14 @@ public class NotificationInfoRepositoryImpl implements NotificationInfoRepositor
 				qNotificationInfo.user.id.eq(userId)
 			)
 			.fetch();
+	}
+
+	@Override
+	public void deleteAllByUserAndCategories(Long userId, List<NotificationCategory> categories) {
+		QNotificationInfo qNotificationInfo = QNotificationInfo.notificationInfo;
+		queryFactory.delete(qNotificationInfo).where(
+			qNotificationInfo.user.id.eq(userId),
+			qNotificationInfo.category.in(categories)
+		).execute();
 	}
 }
