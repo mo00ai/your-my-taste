@@ -82,7 +82,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private RedissonClient redissonClient;
 
-	@Tag("local-only")
+	@Tag("Performance")
 	@Test
 	@Transactional
 	void tryEnterFcfsQueue_whenConvertAndSend_thenClientReceiveMsg() {
@@ -171,7 +171,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		categoryRepository.deleteById(category.getId());
 	}
 
-	@Tag("local-only")
+	@Tag("Performance")
 	@Test
 	@Transactional
 	void tryEnterFcfsQueue_whenFailedHasLock_thenError() {
