@@ -55,6 +55,10 @@ dependencies {
 
     // DB
     runtimeOnly 'org.postgresql:postgresql'
+    // postgresql pgvector
+//    implementation 'com.pgvector:pgvector:0.1.4'
+    // Critical: Hibernate Vector Module
+    implementation 'org.hibernate.orm:hibernate-vector:6.6.15.Final'
     implementation 'com.h2database:h2'
 
     // Lombok
@@ -121,6 +125,14 @@ dependencies {
 
     //rabbitmq
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    // open ai api
+    implementation platform("org.springframework.ai:spring-ai-bom:1.0.0") // BOM
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai' // 필요함
+
+    // 형태소 분석기 https://mvnrepository.com/artifact/org.openkoreantext/open-korean-text
+    implementation("org.openkoreantext:open-korean-text:2.3.1")
+    // csv
+    implementation 'org.apache.commons:commons-csv:1.10.0'
 }
 
 def dotenv = new Properties()
