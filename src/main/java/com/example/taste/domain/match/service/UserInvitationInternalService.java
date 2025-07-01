@@ -125,7 +125,7 @@ public class UserInvitationInternalService {
 				String key = "partyMatchInfo" + partyMatchInfoId;
 				PartyMatchInfoDto cachedDto = (PartyMatchInfoDto)redisService.getKeyValue(key);
 				if (cachedDto != null) {
-					PartyMatchInfoDto newCacheDto = cachedDto.withUpdatedAvgAge(
+					PartyMatchInfoDto newCacheDto = new PartyMatchInfoDto(
 						cachedDto, party.calculateAvgAgeAfterJoin(cachedDto.getAvgAge(), userAge));
 					redisService.setKeyValue(key, newCacheDto);
 				}

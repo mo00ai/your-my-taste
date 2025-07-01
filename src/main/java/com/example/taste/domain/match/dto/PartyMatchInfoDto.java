@@ -35,8 +35,8 @@ public class PartyMatchInfoDto implements Serializable {
 	private MatchStatus matchStatus;
 	private List<Favor> favorList;
 
-	@Builder(buildMethodName = "build", builderMethodName = "builder")
-	public PartyMatchInfoDto(PartyMatchInfo entity, Double averageAge) {
+	@Builder
+	public PartyMatchInfoDto(PartyMatchInfo entity, Double avgAge) {
 		this.id = entity.getId();
 		this.partyId = entity.getParty().getId();
 		this.hostId = entity.getParty().getHostUser().getId();
@@ -52,7 +52,7 @@ public class PartyMatchInfoDto implements Serializable {
 				.map(PartyMatchInfoFavor::getFavor)
 				.toList()
 			: List.of();
-		this.avgAge = averageAge;
+		this.avgAge = avgAge;
 	}
 
 	@Override
@@ -71,8 +71,8 @@ public class PartyMatchInfoDto implements Serializable {
 			'}';
 	}
 
-	@Builder(buildMethodName = "oBuild", builderMethodName = "oBuilder")
-	public PartyMatchInfoDto withUpdatedAvgAge(PartyMatchInfoDto dto, Double averageAge) {
+	@Builder(buildMethodName = "buildWithNewAvgAge", builderMethodName = "builderWithNewAvgAge")
+	public PartyMatchInfoDto(PartyMatchInfoDto dto, Double newAvgAge) {
 		this.id = dto.getId();
 		this.partyId = dto.getPartyId();
 		this.hostId = dto.getHostId();
@@ -82,8 +82,8 @@ public class PartyMatchInfoDto implements Serializable {
 		this.region = dto.getRegion();
 		this.prefGender = dto.getPrefGender();
 		this.ageRange = dto.getAgeRange();
-		this.avgAge = averageAge;                // 새 파티 평균 나이대 값 대입
 		this.matchStatus = dto.getMatchStatus();
 		this.favorList = dto.getFavorList() != null ? dto.getFavorList() : null;
+		this.avgAge = newAvgAge;
 	}
 }
