@@ -162,7 +162,7 @@ public class PkService {
 		return savedPkTerm;
 	}
 
-	//PkTermRanking에 집어넣기
+	// PkTermRanking에 집어넣기
 	@Transactional
 	public void savePkTermRankingUsers(PkTerm term) {
 		List<User> pkRankingUsers = userService.findPkRankingUsers();
