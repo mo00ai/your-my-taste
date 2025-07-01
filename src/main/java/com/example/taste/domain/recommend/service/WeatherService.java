@@ -93,14 +93,14 @@ public class WeatherService {
 	}
 
 	//데이터 변환 메서드들
-	private String addTempCelsius(String temp) {
+	protected String addTempCelsius(String temp) {
 		if ("알 수 없음".equals(temp)) {
 			return temp;
 		}
 		return temp + "℃";
 	}
 
-	private String convertRainAmount(String rainAmount) {
+	protected String convertRainAmount(String rainAmount) {
 		String result;
 
 		if (rainAmount == null || "0".equals(rainAmount) || "-".equals(rainAmount)) {
@@ -109,7 +109,7 @@ public class WeatherService {
 		return rainAmount + "mm";
 	}
 
-	private String convertRainStatus(String pty) {
+	protected String convertRainStatus(String pty) {
 		String result;
 
 		switch (pty) {

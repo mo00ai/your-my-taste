@@ -48,7 +48,9 @@ public class AddressServiceTest {
 
 	@Test
 	void getCoordinates_success() throws Exception {
-		String mockResponse = """
+		// given
+		String body =
+			"""
 				{
 				  "documents": [
 				    {
@@ -57,17 +59,20 @@ public class AddressServiceTest {
 				    }
 				  ]
 				}
-			""";
-
+				""";
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(200)
-			.setBody(mockResponse)
+			.setBody(body)
 			.addHeader("Content-Type", "application/json"));
 
-		User user = User.builder().address("서울시 강남구").build();
+		User user = User.builder()
+			.address("서울시 강남구")
+			.build();
 
+		// when
 		Mono<CoordinateResponseDto> result = addressService.getCoordinates(user);
 
+		// then
 		StepVerifier.create(result)
 			.assertNext(dto -> {
 				assertThat(dto.getLon()).isEqualTo(127.123);
@@ -78,21 +83,26 @@ public class AddressServiceTest {
 
 	@Test
 	void getCoordinates_emptyDocuments_thenThrow() throws Exception {
-		String mockResponse = """
+		// given
+		String body =
+			"""
 				{
 				  "documents": []
 				}
-			""";
-
+				""";
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(200)
-			.setBody(mockResponse)
+			.setBody(body)
 			.addHeader("Content-Type", "application/json"));
 
-		User user = User.builder().address("없는주소").build();
+		User user = User.builder()
+			.address("없는주소")
+			.build();
 
+		// when
 		Mono<CoordinateResponseDto> result = addressService.getCoordinates(user);
 
+		// then
 		StepVerifier.create(result)
 			.expectError(CustomException.class)
 			.verify();
