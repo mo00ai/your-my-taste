@@ -62,6 +62,10 @@ jobs:
             echo "RDS_PORT=${{ secrets.RDS_PORT }}" >> .env
             echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }}" >> .env
+            echo "RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}" >> .env
+            echo "RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}" >> .env
+            echo "RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}" >> .env
             
             
             docker-compose down
