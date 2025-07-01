@@ -69,17 +69,19 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
 		query.setParameter("limit", pageable.getPageSize());
 		query.setParameter("offset", pageable.getOffset());
 
-		@SuppressWarnings("unchecked")
 		List<Object[]> rawResults = query.getResultList();
 
 		List<StoreSearchResult> content = rawResults.stream()
-			.map(row -> new StoreSearchResult(
-				((Number)row[0]).longValue(),    // id
-				(String)row[1],                  // name
-				(String)row[2],                  // address
-				(String)row[3],                  // category_name
-				((Number)row[4]).doubleValue()   // similarity
-			))
+			.map(row -> {
+				// Null 체크 추가
+				Long id = row[0] != null ? ((Number)row[0]).longValue() : null;
+				String name = (String)row[1];
+				String address = (String)row[2];
+				String categoryName = (String)row[3];
+				Double similarity = row[4] != null ? ((Number)row[4]).doubleValue() : 0.0;
+
+				return new StoreSearchResult(id, name, address, categoryName, similarity);
+			})
 			.collect(Collectors.toList());
 
 		// Count 쿼리

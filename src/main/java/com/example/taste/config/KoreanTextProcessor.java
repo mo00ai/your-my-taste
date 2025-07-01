@@ -123,6 +123,7 @@ public class KoreanTextProcessor {
 
 	/**
 	 * 명사만 추출
+	 * 형용사 추출
 	 */
 	public List<String> extractAdjective(String text) {
 		if (text == null || text.trim().isEmpty()) {
@@ -281,8 +282,8 @@ public class KoreanTextProcessor {
 		return !invalidWords.contains(word);
 	}
 
-	// 위치 키워드 판별 로직 강화
-	private boolean isLocationKeyword(String keyword) {
+	// 위치 키워드 판별
+	public boolean isLocationKeyword(String keyword) {
 		Set<String> locationSuffixes = Set.of("역", "동", "구", "로", "길");
 		Set<String> locationWords = Set.of("근처", "주변", "앞", "건너편", "옆");
 

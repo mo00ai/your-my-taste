@@ -140,7 +140,7 @@ public class EmbeddingService {
 		Set<String> normalKeywords = new HashSet<>();
 
 		for (String keyword : keywords) {
-			if (isLocationKeyword(keyword)) {
+			if (processor.isLocationKeyword(keyword)) {
 				locationKeywords.add(keyword);
 			} else if (categoryManager.isFoodCategory(keyword)) {
 				categoryKeywords.add(keyword);
@@ -175,27 +175,6 @@ public class EmbeddingService {
 		for (int i = 0; i < weight; i++) {
 			sb.append(textWithSpace);
 		}
-	}
-
-	private boolean isLocationKeyword(String keyword) {
-		Set<String> locationSuffixes = Set.of("역", "동", "구", "로", "길");
-		Set<String> locationWords = Set.of("근처", "주변", "앞", "건너편", "옆");
-
-		// 접미사 체크
-		boolean hasSuffix = locationSuffixes.stream()
-			.anyMatch(keyword::endsWith);
-
-		// 위치 관련 단어 체크
-		boolean hasLocationWord = locationWords.stream()
-			.anyMatch(keyword::contains);
-
-		// 지하철역 패턴 체크 (한글 + 역)
-		boolean isStationPattern = keyword.matches(".*[가-힣]+역.*");
-
-		// 행정동 패턴 체크 (한글 + 동)
-		boolean isDongPattern = keyword.matches(".*[가-힣]+동.*");
-
-		return hasSuffix || hasLocationWord || isStationPattern || isDongPattern;
 	}
 
 }

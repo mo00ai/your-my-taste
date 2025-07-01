@@ -22,7 +22,7 @@ import com.querydsl.core.types.dsl.SimpleExpression;
  *  - l2Distance       : <-> 는 L2(Euclidean) 거리.
  */
 @Component
-public class VectorQueryDslExtension {
+public final class VectorQueryDslExtension {
 
 	// 지구 반지름 (미터)을 상수로 정의
 	private static final double EARTH_RADIUS_METERS = 6371000;
