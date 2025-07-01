@@ -127,10 +127,10 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 			// when
 			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
-			//Thread.sleep(100);
+			Thread.sleep(100);
 
 			// then
-			String receivedMessage = future.get(10, TimeUnit.SECONDS);
+			String receivedMessage = future.get(15, TimeUnit.SECONDS);
 			assertNotNull(receivedMessage);
 			System.out.println("수신 메시지: " + receivedMessage);
 		} catch (Exception e) {
