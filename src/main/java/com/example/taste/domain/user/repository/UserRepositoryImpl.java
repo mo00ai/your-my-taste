@@ -65,7 +65,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				.leftJoin(user.userFavorList, userFavor).fetchJoin()
 				.leftJoin(userFavor.favor, favor).fetchJoin()
 				.where(user.id.eq(userId)
-					.and(user.deletedAt.isNotNull()))
+					.and(user.deletedAt.isNull()))
 				.fetchOne()
 		);
 	}
