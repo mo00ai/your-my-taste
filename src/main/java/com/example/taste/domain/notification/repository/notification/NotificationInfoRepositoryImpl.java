@@ -1,6 +1,5 @@
 package com.example.taste.domain.notification.repository.notification;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -27,9 +26,10 @@ public class NotificationInfoRepositoryImpl implements NotificationInfoRepositor
 		List<NotificationInfo> notificationInfos = queryFactory.selectFrom(qNotificationInfo)
 			.where(
 				redisNotifications.isEmpty() ? null :
-					qNotificationInfo.createdAt.before(LocalDateTime.now().minusDays(7)),
+					qNotificationInfo.notificationContent.id.notIn(redisNotifications),
 				qNotificationInfo.user.id.eq(userId)
 			)
+			.orderBy(qNotificationInfo.createdAt.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.fetch();

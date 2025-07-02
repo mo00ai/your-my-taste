@@ -1,11 +1,13 @@
 package com.example.taste.domain.party.controller;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taste.common.annotation.ValidEnum;
 import com.example.taste.common.response.CommonResponse;
+import com.example.taste.domain.match.service.PartyInvitationService;
+import com.example.taste.domain.match.service.PartyService;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
 import com.example.taste.domain.party.dto.response.PartyResponseDto;
 import com.example.taste.domain.party.enums.PartyFilter;
-import com.example.taste.domain.party.service.PartyInvitationService;
-import com.example.taste.domain.party.service.PartyService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 
 @RestController
@@ -44,10 +46,12 @@ public class PartyController {
 	}
 
 	@GetMapping
-	public CommonResponse<List<PartyResponseDto>> getParties(
+	public CommonResponse<SliceImpl<PartyResponseDto>> getParties(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter) {
-		return CommonResponse.ok(partyService.getParties(userDetails.getId(), filter));
+		@RequestParam(defaultValue = "ALL") @ValidEnum(target = PartyFilter.class) String filter,
+		@PageableDefault(size = 10, sort = "MEETING_DATE", direction = Sort.Direction.ASC) Pageable pageable) {
+		return CommonResponse.ok(
+			partyService.getParties(userDetails.getId(), filter, pageable));
 	}
 
 	@GetMapping("/{partyId}")

@@ -1,5 +1,6 @@
 package com.example.taste.domain.match.entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,9 +9,11 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -33,7 +36,7 @@ import com.example.taste.domain.user.enums.Gender;
 @Getter
 @NoArgsConstructor
 @Table(name = "party_match_info")
-public class PartyMatchInfo extends BaseCreatedAtEntity {
+public class PartyMatchInfo extends BaseCreatedAtEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -42,7 +45,7 @@ public class PartyMatchInfo extends BaseCreatedAtEntity {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Party party;
 
-	@OneToOne(optional = true)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Store store;
 	private LocalDate meetingDate;
 
