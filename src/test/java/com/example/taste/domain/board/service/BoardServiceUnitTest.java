@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,6 +92,10 @@ public class BoardServiceUnitTest {
 	private EntityManager entityManager;
 	@Mock
 	private RedissonClient redissonClient;
+	@Mock
+	private BoardCacheService boardCacheService;
+	@Mock
+	private FcfsQueueService fcfsQueueService;
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 공개 전 게시글!)")
 	@Test
@@ -159,15 +162,18 @@ public class BoardServiceUnitTest {
 	public void findBoard_withFcfsCountExceeded_throwsException() throws InterruptedException {
 		// given
 		Long boardId = 1L;
-		Long boardUserId = 998L;
-		Long userId = 999L;
+		Long boardUserId = 999L;
+		Long user1Id = 2L;
+		Long user2Id = 3L;
 
 		User writer = UserFixture.create(ImageFixture.create());
 		ReflectionTestUtils.setField(writer, "id", boardUserId);
 		Store store = StoreFixture.create(CategoryFixture.create());
 
-		User viewer = UserFixture.create(ImageFixture.create());
-		ReflectionTestUtils.setField(viewer, "id", userId);
+		User user1 = UserFixture.create(ImageFixture.create());
+		ReflectionTestUtils.setField(user1, "id", user1Id);
+		User user2 = UserFixture.create(ImageFixture.create());
+		ReflectionTestUtils.setField(user2, "id", user2Id);
 
 		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
 		ReflectionTestUtils.setField(dto, "title", "오픈런 선착순 마감 테스트!");
@@ -178,26 +184,36 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "openLimit", 1);
 
 		Board board = BoardFixture.createFcfsOBoard(dto, store, writer);
-		// rLock으로 모킹
 		RLock rLock = mock(RLock.class);
-		given(redissonClient.getLock(anyString())).willReturn(rLock);
-		// 락 획득 가정
-		given(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class))).willReturn(true);
 
 		// stub
 		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
-		given(userRepository.findById(userId)).willReturn(Optional.of(viewer));
-		given(redisService.getZSetSize(anyString())).willReturn(1L);
-		given(redisService.hasRankInZSet(anyString(), eq(userId)))
-			.willReturn(false)
-			.willReturn(false);
+		given(boardCacheService.getRedisCache(board))
+			.willReturn(BoardResponseDto.builder().entity(board).build());
+
+		// 작성자는 조회 가능
+		given(userRepository.findById(boardUserId)).willReturn(Optional.of(writer));
+		BoardResponseDto result1 = boardService.findBoard(boardId, boardUserId);
+		assertNotNull(result1);
+
+		// user1은 성공
+		given(userRepository.findById(user1Id)).willReturn(Optional.of(user1));
+		doNothing().when(fcfsQueueService).tryEnterFcfsQueueByRedisson(board, user1);
+		BoardResponseDto result2 = boardService.findBoard(boardId, user1Id);
+		assertNotNull(result2);
+
+		// user2는 예외 발생
+		given(userRepository.findById(user2Id)).willReturn(Optional.of(user2));
+		doThrow(new CustomException(BoardErrorCode.EXCEED_OPEN_LIMIT))
+			.when(fcfsQueueService).tryEnterFcfsQueueByRedisson(board, user2);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class, () ->
-			boardService.findBoard(boardId, userId)
+			boardService.findBoard(boardId, user2Id)
 		);
 		// assertEquals(BoardErrorCode.BOARD_NOT_YET_OPEN, exception.getBaseCode());
 		assertEquals(BoardErrorCode.EXCEED_OPEN_LIMIT, exception.getBaseCode());
+		verify(boardCacheService, times(2)).getRedisCache(board);
 	}
 
 	@DisplayName("게시글 정상 생성(일반 게시글)")
@@ -398,11 +414,14 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(board, "accessPolicy", TIMEATTACK);
 		ReflectionTestUtils.setField(board, "openTime", LocalDateTime.now().plusDays(1));
 
+		BoardResponseDto responseDto = BoardResponseDto.builder().entity(board).build(); // DTO 변환 예시
 		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
 		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		given(boardCacheService.getInMemoryCache(board)).willReturn(responseDto); // 이 부분 추가
 
 		BoardResponseDto result = boardService.findBoard(boardId, userId);
 		assertNotNull(result);
+		assertEquals(board.getTitle(), result.getTitle());
 	}
 
 	@DisplayName("게시글 조회 성공(오픈런 게시글 - 작성자 본인)")
@@ -427,10 +446,12 @@ public class BoardServiceUnitTest {
 
 		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
 		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		given(boardCacheService.getInMemoryCache(board)).willReturn(BoardResponseDto.builder().entity(board).build());
 
 		BoardResponseDto result = boardService.findBoard(boardId, userId);
+
 		assertNotNull(result);
-		assertEquals("오픈런 테스트", result.getTitle());
+		assertEquals("오픈런 게시글 조회 테스트", result.getTitle());
 	}
 
 	@DisplayName("게시글 조회 실패(존재하지 않는 게시글!)")
