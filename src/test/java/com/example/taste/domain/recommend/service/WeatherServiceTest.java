@@ -3,21 +3,22 @@ package com.example.taste.domain.recommend.service;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.taste.domain.recommend.dto.response.WeatherResponseDto;
+import com.example.taste.property.AbstractIntegrationTest;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-public class WeatherServiceTest {
+public class WeatherServiceTest extends AbstractIntegrationTest {
 
 	private MockWebServer mockWebServer;
 	private WeatherService weatherService;
@@ -33,10 +34,7 @@ public class WeatherServiceTest {
 
 		weatherService = new WeatherService(webClient);
 
-		// 리플렉션으로 weatherKey 주입
-		Field field = WeatherService.class.getDeclaredField("weatherKey");
-		field.setAccessible(true);
-		field.set(weatherService, "dummyWeatherKey");
+		ReflectionTestUtils.setField(weatherService, "weatherKey", "dummyWeatherKey");
 	}
 
 	@AfterEach

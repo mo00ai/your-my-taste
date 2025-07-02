@@ -101,8 +101,6 @@ public class WeatherService {
 	}
 
 	protected String convertRainAmount(String rainAmount) {
-		String result;
-
 		if (rainAmount == null || "0".equals(rainAmount) || "-".equals(rainAmount)) {
 			return "강수 없음";
 		}
