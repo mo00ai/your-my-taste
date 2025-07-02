@@ -3,6 +3,7 @@ package com.example.taste.domain.user.facade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +61,7 @@ public class UserFacadeTest extends AbstractIntegrationTest {            // user
 			"file", "test.png", "image/png", "이미지데이터".getBytes());
 
 		// when
+		doReturn("encodedPassword").when(passwordEncoder).encode(any());
 		doNothing().when(userService).updateUserFavors(any(), any());
 		doThrow(new IOException("파일 저장 실패")).when(imageService).saveImage(any(), any());
 		userFacade.signup(requestDto, image);
