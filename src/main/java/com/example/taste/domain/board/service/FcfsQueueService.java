@@ -1,7 +1,6 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
-import static com.example.taste.common.constant.SocketConst.*;
 import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
@@ -35,51 +34,66 @@ public class FcfsQueueService {
 	private final BoardStatusPublisher boardStatusPublisher;
 
 	// 선착순 queue에 데이터 insert
-	public void tryEnterFcfsQueue(Board board, Long userId) {
+	public void tryEnterFcfsQueue(Board board, User user) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 
 		// 순위가 없는 유저만 ZSet에 insert
-		if (redisService.hasRankInZSet(key, userId)) {
+		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
+		}
+		if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
+			return;
+		}
+		if (fcfsInformationRepository.existsByBoardId(board.getId())) {
+			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 		long size = redisService.getZSetSize(key);
 		if (board.isOverOpenLimit(size)) {
+			fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+			redisService.deleteKey(key);
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
-		redisService.addToZSet(key, userId, System.currentTimeMillis());
+		redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 		// 클라이언트에 잔여 인원 전송
-		String destination = BOARD_SOCKET_DESTINATION + board.getId();
+		//String destination = BOARD_SOCKET_DESTINATION + board.getId();
 		long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
-		messagingTemplate.convertAndSend(destination, remainingSlot);
+		//messagingTemplate.convertAndSend(destination, remainingSlot);
+		boardStatusPublisher.publish(new BoardStatusDto(board.getId(), remainingSlot));
 
 		// 동시성 문제로 openLimit 보다 초과 저장된 데이터 삭제
-		Long rank = redisService.getRank(key, userId);
+		Long rank = redisService.getRank(key, user.getId());
 		if (rank != null && board.isOverOpenLimit(rank)) {
-			redisService.removeFromZSet(key, userId);
+			redisService.removeFromZSet(key, user.getId());
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 	}
 
 	// lettuce 분산락으로 동시성 제어
-	public void tryEnterFcfsQueueByLettuce(Board board, Long userId) {
+	public void tryEnterFcfsQueueByLettuce(Board board, User user) {
 		String key = OPENRUN_KEY_PREFIX + board.getId();
 		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
 
-		if (redisService.hasRankInZSet(key, userId)) {
+		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
 		}
+		if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
+			return;
+		}
+		if (fcfsInformationRepository.existsByBoardId(board.getId())) {
+			throw new CustomException(EXCEED_OPEN_LIMIT);
+		}
 
-		boolean hasLock = redisService.setIfAbsent(lockKey, userId.toString(), Duration.ofMillis(3000));
+		boolean hasLock = redisService.setIfAbsent(lockKey, user.getId(), Duration.ofMillis(3000));
 		int retry = 10;
 
 		try {
 			while (!hasLock && retry > 0) {
 				Thread.sleep(50);
-				hasLock = redisService.setIfAbsent(lockKey, userId, Duration.ofMillis(3000));
+				hasLock = redisService.setIfAbsent(lockKey, user.getId(), Duration.ofMillis(3000));
 				retry--;
 			}
 
@@ -87,16 +101,21 @@ public class FcfsQueueService {
 				throw new CustomException(REDIS_FAIL_GET_LOCK);
 			}
 
+			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
 			if (board.isOverOpenLimit(size)) {
+				fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+				redisService.deleteKey(key);
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
 
-			redisService.addToZSet(key, userId, System.currentTimeMillis());
+			redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
-			String destination = BOARD_SOCKET_DESTINATION + board.getId();
+			// 클라이언트에 잔여 인원 전송
+			//String destination = BOARD_SOCKET_DESTINATION + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
-			messagingTemplate.convertAndSend(destination, remainingSlot);
+			//messagingTemplate.convertAndSend(destination, remainingSlot);
+			boardStatusPublisher.publish(new BoardStatusDto(board.getId(), remainingSlot));
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -104,7 +123,7 @@ public class FcfsQueueService {
 
 		} finally {
 			Long value = redisService.getKeyLongValue(lockKey);
-			if (value != null && value.equals(userId)) {
+			if (value != null && value.equals(user.getId())) {
 				redisService.deleteKey(lockKey);
 			}
 		}
