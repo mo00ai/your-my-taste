@@ -104,7 +104,6 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
 		return new PageImpl<>(content, pageable, total);
 	}
 
-	// TODO 구현 수정 필요
 	// @Override
 	// public Page<StoreSearchResult> searchByVectorWithFilters(StoreSearchCondition condition, float[] queryVector,
 	// 	Pageable pageable) {
