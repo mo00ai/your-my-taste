@@ -1,14 +1,16 @@
 package com.example.taste.domain.board.service;
 
+import static com.example.taste.domain.user.exception.UserErrorCode.*;
+
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.Like;
 import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.repository.LikeRepository;
 import com.example.taste.domain.user.entity.User;
+import com.example.taste.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +20,11 @@ public class LikeService {
 
 	private final LikeRepository likeRepository;
 	private final BoardService boardService;
-	private final EntityFetcher entityFetcher;
+	private final UserRepository userRepository;
 
 	public void likeBoard(Long userId, Long boardId) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Board board = boardService.findByBoardId(boardId);
 		// 이미 저장되어 있다면
 		if (likeRepository.existsByUserAndBoard(user, board)) {
@@ -35,7 +38,8 @@ public class LikeService {
 	}
 
 	public void unlikeBoard(Long userId, Long boardId) {
-		User user = entityFetcher.getUserOrThrow(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Board board = boardService.findByBoardId(boardId);
 
 		Like like = likeRepository.findByUserAndBoard(user, board)

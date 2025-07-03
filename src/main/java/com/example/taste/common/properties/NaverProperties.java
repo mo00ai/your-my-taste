@@ -1,4 +1,4 @@
-package com.example.taste.config;
+package com.example.taste.common.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @ConfigurationProperties(prefix = "naver.map")
-public class NaverConfig {
+public class NaverProperties {
 
 	private final String clientId;
 	private final String clientSecret;

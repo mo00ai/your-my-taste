@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
-import com.example.taste.config.NaverConfig;
+import com.example.taste.common.properties.NaverProperties;
 import com.example.taste.domain.map.dto.geocode.GeoMapDetailResponse;
 import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeDetailResponse;
 
@@ -27,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 public class NaverMapService {
 
 	private final WebClient webClient;
-	private final NaverConfig naverConfig;
+	private final NaverProperties naverProperties;
 
 	// address -> coordinates
 	public GeoMapDetailResponse getCoordinatesFromAddress(String address) {
 		try {
 			URI uri = UriComponentsBuilder
-				.fromUriString(naverConfig.getGeoCoding().getBaseUrl())
+				.fromUriString(naverProperties.getGeoCoding().getBaseUrl())
 				.queryParam("query", address)
 				.encode(StandardCharsets.UTF_8)            // 인코딩 UTF_8 설정
 				.build()
@@ -42,8 +42,8 @@ public class NaverMapService {
 			return webClient.get()
 				.uri(uri)
 				// naver api spec
-				.header("x-ncp-apigw-api-key-id", naverConfig.getClientId())
-				.header("x-ncp-apigw-api-key", naverConfig.getClientSecret())
+				.header("x-ncp-apigw-api-key-id", naverProperties.getClientId())
+				.header("x-ncp-apigw-api-key", naverProperties.getClientSecret())
 				.header("Accept", "application/json")
 				.retrieve()
 				.bodyToMono(GeoMapDetailResponse.class)
@@ -72,7 +72,7 @@ public class NaverMapService {
 		String coords = String.format("%.7f,%.7f", longitude, latitude);    // 네이버 api 좌표 포매팅
 		try {
 			URI uri = UriComponentsBuilder
-				.fromUriString(naverConfig.getReverseGeoCoding().getBaseUrl())
+				.fromUriString(naverProperties.getReverseGeoCoding().getBaseUrl())
 				.queryParam("coords", coords)            // 좌표
 				.queryParam("orders", "admcode")    // 변환 타입 admcode: 행정동
 				.queryParam("output", "json")    // 응답 결과의 포맷 유형 JSON
@@ -83,8 +83,8 @@ public class NaverMapService {
 			return webClient.get()
 				.uri(uri)
 				// naver api spec
-				.header("x-ncp-apigw-api-key-id", naverConfig.getClientId())
-				.header("x-ncp-apigw-api-key", naverConfig.getClientSecret())
+				.header("x-ncp-apigw-api-key-id", naverProperties.getClientId())
+				.header("x-ncp-apigw-api-key", naverProperties.getClientSecret())
 				.retrieve()
 				.bodyToMono(ReverseGeocodeDetailResponse.class)
 				.timeout(Duration.ofSeconds(10))
@@ -103,7 +103,7 @@ public class NaverMapService {
 		log.info("좌표 값: {} ", coords);
 		try {
 			URI uri = UriComponentsBuilder
-				.fromUriString(naverConfig.getReverseGeoCoding().getBaseUrl())
+				.fromUriString(naverProperties.getReverseGeoCoding().getBaseUrl())
 				.queryParam("coords", coords)            // 좌표
 				.queryParam("orders", "admcode")    // 변환 타입 admcode: 행정동
 				.queryParam("output", "json")    // 응답 결과의 포맷 유형 JSON
@@ -114,8 +114,8 @@ public class NaverMapService {
 			return webClient.get()
 				.uri(uri)
 				// naver api spec
-				.header("x-ncp-apigw-api-key-id", naverConfig.getClientId())
-				.header("x-ncp-apigw-api-key", naverConfig.getClientSecret())
+				.header("x-ncp-apigw-api-key-id", naverProperties.getClientId())
+				.header("x-ncp-apigw-api-key", naverProperties.getClientSecret())
 				.retrieve()
 				.bodyToMono(ReverseGeocodeDetailResponse.class)
 				.timeout(Duration.ofSeconds(10))

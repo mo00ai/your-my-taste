@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.config.NaverDatalabConfig;
+import com.example.taste.common.properties.NaverDatalabProperties;
 import com.example.taste.domain.searchapi.dto.NaverLocalSearchResponseDto;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SearchApiService {
 
 	private final WebClient webClient;
-	private final NaverDatalabConfig naverDatalabConfig;
+	private final NaverDatalabProperties naverDatalabProperties;
 
 	/**
 	 *
@@ -41,7 +41,7 @@ public class SearchApiService {
 
 		try {
 			URI uri = UriComponentsBuilder
-				.fromUriString(naverDatalabConfig.getBaseUrl())
+				.fromUriString(naverDatalabProperties.getBaseUrl())
 				.queryParam("query", keyword)
 				.queryParam("display", 5)
 				.queryParam("start", 1)
@@ -52,8 +52,8 @@ public class SearchApiService {
 
 			return webClient.get()
 				.uri(uri)
-				.header("X-Naver-Client-Id", naverDatalabConfig.getClientId())
-				.header("X-Naver-Client-Secret", naverDatalabConfig.getClientSecret())
+				.header("X-Naver-Client-Id", naverDatalabProperties.getClientId())
+				.header("X-Naver-Client-Secret", naverDatalabProperties.getClientSecret())
 				.header("Content-Type", "application/json; charset=UTF-8")
 				// .header("Accept", "*/*")
 				// .header("Content-Type", "plain/text")  // Playground와 동일하게 설정

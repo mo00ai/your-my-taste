@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,16 +31,16 @@ public class HashtagService {
 			return;
 		}
 
-		List<String> normalizedHashtags = normalizeHashtags(hashtagList);
-		if (normalizedHashtags.isEmpty()) {
+		List<String> stringNormalizedHashtags = normalizeHashtags(hashtagList);
+		if (stringNormalizedHashtags.isEmpty()) {
 			return;
 		}
 		// 기존 해시태그 조회
-		List<Hashtag> existingHashtag = findExistingHashtags(normalizedHashtags);
+		List<Hashtag> existingHashtag = findExistingHashtags(stringNormalizedHashtags);
 		// 새로운 해시태그 생성 및 저장
-		List<Hashtag> newHashtags = createAndSaveNewHashtags(normalizedHashtags, existingHashtag);
+		List<Hashtag> normalizeHashtags = createAndSaveNewHashtags(stringNormalizedHashtags, existingHashtag);
 		// 게시글에 해시태그 연결
-		linkHashtagsToBoard(board, existingHashtag, newHashtags);
+		linkHashtagsToBoard(board, normalizeHashtags);
 
 	}
 
@@ -80,16 +79,19 @@ public class HashtagService {
 			return hashtagRepository.saveAll(newHashtags);
 		}
 
-		return newHashtags;
+		return findExistingHashtags(normalizedHashtags);
 	}
 
 	/**
 	 * 게시글에 해시태그 연결
 	 */
-	private void linkHashtagsToBoard(Board board, List<Hashtag> existingHashtags, List<Hashtag> newHashtags) {
+	private void linkHashtagsToBoard(Board board, List<Hashtag> hashtags) {
 
-		List<BoardHashtag> boardHashtags = Stream.of(existingHashtags, newHashtags)
-			.flatMap(List::stream)
+		if (hashtags == null || hashtags.isEmpty()) {
+			return;
+		}
+
+		List<BoardHashtag> boardHashtags = hashtags.stream()
 			.map(hashtag -> BoardHashtag.builder()
 				.board(board)
 				.hashtag(hashtag)

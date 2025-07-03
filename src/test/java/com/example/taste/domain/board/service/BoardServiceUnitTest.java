@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -72,8 +71,6 @@ public class BoardServiceUnitTest {
 	private PkService pkService;
 	@Mock
 	private HashtagService hashtagService;
-	@Mock
-	private EntityFetcher entityFetcher;
 	@Mock
 	private RedisService redisService;
 	@Mock

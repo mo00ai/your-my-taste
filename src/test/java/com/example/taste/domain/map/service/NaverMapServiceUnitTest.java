@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.example.taste.config.NaverConfig;
+import com.example.taste.common.properties.NaverProperties;
 import com.example.taste.domain.map.dto.geocode.GeoAddress;
 import com.example.taste.domain.map.dto.geocode.GeoMapDetailResponse;
 import com.example.taste.domain.map.dto.reversegeocode.ReverseGeocodeArea;
@@ -45,11 +45,11 @@ public class NaverMapServiceUnitTest {
 	@Mock
 	private WebClient.ResponseSpec responseSpec;
 
-	private final NaverConfig naverConfig = new NaverConfig(
+	private final NaverProperties naverProperties = new NaverProperties(
 		"dummy-client-id",
 		"dummy-client-secret",
-		new NaverConfig.Geocoding("https://dummy-map-url.com"),
-		new NaverConfig.ReverseGeocoding("https://dummy-reverse-url.com")
+		new NaverProperties.Geocoding("https://dummy-map-url.com"),
+		new NaverProperties.ReverseGeocoding("https://dummy-reverse-url.com")
 	);
 
 	@DisplayName("주소를 좌표로 변환하는 naver geoCode API 호출 테스트")
@@ -74,7 +74,7 @@ public class NaverMapServiceUnitTest {
 		given(headersSpec.retrieve()).willReturn(responseSpec);
 		given(responseSpec.bodyToMono(GeoMapDetailResponse.class)).willReturn(Mono.just(dummyResponse));
 
-		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverConfig);
+		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverProperties);
 
 		// when
 		GeoMapDetailResponse result = naverMapService.getCoordinatesFromAddress(address);
@@ -117,7 +117,7 @@ public class NaverMapServiceUnitTest {
 		given(headersSpec.header(anyString(), anyString())).willReturn(headersSpec);
 		given(headersSpec.retrieve()).willReturn(responseSpec);
 		given(responseSpec.bodyToMono(ReverseGeocodeDetailResponse.class)).willReturn(Mono.just(dummyResponse));
-		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverConfig);
+		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverProperties);
 
 		// when
 		ReverseGeocodeDetailResponse response = naverMapService.getAddressFromStringCoordinates(coordinates);
