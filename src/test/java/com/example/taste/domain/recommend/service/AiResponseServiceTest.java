@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.taste.domain.favor.entity.Favor;
@@ -22,9 +24,12 @@ import okhttp3.mockwebserver.MockWebServer;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+@SpringBootTest
 class AiResponseServiceTest extends AbstractIntegrationTest {
 
 	private MockWebServer mockWebServer;
+
+	@Autowired
 	private AiResponseService aiResponseService;
 
 	@BeforeEach

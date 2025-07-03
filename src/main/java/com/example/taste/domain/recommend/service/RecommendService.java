@@ -19,9 +19,11 @@ import com.example.taste.domain.user.repository.UserRepository;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendService {
@@ -43,6 +45,8 @@ public class RecommendService {
 		Properties queueProps = rabbitAdmin.getQueueProperties(ERROR_QUEUE_NAME);
 		int queueLength = queueProps != null && queueProps.get("QUEUE_MESSAGE_COUNT") != null
 			? (Integer)queueProps.get("QUEUE_MESSAGE_COUNT") : 0;
+
+		log.info("[추천 서비스] 현재 큐 길이: {}", queueLength);
 
 		//임계치 초과 시 → 바로 오류 응답
 		if (queueLength >= MAX_ERROR_QUEUE_THRESHOLD) {
