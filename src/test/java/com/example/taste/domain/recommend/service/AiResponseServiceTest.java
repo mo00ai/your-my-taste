@@ -54,7 +54,7 @@ class AiResponseServiceTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	void recommendFood_shouldReturnAiResponse_whenApiRespondsSuccessfully() {
+	void ai_response_recommendFood_success() {
 		// given
 		String body =
 			"""

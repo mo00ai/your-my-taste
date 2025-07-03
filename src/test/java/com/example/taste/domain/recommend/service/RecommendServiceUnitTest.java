@@ -50,7 +50,7 @@ class RecommendServiceUnitTest {
 	private RabbitAdmin rabbitAdmin;
 
 	@Test
-	void recommend_shouldReturnRecommendResponseDto_whenAllServicesSucceed() {
+	void recommend_success() {
 		// given
 		Long userId = 1L;
 		RecommendRequestDto dto = new RecommendRequestDto("지금 뭐먹지?");
@@ -88,7 +88,7 @@ class RecommendServiceUnitTest {
 	}
 
 	@Test
-	void recommend_shouldReturnError_whenQueueLengthExceedsThreshold() {
+	void recommend_message_queue_failed_thenThrowException() {
 		// given
 		Long userId = 1L;
 		RecommendRequestDto dto = new RecommendRequestDto("지금 뭐먹지?");
