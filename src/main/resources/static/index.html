@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login + FCM 테스트</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+</head>
+<body>
+<h1>🔐 로그인 + FCM 테스트</h1>
+
+<form id="login-form">
+    <label>Email: <input type="email" name="email" required></label><br>
+    <label>Password: <input type="password" name="password" required></label><br>
+    <button type="submit">로그인</button>
+</form>
+
+
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAaqBkYM4a69GlaVda6b2c651wfJTyeRLk",
+        authDomain: "taste-web-push.firebaseapp.com",
+        projectId: "taste-web-push",
+        storageBucket: "taste-web-push.firebasestorage.app",
+        messagingSenderId: "62821911150",
+        appId: "1:62821911150:web:db6a0df9ca7d4e439ef47f",
+        measurementId: "G-5GGMJ81LTC"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    const form = document.getElementById('login-form');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = form.email.value;
+        const password = form.password.value;
+
+        // 로그인 요청
+        const loginResponse = await fetch('/auth/signin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password}),
+            credentials: 'include'  // 세션 쿠키 전달 필수
+        });
+
+        if (!loginResponse.ok) {
+            alert('로그인 실패');
+            return;
+        }
+
+        console.log('✅ 로그인 성공');
+
+        // 서비스워커 등록
+        const registration = await navigator.serviceWorker.register('sw.js');
+        console.log('✅ 서비스워커 등록 완료');
+
+        // 서비스 워커가 활성화될 때까지 기다림
+        await registration.ready;
+        console.log('✅ 서비스워커 활성화 완료');
+
+        // FCM 토큰 요청
+        try {
+            const fcmToken = await messaging.getToken({ serviceWorkerRegistration: registration });
+            console.log('✅ FCM 등록 토큰:', fcmToken);
+
+            // 서버에 FCM 토큰 전송
+            await fetch('/web-push/subscribe', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ fcmToken: fcmToken }),
+                credentials: 'include'
+            });
+
+            alert('🎉 구독 완료! 이제 서버에서 알림을 보내보세요.');
+        } catch (error) {
+            console.error('FCM 토큰 가져오기 또는 서버 전송 실패:', error);
+            alert('FCM 구독 실패: ' + error.message);
+        }
+    });
+
+    // 포그라운드 메시지 처리 (선택 사항: 브라우저가 활성화된 상태에서 알림을 받을 때)
+    messaging.onMessage(function(payload) {
+        console.log('Message received in foreground. ', payload);
+        // 포그라운드에서는 OS 알림만 표시하도록 변경
+        const notificationTitle = payload.notification.title || '새 알림';
+        const notificationBody = payload.notification.body || '내용 없음';
+        const notificationImage = payload.notification.image || null;
+        const notificationIcon = payload.notification.icon || '/firebase-image.png'; // 기본 아이콘 사용
+
+        const notificationOptions = {
+            body: notificationBody,
+            icon: notificationIcon,
+            data: payload.data
+        };
+
+        if (notificationImage) {
+            notificationOptions.image = notificationImage;
+        }
+
+        // Check if notification permission is granted
+        if (Notification.permission === 'granted') {
+            new Notification(notificationTitle, notificationOptions);
+        } else if (Notification.permission !== 'denied') {
+            // Request permission if not already granted or denied
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification(notificationTitle, notificationOptions);
+                }
+            });
+        }
+    });
+
+</script>
+</body>
+</html>
