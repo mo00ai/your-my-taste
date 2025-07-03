@@ -16,5 +16,5 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReverseGeocodeDetailResponse {
 	private ReverseGeocodeStatus status;
-	public List<ReverseGeocodeResult> results;
+	private List<ReverseGeocodeResult> results;
 }
