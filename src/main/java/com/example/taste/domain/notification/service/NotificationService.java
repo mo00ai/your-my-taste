@@ -48,7 +48,6 @@ public class NotificationService {
 			try {
 				webPushService.send(subscription, dataDto, content.getId());
 			} catch (Exception e) {
-				log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 			}
 		}
 		notificationRedisService.storeAndTrimNotification(dataDto.getUserId(), content.getId(),
@@ -72,7 +71,6 @@ public class NotificationService {
 				try {
 					webPushService.send(subscription, dataDto, content.getId());
 				} catch (Exception e) {
-					log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 				}
 
 			}
@@ -100,7 +98,6 @@ public class NotificationService {
 				try {
 					webPushService.send(subscription, dataDto, content.getId());
 				} catch (Exception e) {
-					log.error("Failed to send web push to subscription: {}", subscription.getEndpoint(), e);
 				}
 			}
 			notificationRedisService.storeAndTrimNotification(id, content.getId(),

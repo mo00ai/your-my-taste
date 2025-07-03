@@ -141,7 +141,7 @@ public class NotificationUserService {
 		// mysql 알림 읽음 처리
 		List<Long> list = new ArrayList<>();
 		list.add(contentID);
-		markSqlNotificationAsRead(userId, list);
+		readNotificationsAtTerminalStorage(userId, list);
 	}
 
 	// 모든 알림 읽음 처리
@@ -164,13 +164,12 @@ public class NotificationUserService {
 
 		// mysql 알림 읽음 처리
 		List<Long> emptyList = new ArrayList<>();
-		markSqlNotificationAsRead(userId, emptyList);
+		readNotificationsAtTerminalStorage(userId, emptyList);
 	}
 
 	@Transactional
-	public UserNotificationSettingResponseDto userNotificationSetting(
+	public UserNotificationSettingResponseDto denyNotification(
 		NotificationCategory category,
-		boolean isSet,
 		Long userId
 	) {
 		User user = userRepository.findById(userId)
@@ -179,20 +178,31 @@ public class NotificationUserService {
 		Optional<UserNotificationSetting> settingOpt =
 			userNotificationSettingRepository.findByUserAndNotificationCategory(user, category);
 
-		if (!isSet && settingOpt.isPresent()) {
+		if (settingOpt.isPresent()) {
 			userNotificationSettingRepository.delete(settingOpt.get());
-			return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
+			return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, true);
 		}
 
-		if (isSet && settingOpt.isEmpty()) {
-			UserNotificationSetting newSetting = UserNotificationSetting.builder()
-				.notificationCategory(category)
-				.user(user)
-				.build();
-			userNotificationSettingRepository.save(newSetting);
+		return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, true);
+	}
+
+	@Transactional
+	public UserNotificationSettingResponseDto allowNotification(
+		NotificationCategory category,
+		Long userId
+	) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		// 없어도 에러 던지면 안되서 optional로 받음
+		Optional<UserNotificationSetting> settingOpt =
+			userNotificationSettingRepository.findByUserAndNotificationCategory(user, category);
+
+		if (settingOpt.isPresent()) {
+			userNotificationSettingRepository.delete(settingOpt.get());
+			return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, false);
 		}
 
-		return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, isSet);
+		return new UserNotificationSettingResponseDto(user.getId(), user.getNickname(), category, false);
 	}
 
 	// 읽음 처리 중복 코드 정리
@@ -214,7 +224,8 @@ public class NotificationUserService {
 		return Long.parseLong(parts[parts.length - 2]);
 	}
 
-	private void markSqlNotificationAsRead(Long userId, List<Long> contentsIds) {
+	// TODO 이름 수정
+	private void readNotificationsAtTerminalStorage(Long userId, List<Long> contentsIds) {
 		List<NotificationInfo> mysqlNotifications = notificationInfoRepository.getNotificationInfoWithContents(userId,
 			contentsIds);
 		mysqlNotifications.forEach(NotificationInfo::readIt);

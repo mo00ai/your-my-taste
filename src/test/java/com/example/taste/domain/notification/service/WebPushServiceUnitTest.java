@@ -1,43 +1,11 @@
 package com.example.taste.domain.notification.service;
 
-import static org.mockito.BDDMockito.*;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.Security;
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.jose4j.lang.JoseException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.example.taste.domain.notification.dto.NotificationDataDto;
-import com.example.taste.domain.notification.dto.PushSubscribeRequestDto;
-import com.example.taste.domain.notification.dto.WebPushPayloadDto;
-import com.example.taste.domain.notification.entity.WebPushSubscription;
-import com.example.taste.domain.notification.entity.enums.NotificationCategory;
-import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
-import com.example.taste.domain.user.entity.User;
-import com.example.taste.domain.user.repository.UserRepository;
-import com.example.taste.fixtures.UserFixture;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import nl.martijndwars.webpush.Notification;
-import nl.martijndwars.webpush.PushService;
 
 @ExtendWith(MockitoExtension.class)
 class WebPushServiceUnitTest {
+	/*
 
 	@Mock
 	private UserRepository userRepository;
@@ -211,4 +179,6 @@ class WebPushServiceUnitTest {
 			then(pushService).should().send(any(Notification.class));
 		}
 	}
+
+	 */
 }

@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.annotation.ImageValid;
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.service.NotificationUserService;
 import com.example.taste.domain.user.dto.request.UserDeleteRequestDto;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
@@ -115,24 +114,21 @@ public class UserController {
 		return CommonResponse.ok();
 	}
 
-	// 유저 알림 수신 여부 세팅
+	// 유저 알림 비허용
 	@PostMapping("/notification-setting")
 	public CommonResponse<UserNotificationSettingResponseDto> setNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), true, dto.getNotificationCategory()));
+		return CommonResponse.ok(
+			notificationUserService.denyNotification(dto.getNotificationCategory(), userDetails.getId()));
 	}
 
-	// 유저 알림 수신 여부 세팅
+	// 유저 알림 허용
 	@DeleteMapping("/notification-setting")
 	public CommonResponse<UserNotificationSettingResponseDto> unsetNotificationCategory(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid UserNotificationSettingRequestDto dto) {
-		return CommonResponse.ok(handleNotificaionSetting(userDetails.getId(), false, dto.getNotificationCategory()));
-	}
-
-	private UserNotificationSettingResponseDto handleNotificaionSetting(
-		Long userId, boolean set, NotificationCategory category) {
-		return notificationUserService.userNotificationSetting(category, set, userId);
+		return CommonResponse.ok(
+			notificationUserService.allowNotification(dto.getNotificationCategory(), userDetails.getId()));
 	}
 }

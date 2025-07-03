@@ -28,22 +28,14 @@ public class WebPushSubscription {
 	private Long id;
 
 	@Column(unique = true, length = 1000)
-	private String endpoint;
-	@Setter
-	private String p256dhKey;
-	@Setter
-	private String authKey;
-
-	private LocalDateTime expirationTime;
+	private String fcmToken;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 
 	@Builder
-	public WebPushSubscription(String authKey, String p256dhKey, String endpoint, User user) {
-		this.authKey = authKey;
-		this.p256dhKey = p256dhKey;
-		this.endpoint = endpoint;
+	public WebPushSubscription(String fcmToken, User user) {
+		this.fcmToken = fcmToken;
 		this.user = user;
 	}
 }

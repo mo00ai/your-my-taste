@@ -5,7 +5,7 @@ import java.util.List;
 import com.example.taste.domain.notification.entity.WebPushSubscription;
 
 public interface WebPushRepositoryCustom {
-	public WebPushSubscription getWebPushSubscriptionByUserIdAndEndpoint(Long userId, String endPoint);
+	public WebPushSubscription getWebPushSubscriptionByUserIdAndFcmToken(Long userId, String fcmToken);
 
 	public List<WebPushSubscription> findByUserId(Long userId);
 }
