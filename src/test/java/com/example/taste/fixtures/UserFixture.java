@@ -1,6 +1,6 @@
 package com.example.taste.fixtures;
 
-import static com.example.taste.domain.user.enums.Gender.*;
+import static com.example.taste.domain.user.enums.Gender.ANY;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,5 +106,11 @@ public class UserFixture {
 		}
 
 		return users;
+	}
+
+	public static User createSoftDeletedUser(Image image) {
+		User user = create(image);
+		user.softDelete();
+		return user;
 	}
 }

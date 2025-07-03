@@ -52,14 +52,14 @@ public class UserService {
 
 	// 내 정보 조회
 	public UserMyProfileResponseDto getMyProfile(Long userId) {
-		User user = userRepository.findByIdWithUserFavorList(userId)
+		User user = userRepository.findUserWithFavors(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserMyProfileResponseDto(user);
 	}
 
 	// 다른 유저 프로필 조회
 	public UserProfileResponseDto getProfile(Long userId) {
-		User user = userRepository.findByIdWithUserFavorList(userId)
+		User user = userRepository.findUserWithFavors(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		return new UserProfileResponseDto(user);
 	}
