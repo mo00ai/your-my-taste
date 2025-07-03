@@ -5,11 +5,15 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NaverLocalSearchResponseDto {
 	private String lastBuildDate;
@@ -21,6 +25,8 @@ public class NaverLocalSearchResponseDto {
 
 	@Getter
 	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Item {
 		@JsonProperty("title")
