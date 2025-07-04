@@ -110,13 +110,13 @@ jobs:
       KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
       WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    #      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
-    #      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
-    #      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
-    #      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-    #      RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_USERNAME }}
-    #      RABBITMQ_DEFAULT_PASS: ${{ Rsecrets.ABBITMQ_PASSWORD }}
+      OPENAI_EMBEDDING_API_KEY: ${{ secrets.OPENAI_EMBEDDING_API_KEY }}
+      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
 
+    
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
