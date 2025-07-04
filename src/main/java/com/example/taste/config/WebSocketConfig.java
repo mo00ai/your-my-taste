@@ -1,5 +1,7 @@
 package com.example.taste.config;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -11,8 +13,6 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 import com.example.taste.common.interceptor.CustomHttpHandshakeInterceptor;
 import com.example.taste.common.interceptor.StompCommandInterceptor;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// 브라우저 환경용 - http://.../ws로 요청
-		registry.addEndpoint("/http")
+		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*") // TODO 도메인 주소 적용
 			.addInterceptors(customHttpHandshakeInterceptor)
 			.withSockJS()

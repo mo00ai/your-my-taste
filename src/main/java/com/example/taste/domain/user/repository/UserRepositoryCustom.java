@@ -18,4 +18,6 @@ public interface UserRepositoryCustom {
 	Page<Long> getAllUserIdPage(PageRequest pageRequest);
 
 	Optional<User> findUserWithFavors(Long userId);
+
+	Optional<User> findByIdWithImage(Long userId);
 }

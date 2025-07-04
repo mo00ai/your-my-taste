@@ -14,10 +14,10 @@ public class WebPushRepositoryImpl implements WebPushRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public WebPushSubscription getWebPushSubscriptionByUserIdAndEndpoint(Long userId, String endPoint) {
+	public WebPushSubscription getWebPushSubscriptionByUserIdAndFcmToken(Long userId, String fcmToken) {
 		QWebPushSubscription qSubscription = QWebPushSubscription.webPushSubscription;
 		return queryFactory.selectFrom(qSubscription).where(
-			qSubscription.endpoint.eq(endPoint),
+			qSubscription.fcmToken.eq(fcmToken),
 			qSubscription.user.id.eq(userId)
 		).fetchOne();
 	}

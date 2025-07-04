@@ -4,6 +4,11 @@ import java.util.Optional;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 @SpringBootTest
 public abstract class AbstractIntegrationTest {
 	static {
@@ -13,4 +18,9 @@ public abstract class AbstractIntegrationTest {
 		}
 	}
 
+	@MockitoBean
+	protected FirebaseApp firebaseApp;
+
+	@MockitoBean
+	protected FirebaseMessaging firebaseMessaging;
 }

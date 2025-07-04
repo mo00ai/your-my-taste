@@ -40,9 +40,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
 	Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-	@Query("SELECT u FROM User u JOIN FETCH u.image WHERE u.id = :id")
-	Optional<User> findByIdWithImage(@Param("id") Long id);
-
 	@Modifying
 	@Query("UPDATE User u SET u.point = 0")
 	void resetAllPoints();

@@ -41,8 +41,8 @@ out/
 src/main/generated
 /src/main/resources/index.html
 /src/main/resources/sw.js
-/src/main/resources/static/index.html
-/src/main/resources/static/sw.js
+
+
 
 .DS_Store
 /src/main/java/com/example/taste/common/util/BulkUserInsertRunner.java

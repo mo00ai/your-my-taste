@@ -16,12 +16,15 @@ import com.example.taste.domain.party.entity.Party;
 import com.example.taste.domain.party.entity.QParty;
 import com.example.taste.domain.party.entity.QPartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
+import com.example.taste.domain.party.enums.PartyFilter;
 import com.example.taste.domain.party.enums.PartyStatus;
 import com.example.taste.domain.store.entity.QStore;
 import com.example.taste.domain.user.entity.QUser;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 public class PartyRepositoryImpl implements PartyRepositoryCustom {
@@ -35,40 +38,22 @@ public class PartyRepositoryImpl implements PartyRepositoryCustom {
 		this.queryFactory = jpaQueryFactory;
 	}
 
-	@Override
-	public Slice<Party> findAllByActiveAndUserNotInSorted(
-		Long userId, Pageable pageable) {
+	public Slice<Party> findAllByFilterAndSorted(
+		Long userId, PartyFilter filter, Pageable pageable) {
+
+		BooleanBuilder whereBuilder = getPartyFilterPredicate(userId, filter);
+
 		List<Party> results = queryFactory
-			.select(p)
-			.from(p)
+			.selectFrom(p)
 			.join(p.hostUser, user).fetchJoin()
 			.leftJoin(p.store).fetchJoin()
 			.leftJoin(pi).on(
 				pi.party.eq(p),
-				pi.invitationStatus.eq(InvitationStatus.CONFIRMED))
-			.where(
-				p.partyStatus.eq(PartyStatus.ACTIVE),
-				p.hostUser.id.ne(userId))
+				pi.invitationStatus.eq(InvitationStatus.CONFIRMED)
+			)
+			.where(whereBuilder)
 			.groupBy(p.id)
 			.having(pi.count().lt(p.maxMembers))
-			.orderBy(getOrderSpecifier(pageable))
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize() + 1)
-			.fetch();
-
-		return hasNext(results, pageable);
-	}
-
-	@Override
-	public Slice<Party> findAllByUserInSorted(
-		Long userId, Pageable pageable) {
-		List<Party> results = queryFactory
-			.selectDistinct(p)
-			.from(pi)
-			.join(pi.party, p)
-			.join(p.hostUser, user).fetchJoin()
-			.leftJoin(p.store).fetchJoin()
-			.where(pi.user.id.eq(userId))
 			.orderBy(getOrderSpecifier(pageable))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
@@ -124,4 +109,43 @@ public class PartyRepositoryImpl implements PartyRepositoryCustom {
 
 		return new SliceImpl<>(results, pageable, hasNext);
 	}
+
+	private BooleanBuilder getPartyFilterPredicate(Long userId, PartyFilter filter) {
+		QParty party = QParty.party;
+		QPartyInvitation pi = QPartyInvitation.partyInvitation;
+
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(party.partyStatus.eq(PartyStatus.ACTIVE));
+
+		if (filter == PartyFilter.MY) {
+			// 내가 속한 파티
+			builder.and(
+				JPAExpressions
+					.selectOne()
+					.from(pi)
+					.where(
+						pi.party.eq(party),
+						pi.user.id.eq(userId),
+						pi.invitationStatus.eq(InvitationStatus.CONFIRMED)
+					)
+					.exists()
+			);
+		} else if (filter == PartyFilter.ALL) {
+			// 내가 속하지 않은 파티
+			builder.and(
+				JPAExpressions
+					.selectOne()
+					.from(pi)
+					.where(
+						pi.party.eq(party),
+						pi.user.id.eq(userId),
+						pi.invitationStatus.eq(InvitationStatus.CONFIRMED)
+					)
+					.notExists()
+			);
+		}
+
+		return builder;
+	}
+
 }

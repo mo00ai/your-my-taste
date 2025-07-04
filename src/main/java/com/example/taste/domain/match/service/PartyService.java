@@ -74,24 +74,11 @@ public class PartyService {
 	public SliceImpl<PartyResponseDto> getParties(Long userId, String filter, Pageable pageable) {
 		validateSort(pageable.getSort());
 
-		PartyFilter partyFilter = PartyFilter.of(filter);
-		switch (partyFilter) {
-			case ALL -> {
-				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
-				Slice<Party> partySlice = partyRepository.findAllByActiveAndUserNotInSorted(userId, pageable);
-				return new SliceImpl<>(partySlice.getContent().stream()
-					.map(PartyResponseDto::new)
-					.toList(), pageable, partySlice.hasNext());
-			}
-			case MY -> {
-				// 유저가 참가, 호스트인 파티 모두 보여줌 (deleted 제외)
-				Slice<Party> partySlice = partyRepository.findAllByUserInSorted(userId, pageable);
-				return new SliceImpl<>(partySlice.getContent().stream()
-					.map(PartyResponseDto::new)
-					.toList(), pageable, partySlice.hasNext());
-			}
-			default -> throw new CustomException(INVALID_INPUT_VALUE);
-		}
+		Slice<Party> partySlice = partyRepository.findAllByFilterAndSorted(userId, PartyFilter.of(filter), pageable);
+
+		return new SliceImpl<>(partySlice.getContent().stream()
+			.map(PartyResponseDto::new)
+			.toList(), pageable, partySlice.hasNext());
 	}
 
 	public PartyDetailResponseDto getPartyDetail(Long partyId) {
