@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+  taste-app:
     image: ${DOCKER_IMAGE}
     container_name: taste-app
     ports:
@@ -67,7 +67,7 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - app
+      - taste-app
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
