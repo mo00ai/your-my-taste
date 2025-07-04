@@ -1,6 +1,7 @@
 package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.common.constant.SocketConst.*;
 import static com.example.taste.common.exception.ErrorCode.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
@@ -51,7 +52,7 @@ public class FcfsQueueService {
 		redisService.addToZSet(key, userId, System.currentTimeMillis());
 
 		// 클라이언트에 잔여 인원 전송
-		String destination = "/sub/openrun/board/" + board.getId();
+		String destination = BOARD_SOCKET_DESTINATION + board.getId();
 		long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 		messagingTemplate.convertAndSend(destination, remainingSlot);
 
@@ -93,7 +94,7 @@ public class FcfsQueueService {
 
 			redisService.addToZSet(key, userId, System.currentTimeMillis());
 
-			String destination = "/sub/openrun/board/" + board.getId();
+			String destination = BOARD_SOCKET_DESTINATION + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			messagingTemplate.convertAndSend(destination, remainingSlot);
 
@@ -145,7 +146,7 @@ public class FcfsQueueService {
 			redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 			// 클라이언트에 잔여 인원 전송
-			//String destination = "/sub/openrun/board/" + board.getId();
+			//String destination = BOARD_SOCKET_DESTINATION + board.getId();
 			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
 			//messagingTemplate.convertAndSend(destination, remainingSlot);
 			boardStatusPublisher.publish(new BoardStatusDto(board.getId(), remainingSlot)); // 메세지큐 적용 -> 메세지 전송 성능 향상
