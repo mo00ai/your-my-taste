@@ -39,10 +39,8 @@ public class WebPushService {
 		WebPushSubscription subscription = webPushRepository.findByFcmToken(dto.getFcmToken()).orElse(null);
 
 		if (subscription != null && subscription.getUser().isSameUser(user.getId())) {
-			// If the token already exists for the same user, do nothing.
 			return;
 		} else if (subscription != null) {
-			// If the token exists but for a different user, delete the old subscription.
 			webPushRepository.delete(subscription);
 		}
 
@@ -63,7 +61,7 @@ public class WebPushService {
 
 	public void send(WebPushSubscription subscription, NotificationDataDto dataDto, Long contentId) {
 		try {
-			// Create a data payload
+			// payload
 			Map<String, String> data = new HashMap<>();
 			data.put("category", dataDto.getCategory().name());
 			data.put("content", dataDto.getContents());
@@ -71,18 +69,18 @@ public class WebPushService {
 			data.put("createdAt", dataDto.getCreatedAt().toString());
 			data.put("redirectUrl", dataDto.getRedirectionUrl());
 
-			// Create a notification payload (optional, for display notifications)
+			// notification payload
 			Notification notification = Notification.builder()
-				.setTitle("New Notification") // You might want to customize this
+				.setTitle("New Notification")
 				.setBody(dataDto.getContents())
-				.setImage("/firebase-image.png") // Add this line for the image
+				.setImage("/firebase-image.png")
 				.build();
 
 			// Build the message
 			Message message = Message.builder()
 				.setToken(subscription.getFcmToken())
-				.setNotification(notification) // Optional: for display notifications
-				.putAllData(data) // For data messages
+				.setNotification(notification)
+				.putAllData(data)
 				.build();
 
 			// Send the message
