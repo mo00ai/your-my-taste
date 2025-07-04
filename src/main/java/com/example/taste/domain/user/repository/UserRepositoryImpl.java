@@ -1,6 +1,7 @@
 package com.example.taste.domain.user.repository;
 
 import static com.example.taste.domain.favor.entity.QFavor.favor;
+import static com.example.taste.domain.image.entity.QImage.image;
 import static com.example.taste.domain.user.entity.QUser.user;
 import static com.example.taste.domain.user.entity.QUserFavor.userFavor;
 
@@ -68,6 +69,17 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 					.and(user.deletedAt.isNull()))
 				.fetchOne()
 		);
+	}
+
+	@Override
+	public Optional<User> findByIdWithImage(Long id) {
+		User result = queryFactory
+			.selectFrom(user)
+			.leftJoin(user.image, image).fetchJoin()
+			.where(user.id.eq(id))
+			.fetchOne();
+
+		return Optional.ofNullable(result);
 	}
 
 	@Override
