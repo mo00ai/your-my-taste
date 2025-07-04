@@ -17,9 +17,11 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.taste.common.batch.RetryUtils;
 import com.example.taste.domain.event.entity.Event;
 import com.example.taste.domain.event.service.EventService;
 import com.example.taste.domain.pk.enums.PkType;
@@ -62,6 +64,20 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 			.<Event, Event>chunk(500, transactionManager)
 			.reader(eventReader())
 			.writer(eventWriter())
+			.faultTolerant()
+			.retry(Exception.class)
+			.retryLimit(RETRY_LIMIT)
+			.listener(new RetryListener() {
+				@Override
+				public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
+					Throwable throwable) {
+					int retryCount = context.getRetryCount();
+					log.warn("[Event] 처리 실패. 재시도 {}/{}", retryCount, RETRY_LIMIT);
+					if (retryCount >= RETRY_LIMIT) {
+						log.error("[Event] 재시도 한계 초과. 최종 실패", throwable);
+					}
+				}
+			})
 			.build();
 	}
 
@@ -70,11 +86,7 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 	public ItemReader<Event> eventReader() {
 		LocalDate yesterday = LocalDate.now().minusDays(1);
 
-		List<Event> events = RetryUtils.executeWithRetry(
-			() -> eventService.findEndedEventList(yesterday),
-			RETRY_LIMIT,
-			"Reader - [Event] 종료된 이벤트 목록 조회" );
-
+		List<Event> events = eventService.findEndedEventList(yesterday);
 		log.info("[Event] 종료된 이벤트 수: {}", events.size());
 		return new ListItemReader<>(events);
 	}
@@ -84,15 +96,12 @@ public class EventWinnerBatchConfig extends DefaultBatchConfiguration {
 	public ItemWriter<Event> eventWriter() {
 		return events -> {
 			for (Event event : events) {
-				RetryUtils.executeWithRetry(() -> {
-					eventService.findWinningBoard(event.getId())
-						.ifPresent(winner -> {
-							Long userId = winner.getUser().getId();
-							pkService.savePkLog(userId, PkType.EVENT);
-							log.info("Writer - [Event] 이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
-						});
-					return null;
-				}, RETRY_LIMIT, "Writer - [Event] eventId: " + event.getId());
+				eventService.findWinningBoard(event.getId())
+					.ifPresent(winner -> {
+						Long userId = winner.getUser().getId();
+						pkService.savePkLog(userId, PkType.EVENT);
+						log.info("Writer - [Event] 이벤트 ID: {}, 우승자 ID: {}", event.getId(), userId);
+					});
 			}
 		};
 	}

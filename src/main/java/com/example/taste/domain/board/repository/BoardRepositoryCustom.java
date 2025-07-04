@@ -24,7 +24,7 @@ public interface BoardRepositoryCustom {
 
 	Page<OpenRunBoardQueryDto> findUndeletedBoardByTypeAndPolicy(BoardType type, Collection<AccessPolicy> statuses,
 		Pageable pageable);
-	// TODO 구현할 메서드
+
 	// List<BoardListResponseDto> findByOktTrgmSearch(String searchKeywords, String originalQuery, int limit);
 	//
 	// List<BoardListResponseDto> findByHybridSearch(BoardSearchCondition condition);
