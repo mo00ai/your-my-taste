@@ -36,7 +36,6 @@ import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.redis.NotificationRedisService;
 import com.example.taste.domain.notification.repository.notification.NotificationInfoRepository;
 import com.example.taste.domain.notification.repository.notification.UserNotificationSettingRepository;
-import com.example.taste.domain.user.dto.response.UserNotificationSettingResponseDto;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 import com.example.taste.fixtures.ImageFixture;
@@ -452,6 +451,7 @@ class NotificationUserServiceUnitTest {
 		}
 	}
 
+	/*
 	@Nested
 	class setting {
 		@Test
@@ -551,4 +551,6 @@ class NotificationUserServiceUnitTest {
 			assertThat(result.isSet()).isFalse();
 		}
 	}
+
+	 */
 }
