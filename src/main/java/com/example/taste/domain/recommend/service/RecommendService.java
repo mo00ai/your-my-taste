@@ -70,35 +70,6 @@ public class RecommendService {
 			.doOnError(e -> errorMonitoringProducer.send(userId, message));
 	}
 
-	// @CircuitBreaker(name = "RecommendService", fallbackMethod = "fallbackMethod")
-	// public Mono<RecommendResponseDto> recommend(Long userId, RecommendRequestDto dto) {
-	// 	String message = (dto == null || dto.getMessage() == null || dto.getMessage().isBlank())
-	// 		? "지금 뭐 먹을까. 메뉴 추천 좀 해줘"
-	// 		: dto.getMessage();
-	//
-	// 	// 1. queueLength 조회를 Mono.just(...)로 명시적으로 래핑
-	// 	return Mono.fromCallable(() -> {
-	// 			Properties props = rabbitAdmin.getQueueProperties(ERROR_QUEUE_NAME);
-	// 			return props != null && props.get("QUEUE_MESSAGE_COUNT") != null
-	// 				? (Integer)props.get("QUEUE_MESSAGE_COUNT")
-	// 				: 0;
-	// 		})
-	// 		.subscribeOn(Schedulers.boundedElastic()) // 강제 비동기
-	// 		.flatMap(queueLength -> {
-	// 			if (queueLength >= MAX_ERROR_QUEUE_THRESHOLD) {
-	// 				return Mono.error(new CustomException(TOO_MANY_API_REQUESTS));
-	// 			}
-	// 			return Mono.fromCallable(() ->
-	// 					userRepository.findUserWithFavors(userId)
-	// 						.orElseThrow(() -> new CustomException(NOT_FOUND_USER)))
-	// 				.subscribeOn(Schedulers.boundedElastic())
-	// 				.flatMap(user ->
-	// 					addressService.getCoordinates(user)
-	// 						.flatMap(coord -> getRecommendation(coord, user, message)))
-	// 				.doOnError(e -> errorMonitoringProducer.send(userId, message));
-	// 		});
-	// }
-
 	private Mono<RecommendResponseDto> getRecommendation(CoordinateResponseDto coord, User user, String message) {
 		return weatherService.loadWeather(coord.getLat(), coord.getLon())
 			.flatMap(weather -> aiResponseService.recommendFood(
