@@ -11,6 +11,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -29,7 +32,8 @@ import com.example.taste.fixtures.UserFixture;
 import com.example.taste.property.AbstractIntegrationTest;
 
 @Transactional
-@SpringBootTest(classes = {UserService.class, org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.class})
+@SpringBootTest
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class UserServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private UserService userService;
