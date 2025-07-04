@@ -1,7 +1,5 @@
 package com.example.taste.domain.notification.entity;
 
-import java.time.LocalDateTime;
-
 import com.example.taste.domain.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -15,7 +13,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @EqualsAndHashCode
@@ -27,23 +24,15 @@ public class WebPushSubscription {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true, length = 1000)
-	private String endpoint;
-	@Setter
-	private String p256dhKey;
-	@Setter
-	private String authKey;
-
-	private LocalDateTime expirationTime;
+	@Column(unique = true, length = 255)
+	private String fcmToken;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 
 	@Builder
-	public WebPushSubscription(String authKey, String p256dhKey, String endpoint, User user) {
-		this.authKey = authKey;
-		this.p256dhKey = p256dhKey;
-		this.endpoint = endpoint;
+	public WebPushSubscription(String fcmToken, User user) {
+		this.fcmToken = fcmToken;
 		this.user = user;
 	}
 }

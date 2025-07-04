@@ -54,7 +54,7 @@ public class SecurityConfig {
 				// 프로메테우스 허용
 				auth.requestMatchers("/actuator/prometheus").permitAll();
 				// 엔드투엔드 테스트용 index 접근 허용
-				auth.requestMatchers("/index.html", "/sw.js").permitAll();
+				auth.requestMatchers("/index.html", "/sw.js", "/firebase-messaging-sw.js").permitAll();
 				auth.anyRequest().authenticated();
 			})
 			.exceptionHandling(exception -> {

@@ -119,9 +119,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    // web_push
-    implementation 'nl.martijndwars:web-push:5.1.0'
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
+    //firebase
+    implementation 'com.google.firebase:firebase-admin:9.5.0'
 
     //circuit breaker
     implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.0'
