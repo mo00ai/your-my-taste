@@ -1,8 +1,12 @@
 package com.example.taste.domain.pk.batch;
 
-import static com.example.taste.domain.user.exception.UserErrorCode.*;
-
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jooq.exception.DataAccessException;
 import org.springframework.batch.core.Job;
@@ -14,23 +18,29 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.pk.dto.request.PkLogCacheDto;
 import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
+import com.sun.management.OperatingSystemMXBean;
 
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +52,49 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 	private final PkService pkService;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
+	private final RedisTemplate redisTemplate;
+	private final MeterRegistry meterRegistry;
 	private static final int RETRY_LIMIT = 3;
+
+	@PostConstruct
+	public void registerJvmGauges() {
+		MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+		OperatingSystemMXBean osBean =
+			(OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
+
+		// Heap 메모리 사용량 (bytes)
+		Gauge.builder("jvm.memory.heap.used", memoryBean, m -> (double)m.getHeapMemoryUsage().getUsed())
+			.description("JVM Heap memory used")
+			.baseUnit("bytes")
+			.register(meterRegistry);
+
+		// Heap 메모리 커밋량 (bytes)
+		Gauge.builder("jvm.memory.heap.committed", memoryBean, m -> (double)m.getHeapMemoryUsage().getCommitted())
+			.description("JVM Heap memory committed")
+			.baseUnit("bytes")
+			.register(meterRegistry);
+
+		// 시스템 전체 CPU 사용률 (0.0 ~ 1.0)
+		Gauge.builder("system.cpu.usage", osBean, OperatingSystemMXBean::getSystemCpuLoad)
+			.description("System CPU usage")
+			.register(meterRegistry);
+
+		// JVM 프로세스의 CPU 사용률 (0.0 ~ 1.0)
+		Gauge.builder("process.cpu.usage", osBean, OperatingSystemMXBean::getProcessCpuLoad)
+			.description("Process CPU usage")
+			.register(meterRegistry);
+	}
+
+	@Bean
+	public TaskExecutor pkLogTaskExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(4);     // 동시에 실행할 스레드 수
+		executor.setMaxPoolSize(8);      // 최대 스레드 수
+		executor.setQueueCapacity(100);  // 큐에 대기할 작업 수
+		executor.setThreadNamePrefix("PkLogExecutor-");
+		executor.initialize();
+		return executor;
+	}
 
 	@Bean
 	public Job pkLogJob(JobRepository repo, Step pkLogStep) {
@@ -52,14 +104,17 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 	}
 
 	@Bean
-	public Step pkLogStep(JobRepository repo, PlatformTransactionManager transactionManager) {
+	public Step pkLogStep(JobRepository repo, PlatformTransactionManager transactionManager,
+		TaskExecutor pkLogTaskExecutor) {
 		return new StepBuilder("pkLogStep", repo)
-			.<String, String>chunk(100, transactionManager)
-			.reader(pkLogKeyReader())
+			.<String, String>chunk(1000, transactionManager)
+			.reader(PkLogItemReader())
 			.writer(pkLogWriter())
+			.taskExecutor(pkLogTaskExecutor)
 			.faultTolerant()
 			.retry(DataAccessException.class)
 			.retryLimit(3)
+			.skip(EmptyResultDataAccessException.class) // 조회한 id가 존재하지 않을 때 (writer 호출 전 삭제됨)
 			.listener(new RetryListener() {
 				@Override
 				public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
@@ -73,29 +128,41 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 					}
 				}
 			})
-			.skip(EmptyResultDataAccessException.class) // 조회한 id가 존재하지 않을 때 (writer 호출 전 삭제됨)
 			.build();
 	}
 
 	@Bean
 	@StepScope
-	public ItemReader<String> pkLogKeyReader() {
-
-		List<String> keys = redisService.getKeys("pkLog:*").stream().toList();
-		log.info("[PK LOG] {}개의 키 조회", keys.size());
-		return new ListItemReader<>(keys);
-
+	public ItemReader<String> PkLogItemReader() {
+		return new PkLogItemReader(redisTemplate, "pkLog:*");
 	}
 
 	@Bean
 	@StepScope
 	public ItemWriter<String> pkLogWriter() {
-		return keys -> {
-			for (String key : keys) {
+		return items -> {
 
+			Timer.Sample sample = Timer.start(meterRegistry);
+
+			List<? extends String> keys = items.getItems();
+
+			// 1. userId 수집
+			Set<Long> userIds = keys.stream()
+				.map(key -> Long.parseLong(key.split(":")[2]))
+				.collect(Collectors.toSet());
+
+			// 2. batch 조회
+			Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
+				.collect(Collectors.toMap(User::getId, u -> u));
+
+			// 3. 모든 PkLog 한 번에 수집
+			List<PkLog> allPkLogs = new ArrayList<>();
+
+			for (String key : keys) {
 				Long userId = Long.parseLong(key.split(":")[2]);
-				User user = userRepository.findById(userId)
-					.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+				User user = userMap.get(userId);
+				if (user == null)
+					continue;
 
 				List<PkLogCacheDto> dtoList = redisService.getOpsForList(key, PkLogCacheDto.class);
 
@@ -108,9 +175,18 @@ public class PkLogBatchConfig extends DefaultBatchConfiguration {
 						.build())
 					.toList();
 
-				pkService.saveBulkPkLogs(pkLogs);
-				log.info("[PK LOG] {}에 대해 {}건 저장 완료", key, pkLogs.size());
+				allPkLogs.addAll(pkLogs);
 			}
+
+			int batchSize = 10000;
+			for (int i = 0; i < allPkLogs.size(); i += batchSize) {
+				int end = Math.min(i + batchSize, allPkLogs.size());
+				List<PkLog> subList = allPkLogs.subList(i, end);
+				pkService.saveBulkPkLogs(subList);
+			}
+
+			sample.stop(meterRegistry.timer("pklog_batch_duration"));
+
 		};
 	}
 }

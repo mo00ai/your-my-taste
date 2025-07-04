@@ -66,7 +66,7 @@ jobs:
             echo "RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}" >> .env
             echo "RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}" >> .env
             echo "RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}" >> .env
-            
+            echo "OPENAI_EMBEDDING_API_KEY=${{ secrets.OPENAI_EMBEDDING_API_KEY }}" >> .env
             
             docker-compose down
             docker-compose pull

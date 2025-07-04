@@ -1,7 +1,5 @@
 package com.example.taste.domain.image.service;
 
-import static com.example.taste.domain.board.exception.BoardErrorCode.*;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -9,10 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
-import com.example.taste.domain.image.dto.ImageResponseDto;
 import com.example.taste.domain.image.entity.BoardImage;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.image.enums.ImageType;
@@ -44,13 +40,13 @@ public class BoardImageService {
 		}
 	}
 
-	@Transactional(readOnly = true)
-	public List<ImageResponseDto> findBoardImages(Long boardId) {
-
-		Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
-
-		return boardImageRepository.findAllByBoardId(boardId);
-	}
+	// @Transactional(readOnly = true)
+	// public List<ImageResponseDto> findBoardImages(Long boardId) {
+	//
+	// 	Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
+	//
+	// 	return boardImageRepository.findAllByBoardId(boardId);
+	// }
 
 	@Transactional
 	public void deleteBoardImages(Board board) {

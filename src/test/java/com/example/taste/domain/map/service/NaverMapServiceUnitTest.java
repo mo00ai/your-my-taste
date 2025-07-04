@@ -74,7 +74,7 @@ public class NaverMapServiceUnitTest {
 		given(headersSpec.retrieve()).willReturn(responseSpec);
 		given(responseSpec.bodyToMono(GeoMapDetailResponse.class)).willReturn(Mono.just(dummyResponse));
 
-		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverProperties);
+		ReflectionTestUtils.setField(naverMapService, "naverProperties", naverProperties);
 
 		// when
 		GeoMapDetailResponse result = naverMapService.getCoordinatesFromAddress(address);
@@ -117,7 +117,7 @@ public class NaverMapServiceUnitTest {
 		given(headersSpec.header(anyString(), anyString())).willReturn(headersSpec);
 		given(headersSpec.retrieve()).willReturn(responseSpec);
 		given(responseSpec.bodyToMono(ReverseGeocodeDetailResponse.class)).willReturn(Mono.just(dummyResponse));
-		ReflectionTestUtils.setField(naverMapService, "naverConfig", naverProperties);
+		ReflectionTestUtils.setField(naverMapService, "naverProperties", naverProperties);
 
 		// when
 		ReverseGeocodeDetailResponse response = naverMapService.getAddressFromStringCoordinates(coordinates);

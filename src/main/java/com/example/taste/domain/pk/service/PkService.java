@@ -21,7 +21,6 @@ import com.example.taste.domain.pk.entity.PkLog;
 import com.example.taste.domain.pk.entity.PkTerm;
 import com.example.taste.domain.pk.entity.PkTermRanking;
 import com.example.taste.domain.pk.enums.PkType;
-import com.example.taste.domain.pk.repository.PkLogJdbcRepository;
 import com.example.taste.domain.pk.repository.PkLogRepository;
 import com.example.taste.domain.pk.repository.PkTermRankingRepository;
 import com.example.taste.domain.pk.repository.PkTermRepository;
@@ -34,76 +33,17 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PkService {
-	// private final PkCriteriaRepository pkCriteriaRepository;
 	private final PkLogRepository pkLogRepository;
 	private final UserRepository userRepository;
 	private final UserService userService;
 	private final RedisService redisService;
-	// private final PkCacheService pkCacheService;
 	private final PkTermRepository pkTermRepository;
 	private final PkTermRankingRepository pkTermRankingRepository;
-	private final PkLogJdbcRepository pkLogJdbcRepository;
-
-	// @CacheEvict(value = "pkCriteriaCache", allEntries = true)
-	// @Transactional
-	// public PkCriteriaResponseDto savePkCriteria(String type, Integer point) {
-	//
-	// 	PkType pkType = PkType.valueOf(type.toUpperCase());
-	//
-	// 	if (pkCriteriaRepository.existsByType(pkType)) {
-	// 		throw new CustomException(DUPLICATE_PK_TYPE);
-	// 	}
-	//
-	// 	PkCriteria pkCriteria = PkCriteria.builder()
-	// 		.type(pkType)
-	// 		.point(point)
-	// 		.active(true)
-	// 		.build();
-	//
-	// 	PkCriteria saved = pkCriteriaRepository.save(pkCriteria);
-	//
-	// 	return PkCriteriaResponseDto.builder()
-	// 		.id(saved.getId())
-	// 		.type(saved.getType().toString())
-	// 		.point(saved.getPoint())
-	// 		.active(saved.isActive())
-	// 		.build();
-	// }
-	//
-	// @Transactional(readOnly = true)
-	// public List<PkCriteriaResponseDto> findAllPkCriteria() {
-	//
-	// 	return pkCacheService.findAllPkCriteria();
-	//
-	// }
-	//
-	// @CacheEvict(value = "pkCriteriaCache", allEntries = true)
-	// @Transactional
-	// public void updatePkCriteria(Long id, PkUpdateRequestDto dto) {
-	//
-	// 	PkCriteria pkCriteria = pkCriteriaRepository.findById(id)
-	// 		.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
-	//
-	// 	pkCriteria.update(dto);
-	//
-	// }
-	//
-	// @CacheEvict(value = "pkCriteriaCache", allEntries = true)
-	// @Transactional
-	// public void deletePkCriteria(Long id) {
-	//
-	// 	PkCriteria pkCriteria = pkCriteriaRepository.findById(id)
-	// 		.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
-	// 	pkCriteria.delete();
-	//
-	// }
 
 	@Transactional
 	public void savePkLog(Long userId, PkType type) {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-
-		// int point = getPointByPkType(type);
 
 		PkLogCacheDto dto = PkLogCacheDto.builder()
 			.userId(user.getId())
@@ -118,23 +58,6 @@ public class PkService {
 		userService.increaseUserPoint(user, type.getPoint());
 
 	}
-
-	// public int getPointByPkType(PkType type) {
-	//
-	// 	List<PkCriteriaResponseDto> criteriaList = pkCacheService.findAllPkCriteria();
-	//
-	// 	return criteriaList.stream()
-	// 		.filter(dto -> dto.getType().equals(type.name()))
-	// 		.map(PkCriteriaResponseDto::getPoint)
-	// 		.findFirst()
-	// 		.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
-	//
-	// 	// return pkCriteriaRepository.findByType(type)
-	// 	// 	.filter(PkCriteria::isActive)
-	// 	// 	.map(PkCriteria::getPoint)
-	// 	// 	.orElseThrow(() -> new CustomException(PK_CRITERIA_NOT_FOUND));
-	//
-	// }
 
 	@Transactional
 	public void runPkTermRankingScheduler(LocalDate now) {
