@@ -17,6 +17,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.pk.repository.PkLogRepository;
+import com.example.taste.domain.store.repository.StoreBucketRepository;
 import com.example.taste.domain.user.dto.request.UserFavorUpdateRequestDto;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.entity.UserFavor;
@@ -37,6 +39,10 @@ public class UserServiceTest extends AbstractIntegrationTest {
 	private FavorRepository favorRepository;
 	@MockitoSpyBean
 	private UserFavorRepository userFavorRepository;
+	@MockitoBean
+	private StoreBucketRepository storeBucketRepository;
+	@MockitoBean
+	private PkLogRepository pkLogRepository;
 
 	@Test
 	@DisplayName("관리자가 지정한 입맛이 아니면 저장되지 않는다")
