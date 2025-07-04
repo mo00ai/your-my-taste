@@ -29,7 +29,7 @@ import com.example.taste.fixtures.UserFixture;
 import com.example.taste.property.AbstractIntegrationTest;
 
 @Transactional
-@SpringBootTest
+@SpringBootTest(classes = {UserService.class, org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.class})
 public class UserServiceTest extends AbstractIntegrationTest {
 	@Autowired
 	private UserService userService;
