@@ -1,6 +1,5 @@
 package com.example.taste.config;
 
-import static com.example.taste.common.constant.CacheConst.*;
 import static com.example.taste.common.constant.RedisConst.*;
 
 import java.time.Duration;
@@ -87,7 +86,6 @@ public class RedisConfig {
 		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 		cacheConfigurations.put(DEFAULT, defaultConfig.entryTtl(DEFAULT_TTL));
 		cacheConfigurations.put("pkCriteriaCache", defaultConfig);
-		cacheConfigurations.put(FCFS_CACHE_NAME, defaultConfig);
 		// Todo 캐싱할 데이터의 key값을 자유롭게 설정해서 입력해 주세요.
 
 		return RedisCacheManager.builder(connectionFactory)

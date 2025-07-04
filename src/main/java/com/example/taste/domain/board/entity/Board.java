@@ -1,7 +1,5 @@
 package com.example.taste.domain.board.entity;
 
-import static com.example.taste.common.constant.CacheConst.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -111,9 +109,6 @@ public class Board extends SoftDeletableEntity {
 	public void register(Store store, User user) {
 		this.store = store;
 		this.user = user;
-		// set구조 사용
-		user.getBoardSet().add(this);
-
 	}
 
 	@Builder(builderMethodName = "nBoardBuilder", buildMethodName = "buildNormal")
@@ -152,26 +147,8 @@ public class Board extends SoftDeletableEntity {
 		}
 	}
 
-	// 게시글의 공개 종료시각 <= 현재시각이면 true
-	public boolean isExpired() {
-		if (this.openTime == null || this.openLimit == null) {
-			return false;
-		}
-
-		LocalDateTime closeTime = this.openTime.plusMinutes(this.openLimit);
-		return !LocalDateTime.now().isBefore(closeTime);
-	}
-
 	public boolean isNBoard() {
 		return this.type == BoardType.N;
-	}
-
-	public boolean isOpenTimeNow() {
-		return !LocalDateTime.now().isBefore(this.openTime);
-	}
-
-	public boolean canCaching() {
-		return LocalDateTime.now().isBefore(this.openTime.plus(DEFAULT_TTL));
 	}
 
 	public boolean isOverOpenLimit(Long num) {

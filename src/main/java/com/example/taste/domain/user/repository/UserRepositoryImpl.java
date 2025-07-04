@@ -4,9 +4,8 @@ import static com.example.taste.domain.favor.entity.QFavor.*;
 import static com.example.taste.domain.user.entity.QUser.*;
 import static com.example.taste.domain.user.entity.QUserFavor.*;
 
-import java.util.Optional;
-
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,17 +38,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	// }
 
 	@Override
-	public int increasePostingCount(Long userId, int limit) {
-		return (int)queryFactory.update(user)
-			.set(user.postingCount, user.postingCount.add(1))
-			.where(
-				user.id.eq(userId),
-				user.postingCount.lt(limit)
-			)
-			.execute();
-	}
-
-	@Override
 	public Optional<User> findUserWithFavors(Long userId) {
 		return Optional.ofNullable(
 			queryFactory
@@ -60,7 +48,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 				.fetchOne()
 		);
 	}
-
 
 	@Override
 	public Page<Long> getAllUserIdPage(PageRequest pageRequest) {

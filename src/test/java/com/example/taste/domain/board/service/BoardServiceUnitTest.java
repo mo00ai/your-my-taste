@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.image.entity.Image;
 import com.example.taste.domain.store.entity.Category;
@@ -40,10 +41,11 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 			LocalDateTime.now().plusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
 	}
 
@@ -59,10 +61,11 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10,
 			LocalDateTime.now().plusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
 	}
 
@@ -78,10 +81,11 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 			LocalDateTime.now().minusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
 	}
 }

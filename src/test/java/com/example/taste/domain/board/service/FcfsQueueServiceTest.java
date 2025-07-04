@@ -38,6 +38,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
+import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
@@ -97,6 +98,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1, LocalDateTime.now().minusDays(1), store,
 				user));
 		String key = BOARD_SOCKET_DESTINATION + board.getId();
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// HTTP 로그인 요청으로 세션 획득
 		String json = """
@@ -128,7 +130,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 			CompletableFuture<String> future = connectAndSubscribe(board.getId(), sessionId);
 
 			// when
-			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user);
 
 			// then
 			String receivedMessage = future.get(5, TimeUnit.SECONDS);
@@ -153,14 +155,15 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.save(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
 				LocalDateTime.now(), store, user1));
+		BoardResponseDto dto = new BoardResponseDto(board);
 
-		fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user1);
+		fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user1);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user2);
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user2);
 		});
-		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String key = FCFS_KEY_PREFIX + board.getId();
 		assertThat(redisService.getZSetRange(key)).isEmpty();
 
 		// clean-up
@@ -183,8 +186,9 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.save(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
 				LocalDateTime.now(), store, user));
+		BoardResponseDto dto = new BoardResponseDto(board);
 
-		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+		String lockKey = FCFS_LOCK_KEY_PREFIX + board.getId();
 		RLock lock = redissonClient.getLock(lockKey);
 
 		try {
@@ -200,7 +204,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user);
 		});
 	}
 
@@ -215,8 +219,9 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.save(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 1,
 				LocalDateTime.now(), store, user));
+		BoardResponseDto dto = new BoardResponseDto(board);
 
-		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+		String lockKey = FCFS_LOCK_KEY_PREFIX + board.getId();
 		RLock lock = redissonClient.getLock(lockKey);
 
 		try {
@@ -237,7 +242,7 @@ class FcfsQueueServiceTest extends AbstractIntegrationTest {
 		}
 
 		// when, then
-		assertDoesNotThrow(() -> fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user));
+		assertDoesNotThrow(() -> fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user));
 	}
 
 	private CompletableFuture<String> connectAndSubscribe(Long boardId, String sessionId) {

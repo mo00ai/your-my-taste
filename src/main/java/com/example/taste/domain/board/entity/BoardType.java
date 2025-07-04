@@ -31,4 +31,8 @@ public enum BoardType {
 	public String getCode() {
 		return code;
 	}
+
+	public boolean matches(String type) {
+		return N == from(type);
+	}
 }

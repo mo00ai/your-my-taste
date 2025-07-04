@@ -2,6 +2,7 @@ package com.example.taste.domain.board.service;
 
 import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.auth.exception.AuthErrorCode.*;
+import static com.example.taste.domain.board.entity.BoardType.*;
 import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 import static com.example.taste.domain.store.exception.StoreErrorCode.*;
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
@@ -49,7 +50,6 @@ import com.example.taste.domain.store.repository.StoreRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -64,7 +64,6 @@ public class BoardService {
 	private final RedisService redisService;
 	private final UserRepository userRepository;
 	private final BoardCreationStrategyFactory strategyFactory;
-	private final EntityManager entityManager;
 	private final ApplicationEventPublisher eventPublisher;
 	private final BoardCacheService boardCacheService;
 	private final FcfsQueueService fcfsQueueService;
@@ -88,13 +87,9 @@ public class BoardService {
 
 		// 오픈런 게시글 카운팅
 		if (!saved.isNBoard()) {
-			int updatedUserCnt = userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit());
-			entityManager.refresh(user);
-
-			if (updatedUserCnt == 0) {
-				throw new CustomException(POSTING_COUNT_OVERFLOW);
-			}
+			user.updatePostingCnt();
 		}
+
 		pkService.savePkLog(userId, PkType.POST);
 		try {
 			if (files != null && !files.isEmpty()) {
@@ -114,53 +109,57 @@ public class BoardService {
 	}
 
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
-		Board board = boardRepository.findActiveBoard(boardId)
+		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 		// 게시글 유효성 검증
-		validateBoard(board, user);
+		BoardResponseDto responseDto = new BoardResponseDto(board);
+		validateOBoard(responseDto, user);
 
-		// 캐시 데이터 반환
-		if (board.getAccessPolicy().isTimeAttack()) {
-			return boardCacheService.getInMemoryCache(board);
-		}
-		if (board.getAccessPolicy().isFcfs()) {
-			return boardCacheService.getRedisCache(board);
-		}
-
-		return new BoardResponseDto(board);
+		return responseDto;
 	}
 
-	public void validateBoard(Board board, User user) {
-		if (board.isNBoard()) {
-			return;
+	public BoardResponseDto findBoardInCache(Long boardId, Long userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+		BoardResponseDto responseDto = boardCacheService.getOrSetCache(boardId);
+		if (N.matches(responseDto.getType())) {
+			return responseDto;
 		}
 
+		validateOBoard(responseDto, user);
+		return responseDto;
+	}
+
+	public void validateOBoard(BoardResponseDto dto, User user) {
+
 		// 게시글 작성자거나 관리자이면 리턴
-		if (board.getUser().isSameUser(user.getId()) || user.isAdmin()) {
+		if (user.isSameUser(dto.getWriterId()) || user.isAdmin()) {
 			return;
 		}
 
 		// 게시글 공개시간 전이면 error
-		if (!board.isOpenTimeNow()) {
+		if (LocalDateTime.now().isBefore(dto.getOpenTime())) {
 			throw new CustomException(BOARD_NOT_YET_OPEN);
 		}
 
 		// 비공개 게시글이면 error
-		if (board.getAccessPolicy().isClosed()) {
+		if (dto.getAccessPolicy().isClosed()) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 타임어택 게시글이면 공개시간 만료 검증 (스케줄링 누락 방지)
-		if (board.getAccessPolicy().isTimeAttack() && board.isExpired()) {
+		boolean isExpired = LocalDateTime.now().isAfter(dto.getOpenTime().plusMinutes(dto.getOpenLimit()));
+		if (dto.getAccessPolicy().isTimeAttack() && isExpired) {
 			throw new CustomException(CLOSED_BOARD);
 		}
 
 		// 선착순 공개 게시글이면 순위 검증
-		if (board.getAccessPolicy().isFcfs()) {
-			fcfsQueueService.tryEnterFcfsQueueByRedisson(board, user);
+		if (dto.getAccessPolicy().isFcfs()) {
+			fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user);
+			//fcfsQueueService.tryEnterFcfsQueueByLettuce(board, user);
 		}
 	}
 
@@ -179,7 +178,7 @@ public class BoardService {
 		Board board = findByBoardId(boardId);
 		checkUser(userId, board);
 		if (board.getAccessPolicy().isFcfs()) {
-			redisService.deleteKey(OPENRUN_KEY_PREFIX + board.getId());
+			redisService.deleteKey(FCFS_KEY_PREFIX + board.getId());
 		}
 		board.softDelete();
 		boardImageService.deleteBoardImages(board);
@@ -241,7 +240,7 @@ public class BoardService {
 			Integer openLimit = isBeforeOpen ? null : dto.getOpenLimit();
 
 			if (dto.getAccessPolicy().isFcfs() && !isBeforeOpen) {
-				long zSetSize = redisService.getZSetSize(OPENRUN_KEY_PREFIX + dto.getBoardId());
+				long zSetSize = redisService.getZSetSize(FCFS_KEY_PREFIX + dto.getBoardId());
 				remainingSlot = Math.max(0, dto.getOpenLimit() - zSetSize);
 			}
 

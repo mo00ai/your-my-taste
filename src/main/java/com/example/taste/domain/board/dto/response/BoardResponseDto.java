@@ -3,14 +3,17 @@ package com.example.taste.domain.board.dto.response;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.taste.domain.board.entity.AccessPolicy;
 import com.example.taste.domain.board.entity.Board;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor // redisCache 역직렬화할 때 필요
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 public class BoardResponseDto {
 	private Long boardId;
 	private String title;
@@ -21,6 +24,9 @@ public class BoardResponseDto {
 	private List<String> imageUrlList;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private AccessPolicy accessPolicy;
+	private LocalDateTime openTime;
+	private Integer openLimit;
 
 	@Builder
 	public BoardResponseDto(Board entity) {
@@ -35,6 +41,8 @@ public class BoardResponseDto {
 			.toList();
 		this.createdAt = entity.getCreatedAt();
 		this.updatedAt = entity.getUpdatedAt();
+		this.accessPolicy = entity.getAccessPolicy();
+		this.openTime = entity.isNBoard() ? null : entity.getOpenTime();
+		this.openLimit = entity.isNBoard() ? null : entity.getOpenLimit();
 	}
-
 }

@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: taste_ci_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test1234
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d taste_ci_test" ]
       interval: 5s

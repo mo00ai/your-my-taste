@@ -118,7 +118,7 @@ class BoardServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.save(
 			BoardFixture.createOBoard("title", "contents", BoardType.O.name(), FCFS.name(), 10, LocalDateTime.now(),
 				store, user));
-		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String key = FCFS_KEY_PREFIX + board.getId();
 		redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 		// when

@@ -1,61 +1,81 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.common.constant.CacheConst.*;
+import static com.example.taste.common.constant.RedisConst.*;
+import static com.example.taste.domain.board.exception.BoardErrorCode.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
+import com.example.taste.domain.board.repository.BoardRepository;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BoardCacheService {
 
-	private final CacheManager cacheManager;
+	private final BoardRepository boardRepository;
+	private final MeterRegistry registry;
+	private final RedisService redisService;
+	private Counter counter;
 
-	public BoardCacheService(CacheManager cacheManager,
-		@Qualifier(value = "redisCacheManager") CacheManager redisCacheManager) {
-		this.cacheManager = cacheManager;
+	@PostConstruct
+	public void initCounter() {
+		counter = Counter.builder("cache.hit.fail")
+			.description("캐시 히트 실패량")
+			.register(registry);
 	}
 
-	@Cacheable(value = TIMEATTACK_CACHE_NAME, key = "#board.id", condition = "!#board.accessPolicy.closed")
-	public BoardResponseDto getInMemoryCache(Board board) {
-		log.debug("타임어택 게시글 캐시 저장 : id = {}", board.getId());
-		return new BoardResponseDto(board);
-	}
+	// 일반 게시글은 캐싱 안하므로 board 타입으로 반환
+	public BoardResponseDto getOrSetCache(Long boardId) {
 
-	@Cacheable(value = FCFS_CACHE_NAME, key = "#board.id", condition = "#board.canCaching()", cacheManager = "redisCacheManager")
-	public BoardResponseDto getRedisCache(Board board) {
-		log.debug("선착순 게시글 캐시 저장 : id = {}", board.getId());
-		return new BoardResponseDto(board);
+		BoardResponseDto cachedBoardDto = (BoardResponseDto)redisService.getKeyValue(CACHE_KEY_PREFIX + boardId);
+		if (cachedBoardDto != null) {
+			return cachedBoardDto;
+		}
+
+		Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
+		if (board.isNBoard()) {
+			return new BoardResponseDto(board);
+		}
+
+		Duration duration = Duration.between(LocalDateTime.now(),
+			board.getOpenTime().plusMinutes(board.getOpenLimit()));
+		if (board.getAccessPolicy().isFcfs()) {
+			duration = DEFAULT_TTL;
+		}
+		if (duration.isNegative() || duration.isZero()) {
+			throw new CustomException(CLOSED_BOARD);
+		}
+
+		cachedBoardDto = new BoardResponseDto(board);
+		redisService.setKeyValue(CACHE_KEY_PREFIX + boardId, cachedBoardDto, duration);
+		counter.increment();
+		return cachedBoardDto;
 	}
 
 	// 공개시간 만료된 타임어택 게시글 캐시 삭제
 	public void evictTimeAttackCaches(List<? extends Long> ids) {
-		Cache cache = cacheManager.getCache(TIMEATTACK_CACHE_NAME);
-		if (cache != null) {
-			for (Long boardId : ids) {
-				cache.evict(boardId); // 개별 삭제
-			}
-			log.debug("공개 만료된 타임어택 게시글 캐시 삭제 : id = {}", ids);
+		for (Long boardId : ids) {
+			redisService.deleteKey(CACHE_KEY_PREFIX + boardId);
 		}
+		log.debug("공개 만료된 타임어택 게시글 캐시 삭제 : id = {}", ids);
 	}
 
-	@Caching(evict = {
-		@CacheEvict(value = TIMEATTACK_CACHE_NAME, key = "#board.id"),
-		@CacheEvict(value = FCFS_CACHE_NAME, key = "#board.id", cacheManager = "redisCacheManager")
-	})
 	public void evictCache(Board board) {
+		redisService.deleteKey(CACHE_KEY_PREFIX + board.getId());
 		log.debug("오픈런 게시글 캐시 삭제 : id = {}", board.getId());
 	}
 }

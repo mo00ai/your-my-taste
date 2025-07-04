@@ -15,13 +15,20 @@ import org.springframework.stereotype.Service;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.mq.BoardStatusDto;
+import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.mq.BoardStatusPublisher;
 import com.example.taste.domain.board.repository.FcfsInformationRepository;
 import com.example.taste.domain.user.entity.User;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FcfsQueueService {
@@ -32,10 +39,20 @@ public class FcfsQueueService {
 	private final FcfsInformationRepository fcfsInformationRepository;
 	private final FcfsInformationService fcfsInformationService;
 	private final BoardStatusPublisher boardStatusPublisher;
+	private final MeterRegistry registry;
+	private Counter counter;
+
+	@PostConstruct
+	void init() {
+		counter = Counter.builder("success_thread_count")
+			.description("Number of thread in test")
+			.register(registry);
+	}
 
 	// 선착순 queue에 데이터 insert
 	public void tryEnterFcfsQueue(Board board, User user) {
-		String key = OPENRUN_KEY_PREFIX + board.getId();
+		Timer.Sample testTimer = Timer.start(registry);
+		String key = FCFS_KEY_PREFIX + board.getId();
 
 		// 순위가 없는 유저만 ZSet에 insert
 		if (redisService.hasRankInZSet(key, user.getId())) {
@@ -51,12 +68,13 @@ public class FcfsQueueService {
 		// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 		long size = redisService.getZSetSize(key);
 		if (board.isOverOpenLimit(size)) {
-			fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+			fcfsInformationService.saveFcfsInfoToDB(key, board.getId()); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
 			redisService.deleteKey(key);
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
 		redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
+		counter.increment();
 
 		// 클라이언트에 잔여 인원 전송
 		//String destination = BOARD_SOCKET_DESTINATION + board.getId();
@@ -70,12 +88,13 @@ public class FcfsQueueService {
 			redisService.removeFromZSet(key, user.getId());
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
+		testTimer.stop(registry.timer("running_time"));
 	}
 
 	// lettuce 분산락으로 동시성 제어
 	public void tryEnterFcfsQueueByLettuce(Board board, User user) {
-		String key = OPENRUN_KEY_PREFIX + board.getId();
-		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+		String key = FCFS_KEY_PREFIX + board.getId();
+		String lockKey = FCFS_LOCK_KEY_PREFIX + board.getId();
 
 		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
@@ -104,7 +123,7 @@ public class FcfsQueueService {
 			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
 			if (board.isOverOpenLimit(size)) {
-				fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+				fcfsInformationService.saveFcfsInfoToDB(key, board.getId()); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
 				redisService.deleteKey(key);
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
@@ -130,19 +149,19 @@ public class FcfsQueueService {
 	}
 
 	// Redisson 분산락으로 동시성 제어
-	public void tryEnterFcfsQueueByRedisson(Board board, User user) {
-		String key = OPENRUN_KEY_PREFIX + board.getId();
-		String lockKey = OPENRUN_LOCK_KEY_PREFIX + board.getId();
+	public void tryEnterFcfsQueueByRedisson(BoardResponseDto dto, User user) {
+		String key = FCFS_KEY_PREFIX + dto.getBoardId();
+		String lockKey = FCFS_LOCK_KEY_PREFIX + dto.getBoardId();
 
 		// 순위가 이미 존재하는 유저는 바로 리턴
 		if (redisService.hasRankInZSet(key, user.getId())) {
 			return;
 		}
-		if (fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())) {
+		if (fcfsInformationRepository.existsByBoardIdAndUserId(dto.getBoardId(), user.getId())) {
 			return;
 		}
 		// 이미 순위가 다 차서 DB에 선착순 정보가 저장된 게시글이면 error
-		if (fcfsInformationRepository.existsByBoardId(board.getId())) {
+		if (fcfsInformationRepository.existsByBoardId(dto.getBoardId())) {
 			throw new CustomException(EXCEED_OPEN_LIMIT);
 		}
 
@@ -156,8 +175,8 @@ public class FcfsQueueService {
 
 			// ZSet 크기가 open limit을 초과하면 error로 메시지 전달
 			long size = redisService.getZSetSize(key);
-			if (board.isOverOpenLimit(size)) {
-				fcfsInformationService.saveFcfsInfoToDB(key, board); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
+			if (dto.getOpenLimit() <= size) {
+				fcfsInformationService.saveFcfsInfoToDB(key, dto.getBoardId()); // redis 메모리 관리(인원 다 차면 db에 삽입하고 key
 				redisService.deleteKey(key);
 				throw new CustomException(EXCEED_OPEN_LIMIT);
 			}
@@ -166,9 +185,10 @@ public class FcfsQueueService {
 
 			// 클라이언트에 잔여 인원 전송
 			//String destination = BOARD_SOCKET_DESTINATION + board.getId();
-			long remainingSlot = Math.max(0, board.getOpenLimit() - redisService.getZSetSize(key));
+			long remainingSlot = Math.max(0, dto.getOpenLimit() - redisService.getZSetSize(key));
 			//messagingTemplate.convertAndSend(destination, remainingSlot);
-			boardStatusPublisher.publish(new BoardStatusDto(board.getId(), remainingSlot)); // 메세지큐 적용 -> 메세지 전송 성능 향상
+			boardStatusPublisher.publish(
+				new BoardStatusDto(dto.getBoardId(), remainingSlot)); // 메세지큐 적용 -> 메세지 전송 성능 향상
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt(); // 스레드 중단 요청
