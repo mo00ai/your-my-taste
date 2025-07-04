@@ -1,13 +1,31 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.domain.board.entity.AccessPolicy.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.example.taste.domain.board.entity.AccessPolicy.CLOSED;
+import static com.example.taste.domain.board.entity.AccessPolicy.FCFS;
+import static com.example.taste.domain.board.entity.AccessPolicy.OPEN;
+import static com.example.taste.domain.board.entity.AccessPolicy.TIMEATTACK;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyInt;
+import static org.mockito.BDDMockito.anyLong;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.doNothing;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.common.util.EntityFetcher;
 import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -55,8 +72,6 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
-import jakarta.persistence.EntityManager;
-
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceUnitTest {
 	@Spy
@@ -72,8 +87,6 @@ public class BoardServiceUnitTest {
 	private PkService pkService;
 	@Mock
 	private HashtagService hashtagService;
-	@Mock
-	private EntityFetcher entityFetcher;
 	@Mock
 	private RedisService redisService;
 	@Mock
