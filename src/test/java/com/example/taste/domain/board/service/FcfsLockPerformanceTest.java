@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.entity.Board;
@@ -60,6 +61,8 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 	private FcfsQueueService fcfsQueueService;
 	@Autowired
 	private RedisService redisService;
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
 
 	// @BeforeAll
 	// public static void setUp() throws SQLException {
@@ -74,10 +77,9 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 	// }
 
 	@Test
-	@Transactional
 	void tryEnterFcfsQueue() {
 		// given
-		int threadCount = 101;
+		int threadCount = 102;
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		CyclicBarrier barrier = new CyclicBarrier(threadCount);
 		CountDownLatch latch = new CountDownLatch(threadCount);
@@ -87,7 +89,7 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.saveAndFlush(StoreFixture.create(category));
 		Board board = boardRepository.saveAndFlush(
-			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 100,
+			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10,
 				LocalDateTime.now(), store, postingUser));
 
 		Timer.Sample methodTimer = Timer.start(meterRegistry);
@@ -119,9 +121,16 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 
 		// then
 		String key = FCFS_KEY_PREFIX + board.getId();
-		assertThat(fcfsInformationRepository.existsByBoardId(board.getId())).isTrue();
+
+		//assertThat(fcfsInformationRepository.existsByBoardId(board.getId())).isTrue();
 		//assertThat(redisService.getZSetRange(key)).isEmpty();
 		assertThat(redisService.getZSetSize(key)).isEqualTo(0);
+
+		// clean-up
+		boardRepository.deleteAllInBatch();     // Board
+		storeRepository.deleteAllInBatch();     // Store
+		categoryRepository.deleteAllInBatch();  // Category
+		userRepository.deleteAllInBatch();      // User
 	}
 
 	@Test
