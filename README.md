@@ -252,8 +252,7 @@ docker-compose up -d
 
 ![와이어 프레임](./image/figma.png)
 
-**[🔗 Figma 디자인](https://www.figma.com/proto/xDPayyfst1tmlY1twpso3E/%EB%8B%88%EB%A7%9B%EB%82%B4%EB%A7%9B?node-id=10-309&t=hl3osNc9mnhTzDTD-1)
-**
+**[🔗 Figma 디자인](https://www.figma.com/proto/xDPayyfst1tmlY1twpso3E/%EB%8B%88%EB%A7%9B%EB%82%B4%EB%A7%9B?node-id=10-309&t=hl3osNc9mnhTzDTD-1)**
 
 <br><br>
 
