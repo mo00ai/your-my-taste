@@ -75,4 +75,50 @@ public class OcrResponseDto {
 			return text;
 		}
 	}
+
+	public String getStoreName() {
+		if (images == null || images.isEmpty())
+			return null;
+
+		Receipt receipt = images.get(0).getReceipt();
+		if (receipt == null)
+			return null;
+
+		Result result = receipt.getResult();
+		if (result == null)
+			return null;
+
+		StoreInfo storeInfo = result.getStoreInfo();
+		if (storeInfo == null)
+			return null;
+
+		Name name = storeInfo.getName();
+		if (name == null)
+			return null;
+
+		return name.getText();
+	}
+
+	public String getStoreSubName() {
+		if (images == null || images.isEmpty())
+			return null;
+
+		Receipt receipt = images.get(0).getReceipt();
+		if (receipt == null)
+			return null;
+
+		Result result = receipt.getResult();
+		if (result == null)
+			return null;
+
+		StoreInfo storeInfo = result.getStoreInfo();
+		if (storeInfo == null)
+			return null;
+
+		SubName subName = storeInfo.getSubName();
+		if (subName == null)
+			return null;
+
+		return subName.getText();
+	}
 }

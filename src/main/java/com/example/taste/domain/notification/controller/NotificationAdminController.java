@@ -1,6 +1,7 @@
 package com.example.taste.domain.notification.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +29,12 @@ public class NotificationAdminController {
 		return CommonResponse.ok();
 	}
 
-	// TODO 개인에게 알림 보내는 기능 추가할 것.
+	@PostMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public CommonResponse<Void> publishNotificationToUser(
+		@RequestBody @Valid AdminNotificationRequestDto dto,
+		@PathVariable Long userId) {
+		notificationAdminService.publishNotificationToUser(dto, userId);
+		return CommonResponse.ok();
+	}
 }

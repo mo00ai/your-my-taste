@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
+import com.example.taste.domain.match.service.PartyInvitationInternalService;
 import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
-import com.example.taste.domain.party.service.PartyInvitationInternalService;
 
 @Service
 @RequiredArgsConstructor

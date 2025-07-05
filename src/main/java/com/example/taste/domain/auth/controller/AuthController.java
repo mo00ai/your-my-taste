@@ -1,11 +1,5 @@
 package com.example.taste.domain.auth.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.response.CommonResponse;
-import com.example.taste.domain.auth.dto.DeleteWebPushInfoDto;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
 import com.example.taste.domain.auth.dto.SignupRequestDto;
 import com.example.taste.domain.auth.dto.UserResponseDto;
@@ -24,6 +17,11 @@ import com.example.taste.domain.auth.service.AuthService;
 import com.example.taste.domain.notification.service.WebPushService;
 import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.user.facade.UserFacade;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/auth")
@@ -58,10 +56,7 @@ public class AuthController {
 	@PostMapping("/signout")
 	public CommonResponse<Void> signout(
 		HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		// 로그아웃 시 등록된 web push 정보를 삭제
-		@RequestBody DeleteWebPushInfoDto dto) {
-		webPushService.deleteSubscription(userDetails.getId(), dto.getEndpoint());
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		authService.signout(httpRequest, httpResponse);
 
 		return CommonResponse.ok();

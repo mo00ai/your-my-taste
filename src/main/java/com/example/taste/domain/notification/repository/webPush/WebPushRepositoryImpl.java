@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.example.taste.domain.notification.entity.QWebPushSubscription;
 import com.example.taste.domain.notification.entity.WebPushSubscription;
-import com.example.taste.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -15,19 +14,19 @@ public class WebPushRepositoryImpl implements WebPushRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public WebPushSubscription getWebPushSubscriptionByUserIdAndEndpoint(Long userId, String endPoint) {
+	public WebPushSubscription getWebPushSubscriptionByUserIdAndFcmToken(Long userId, String fcmToken) {
 		QWebPushSubscription qSubscription = QWebPushSubscription.webPushSubscription;
 		return queryFactory.selectFrom(qSubscription).where(
-			qSubscription.endpoint.eq(endPoint),
+			qSubscription.fcmToken.eq(fcmToken),
 			qSubscription.user.id.eq(userId)
 		).fetchOne();
 	}
 
 	@Override
-	public List<WebPushSubscription> findByUser(User user) {
+	public List<WebPushSubscription> findByUserId(Long userId) {
 		QWebPushSubscription qWebPushSubscription = QWebPushSubscription.webPushSubscription;
 		return queryFactory.selectFrom(qWebPushSubscription).where(
-			qWebPushSubscription.user.id.eq(user.getId())
+			qWebPushSubscription.user.id.eq(userId)
 		).fetch();
 	}
 }

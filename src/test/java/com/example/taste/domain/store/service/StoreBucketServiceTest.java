@@ -65,7 +65,7 @@ class StoreBucketServiceTest extends AbstractIntegrationTest {
 	private BoardRepository boardRepository;
 
 	@Test
-	void addBucketItem_rollsBackOnError() {
+	void addBucketItem_whenThrowError_thenRollBack() {
 		// given
 		Image image1 = ImageFixture.create();
 		Image image2 = ImageFixture.create();
@@ -108,7 +108,7 @@ class StoreBucketServiceTest extends AbstractIntegrationTest {
 
 	@Test
 	@Transactional
-	void getBucketsByUserId_excludesPrivateBuckets() {
+	void getBucketsByUserId_excludePrivateBuckets() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));

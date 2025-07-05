@@ -133,6 +133,6 @@ public class UserController {
 
 	private UserNotificationSettingResponseDto handleNotificaionSetting(
 		Long userId, boolean set, NotificationCategory category) {
-		return notificationUserService.userNotificationSetting(category, set, userId);
+		return notificationUserService.setUserNotificationAllowance(category, set, userId);
 	}
 }

@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,60 +26,22 @@ public class NotificationRedisService {
 	private final RedisService redisService;
 
 	//Notification store
-	public void storeNotification(Long userId, Long contentId, NotificationDataDto dataDto,
-		Duration duration) {
+	public void storeAndTrimNotification(Long userId, Long contentId, NotificationDataDto dataDto) {
+		if (userId == 0 || contentId == null || dataDto == null || dataDto.getCategory() == null) {
+			throw new IllegalArgumentException("Invalid params");
+		}
+
 		String key = "notification:user:" + userId + ":id:" + contentId + ":" + dataDto.getCategory().name();
-		redisService.setKeyValue(key, dataDto, duration);
-		// 해당 카테고리에 대해 count 증가
-		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
-		redisService.increaseCount(countKey);
 		String listKey = "notification:list:user:" + userId;
-		String lockKey = "lock:" + listKey;
-		int retryCount = 0;
+		String countKey = "notification:count:user:" + userId + ":" + dataDto.getCategory().name();
 
-		while (retryCount < 3) {
-			boolean locked = redisService.setIfAbsent(lockKey, key, Duration.ofSeconds(3));
-			if (locked) {
-				try {
-					redisService.listLeftPush(listKey, key);
-					deleteOldNotifications(listKey);
-					// finally 실행 하고 return 함
-					return;
-				} finally {
-					Object lockValue = redisService.getKeyValue(lockKey);
-					if (lockValue.equals(key)) {
-						redisService.delete(lockKey);
-					}
-				}
-			} else {
-				retryCount++;
-				if (retryCount >= 3) {
-					log.error("락 획득 실패 {}", lockKey);
-				}
-				try {
-					// waiting jitter
-					// thread local random 을 쓰면 각 스레드 별로 난수 생성기를 사용(다른 스레드 난수 생성을 기다릴 필요 없음)
-					Thread.sleep(ThreadLocalRandom.current().nextInt(retryCount * 100) + 100);
-				} catch (InterruptedException e) {
-					throw new RuntimeException("Interrupted while waiting", e);
-				}
-			}
+		// Lua로 redis 일괄 작업 (삭제 포함)
+		try {
+			redisService.execute(countKey, listKey, key, dataDto);
+		} catch (JsonProcessingException e) {
+			log.warn("redis 저장 실패");
 		}
-	}
 
-	public void deleteOldNotifications(String listKey) {
-		Long size = redisService.getListSize(listKey);
-		if (size != null && size > 100) {
-			long overflow = size - 100;
-			for (int i = 0; i < overflow; i++) {
-				// redis 에서만 삭제하기 때문에 count 는 유지
-				String oldestKey = redisService.getLast(listKey, String.class);
-				if (oldestKey != null) {
-					redisService.delete(oldestKey);
-				}
-				redisService.deleteFromList(listKey, oldestKey, String.class);
-			}
-		}
 	}
 
 	public void deleteNotificationOfCategories(Long userId, List<NotificationCategory> categories) {

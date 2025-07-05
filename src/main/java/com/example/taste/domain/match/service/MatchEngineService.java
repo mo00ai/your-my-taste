@@ -25,6 +25,9 @@ import com.example.taste.domain.party.enums.MatchStatus;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.user.enums.Gender;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,30 +35,39 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	private final UserMatchInfoRepository userMatchInfoRepository;
 	private final PartyMatchInfoRepository partyMatchInfoRepository;
 	private final PartyInvitationRepository partyInvitationRepository;
+	private final MeterRegistry meterRegistry;
 
 	// 유저 한 명에게 파티 추천
 	@Transactional
 	public void runMatchingForUser(List<Long> userMatchInfoIdList) {
 		// MEMO : 다 불러와도 되나?
-		List<UserMatchInfo> matchingUserList =
-			userMatchInfoRepository.findAllById(userMatchInfoIdList);
+		Timer.Sample sample = Timer.start(meterRegistry);
+		try {
+			List<UserMatchInfo> matchingUserList =
+				userMatchInfoRepository.findAllById(userMatchInfoIdList);
 
-		List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
-		// 매칭 중인 파티가 없는 경우
-		if (matchingPartyList.isEmpty()) {
-			return;
-		}
-
-		// 매칭 알고리즘
-		List<PartyInvitation> matchedList = new ArrayList<>();
-
-		for (UserMatchInfo matchingUser : matchingUserList) {
-			PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
-			if (partyInvitation != null) {
-				matchedList.add(partyInvitation);
+			List<PartyMatchInfo> matchingPartyList = partyMatchInfoRepository.findAll();
+			// 매칭 중인 파티가 없는 경우
+			if (matchingPartyList.isEmpty()) {
+				return;
 			}
+
+			// 매칭 알고리즘
+			List<PartyInvitation> matchedList = new ArrayList<>();
+
+			for (UserMatchInfo matchingUser : matchingUserList) {
+				PartyInvitation partyInvitation = runMatchEngine(matchingUser, matchingPartyList);
+				if (partyInvitation != null) {
+					matchedList.add(partyInvitation);
+				}
+			}
+			partyInvitationRepository.saveAll(matchedList);
+		} finally {
+			sample.stop(Timer.builder("party.match.execution.time")
+				.description("파티 매칭 알고리즘 실행 시간 (ms)")
+				.publishPercentileHistogram()
+				.register(meterRegistry));
 		}
-		partyInvitationRepository.saveAll(matchedList);
 		// TODO : 저장 후 매칭 리스트에 있는 파티장에게 성공 알림 발송 - @윤예진 MEMO : 실패 시 케이스도(매칭된 파티가 없음, 그외 오류) 다뤄야 할까?
 	}
 
@@ -173,21 +185,42 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 	}
 
 	private boolean isMatchStore(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		if (partyMatchInfo.getStore() == null) {
+		boolean userHasCondition = matchingUser.getStoreList() != null && !matchingUser.getStoreList().isEmpty();
+		boolean partyHasCondition = partyMatchInfo.getStore() != null;
+
+		if (!userHasCondition) {
+			return true;
+		}
+		if (userHasCondition && !partyHasCondition) {
 			return false;
 		}
+
 		return matchingUser.getStoreList().stream()
 			.anyMatch(userStore -> userStore.getStore().equals(partyMatchInfo.getStore()));
 	}
 
 	private boolean isMatchRegion(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		return partyMatchInfo.getRegion() != null &&
-			partyMatchInfo.getRegion().contains(matchingUser.getRegion());
+		boolean userHasCondition = matchingUser.getRegion() != null;
+		boolean partyHasCondition = partyMatchInfo.getRegion() != null;
+
+		if (!userHasCondition) {
+			return true;
+		}
+		if (userHasCondition && !partyHasCondition) {
+			return false;
+		}
+
+		return partyMatchInfo.getRegion().contains(matchingUser.getRegion());
 	}
 
 	private boolean isMatchGender(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
-		Gender partyGender = partyMatchInfo.getGender();
-		return partyGender.equals(Gender.ANY) || partyGender.equals(matchingUser.getUserGender());
+		Gender partyPrefGender = partyMatchInfo.getGender();
+		Gender userGender = matchingUser.getUserGender();
+
+		if (partyPrefGender == null || partyPrefGender.equals(Gender.ANY))
+			return true;
+
+		return partyPrefGender.equals(userGender);
 	}
 
 	private boolean isMatchAgeRange(UserMatchInfo matchingUser, PartyMatchInfo partyMatchInfo) {
@@ -195,16 +228,25 @@ public class MatchEngineService {    // 매칭 알고리즘 비동기 실행 워
 		AgeRange userPrefAgeRange = matchingUser.getAgeRange();
 		AgeRange partyPrefAgeRange = partyMatchInfo.getAgeRange();
 
-		boolean isUserFitPartyPref = partyPrefAgeRange == null || partyPrefAgeRange.includes(userAge);
-		boolean isPartyFitUserPref = true;
+		boolean userHasCondition = userPrefAgeRange != null;
+		boolean partyHasCondition = partyPrefAgeRange != null;
 
-		if (userPrefAgeRange != null) {
-			List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
-			double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
-			isPartyFitUserPref = userPrefAgeRange.includes(avgAge);
+		if (!userHasCondition && !partyHasCondition) {
+			return true;
 		}
 
-		return isUserFitPartyPref && isPartyFitUserPref;
+		if (!userHasCondition && partyHasCondition) {
+			return partyPrefAgeRange.includes(userAge);
+		}
+
+		List<PartyInvitation> partyInvitationList = partyInvitationRepository.findByPartyId(partyMatchInfo.getId());
+		double avgAge = partyMatchInfo.getParty().calculateAverageMemberAge(partyInvitationList);
+
+		if (userHasCondition && !partyHasCondition) {
+			return userPrefAgeRange.includes(avgAge);
+		}
+
+		return partyPrefAgeRange.includes(userAge) && userPrefAgeRange.includes(avgAge);
 	}
 
 	// 파티의 음식점 카테고리와 유저의 선호 카테고리들과 겹치는지

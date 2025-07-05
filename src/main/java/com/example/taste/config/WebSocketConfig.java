@@ -24,10 +24,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// 브라우저 환경용 - http://.../ws로 요청
 		registry.addEndpoint("/ws")
-			.setAllowedOriginPatterns("*") // TODO 실서비스에서는 보안상 프론트엔드 url 적용 @김채진
+			.setAllowedOriginPatterns("*") // TODO 도메인 주소 적용
 			.addInterceptors(customHttpHandshakeInterceptor)
 			.withSockJS()
 			.setHeartbeatTime(10000);            // 10초마다 세션 서버 -> 클라이언트 살아있는지 확인, 응답 없으면 kill
+
+		// 테스트 환경용 - ws://.../ws로 요청
+		registry.addEndpoint("/ws")
+			.setAllowedOriginPatterns("*")
+			.addInterceptors(customHttpHandshakeInterceptor);
 	}
 
 	@Override

@@ -41,6 +41,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'io.projectreactor:reactor-test'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
     // Spring starters
@@ -55,11 +57,17 @@ dependencies {
 
     // DB
     runtimeOnly 'org.postgresql:postgresql'
+    // postgresql pgvector
+//    implementation 'com.pgvector:pgvector:0.1.4'
+    // Critical: Hibernate Vector Module
+    implementation 'org.hibernate.orm:hibernate-vector:6.6.15.Final'
     implementation 'com.h2database:h2'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Validation
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -88,9 +96,10 @@ dependencies {
     // Image 검증
     implementation 'org.apache.tika:tika-core:2.9.0'
 
-    // AWS SDK v2 for S3 + Presigned URL
+    // AWS SDK v2 for S3 + Presigned URL + cloudfront
     implementation platform("software.amazon.awssdk:bom:2.31.6")
     implementation "software.amazon.awssdk:s3"
+    implementation("software.amazon.awssdk:cloudfront:2.25.4")
 
     // bcrypt
     implementation 'at.favre.lib:bcrypt:0.10.2'
@@ -106,13 +115,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
-    //prometheus
+    // prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    //web_push
-    implementation 'nl.martijndwars:web-push:5.1.0'
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
+    //firebase
+    implementation 'com.google.firebase:firebase-admin:9.5.0'
+
+    //circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    //rabbitmq
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    // open ai api
+    implementation platform("org.springframework.ai:spring-ai-bom:1.0.0") // BOM
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai' // 필요함
+
+    // 형태소 분석기 https://mvnrepository.com/artifact/org.openkoreantext/open-korean-text
+    implementation("org.openkoreantext:open-korean-text:2.3.1")
+    // csv
+    implementation 'org.apache.commons:commons-csv:1.10.0'
 }
 
 def dotenv = new Properties()
@@ -186,7 +209,9 @@ tasks.register("unitTest", Test) {
 }
 
 tasks.register("integrationTest", Test) {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'local-only', 'Performance'
+    }
 
     def ci = System.getenv("CI") == "true"
     if (ci) {

@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.auth.dto.SigninRequestDto;
+import com.example.taste.domain.user.dto.UserSigninProjectionDto;
 import com.example.taste.domain.user.entity.CustomUserDetails;
-import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
 @Slf4j
@@ -42,8 +42,11 @@ public class AuthService {
 		}
 
 		// 이메일 검증
-		User user = userRepository.findUserByEmail(requestDto.getEmail()).orElseThrow(
-			() -> new CustomException(NOT_FOUND_USER));
+		// User user = userRepository.findUserByEmail(requestDto.getEmail()).orElseThrow(
+		// 	() -> new CustomException(NOT_FOUND_USER));
+
+		UserSigninProjectionDto user = userRepository.findSigninProjectionByEmail(requestDto.getEmail())
+			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
 		// 탈퇴한 사용자 검증
 		if (user.getDeletedAt() != null) {

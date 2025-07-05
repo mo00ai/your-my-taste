@@ -74,7 +74,38 @@ public class NaverMapService {
 			URI uri = UriComponentsBuilder
 				.fromUriString(naverConfig.getReverseGeoCoding().getBaseUrl())
 				.queryParam("coords", coords)            // 좌표
-				.queryParam("orders", "legalcode,admcode,addr,roadaddr")    // 변환 타입
+				.queryParam("orders", "admcode")    // 변환 타입 admcode: 행정동
+				.queryParam("output", "json")    // 응답 결과의 포맷 유형 JSON
+				.encode(StandardCharsets.UTF_8)            // 인코딩 UTF_8 설정
+				.build()
+				.toUri();        // 기존 toUriString과 String에서 -> toUrl와 URI 객체로 변경
+
+			return webClient.get()
+				.uri(uri)
+				// naver api spec
+				.header("x-ncp-apigw-api-key-id", naverConfig.getClientId())
+				.header("x-ncp-apigw-api-key", naverConfig.getClientSecret())
+				.retrieve()
+				.bodyToMono(ReverseGeocodeDetailResponse.class)
+				.timeout(Duration.ofSeconds(10))
+				.block();
+		} catch (WebClientResponseException e) {
+			throw new CustomException(REVERSE_GEOCODING_API_ERROR);
+		} catch (WebClientException e) {
+			throw new CustomException(REVERSE_GEOCODING_API_ERROR);
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	public ReverseGeocodeDetailResponse getAddressFromStringCoordinates(String coords) {
+		log.info("좌표 값: {} ", coords);
+		try {
+			URI uri = UriComponentsBuilder
+				.fromUriString(naverConfig.getReverseGeoCoding().getBaseUrl())
+				.queryParam("coords", coords)            // 좌표
+				.queryParam("orders", "admcode")    // 변환 타입 admcode: 행정동
 				.queryParam("output", "json")    // 응답 결과의 포맷 유형 JSON
 				.encode(StandardCharsets.UTF_8)            // 인코딩 UTF_8 설정
 				.build()

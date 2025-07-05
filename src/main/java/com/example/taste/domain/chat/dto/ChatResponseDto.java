@@ -23,9 +23,9 @@ public class ChatResponseDto {
 	public ChatResponseDto(Chat chat) {
 		this.partyId = chat.getParty().getId();
 		this.senderId = chat.getUser().getId();
-		this.senderNickname = chat.getUser().getDeletedAt() != null ?
+		this.senderNickname = chat.getUser().getDeletedAt() == null ?
 			chat.getUser().getNickname() : DELETED_USER_NICKNAME;
-		if (chat.getUser().getDeletedAt() != null) {
+		if (chat.getUser().getDeletedAt() == null) {
 			if (chat.getUser().getImage() != null) {
 				this.senderImageUrl = chat.getUser().getImage().getUrl();
 			} else {

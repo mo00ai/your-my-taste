@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.taste.domain.user.dto.UserSigninProjectionDto;
 import com.example.taste.domain.user.enums.Role;
 
 @Getter
@@ -24,8 +25,17 @@ public class CustomUserDetails implements UserDetails, Serializable {
 	private final Role role;
 	private final LocalDateTime deletedAt;
 
+	// @Builder
+	// public CustomUserDetails(User user) {
+	// 	this.id = user.getId();
+	// 	this.email = user.getEmail();
+	// 	this.password = user.getPassword();
+	// 	this.role = user.getRole();
+	// 	this.deletedAt = user.getDeletedAt();
+	// }
+
 	@Builder
-	public CustomUserDetails(User user) {
+	public CustomUserDetails(UserSigninProjectionDto user) {
 		this.id = user.getId();
 		this.email = user.getEmail();
 		this.password = user.getPassword();

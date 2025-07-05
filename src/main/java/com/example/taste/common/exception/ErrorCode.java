@@ -5,8 +5,6 @@ import org.springframework.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import org.springframework.http.HttpStatus;
-
 @Getter
 @AllArgsConstructor
 public enum ErrorCode implements BaseCode {
@@ -29,7 +27,13 @@ public enum ErrorCode implements BaseCode {
 	REDIS_FAIL_GET_LOCK(HttpStatus.INTERNAL_SERVER_ERROR, "R004", "Redis 락 점유 과정에서 오류가 발생했습니다."),
 
 	//Cache
-	CACHE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "CA001", "Cache가 존재하지 않습니다.");
+	CACHE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "CA001", "Cache가 존재하지 않습니다."),
+
+	// embedding
+	EMBEDDING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "임베딩 생성에 실패했습니다: "),
+	EMBEDDING_TEXT_NOT_FOUND(HttpStatus.BAD_REQUEST, "E002", "임베딩할 텍스트가 없습니다."),
+
+	;
 
 	private final HttpStatus httpStatus;
 	private final String code;

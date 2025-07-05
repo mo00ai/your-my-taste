@@ -15,12 +15,14 @@ import com.example.taste.domain.favor.dto.request.FavorAdminRequestDto;
 import com.example.taste.domain.favor.dto.response.FavorAdminResponseDto;
 import com.example.taste.domain.favor.entity.Favor;
 import com.example.taste.domain.favor.repository.FavorRepository;
+import com.example.taste.domain.user.repository.UserFavorRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavorAdminService {
 	private final FavorRepository favorRepository;
+	private final UserFavorRepository userFavorRepository;
 
 	@Transactional
 	public void createFavor(List<FavorAdminRequestDto> requestDtoList) {
@@ -46,6 +48,9 @@ public class FavorAdminService {
 
 	@Transactional
 	public void deleteFavor(Long favorId) {
+		Favor favor = favorRepository.findById(favorId)
+			.orElseThrow(() -> new CustomException(NOT_FOUND_FAVOR));
+		userFavorRepository.deleteAllByFavor(favor);
 		favorRepository.deleteById(favorId);
 	}
 }

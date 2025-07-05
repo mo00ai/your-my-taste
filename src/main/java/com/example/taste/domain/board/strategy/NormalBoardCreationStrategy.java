@@ -10,7 +10,10 @@ public class NormalBoardCreationStrategy implements BoardCreationStrategy<Normal
 	@Override
 	public Board createBoard(NormalBoardRequestDto requestDto, Store store, User user) {
 		return Board.nBoardBuilder()
-			.requestDto(requestDto)
+			.title(requestDto.getTitle())
+			.contents(requestDto.getContents())
+			.type(requestDto.getType())
+			.accessPolicy(requestDto.getAccessPolicy())
 			.store(store)
 			.user(user)
 			.buildNormal();

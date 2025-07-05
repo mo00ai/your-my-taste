@@ -7,18 +7,20 @@ import com.example.taste.domain.board.entity.Board;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor // redisCache 역직렬화할 때 필요
 public class BoardResponseDto {
-	private final Long boardId;
-	private final String title;
-	private final String contents;
-	private final String type;
-	private final Long writerId;
-	private final String writerName;
-	private final List<String> imageUrlList;
-	private final LocalDateTime createdAt;
-	private final LocalDateTime updatedAt;
+	private Long boardId;
+	private String title;
+	private String contents;
+	private String type;
+	private Long writerId;
+	private String writerName;
+	private List<String> imageUrlList;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
 	@Builder
 	public BoardResponseDto(Board entity) {

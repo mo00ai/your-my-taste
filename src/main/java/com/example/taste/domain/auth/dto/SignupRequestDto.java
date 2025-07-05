@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,7 @@ import com.example.taste.domain.user.enums.Gender;
 import com.example.taste.domain.user.enums.Role;
 
 @Getter
+@AllArgsConstructor
 public class SignupRequestDto {
 	@NotBlank(message = "이메일은 필수값입니다.")
 	@Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", message = "유효한 이메일 형식이 아닙니다.")

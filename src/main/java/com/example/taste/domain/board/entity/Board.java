@@ -1,5 +1,7 @@
 package com.example.taste.domain.board.entity;
 
+import static com.example.taste.common.constant.CacheConst.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
@@ -34,6 +35,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @EqualsAndHashCode(of = "id", callSuper = false) // id값으로만 비교
 @Getter
@@ -63,6 +65,18 @@ public class Board extends SoftDeletableEntity {
 	private Integer openLimit; // 단위 : 분(TIMEATTACK), 인원 수(FCFS)
 
 	private LocalDateTime openTime;
+	@Setter
+	// 검색용 인덱스 추가
+	@Column(name = "search_keywords", columnDefinition = "TEXT")
+	private String searchKeywords;  // 전체 키워드 (공백으로 구분)
+
+	@Setter
+	@Column(name = "search_nouns", columnDefinition = "TEXT")
+	private String searchNouns;     // 명사만 (공백으로 구분)
+
+	@Setter
+	@Column(name = "search_phrases", columnDefinition = "TEXT")
+	private String searchPhrases;   // 구문만 (공백으로 구분)
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -102,12 +116,12 @@ public class Board extends SoftDeletableEntity {
 	}
 
 	@Builder(builderMethodName = "nBoardBuilder", buildMethodName = "buildNormal")
-	public Board(BoardRequestDto requestDto, Store store, User user) {
-		this.title = requestDto.getTitle();
-		this.contents = requestDto.getContents();
-		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.N;
+	public Board(String title, String contents, String type, String accessPolicy, Store store, User user) {
+		this.title = title;
+		this.contents = contents;
+		this.type = type != null ? BoardType.from(type) : BoardType.N;
 		this.accessPolicy =
-			requestDto.getAccessPolicy() != null ? AccessPolicy.from(requestDto.getAccessPolicy()) : AccessPolicy.OPEN;
+			accessPolicy != null ? AccessPolicy.from(accessPolicy) : AccessPolicy.OPEN;
 		register(store, user);
 	}
 
@@ -153,6 +167,10 @@ public class Board extends SoftDeletableEntity {
 
 	public boolean isOpenTimeNow() {
 		return !LocalDateTime.now().isBefore(this.openTime);
+	}
+
+	public boolean canCaching() {
+		return LocalDateTime.now().isBefore(this.openTime.plus(DEFAULT_TTL));
 	}
 
 	public boolean isOverOpenLimit(Long num) {
