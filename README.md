@@ -166,65 +166,47 @@ docker-compose up -d
 
 ### Backend
 
-<img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20WebFlux-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
-<img src="https://img.shields.io/badge/Quartz-3C3C3C?style=for-the-badge&logo=Quartz&logoColor=white">
-<img src="https://img.shields.io/badge/jOOQ-4169E1?style=for-the-badge&logo=Jooq&logoColor=white">
+<img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
+
+<img src="https://img.shields.io/badge/Quartz-3C3C3C?style=for-the-badge&logo=Quartz&logoColor=white"> <img src="https://img.shields.io/badge/jOOQ-4169E1?style=for-the-badge&logo=Jooq&logoColor=white">
 
 ***
 
 ### Logging & Monitoring & Analytics
 
-<img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white">
-<img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white">
-<img src="https://img.shields.io/badge/Micrometer-2E7D32?style=for-the-badge&logo=Spring&logoColor=white">
+<img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"> <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"> <img src="https://img.shields.io/badge/Micrometer-2E7D32?style=for-the-badge&logo=Spring&logoColor=white">
 
 ---
 
 ### Security
 
-<img src="https://img.shields.io/badge/Session-007396?style=for-the-badge">
-<img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white">
+<img src="https://img.shields.io/badge/Session-007396?style=for-the-badge"> <img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white">
 
 ---
 
 ### Collaboration Tool
 
-<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white">
-<img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white">
-<img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white">
-<img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white">
-<img src="https://img.shields.io/badge/ERDCloud-0078D4?style=for-the-badge&logoColor=white">
+<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white"> <img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white"> <img src="https://img.shields.io/badge/ERDCloud-0078D4?style=for-the-badge&logoColor=white">
 
 ---
 
 ### Deployment & Distribution
 
-<img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHubActions&logoColor=white">
-<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white">
-<img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white">
-<img src="https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white">
-<img src="https://img.shields.io/badge/Amazon%20ElastiCache-0052CC?style=for-the-badge&logo=AmazonAWS&logoColor=white">
-<img src="https://img.shields.io/badge/Route53-FF9900?style=for-the-badge&logo=AmazonRoute53&logoColor=white">
-<img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white">
-<img src="https://img.shields.io/badge/CloudFront-232F3E?style=for-the-badge&logo=AmazonAWS&logoColor=white">
+<img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHubActions&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white"> <img src="https://img.shields.io/badge/Certbot-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white">
+
+<img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20ElastiCache-0052CC?style=for-the-badge&logo=AmazonAWS&logoColor=white"> <img src="https://img.shields.io/badge/Route53-FF9900?style=for-the-badge&logo=AmazonRoute53&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white"> <img src="https://img.shields.io/badge/CloudFront-232F3E?style=for-the-badge&logo=AmazonAWS&logoColor=white">
 
 ---
 
 ### API Communication
 
-<img src="https://img.shields.io/badge/Redis%20Pub%2FSub-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
-<img src="https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=WebSocket&logoColor=white">
-<img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=RabbitMQ&logoColor=white">
+<img src="https://img.shields.io/badge/Redis%20Pub%2FSub-DC382D?style=for-the-badge&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=WebSocket&logoColor=white"> <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=RabbitMQ&logoColor=white">
 
 ---
 
 ### DataBase
 
-<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white">
-<img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
 
 <br><br>
 
@@ -1097,54 +1079,6 @@ services:
 지금은 각 Job이 명확히 역할을 분리하고, 모든 테스트가 예측 가능한 환경에서 안정적으로 수행되고 있어 전체 개발 효율이 크게 향상된 상태다.
 
 </details>
-<details>
-<summary><strong>영속성 컨텍스트와 DB 상태 불일치</strong></summary>
-
-### 문제
-
-변경된 값이 DB에 업데이트되지 않고 계속 이전의 값으로 남아있어서 무한 게시글 생성이 가능한 문제가 발생했습니다.
-
-### 발생 배경
-
-사용자의 등급(Level)에 따라 한 달 동안 생성할 수 있는 오픈런 게시글 수(`postingCount`)를 제한하고 있으며, 이 값은 매월 초기화됩니다.
-
-동일 사용자가 여러 브라우저에서 동시에 게시글을 생성할 경우, `postingCount`를 검증하는 시점과 이를 업데이트하는 시점 사이에 경쟁 조건(race condition)이 발생할 수 있습니다.
-
-기존에는 엔티티 변경 감지를 통해 값을 갱신했지만, 이 방식은 엔티티를 조회 후 변경 시 `flush()` 시점에 전체 필드가 업데이트되어 **DB 접근이 최소 2회** 발생하며, race condition에도
-취약합니다.
-
-이를 개선하기 위해 조회 없이 곧바로 DB에 반영하는 **QueryDSL bulk update** 방식으로 전환했습니다.
-
-### 원인 분석
-
-bulk update 쿼리는 정상적으로 실행되어 `postingCount`가 업데이트되지만, **영속성 컨텍스트에는 반영되지 않습니다**.
-
-같은 트랜잭션 내에서 `User` 엔티티가 이미 조회되어 **영속성 컨텍스트에 존재**하는 경우, JPA는 여전히 이전 값을 보존하고 있고, 트랜잭션 종료 시 flush 과정에서 이 값으로 엔티티를 덮어씌웁니다.
-
-로그를 통해 bulk update 쿼리가 한 번 발생하고, 이어서 영속성 컨텍스트에 있는 엔티티 상태를 DB에 반영하는 쿼리가 발생하는 것을 볼 수 있었습니다.
-
-결과적으로 bulk update 결과가 다시 이전 값으로 덮여 **postingCount가 갱신되지 않는** 문제가 발생했습니다.
-
-### 개선 전략
-
-변경된 값을 영속성 컨텍스트에 저장할 수 있도록, 영속성 컨텍스트를 초기화해서 문제를 해결했습니다.
-
-`clear()`, `detach()` 는 트랜잭션 내에서 사용되는 다른 엔터티에 영향을 줄 수 있어서 `refresh(user)` 를 통해 업데이트가 일어난 user 엔터티만 DB에서 재조회해서 가져오는 방식을
-선택했습니다.
-
-업데이트가 발생한 대상이 여러 개라면 재조회하는 방식이 효율적이지 않을 수 있지만, 이 문제에서는 하나의 객체만 조회하면 돼서 이 방법으로 진행했습니다.
-
-### 결과
-
-`refresh(user)` 를 추가하고, 변경된 값이 DB와 영속성 컨텍스트에 모두 정상 반영되어 오픈런 게시글 생성이 무한으로 가능했던 문제가 해결되었습니다.
-
-### 회고 및 적용 효과
-
-엔터티의 조회와 상태 변경이 동시에 이뤄지는 트랜잭션 내에서 bulk update 사용 시 영속성 컨텍스트 상태 불일치 문제는 JPA 특성상 반드시 고려할 부분임을 인지하게 되었습니다.
-
-`refresh()` 를 통해 특정 엔터티만 동기화함으로써, 트랜잭션 내의 다른 작업에 미치는 영향을 최소화할 수 있었습니다.
-
-</details>
 
 <details>
 <summary><strong>배치 작업 중 데이터 누락</strong></summary>
@@ -1165,8 +1099,8 @@ Reader를 통해 배치의 첫 페이지에서 100건을 조회하고, 이를 �
 
 offset은 DB에 존재하는 전체 row 중 처리되지 않은 데이터를 기준으로 페이징하는데, 앞서 상태가 변경된 데이터는 더이상 조건에 포함되지 않기 때문에 offset이 가리키는 row 위치가 달라지게 됩니다.
 
-예를 들어, 처음에 1~100번까지의 데이터를 처리하면 다음에는 101~200번 데이터를 처리해야 하지만, 1~100번의 데이터가 다음 조회부터는 포함되지 않기 때문에 2번째 페이지를 조회할 때는 101~200번은
-건너뛰고 201~300번 데이터를 조회하게 됩니다.
+예를 들어, 처음에 1 ~ 100번까지의 데이터를 처리하면 다음에는 101 ~ 200번 데이터를 처리해야 하지만, 1 ~ 100번의 데이터가 다음 조회부터는 포함되지 않기 때문에 2번째 페이지를 조회할 때는 101 ~ 200번은
+건너뛰고 201 ~ 300번 데이터를 조회하게 됩니다.
 
 이런 식으로 페이지 조회할 때마다 데이터가 한 페이지 단위로 건너뛰어지면서 10만 건 중 절반인 5만 건만 처리되었습니다.
 
@@ -1729,7 +1663,7 @@ KPT 회고
     <th>담당 역할</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/0ceb06cb-3857-4c8f-85a8-cdb096b236b2" width="80"></td>
+    <td align="center"><img src="./image/ahyun.png" width="80"></td>
     <td align="center">
       <strong>팀장</strong><br>조아현<br>
       <a href="https://github.com/mo00ai" target="_blank">@mo00ai</a>
@@ -1744,7 +1678,7 @@ KPT 회고
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="[https://github.com/user-attachments/assets/c735f29f-5b4d-426a-9848-5b9a7ea99383" width="80"></td>
+    <td align="center"><img src="./image/yejin.png" width="80"></td>
     <td align="center">
       <strong>부팀장</strong><br>윤예진<br>
       <a href="https://github.com/YejinY00n" target="_blank">@YejinY00n</a>
@@ -1758,7 +1692,7 @@ KPT 회고
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/e36d8960-d138-48af-8640-8d4969ad6a6c" width="80"></td>
+    <td align="center"><img src="./image/chaejin.png" width="80"></td>
     <td align="center">
       <strong>팀원</strong><br>김채진<br>
       <a href="https://github.com/kmchaejin" target="_blank">@kmchaejin</a>
@@ -1771,7 +1705,7 @@ KPT 회고
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/5fb947bd-d58f-488b-b0c8-7f46e945457c" width="80"></td>
+    <td align="center"><img src="./image/kiha.png" width="80"></td>
     <td align="center">
       <strong>팀원</strong><br>황기하<br>
       <a href="https://github.com/rlgkghkd" target="_blank">@rlgkghkd</a>
@@ -1786,7 +1720,7 @@ KPT 회고
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/8e6252d5-8895-4f5c-a75a-75bcd537e70f" width="80"></td>
+    <td align="center"><img src="./image/jungmin.png" width="80"></td>
     <td align="center">
       <strong>팀원</strong><br>채정민<br>
       <a href="https://github.com/Chaemin07" target="_blank">@modesty</a>
