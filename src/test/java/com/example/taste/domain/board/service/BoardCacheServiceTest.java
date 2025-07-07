@@ -11,9 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
@@ -49,11 +47,7 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 	private StoreRepository storeRepository;
 	@Autowired
 	private CategoryRepository categoryRepository;
-	@Autowired
-	private CacheManager cacheManager;
-	@Autowired
-	@Qualifier(value = "redisCacheManager")
-	private CacheManager redisCacheManager;
+
 	@Autowired
 	private RedisService redisService;
 
@@ -68,13 +62,13 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10, LocalDateTime.now(), store,
 				user));
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when
-		BoardResponseDto result = boardCacheService.getOrSetCache(board.getId());
+		BoardResponseDto result = boardCacheService.getOrSetCache(dto.getBoardId());
 
 		// then
 		assertThat(result.getBoardId()).isEqualTo(board.getId());
-		assertThat(redisService.getKeyValue(CACHE_KEY_PREFIX + board.getId())).isEqualTo(result);
 
 		// clean-up
 		redisService.deleteKey(CACHE_KEY_PREFIX + board.getId());

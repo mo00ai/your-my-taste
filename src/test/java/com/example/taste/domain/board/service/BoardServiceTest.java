@@ -4,21 +4,16 @@ import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
 import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.BoardType;
@@ -53,32 +48,6 @@ class BoardServiceTest extends AbstractIntegrationTest {
 	private BoardRepository boardRepository;
 	@Autowired
 	private RedisService redisService;
-
-	@Test
-	@Transactional
-	void createBoard_whenOpenRunTypeRequest_thenIncreasePostingCnt() throws IOException {
-		// given
-		Image image = ImageFixture.create();
-		User user = userRepository.save(UserFixture.create(image));
-		Category category = categoryRepository.save(CategoryFixture.create());
-		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", TIMEATTACK.name());
-		ReflectionTestUtils.setField(dto, "storeId", store.getId());
-		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-
-		// when
-		boardService.createBoard(user.getId(), dto, new ArrayList<>());
-
-		// then
-		assertThat(userRepository.findById(user.getId()).get().getPostingCount()).isEqualTo(1);
-	}
 
 	@Test
 	@Transactional

@@ -16,14 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RedissonClient;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.service.RedisService;
 import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -35,13 +31,10 @@ import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.factory.BoardCreationStrategyFactory;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.image.service.BoardImageService;
-import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
@@ -53,8 +46,6 @@ import com.example.taste.fixtures.ImageFixture;
 import com.example.taste.fixtures.StoreFixture;
 import com.example.taste.fixtures.UserFixture;
 
-import jakarta.persistence.EntityManager;
-
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceUnitTest {
 	@Spy
@@ -63,17 +54,7 @@ public class BoardServiceUnitTest {
 	@Mock
 	private BoardRepository boardRepository;
 	@Mock
-	private BoardImageService boardImageService;
-	@Mock
-	private StoreService storeService;
-	@Mock
-	private PkService pkService;
-	@Mock
 	private HashtagService hashtagService;
-	@Mock
-	private RedisService redisService;
-	@Mock
-	private SimpMessagingTemplate messagingTemplate;
 	@Mock
 	private UserRepository userRepository;
 	@Mock
@@ -82,16 +63,6 @@ public class BoardServiceUnitTest {
 	private BoardCreationStrategyFactory strategyFactory;
 	@Mock
 	private KoreanTextProcessor processor;
-	@Mock
-	private ApplicationEventPublisher eventPublisher;
-	@Mock
-	private EntityManager entityManager;
-	@Mock
-	private RedissonClient redissonClient;
-	@Mock
-	private BoardCacheService boardCacheService;
-	@Mock
-	private FcfsQueueService fcfsQueueService;
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 공개 전 게시글!)")
 	@Test
