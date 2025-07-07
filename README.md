@@ -18,7 +18,7 @@ MZ세대는 맛집 정보를 찾기 위해 여러 앱과 플랫폼을 번갈아 
 
 ## 배포
 
-**[🔗 Your My Taste](http://your-my-taste.site)**
+**[🔗 Your My Taste](https://your-my-taste.site)**
 
 <br><br>
 
