@@ -57,11 +57,11 @@ class FcfsInformationServiceTest extends AbstractIntegrationTest {
 			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 				LocalDateTime.now().plusDays(1), store, user));
 
-		String key = OPENRUN_KEY_PREFIX + board.getId();
+		String key = FCFS_KEY_PREFIX + board.getId();
 		redisService.addToZSet(key, user.getId(), System.currentTimeMillis());
 
 		// when
-		fcfsInformationService.saveFcfsInfoToDB(key, board);
+		fcfsInformationService.saveFcfsInfoToDB(key, board.getId());
 
 		// then
 		assertThat(fcfsInformationRepository.existsByBoardIdAndUserId(board.getId(), user.getId())).isTrue();

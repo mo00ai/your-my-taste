@@ -10,4 +10,6 @@ public interface FcfsInformationRepository extends JpaRepository<FcfsInformation
 	boolean existsByBoardId(Long boardId);
 
 	boolean existsByBoardIdAndUserId(Long boardId, Long userId);
+
+	Iterable<? extends FcfsInformation> findAllByBoardId(Long boardId);
 }

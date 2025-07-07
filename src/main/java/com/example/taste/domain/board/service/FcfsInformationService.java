@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.taste.common.service.RedisService;
-import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.entity.FcfsInformation;
 import com.example.taste.domain.board.repository.FcfsInformationRepository;
 
@@ -20,11 +19,11 @@ public class FcfsInformationService {
 	private final RedisService redisService;
 
 	@Transactional
-	public void saveFcfsInfoToDB(String key, Board board) {
-		if (!fcfsInformationRepository.existsByBoardId(board.getId())) {
+	public void saveFcfsInfoToDB(String key, Long boardId) {
+		if (!fcfsInformationRepository.existsByBoardId(boardId)) {
 			List<FcfsInformation> infos = redisService.getZSetRange(key).stream()
 				.map(object -> ((Number)object).longValue())
-				.map(id -> new FcfsInformation(board.getId(), id))
+				.map(id -> new FcfsInformation(boardId, id))
 				.toList();
 			fcfsInformationRepository.saveAll(infos);
 		}

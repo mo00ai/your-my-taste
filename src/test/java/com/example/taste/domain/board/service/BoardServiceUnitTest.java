@@ -1,31 +1,13 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.domain.board.entity.AccessPolicy.CLOSED;
-import static com.example.taste.domain.board.entity.AccessPolicy.FCFS;
-import static com.example.taste.domain.board.entity.AccessPolicy.OPEN;
-import static com.example.taste.domain.board.entity.AccessPolicy.TIMEATTACK;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyInt;
-import static org.mockito.BDDMockito.anyLong;
-import static org.mockito.BDDMockito.anyString;
-import static org.mockito.BDDMockito.doNothing;
-import static org.mockito.BDDMockito.doThrow;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static com.example.taste.domain.board.entity.AccessPolicy.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,15 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.taste.common.exception.CustomException;
-import com.example.taste.common.service.RedisService;
 import com.example.taste.config.KoreanTextProcessor;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.NormalBoardRequestDto;
@@ -54,13 +32,11 @@ import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.factory.BoardCreationStrategyFactory;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
-import com.example.taste.domain.image.service.BoardImageService;
 import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.exception.StoreErrorCode;
 import com.example.taste.domain.store.repository.StoreRepository;
-import com.example.taste.domain.store.service.StoreService;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.enums.Level;
 import com.example.taste.domain.user.enums.Role;
@@ -80,17 +56,7 @@ public class BoardServiceUnitTest {
 	@Mock
 	private BoardRepository boardRepository;
 	@Mock
-	private BoardImageService boardImageService;
-	@Mock
-	private StoreService storeService;
-	@Mock
-	private PkService pkService;
-	@Mock
 	private HashtagService hashtagService;
-	@Mock
-	private RedisService redisService;
-	@Mock
-	private SimpMessagingTemplate messagingTemplate;
 	@Mock
 	private UserRepository userRepository;
 	@Mock
@@ -98,17 +64,11 @@ public class BoardServiceUnitTest {
 	@Mock
 	private BoardCreationStrategyFactory strategyFactory;
 	@Mock
-	private KoreanTextProcessor processor;
+	private PkService pkService;
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 	@Mock
-	private EntityManager entityManager;
-	@Mock
-	private RedissonClient redissonClient;
-	@Mock
-	private BoardCacheService boardCacheService;
-	@Mock
-	private FcfsQueueService fcfsQueueService;
+	private KoreanTextProcessor processor;
 
 	@DisplayName("게시글 조회 실패(오픈런 게시글 - 공개 전 게시글!)")
 	@Test
@@ -123,10 +83,11 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 			LocalDateTime.now().plusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
 	}
 
@@ -143,10 +104,11 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10,
 			LocalDateTime.now().plusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
 	}
 
@@ -163,70 +125,12 @@ public class BoardServiceUnitTest {
 		Store store = StoreFixture.create(category);
 		Board board = BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 			LocalDateTime.now().minusDays(1), store, user1);
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when, then
 		assertThrows(CustomException.class, () -> {
-			boardService.validateBoard(board, user2);
+			boardService.validateOBoard(dto, user2);
 		});
-	}
-
-	@DisplayName("게시글 조회 실패(오픈런 게시글 - FCFS 선착순 인원 초과!)")
-	@Test
-	public void findBoard_withFcfsCountExceeded_throwsException() throws InterruptedException {
-		// given
-		Long boardId = 1L;
-		Long boardUserId = 999L;
-		Long user1Id = 2L;
-		Long user2Id = 3L;
-
-		User writer = UserFixture.create(ImageFixture.create());
-		ReflectionTestUtils.setField(writer, "id", boardUserId);
-		Store store = StoreFixture.create(CategoryFixture.create());
-
-		User user1 = UserFixture.create(ImageFixture.create());
-		ReflectionTestUtils.setField(user1, "id", user1Id);
-		User user2 = UserFixture.create(ImageFixture.create());
-		ReflectionTestUtils.setField(user2, "id", user2Id);
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "오픈런 선착순 마감 테스트!");
-		ReflectionTestUtils.setField(dto, "contents", "인원 마감!");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.toString());
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().minusMinutes(1));
-		ReflectionTestUtils.setField(dto, "openLimit", 1);
-
-		Board board = BoardFixture.createFcfsOBoard(dto, store, writer);
-		RLock rLock = mock(RLock.class);
-
-		// stub
-		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
-		given(boardCacheService.getRedisCache(board))
-			.willReturn(BoardResponseDto.builder().entity(board).build());
-
-		// 작성자는 조회 가능
-		given(userRepository.findById(boardUserId)).willReturn(Optional.of(writer));
-		BoardResponseDto result1 = boardService.findBoard(boardId, boardUserId);
-		assertNotNull(result1);
-
-		// user1은 성공
-		given(userRepository.findById(user1Id)).willReturn(Optional.of(user1));
-		doNothing().when(fcfsQueueService).tryEnterFcfsQueueByRedisson(board, user1);
-		BoardResponseDto result2 = boardService.findBoard(boardId, user1Id);
-		assertNotNull(result2);
-
-		// user2는 예외 발생
-		given(userRepository.findById(user2Id)).willReturn(Optional.of(user2));
-		doThrow(new CustomException(BoardErrorCode.EXCEED_OPEN_LIMIT))
-			.when(fcfsQueueService).tryEnterFcfsQueueByRedisson(board, user2);
-
-		// when & then
-		CustomException exception = assertThrows(CustomException.class, () ->
-			boardService.findBoard(boardId, user2Id)
-		);
-		// assertEquals(BoardErrorCode.BOARD_NOT_YET_OPEN, exception.getBaseCode());
-		assertEquals(BoardErrorCode.EXCEED_OPEN_LIMIT, exception.getBaseCode());
-		verify(boardCacheService, times(2)).getRedisCache(board);
 	}
 
 	@DisplayName("게시글 정상 생성(일반 게시글)")
@@ -303,8 +207,6 @@ public class BoardServiceUnitTest {
 		given(boardRepository.save(any(Board.class))).willReturn(board);
 
 		int postingLimit = user.getLevel().getPostingLimit();
-		// 오픈런 게시글 작성가능하면 1반환함
-		given(userRepository.increasePostingCount(1L, Level.NORMAL.getPostingLimit())).willReturn(1);
 
 		// 형태소 분석
 		given(processor.extractSearchKeywords(anyString())).willReturn(Set.of("김밥", "분식"));
@@ -317,7 +219,6 @@ public class BoardServiceUnitTest {
 		verify(strategyFactory).getStrategy(eq(BoardType.O));
 		verify(hashtagService).applyHashtagsToBoard(eq(board), eq(List.of("맛집", "한식")));
 		verify(boardRepository).save(any(Board.class));
-		verify(userRepository).increasePostingCount(eq(userId), anyInt());
 	}
 
 	@DisplayName("게시글 생성 실패(오픈런 게시글 - 작성 가능 수 초과)")
@@ -341,6 +242,7 @@ public class BoardServiceUnitTest {
 		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
 
 		User user = UserFixture.create(ImageFixture.create());
+		ReflectionTestUtils.setField(user, "postingCount", user.getLevel().getPostingLimit() + 1);
 		Store store = StoreFixture.create(CategoryFixture.create());
 		Board board = BoardFixture.createTimeLimitedOBoard(dto, store, user);
 
@@ -351,10 +253,6 @@ public class BoardServiceUnitTest {
 		given(processor.extractSearchKeywords(anyString())).willReturn(Set.of("오픈런", "한정"));
 		given(processor.extractNouns(anyString())).willReturn(List.of("한정", "분식"));
 		given(processor.extractPhrases(anyString())).willReturn(List.of("한정 수량", "오픈런 맛집"));
-
-		// 0이면 게시글 작성 가능 수 초과
-		given(userRepository.increasePostingCount(user.getId(), user.getLevel().getPostingLimit()))
-			.willReturn(0);
 
 		// when & then
 		CustomException customException = assertThrows(CustomException.class,
@@ -430,7 +328,6 @@ public class BoardServiceUnitTest {
 		BoardResponseDto responseDto = BoardResponseDto.builder().entity(board).build(); // DTO 변환 예시
 		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
 		given(userRepository.findById(userId)).willReturn(Optional.of(user));
-		given(boardCacheService.getInMemoryCache(board)).willReturn(responseDto); // 이 부분 추가
 
 		BoardResponseDto result = boardService.findBoard(boardId, userId);
 		assertNotNull(result);
@@ -459,7 +356,6 @@ public class BoardServiceUnitTest {
 
 		given(boardRepository.findActiveBoard(boardId)).willReturn(Optional.of(board));
 		given(userRepository.findById(userId)).willReturn(Optional.of(user));
-		given(boardCacheService.getInMemoryCache(board)).willReturn(BoardResponseDto.builder().entity(board).build());
 
 		BoardResponseDto result = boardService.findBoard(boardId, userId);
 
