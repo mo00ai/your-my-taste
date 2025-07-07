@@ -61,7 +61,7 @@ docker-compose up -d
 # 목차
 
 - [프로젝트 소개](#프로젝트-소개)
-- [설치 및 실행 방법](#설치-및-실행-방법)
+- [프로젝트 실행 방법](#프로젝트-실행-방법)
 - [주요 기능](#주요-기능)
 - [기술 스택](#기술-스택)
 - [아키텍처](#아키텍처)
@@ -1744,7 +1744,7 @@ KPT 회고
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/c735f29f-5b4d-426a-9848-5b9a7ea99383" width="80"></td>
+    <td align="center"><img src="[https://github.com/user-attachments/assets/c735f29f-5b4d-426a-9848-5b9a7ea99383" width="80"></td>
     <td align="center">
       <strong>부팀장</strong><br>윤예진<br>
       <a href="https://github.com/YejinY00n" target="_blank">@YejinY00n</a>
