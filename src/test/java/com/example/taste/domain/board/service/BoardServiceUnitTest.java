@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +32,7 @@ import com.example.taste.domain.board.exception.BoardErrorCode;
 import com.example.taste.domain.board.factory.BoardCreationStrategyFactory;
 import com.example.taste.domain.board.repository.BoardRepository;
 import com.example.taste.domain.image.entity.Image;
+import com.example.taste.domain.pk.service.PkService;
 import com.example.taste.domain.store.entity.Category;
 import com.example.taste.domain.store.entity.Store;
 import com.example.taste.domain.store.exception.StoreErrorCode;
@@ -61,6 +63,10 @@ public class BoardServiceUnitTest {
 	private StoreRepository storeRepository;
 	@Mock
 	private BoardCreationStrategyFactory strategyFactory;
+	@Mock
+	private PkService pkService;
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 	@Mock
 	private KoreanTextProcessor processor;
 
