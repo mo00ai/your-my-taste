@@ -33,8 +33,8 @@ public class BoardCacheService {
 
 	@PostConstruct
 	public void initCounter() {
-		counter = Counter.builder("cache.hit.fail")
-			.description("캐시 히트 실패량")
+		counter = Counter.builder("cache.hit.success")
+			.description("캐시 히트 성공량")
 			.register(registry);
 	}
 
@@ -43,6 +43,7 @@ public class BoardCacheService {
 
 		BoardResponseDto cachedBoardDto = (BoardResponseDto)redisService.getKeyValue(CACHE_KEY_PREFIX + boardId);
 		if (cachedBoardDto != null) {
+			counter.increment();
 			return cachedBoardDto;
 		}
 
@@ -62,7 +63,6 @@ public class BoardCacheService {
 
 		cachedBoardDto = new BoardResponseDto(board);
 		redisService.setKeyValue(CACHE_KEY_PREFIX + boardId, cachedBoardDto, duration);
-		counter.increment();
 		return cachedBoardDto;
 	}
 

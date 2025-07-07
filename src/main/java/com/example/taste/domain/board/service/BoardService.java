@@ -158,8 +158,9 @@ public class BoardService {
 
 		// 선착순 공개 게시글이면 순위 검증
 		if (dto.getAccessPolicy().isFcfs()) {
+			//fcfsQueueService.tryEnterFcfsQueue(dto, user);
+			//fcfsQueueService.tryEnterFcfsQueueByLettuce(dto, user);
 			fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user);
-			//fcfsQueueService.tryEnterFcfsQueueByLettuce(board, user);
 		}
 	}
 
