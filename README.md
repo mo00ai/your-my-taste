@@ -13,14 +13,12 @@ MZ세대는 맛집 정보를 찾기 위해 여러 앱과 플랫폼을 번갈아 
 
 ## 시연 영상
 
-**[🔗 시연 영상](https://www.youtube.com/watch?v=fmHCNejqKkg)**
+**[🔗 시연 영상](https://www.youtube.com/watch?v=_ya4lTQ6O5s)**
 <br><br>
 
 ## 배포
 
-```java
-배포 주소
-```
+**[🔗 Your My Taste](http://your-my-taste.site)**
 
 <br><br>
 
@@ -69,7 +67,6 @@ docker-compose up -d
 - [기술적 의사결정](#기술적-의사결정)
 - [성능 개선](#성능-개선)
 - [트러블 슈팅](#트러블-슈팅)
-- [회고](#회고)
 - [팀원 소개](#팀원-소개)
 
 <br><br>
@@ -224,8 +221,7 @@ docker-compose up -d
 
 ## API 명세서
 
-링크 수정 필요
-**[🔗 API 명세서](https://www.figma.com/proto/xDPayyfst1tmlY1twpso3E/%EB%8B%88%EB%A7%9B%EB%82%B4%EB%A7%9B?node-id=10-309&t=hl3osNc9mnhTzDTD-1)**
+**[🔗 API 명세서](https://quill-hourglass-d62.notion.site/229c428f990a80f5bb64d1667c3f274c?v=229c428f990a81a6a02e000cf90f230a&source=copy_link)**
 
 
 **RESTful 규칙을 지향**했고, 담당자·진행상황·상태코드·에러 응답 등 핵심 항목을 포함해 **실무 위주의 명세서**로 작성했습니다.
@@ -1681,10 +1677,6 @@ getDestination());
 
 
 <br><br>
-
-# 회고
-
-KPT 회고
 
 # 팀원 소개
 
