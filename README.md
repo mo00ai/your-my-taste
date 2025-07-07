@@ -220,8 +220,11 @@ docker-compose up -d
 
 ## API 명세서
 
-링크 넣고
-어떤 점을 명시했는지 강조, 변경 사항 반영하기
+링크 수정 필요
+**[🔗 API 명세서](https://www.figma.com/proto/xDPayyfst1tmlY1twpso3E/%EB%8B%88%EB%A7%9B%EB%82%B4%EB%A7%9B?node-id=10-309&t=hl3osNc9mnhTzDTD-1)**
+
+
+RESTful 규칙을 지향했고, 담당자·진행상황·상태코드·에러 응답 등 핵심 항목을 포함해 실무 위주의 명세서로 작성했습니다.
 
 <br><br>
 
