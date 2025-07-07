@@ -84,7 +84,6 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10,
 				LocalDateTime.now(), store, postingUser));
-		System.out.println("board id = " + board.getId());
 		BoardResponseDto dto = new BoardResponseDto(board);
 
 		List<User> createdUsers = Collections.synchronizedList(new ArrayList<>());
@@ -103,8 +102,7 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 				try {
 					barrier.await(); // 모든 쓰레드가 준비될 때까지 대기
 					fcfsQueueService.tryEnterFcfsQueue(dto, user);
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
+				} catch (Exception ignored) {
 				} finally {
 					latch.countDown();
 				}
@@ -153,7 +151,6 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10,
 				LocalDateTime.now(), store, postingUser));
-		System.out.println("board id = " + board.getId());
 		BoardResponseDto dto = new BoardResponseDto(board);
 
 		List<User> createdUsers = Collections.synchronizedList(new ArrayList<>());
@@ -172,8 +169,7 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 				try {
 					barrier.await(); // 모든 쓰레드가 준비될 때까지 대기
 					fcfsQueueService.tryEnterFcfsQueueByLettuce(dto, user);
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
+				} catch (Exception ignored) {
 				} finally {
 					latch.countDown();
 				}
@@ -222,7 +218,6 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10,
 				LocalDateTime.now(), store, postingUser));
-		System.out.println("board id = " + board.getId());
 		BoardResponseDto dto = new BoardResponseDto(board);
 
 		List<User> createdUsers = Collections.synchronizedList(new ArrayList<>());
@@ -241,8 +236,7 @@ class FcfsLockPerformanceTest extends AbstractIntegrationTest {
 				try {
 					barrier.await(); // 모든 쓰레드가 준비될 때까지 대기
 					fcfsQueueService.tryEnterFcfsQueueByRedisson(dto, user);
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
+				} catch (Exception ignored) {
 				} finally {
 					latch.countDown();
 				}

@@ -38,7 +38,7 @@ public class BoardCacheService {
 			.register(registry);
 	}
 
-	// 일반 게시글은 캐싱 안하므로 board 타입으로 반환
+	// 일반 게시글은 캐싱 안하므로 boardResponseDto 타입으로 반환
 	public BoardResponseDto getOrSetCache(Long boardId) {
 
 		BoardResponseDto cachedBoardDto = (BoardResponseDto)redisService.getKeyValue(CACHE_KEY_PREFIX + boardId);
@@ -47,7 +47,7 @@ public class BoardCacheService {
 			return cachedBoardDto;
 		}
 
-		Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
+		Board board = boardRepository.findActiveBoard(boardId).orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 		if (board.isNBoard()) {
 			return new BoardResponseDto(board);
 		}

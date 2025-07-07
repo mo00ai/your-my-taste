@@ -1,6 +1,6 @@
 package com.example.taste.domain.user.entity;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.PK_POINT_OVERFLOW;
+import static com.example.taste.domain.pk.exception.PkErrorCode.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -168,6 +167,10 @@ public class User extends SoftDeletableEntity {
 			throw new CustomException(PK_POINT_OVERFLOW);
 		}
 		this.point += point;
+	}
+
+	public boolean isOverPostingLimit() {
+		return this.postingCount >= this.level.getPostingLimit();
 	}
 
 	public void updatePostingCnt() {

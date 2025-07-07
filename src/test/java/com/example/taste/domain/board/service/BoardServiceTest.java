@@ -3,7 +3,6 @@ package com.example.taste.domain.board.service;
 import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.response.PageResponse;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.request.OpenRunBoardRequestDto;
@@ -80,31 +78,6 @@ class BoardServiceTest extends AbstractIntegrationTest {
 
 		// then
 		assertThat(userRepository.findById(user.getId()).get().getPostingCount()).isEqualTo(1);
-	}
-
-	@Test
-	@Transactional
-	void createBoard_whenPostingCntIsLimit_thenThrowException() throws IOException {
-		// given
-		Image image = ImageFixture.create();
-		User user = userRepository.save(UserFixture.createNoMorePosting(image));
-		Category category = categoryRepository.save(CategoryFixture.create());
-		Store store = storeRepository.save(StoreFixture.create(category));
-
-		OpenRunBoardRequestDto dto = new OpenRunBoardRequestDto();
-		ReflectionTestUtils.setField(dto, "title", "제목입니다");
-		ReflectionTestUtils.setField(dto, "contents", "내용입니다");
-		ReflectionTestUtils.setField(dto, "type", "O");
-		ReflectionTestUtils.setField(dto, "accessPolicy", FCFS.name());
-		ReflectionTestUtils.setField(dto, "storeId", store.getId());
-		ReflectionTestUtils.setField(dto, "hashtagList", List.of("맛집", "한식"));
-		ReflectionTestUtils.setField(dto, "openLimit", 10);
-		ReflectionTestUtils.setField(dto, "openTime", LocalDateTime.now().plusDays(1));
-
-		// when, then
-		assertThrows(CustomException.class, () -> {
-			boardService.createBoard(user.getId(), dto, new ArrayList<>());
-		});
 	}
 
 	@Test

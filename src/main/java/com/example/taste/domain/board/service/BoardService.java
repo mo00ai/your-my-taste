@@ -86,6 +86,9 @@ public class BoardService {
 		Board saved = boardRepository.save(entity);
 
 		// 오픈런 게시글 카운팅
+		if (!saved.isNBoard() && user.isOverPostingLimit()) {
+			throw new CustomException(POSTING_COUNT_OVERFLOW);
+		}
 		if (!saved.isNBoard()) {
 			user.updatePostingCnt();
 		}
@@ -109,7 +112,7 @@ public class BoardService {
 	}
 
 	public BoardResponseDto findBoard(Long boardId, Long userId) {
-		Board board = boardRepository.findById(boardId)
+		Board board = boardRepository.findActiveBoard(boardId)
 			.orElseThrow(() -> new CustomException(BOARD_NOT_FOUND));
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));

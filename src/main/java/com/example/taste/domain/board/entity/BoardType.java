@@ -33,6 +33,6 @@ public enum BoardType {
 	}
 
 	public boolean matches(String type) {
-		return N == from(type);
+		return this == from(type);
 	}
 }

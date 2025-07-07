@@ -43,7 +43,7 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 	@PostConstruct
 	public void init() {
 		counter = Counter.builder("counter")
-			.description("스케줄러의 총 처리 건 수")
+			.description("배치작업 총 처리 건 수")
 			.register(meterRegistry);
 	}
 
