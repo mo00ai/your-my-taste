@@ -9,5 +9,5 @@ import com.example.taste.domain.notification.entity.WebPushSubscription;
 
 @Repository
 public interface WebPushRepository extends JpaRepository<WebPushSubscription, Long>, WebPushRepositoryCustom {
-	Optional<WebPushSubscription> findByEndpoint(String endpoint);
+	Optional<WebPushSubscription> findByFcmToken(String fcmToken);
 }

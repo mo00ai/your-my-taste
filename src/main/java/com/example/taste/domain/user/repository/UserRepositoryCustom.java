@@ -10,8 +10,12 @@ import com.example.taste.domain.user.entity.User;
 public interface UserRepositoryCustom {
 	long resetPostingCnt();
 
+	Integer findAgeByUserId(Long userId);
+
 	// 유저 프록시 가져옴
 	Page<Long> getAllUserIdPage(PageRequest pageRequest);
 
 	Optional<User> findUserWithFavors(Long userId);
+
+	Optional<User> findByIdWithImage(Long userId);
 }

@@ -2,27 +2,27 @@ package com.example.taste.domain.notification.service;
 
 import static com.example.taste.domain.user.exception.UserErrorCode.*;
 
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.PushSubscribeRequestDto;
-import com.example.taste.domain.notification.dto.WebPushPayloadDto;
 import com.example.taste.domain.notification.entity.WebPushSubscription;
 import com.example.taste.domain.notification.exception.NotificationErrorCode;
 import com.example.taste.domain.notification.repository.webPush.WebPushRepository;
 import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.martijndwars.webpush.Notification;
-import nl.martijndwars.webpush.PushService;
 
 @Service
 @RequiredArgsConstructor
@@ -30,40 +30,30 @@ import nl.martijndwars.webpush.PushService;
 public class WebPushService {
 	private final UserRepository userRepository;
 	private final WebPushRepository webPushRepository;
-	private final ObjectMapper objectMapper;
-	private final PushService pushService;
-
-	@Value("${vapid.public}")
-	private String vapidPublic;
-	@Value("${vapid.private}")
-	private String vapidPrivate;
+	private final FirebaseMessaging firebaseMessaging;
 
 	@Transactional
 	public void saveSubscription(Long userId, PushSubscribeRequestDto dto) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-		WebPushSubscription subscription = webPushRepository.findByEndpoint(dto.getEndPoint()).orElse(null);
+		WebPushSubscription subscription = webPushRepository.findByFcmToken(dto.getFcmToken()).orElse(null);
 
 		if (subscription != null && subscription.getUser().isSameUser(user.getId())) {
-			subscription.setP256dhKey(dto.getKeys().getP256dh());
-			subscription.setAuthKey(dto.getKeys().getAuth());
 			return;
 		} else if (subscription != null) {
 			webPushRepository.delete(subscription);
 		}
 
 		subscription = WebPushSubscription.builder()
-			.authKey(dto.getKeys().getAuth())
-			.endpoint(dto.getEndPoint())
-			.p256dhKey(dto.getKeys().getP256dh())
+			.fcmToken(dto.getFcmToken())
 			.user(user)
 			.build();
 		webPushRepository.save(subscription);
 	}
 
-	public void deleteSubscription(Long userId, String endpoint) {
+	public void deleteSubscription(Long userId, String fcmToken) {
 		WebPushSubscription subscription =
-			webPushRepository.getWebPushSubscriptionByUserIdAndEndpoint(userId, endpoint);
+			webPushRepository.getWebPushSubscriptionByUserIdAndFcmToken(userId, fcmToken);
 		if (subscription != null) {
 			webPushRepository.delete(subscription);
 		}
@@ -71,35 +61,38 @@ public class WebPushService {
 
 	public void send(WebPushSubscription subscription, NotificationDataDto dataDto, Long contentId) {
 		try {
-			PushService configuredPushService = pushService
-				.setPublicKey(vapidPublic)
-				.setPrivateKey(vapidPrivate)
-				.setSubject("some-admin-email@example.com");
+			// payload
+			Map<String, String> data = new HashMap<>();
+			data.put("category", dataDto.getCategory().name());
+			data.put("content", dataDto.getContents());
+			data.put("contentId", String.valueOf(contentId));
+			data.put("createdAt", dataDto.getCreatedAt().toString());
+			data.put("redirectUrl", dataDto.getRedirectionUrl());
 
-			// 페이로드 JSON 직렬화
-			WebPushPayloadDto dto = WebPushPayloadDto.builder()
-				.category(dataDto.getCategory())
-				.content(dataDto.getContents())
-				.contentId(contentId)
-				.createdAt(dataDto.getCreatedAt())
-				.redirectUrl(dataDto.getRedirectionUrl())
+			// notification payload
+			Notification notification = Notification.builder()
+				.setTitle("New Notification")
+				.setBody(dataDto.getContents())
+				.setImage("/firebase-image.png")
 				.build();
-			String payload = objectMapper.writeValueAsString(dto);
-			byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
 
-			// Notification 생성 (구독 정보에서 endpoint, p256dh, auth 사용)
-			Notification notification = new Notification(
-				subscription.getEndpoint(),
-				subscription.getP256dhKey(),
-				subscription.getAuthKey(),
-				payloadBytes
-			);
-			log.info(notification.toString());
+			// Build the message
+			Message message = Message.builder()
+				.setToken(subscription.getFcmToken())
+				.setNotification(notification)
+				.putAllData(data)
+				.build();
 
-			configuredPushService.send(notification);
+			// Send the message
+			String response = firebaseMessaging.send(message);
+			log.info("Successfully sent message: " + response);
+
+		} catch (FirebaseMessagingException e) {
+			log.error("Firebase Cloud Messaging send error", e);
+			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION, e.getMessage());
 		} catch (Exception e) {
-			log.error("WebPush send error", e);  // 로깅 프레임워크 사용 시
-			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION, e.toString());
+			log.error("WebPush send error", e);
+			throw new CustomException(NotificationErrorCode.CAN_NOT_CREATE_NOTIFICATION, e.getMessage());
 		}
 	}
 }

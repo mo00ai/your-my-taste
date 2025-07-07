@@ -18,6 +18,7 @@ services:
       timeout: 5s
       retries: 5
 
+
   test-redis:
     image: redis:7
     container_name: test-redis

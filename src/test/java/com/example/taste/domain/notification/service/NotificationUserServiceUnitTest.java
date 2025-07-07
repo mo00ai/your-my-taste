@@ -468,7 +468,7 @@ class NotificationUserServiceUnitTest {
 				.willReturn(maybeSetting);
 
 			// when
-			UserNotificationSettingResponseDto result = userService.userNotificationSetting(
+			UserNotificationSettingResponseDto result = userService.setUserNotificationAllowance(
 				NotificationCategory.INDIVIDUAL, true, everyId);
 			// then
 			then(userNotificationSettingRepository).should().save(any(UserNotificationSetting.class));
@@ -495,7 +495,7 @@ class NotificationUserServiceUnitTest {
 				.willReturn(maybeSetting);
 
 			// when
-			UserNotificationSettingResponseDto result = userService.userNotificationSetting(
+			UserNotificationSettingResponseDto result = userService.setUserNotificationAllowance(
 				NotificationCategory.INDIVIDUAL, true, everyId);
 			// then
 			assertThat(result.getNotificationCategory()).isEqualTo(NotificationCategory.INDIVIDUAL);
@@ -521,7 +521,7 @@ class NotificationUserServiceUnitTest {
 				.willReturn(maybeSetting);
 
 			// when
-			UserNotificationSettingResponseDto result = userService.userNotificationSetting(
+			UserNotificationSettingResponseDto result = userService.setUserNotificationAllowance(
 				NotificationCategory.INDIVIDUAL, false, everyId);
 			// then
 			assertThat(result.getNotificationCategory()).isEqualTo(NotificationCategory.INDIVIDUAL);
@@ -543,7 +543,7 @@ class NotificationUserServiceUnitTest {
 				.willReturn(maybeSetting);
 
 			// when
-			UserNotificationSettingResponseDto result = userService.userNotificationSetting(
+			UserNotificationSettingResponseDto result = userService.setUserNotificationAllowance(
 				NotificationCategory.INDIVIDUAL, false, everyId);
 			// then
 			assertThat(result.getNotificationCategory()).isEqualTo(NotificationCategory.INDIVIDUAL);

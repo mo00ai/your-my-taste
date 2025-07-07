@@ -1,8 +1,9 @@
-package com.example.taste.domain.party.service;
+package com.example.taste.domain.match.service;
 
 import static com.example.taste.common.exception.ErrorCode.INVALID_INPUT_VALUE;
 import static com.example.taste.domain.match.exception.MatchErrorCode.ACTIVE_MATCH_EXISTS;
 import static com.example.taste.domain.party.exception.PartyErrorCode.MAX_CAPACITY_LESS_THAN_CURRENT;
+import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_ACTIVE_PARTY;
 import static com.example.taste.domain.party.exception.PartyErrorCode.NOT_PARTY_HOST;
 import static com.example.taste.domain.party.exception.PartyErrorCode.PARTY_NOT_FOUND;
 import static com.example.taste.domain.store.exception.StoreErrorCode.STORE_NOT_FOUND;
@@ -12,12 +13,15 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.match.dto.request.PartyMatchInfoCreateRequestDto;
-import com.example.taste.domain.match.service.MatchService;
 import com.example.taste.domain.party.dto.request.PartyCreateRequestDto;
 import com.example.taste.domain.party.dto.request.PartyUpdateRequestDto;
 import com.example.taste.domain.party.dto.response.PartyDetailResponseDto;
@@ -27,6 +31,7 @@ import com.example.taste.domain.party.entity.PartyInvitation;
 import com.example.taste.domain.party.enums.InvitationStatus;
 import com.example.taste.domain.party.enums.InvitationType;
 import com.example.taste.domain.party.enums.PartyFilter;
+import com.example.taste.domain.party.enums.PartySort;
 import com.example.taste.domain.party.repository.PartyInvitationRepository;
 import com.example.taste.domain.party.repository.PartyRepository;
 import com.example.taste.domain.store.entity.Store;
@@ -66,24 +71,14 @@ public class PartyService {
 		}
 	}
 
-	// TODO: 정렬 기준 추가 - @윤예진
-	public List<PartyResponseDto> getParties(Long userId, String filter) {
-		PartyFilter partyFilter = PartyFilter.of(filter);
-		switch (partyFilter) {
-			case ALL -> {
-				// 유저가 참가한 파티 제외하고 모든 파티 보여줌
-				return partyRepository.findAllByRecruitingAndUserNotIn(userId).stream()
-					.map(PartyResponseDto::new)
-					.toList();
-			}
-			case MY -> {
-				// 유저가 참가, 호스트인 파티 모두 보여줌
-				return partyRepository.findAllByUserIn(userId).stream()
-					.map(PartyResponseDto::new)
-					.toList();
-			}
-			default -> throw new CustomException(INVALID_INPUT_VALUE);
-		}
+	public SliceImpl<PartyResponseDto> getParties(Long userId, String filter, Pageable pageable) {
+		validateSort(pageable.getSort());
+
+		Slice<Party> partySlice = partyRepository.findAllByFilterAndSorted(userId, PartyFilter.of(filter), pageable);
+
+		return new SliceImpl<>(partySlice.getContent().stream()
+			.map(PartyResponseDto::new)
+			.toList(), pageable, partySlice.hasNext());
 	}
 
 	public PartyDetailResponseDto getPartyDetail(Long partyId) {
@@ -104,12 +99,17 @@ public class PartyService {
 	@Transactional
 	public void updatePartyDetail(
 		Long hostId, Long partyId, PartyUpdateRequestDto requestDto) {
-		Party party = partyRepository.findById(partyId)
+		Party party = partyRepository.findByIdAndDeletedAtIsNull(partyId)
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
 
 		// 호스트가 아니라면
 		if (!party.isHostOfParty(hostId)) {
 			throw new CustomException(NOT_PARTY_HOST);
+		}
+
+		// 만료된 경우
+		if (party.getDeletedAt() != null) {
+			throw new CustomException(NOT_ACTIVE_PARTY);
 		}
 
 		// 랜덤 매칭 중인 경우
@@ -146,5 +146,19 @@ public class PartyService {
 		}
 
 		partyRepository.delete(party);
+	}
+
+	private void validateSort(Sort sort) {
+		long sortCount = sort.stream().count();
+
+		if (sortCount > 1) {
+			throw new CustomException(INVALID_INPUT_VALUE, "파티 정렬 기준은 1개 이하만 허용됩니다.");
+		}
+
+		for (Sort.Order order : sort) {
+			if (!PartySort.isValid(order.getProperty())) {
+				throw new CustomException(INVALID_INPUT_VALUE, "파티 정렬 값이 유효하지 않습니다.");
+			}
+		}
 	}
 }

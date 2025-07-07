@@ -141,7 +141,7 @@ public class NotificationUserService {
 		// mysql 알림 읽음 처리
 		List<Long> list = new ArrayList<>();
 		list.add(contentID);
-		markSqlNotificationAsRead(userId, list);
+		readNotification(userId, list);
 	}
 
 	// 모든 알림 읽음 처리
@@ -164,11 +164,11 @@ public class NotificationUserService {
 
 		// mysql 알림 읽음 처리
 		List<Long> emptyList = new ArrayList<>();
-		markSqlNotificationAsRead(userId, emptyList);
+		readNotification(userId, emptyList);
 	}
 
 	@Transactional
-	public UserNotificationSettingResponseDto userNotificationSetting(
+	public UserNotificationSettingResponseDto setUserNotificationAllowance(
 		NotificationCategory category,
 		boolean isSet,
 		Long userId
@@ -214,10 +214,10 @@ public class NotificationUserService {
 		return Long.parseLong(parts[parts.length - 2]);
 	}
 
-	private void markSqlNotificationAsRead(Long userId, List<Long> contentsIds) {
-		List<NotificationInfo> mysqlNotifications = notificationInfoRepository.getNotificationInfoWithContents(userId,
+	private void readNotification(Long userId, List<Long> contentsIds) {
+		List<NotificationInfo> storageNotifications = notificationInfoRepository.getNotificationInfoWithContents(userId,
 			contentsIds);
-		mysqlNotifications.forEach(NotificationInfo::readIt);
-		notificationInfoRepository.saveAll(mysqlNotifications);
+		storageNotifications.forEach(NotificationInfo::readIt);
+		notificationInfoRepository.saveAll(storageNotifications);
 	}
 }

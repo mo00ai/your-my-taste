@@ -31,17 +31,16 @@ public class ChatService {
 
 	// 보낸 메세지 저장
 	public ChatResponseDto saveMessage(Long userId, ChatCreateRequestDto dto) {
-		User user = userRepository.findById(userId)
+		User user = userRepository.findByIdWithImage(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 		Party party = partyRepository.findById(dto.getPartyId())
 			.orElseThrow(() -> new CustomException(PARTY_NOT_FOUND));
-		if (!partyInvitationRepository.isConfirmedPartyMember(dto.getPartyId(), user.getId())) {
+		if (!partyInvitationRepository.isConfirmedPartyMember(dto.getPartyId(), userId)) {
 			throw new CustomException(UNAUTHORIZED_PARTY_INVITATION);
 		}
 		Chat chat = chatRepository.save(new Chat(dto, user, party));
-		User userWithImage = userRepository.findByIdWithImage(user.getId())
-			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
-		chat.setUser(userWithImage);
+
+		chat.setUser(user);
 		return new ChatResponseDto(chat);
 	}
 

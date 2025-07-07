@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.match.dto.MatchEvent;
+import com.example.taste.domain.match.service.MatchEngineCacheService;
 import com.example.taste.domain.match.service.MatchEngineService;
 
 @Service
@@ -20,6 +21,7 @@ import com.example.taste.domain.match.service.MatchEngineService;
 public class MatchSubscriber implements MessageListener {
 	private final RedisService redisService;
 	private final MatchEngineService matchEngineService;
+	private final MatchEngineCacheService matchEngineCacheService;
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
@@ -33,7 +35,8 @@ public class MatchSubscriber implements MessageListener {
 		// 작업 타입에 따라 메소드 호출
 		switch (event.getMatchJobType()) {
 			case USER_MATCH -> {
-				matchEngineService.runMatchingForUser(event.getUserMatchInfoIdList());
+				// matchEngineService.runMatchingForUser(event.getUserMatchInfoIdList());
+				matchEngineCacheService.runMatchingForUser(event.getUserMatchInfoIdList());
 			}
 			case PARTY_MATCH -> {
 				matchEngineService.runMatchingForParty();

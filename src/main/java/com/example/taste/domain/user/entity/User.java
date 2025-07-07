@@ -1,6 +1,6 @@
 package com.example.taste.domain.user.entity;
 
-import static com.example.taste.domain.pk.exception.PkErrorCode.*;
+import static com.example.taste.domain.pk.exception.PkErrorCode.PK_POINT_OVERFLOW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

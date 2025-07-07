@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.example.taste.common.entity.SoftDeletableEntity;
-import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.comment.entity.Comment;
 import com.example.taste.domain.event.entity.BoardEvent;
@@ -112,12 +111,12 @@ public class Board extends SoftDeletableEntity {
 	}
 
 	@Builder(builderMethodName = "nBoardBuilder", buildMethodName = "buildNormal")
-	public Board(BoardRequestDto requestDto, Store store, User user) {
-		this.title = requestDto.getTitle();
-		this.contents = requestDto.getContents();
-		this.type = requestDto.getType() != null ? BoardType.from(requestDto.getType()) : BoardType.N;
+	public Board(String title, String contents, String type, String accessPolicy, Store store, User user) {
+		this.title = title;
+		this.contents = contents;
+		this.type = type != null ? BoardType.from(type) : BoardType.N;
 		this.accessPolicy =
-			requestDto.getAccessPolicy() != null ? AccessPolicy.from(requestDto.getAccessPolicy()) : AccessPolicy.OPEN;
+			accessPolicy != null ? AccessPolicy.from(accessPolicy) : AccessPolicy.OPEN;
 		register(store, user);
 	}
 

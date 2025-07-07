@@ -41,6 +41,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'io.projectreactor:reactor-test'
     implementation 'com.mchange:c3p0:0.9.5.5'
 
     // Spring starters
@@ -64,6 +66,8 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Validation
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -115,9 +119,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    // web_push
-    implementation 'nl.martijndwars:web-push:5.1.0'
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.78'
+    //firebase
+    implementation 'com.google.firebase:firebase-admin:9.5.0'
 
     //circuit breaker
     implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.0'

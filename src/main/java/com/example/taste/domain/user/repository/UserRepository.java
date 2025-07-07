@@ -10,11 +10,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.taste.domain.user.dto.UserSigninProjectionDto;
 import com.example.taste.domain.user.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom, UserRepositoryJooqCustom {
 	Optional<User> findUserByEmail(String email);
+
+	Optional<UserSigninProjectionDto> findSigninProjectionByEmail(String email);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userFavorList WHERE u.id = :id")
 	Optional<User> findByIdWithUserFavorList(@Param("id") Long id);
@@ -29,9 +32,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 	List<Long> findFollowingIds(@Param("userId") Long userId);
 
 	Optional<User> findByIdAndDeletedAtIsNull(Long id);
-
-	@Query("SELECT u FROM User u JOIN FETCH u.image WHERE u.id = :id")
-	Optional<User> findByIdWithImage(@Param("id") Long id);
 
 	@Modifying
 	@Query("UPDATE User u SET u.point = 0")
