@@ -72,6 +72,8 @@ docker-compose up -d
 - [회고](#회고)
 - [팀원 소개](#팀원-소개)
 
+<br><br>
+
 ## 주요 기능
 
 <details>
