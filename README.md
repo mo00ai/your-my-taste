@@ -2,6 +2,22 @@
 
 <br><br>
 
+
+# 목차
+
+- [프로젝트 소개](#프로젝트-소개)
+- [프로젝트 실행 방법](#프로젝트-실행-방법)
+- [주요 기능](#주요-기능)
+- [기술 스택](#기술-스택)
+- [아키텍처](#아키텍처)
+- [설계](#설계)
+- [기술적 의사결정](#기술적-의사결정)
+- [성능 개선](#성능-개선)
+- [트러블 슈팅](#트러블-슈팅)
+- [팀원 소개](#팀원-소개)
+
+<br><br>
+
 # 프로젝트 소개
 
 MZ세대는 맛집 정보를 찾기 위해 여러 앱과 플랫폼을 번갈아 사용하지만, 정보가 분산되어 불편을 겪고 있습니다. <br>
@@ -15,10 +31,6 @@ MZ세대는 맛집 정보를 찾기 위해 여러 앱과 플랫폼을 번갈아 
 
 **[🔗 시연 영상](https://www.youtube.com/watch?v=_ya4lTQ6O5s)**
 <br><br>
-
-## 배포
-
-**[🔗 Your My Taste](https://your-my-taste.site)**
 
 <br><br>
 
@@ -56,20 +68,6 @@ docker-compose up -d
 
 <br><br>
 
-# 목차
-
-- [프로젝트 소개](#프로젝트-소개)
-- [프로젝트 실행 방법](#프로젝트-실행-방법)
-- [주요 기능](#주요-기능)
-- [기술 스택](#기술-스택)
-- [아키텍처](#아키텍처)
-- [설계](#설계)
-- [기술적 의사결정](#기술적-의사결정)
-- [성능 개선](#성능-개선)
-- [트러블 슈팅](#트러블-슈팅)
-- [팀원 소개](#팀원-소개)
-
-<br><br>
 
 ## 주요 기능
 
@@ -223,8 +221,6 @@ docker-compose up -d
 
 **[🔗 API 명세서](https://quill-hourglass-d62.notion.site/229c428f990a80f5bb64d1667c3f274c?v=229c428f990a81a6a02e000cf90f230a&source=copy_link)**
 
-
-**RESTful 규칙을 지향**했고, 담당자·진행상황·상태코드·에러 응답 등 핵심 항목을 포함해 **실무 위주의 명세서**로 작성했습니다.
 
 <br><br>
 
@@ -1202,7 +1198,7 @@ Cursor 방식으로 전환 후, 전체 10만 건 데이터가 빠짐없이 정�
 nGrinder Agent를 여럿 생성하는 환경에서 Controller에 연결된 Agent가 지속적으로 유실되는 상황이 발생함
 
 ![agent를 3개 실행시켰음](./image/ngrinderTrb1.png)
-=
+
 
 agent를 3개 실행시켰음
 
@@ -1549,13 +1545,7 @@ public Board(String title, String contents, String type, String accessPolicy,
 
 <details>
 <summary><strong>게시글 생성 전략 패턴 적용</strong></summary>
-
-## 프로젝트 수행 경과 - 트러블슈팅
-
-# 게시글 생성 전략 패턴 적용
-
----
-
+	
 ### 발견한 문제점
 
 - 게시글 생성 시, 타입마다 분기문으로 처리  
@@ -1601,12 +1591,6 @@ Board entity = strategy.createBoard(requestDto, store, user);
 <details>
 <summary><strong>형태소 분석 초기 지연 개선</strong></summary>
 
-## 프로젝트 수행 경과 - 트러블슈팅
-
-# 형태소 분석 초기 지연 개선
-
----
-
 ### 발견한 문제점
 
 - 검색 쿼리 전처리(형태소 분석) 과정에서 첫 요청 시 속도가 과도하게 느림
@@ -1632,11 +1616,6 @@ Board entity = strategy.createBoard(requestDto, store, user);
 <details>
 <summary><strong>웹소켓 통신에서의 인증 처리 문제</strong></summary>
 
-## 프로젝트 수행 경과 - 트러블슈팅
-
-# 웹소켓 통신에서의 인증 처리 문제
-
----
 
 ### 발견한 문제점
 
