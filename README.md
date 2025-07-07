@@ -228,7 +228,7 @@ docker-compose up -d
 **[🔗 API 명세서](https://www.figma.com/proto/xDPayyfst1tmlY1twpso3E/%EB%8B%88%EB%A7%9B%EB%82%B4%EB%A7%9B?node-id=10-309&t=hl3osNc9mnhTzDTD-1)**
 
 
-RESTful 규칙을 지향했고, 담당자·진행상황·상태코드·에러 응답 등 핵심 항목을 포함해 실무 위주의 명세서로 작성했습니다.
+**RESTful 규칙을 지향**했고, 담당자·진행상황·상태코드·에러 응답 등 핵심 항목을 포함해 **실무 위주의 명세서**로 작성했습니다.
 
 <br><br>
 
