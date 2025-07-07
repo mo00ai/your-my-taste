@@ -151,61 +151,17 @@ docker-compose up -d
 
 # 기술 스택
 
-### Language
-
-<img src="https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=OpenJDK&logoColor=white">
-
----
-
-### Interface Description Language & Tool
-
-<img src="https://img.shields.io/badge/IntelliJ%20IDEA-000000?style=for-the-badge&logo=intellijidea&logoColor=white">
-
----
-
-### Backend
-
-<img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
-
-<img src="https://img.shields.io/badge/Quartz-3C3C3C?style=for-the-badge&logo=Quartz&logoColor=white"> <img src="https://img.shields.io/badge/jOOQ-4169E1?style=for-the-badge&logo=Jooq&logoColor=white">
-
-***
-
-### Logging & Monitoring & Analytics
-
-<img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"> <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"> <img src="https://img.shields.io/badge/Micrometer-2E7D32?style=for-the-badge&logo=Spring&logoColor=white">
-
----
-
-### Security
-
-<img src="https://img.shields.io/badge/Session-007396?style=for-the-badge"> <img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white">
-
----
-
-### Collaboration Tool
-
-<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white"> <img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white"> <img src="https://img.shields.io/badge/ERDCloud-0078D4?style=for-the-badge&logoColor=white">
-
----
-
-### Deployment & Distribution
-
-<img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHubActions&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white"> <img src="https://img.shields.io/badge/Certbot-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white">
-
-<img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20ElastiCache-0052CC?style=for-the-badge&logo=AmazonAWS&logoColor=white"> <img src="https://img.shields.io/badge/Route53-FF9900?style=for-the-badge&logo=AmazonRoute53&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white"> <img src="https://img.shields.io/badge/CloudFront-232F3E?style=for-the-badge&logo=AmazonAWS&logoColor=white">
-
----
-
-### API Communication
-
-<img src="https://img.shields.io/badge/Redis%20Pub%2FSub-DC382D?style=for-the-badge&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=WebSocket&logoColor=white"> <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=RabbitMQ&logoColor=white">
-
----
-
-### DataBase
-
-<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
+| 구분                          | 기술 스택                                                                                                                                                                                                                                        |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Language**                  | ![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=OpenJDK&logoColor=white)                                                                                                         |
+| **Interface Description Tool**| ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ%20IDEA-000000?style=for-the-badge&logo=intellijidea&logoColor=white)                                                                               |
+| **Backend**                   | ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white) ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white) ![Spring Batch](https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=Spring&logoColor=white) <br> ![Quartz](https://img.shields.io/badge/Quartz-3C3C3C?style=for-the-badge&logo=Quartz&logoColor=white)![jOOQ](https://img.shields.io/badge/jOOQ-4169E1?style=for-the-badge&logo=Jooq&logoColor=white) |
+| **Logging & Monitoring & Analytics** | ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white) ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white) ![Micrometer](https://img.shields.io/badge/Micrometer-2E7D32?style=for-the-badge&logo=Spring&logoColor=white) |
+| **Security**                  | ![Session](https://img.shields.io/badge/Session-007396?style=for-the-badge) ![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white)                                    |
+| **Collaboration Tool**        | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white) ![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white) ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white) ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=Figma&logoColor=white) ![ERDCloud](https://img.shields.io/badge/ERDCloud-0078D4?style=for-the-badge&logoColor=white) |
+| **Deployment & Distribution** | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHubActions&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white) ![Certbot](https://img.shields.io/badge/Certbot-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white) ![Amazon EC2](https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white) ![Amazon RDS](https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white) ![Amazon ElastiCache](https://img.shields.io/badge/Amazon%20ElastiCache-0052CC?style=for-the-badge&logo=AmazonAWS&logoColor=white) ![Route53](https://img.shields.io/badge/Route53-FF9900?style=for-the-badge&logo=AmazonRoute53&logoColor=white) ![Amazon S3](https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white) ![CloudFront](https://img.shields.io/badge/CloudFront-232F3E?style=for-the-badge&logo=AmazonAWS&logoColor=white) |
+| **API Communication**         | ![Redis Pub/Sub](https://img.shields.io/badge/Redis%20Pub%2FSub-DC382D?style=for-the-badge&logo=Redis&logoColor=white) ![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=WebSocket&logoColor=white) ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=RabbitMQ&logoColor=white) |
+| **DataBase**                  | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white)                             |
 
 <br><br>
 
@@ -242,6 +198,8 @@ docker-compose up -d
 
 <details>
 <summary><strong>쿼리 방식 선택 전략</strong></summary>
+
+---
 
 이번 프로젝트에서는 단순 조회부터 동적 조건 기반 검색, 집계 및 배치성 업데이트 쿼리까지 다양한 유형의 데이터 접근 로직이 요구되었습니다.
 
@@ -280,6 +238,8 @@ JPA 메서드, JPQL, QueryDSL, native query, jOOQ 등 여러 접근 방식 중 �
 
 ### 개선 방향 및 선택 기준
 
+<br>
+
 이번 프로젝트에서는 유지보수성과 타입 안정성을 높이기 위해 쿼리 작성 방식을 통일하고, JPQL, native query는 최소화했습니다.
 
 쿼리의 복잡도와 성격에 따라 JPA 메서드, QueryDSL, jOOQ를 기준에 맞춰 선택하는 방식으로 개선했습니다.
@@ -310,12 +270,16 @@ DB를 MySQL에서 PostgreSQL로 변경하면서 SQL 함수를 직접 사용하�
 
 이를 통해 DB 종속성에 따른 유지보수 비용을 체감할 수 있었습니다.
 
+---
+
 </details>
 
 
 
 <details>
 <summary><strong>기술 고도화 사전 스터디 및 공통 설정 의사결정</strong></summary>
+
+---
 
 ### 1. 배경
 
@@ -371,11 +335,15 @@ DB를 MySQL에서 PostgreSQL로 변경하면서 SQL 함수를 직접 사용하�
 
 ✅ 주요 공통 설정 사항은 문서화 후 팀 내 공유
 
+---
+
 </details>
 
 
 <details>
 <summary><strong>맛집 검색 시스템 기술 스택 의사결정</strong></summary>
+
+---
 
 ## 1. Elasticsearch 도입 검토
 
@@ -443,11 +411,15 @@ DB를 MySQL에서 PostgreSQL로 변경하면서 SQL 함수를 직접 사용하�
 - **운영 단순성**: Elasticsearch 대비 관리 복잡성 최소화
 - **확장성**: 파티셔닝, 병렬 쿼리 등 성장 대응 가능
 
+---
+
 </details>
 
 
 <details>
 <summary><strong>알림 즉각 전달 방식</strong></summary>
+
+---
 
 ### 1. 배경
 
@@ -516,12 +488,16 @@ Web Push방식을 사용하기로 하였음
 - 또한 한 클라이언트가 여러 브라우저에서 로그인 한 상태에서도 같은 알림 조회 경험 가능  
   (클라이언트가 가진 모든 엔드포인트에 알림을 동시 전송)
 
+---
+
 </details>
 
 
 
 <details>
 <summary><strong>지금 뭐 먹을까 AI 추천 서비스 기술 의사결정</strong></summary>
+
+---
 
 ## 배경
 
@@ -592,6 +568,8 @@ Web Push방식을 사용하기로 하였음
 - 기상청 API의 초단기예보 데이터를 활용해 시 단위로 하루치 날씨를 캐싱하는 전략 도입 예정
 - 세부 주소 단위가 아닌 지역(시/동) 단위로 캐싱함으로써 반복 호출을 줄이고 응답 속도 개선
 
+---
+
 </details>
 
 <br><br>
@@ -600,6 +578,8 @@ Web Push방식을 사용하기로 하였음
 
 <details>
 <summary><strong>이미지 presigned url, Cloudfront 성능 개선</strong></summary>
+
+---
 
 ### 1. 배경
 
@@ -699,10 +679,14 @@ Web Push방식을 사용하기로 하였음
 - CloudFront: 이미지 조회 평균 13배 이상 속도 개선
 - 전반적인 사용자 이미지 경험이 대폭 향상됨
 
+---
+
 </details>
 
 <details>
 <summary><strong>반복 실행 로직 → 배치 & 쿼츠 기반 성능 개선</strong></summary>
+
+---
 
 ### 1. 문제 상황
 
@@ -809,10 +793,14 @@ Web Push방식을 사용하기로 하였음
 ✅ DB 조회가 전체 서비스 성능에 미치는 영향이 크며,  
 향후 모든 설계에서 이 부분 최적화가 필수임을 인식
 
+---
+
 </details>
 
 <details>
 <summary><strong>알림 생성 최적화</strong></summary>
+
+---
 
 ### 1. 문제점
 
@@ -849,10 +837,14 @@ Web Push방식을 사용하기로 하였음
 - 특히 레퍼런스 방식은 기존 속도를 유지하면서 메모리 사용량 77% 이상 절감
 - 대량 알림 처리 시 안정성 확보에 큰 기여
 
+---
+
 </details>
 
 <details>
 <summary><strong>동시성 제어 성능 개선</strong></summary>
+
+---
 
 ### 발생 배경
 
@@ -915,7 +907,8 @@ Lettuce는 동시성 문제를 해결하는 데 유효했지만, 락 획득 실�
 반면, Redisson은 성능과 정합성 측면 모두에서 가장 안정적인 결과를 보였으며, 실제 운영 환경에도 무리 없이 적용 가능한 방식임을 확인했습니다.
 
 동시성 제어는 단순히 로직을 구성하는 것을 넘어, **트래픽 규모에 따라 전략적으로 접근 방식이 달라져야 한다**는 점을 체감하게 되었습니다.
-  
+
+---
 
 </details>
 
@@ -926,6 +919,8 @@ Lettuce는 동시성 문제를 해결하는 데 유효했지만, 락 획득 실�
 
 <details>
 <summary><strong>CI/CD 의사결정 및 트러블 슈팅</strong></summary>
+
+---
 
 ## 1. 환경 프로파일 분리 문제
 
@@ -1145,10 +1140,14 @@ services:
 
 지금은 각 Job이 명확히 역할을 분리하고, 모든 테스트가 예측 가능한 환경에서 안정적으로 수행되고 있어 전체 개발 효율이 크게 향상된 상태다.
 
+---
+
 </details>
 
 <details>
 <summary><strong>배치 작업 중 데이터 누락</strong></summary>
+
+---
 
 ### 문제
 
@@ -1190,10 +1189,14 @@ Cursor 방식으로 전환 후, 전체 10만 건 데이터가 빠짐없이 정�
 
 해당 개선으로 배치의 안정성이 크게 향상되었으며, 추후 성능 개선이 필요할 경우 병렬 처리 도입을 고려할 예정입니다.
 
+---
+
 </details>
 
 <details>
 <summary><strong>nGrinder Agent 포트 문제</strong></summary>
+
+---
 
 nGrinder Agent를 여럿 생성하는 환경에서 Controller에 연결된 Agent가 지속적으로 유실되는 상황이 발생함
 
@@ -1362,10 +1365,14 @@ public Board(String title, String contents, String type, String accessPolicy,
 1. Lombok `@Builder`를 통해 서로 다른 생성자에 적용할 때는 반드시 `builderMethodName`과 `buildMethodName`을 **모두** 명시적으로 지정해야 합니다.
 2. **팀 협업 관점**: 서로 다른 빌더 생성자를 호출하는 상황에서는 다른 팀원들도 명확히 구분할 수 있도록 의미있는 메서드명을 사용하는 것이 중요합니다.
 
+---
+
 </details>
 
 <details>
 <summary><strong>Redis 세션 기반 로그인 개선 및 스프링 시큐리티 필터 개선 시도</strong></summary>
+
+---
 
 ### 1. 문제 요약
 
@@ -1442,10 +1449,14 @@ public Board(String title, String contents, String type, String accessPolicy,
 
 - 관리자 전용 세션 목록 조회, 강제 로그아웃 기능 도입 검토
 
+---
+
 </details>
 
 <details>
 <summary><strong>알림 생성 방식 개선</strong></summary>
+
+---
 
 ### 1. 배경
 
@@ -1484,10 +1495,14 @@ public Board(String title, String contents, String type, String accessPolicy,
 - 메서드의 Transaction 성공 여부를 기다리기 위해 Transactional Event Listener로 교체
 - 메서드의 Transaction이 정상적으로 완료 된 이후부터 알림 생성을 시작하게 되었음
 
+---
+
 </details>
 
 <details>
 <summary><strong>api 에러 모니터링  Redis Streams → RabbitMQ로 변경</strong></summary>
+
+---
 
 ### 1. 배경
 
@@ -1541,11 +1556,15 @@ public Board(String title, String contents, String type, String accessPolicy,
 - 이벤트 기반 처리를 통해 **커넥션 풀 병목 vs 타임아웃 오류 구분**, 사용자에게 정확한 피드백 제공 가능
 - 현재는 RabbitMQ 기반 구조로 안정화되었으며, 서비스 확장에 유리한 구조로 리팩토링 완료됨
 
+---
+
 </details>
 
 <details>
 <summary><strong>게시글 생성 전략 패턴 적용</strong></summary>
-	
+
+---
+ 
 ### 발견한 문제점
 
 - 게시글 생성 시, 타입마다 분기문으로 처리  
@@ -1586,10 +1605,14 @@ Board entity = strategy.createBoard(requestDto, store, user);
 - 게시글 타입 추가/변경 시 서비스 로직 수정 불필요
 - 전략 클래스 단위로 책임 분리되어 유지보수 용이
 
+---
+
 </details>
 
 <details>
 <summary><strong>형태소 분석 초기 지연 개선</strong></summary>
+
+---
 
 ### 발견한 문제점
 
@@ -1651,6 +1674,8 @@ getDestination());
 	return null;
 	}
 ```
+
+---
 
 </details>
 
