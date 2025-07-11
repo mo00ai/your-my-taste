@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taste.common.exception.CustomException;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
@@ -40,10 +39,9 @@ public class NotificationService {
 
 	// 개별 알림
 	public void sendIndividual(NotificationContent content, NotificationDataDto dataDto) {
-		User user = userRepository.findById(dataDto.getUserId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_USER));
+		User userReference = userRepository.getReferenceById(dataDto.getUserId());
 
-		List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(user.getId());
+		List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(userReference.getId());
 		for (WebPushSubscription subscription : webPushSubscriptions) {
 			try {
 				webPushService.send(subscription, dataDto, content.getId());
@@ -57,35 +55,8 @@ public class NotificationService {
 		infoRepository.save(NotificationInfo.builder()
 			.category(dataDto.getCategory())
 			.notificationContent(content)
-			.user(user)
+			.user(userReference)
 			.build());
-	}
-
-	// 단체알림(마케팅, 시스템)
-	@Transactional
-	public void sendBunch(NotificationContent content, NotificationDataDto dataDto, List<User> allUser) {
-		List<NotificationInfo> notificationInfos = new ArrayList<>();
-		for (User user : allUser) {
-			Long userId = user.getId();
-			List<WebPushSubscription> webPushSubscriptions = webPushRepository.findByUserId(userId);
-			for (WebPushSubscription subscription : webPushSubscriptions) {
-				try {
-					webPushService.send(subscription, dataDto, content.getId());
-				} catch (Exception e) {
-					log.error("Failed to send web push to subscription: {}", subscription.getFcmToken(), e);
-				}
-
-			}
-			notificationRedisService.storeAndTrimNotification(userId, content.getId(),
-				dataDto);
-
-			notificationInfos.add(NotificationInfo.builder()
-				.category(dataDto.getCategory())
-				.notificationContent(content)
-				.user(user)
-				.build());
-		}
-		infoRepository.saveAll(notificationInfos);
 	}
 
 	// 단체알림 reference by id (다른 방식으로 구현)
@@ -110,7 +81,6 @@ public class NotificationService {
 				.category(dataDto.getCategory())
 				.notificationContent(content)
 				.user(userRepository.getReferenceById(id))
-				.user(new User(id))
 				.build());
 		}
 		infoRepository.saveAll(notificationInfos);

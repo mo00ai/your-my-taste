@@ -35,7 +35,6 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 	public void handle(NotificationPublishDto dto) {
 		NotificationDataDto dataDto = notificationService.makeDataDto(dto);
 		NotificationContent notificationContent = notificationService.saveContent(dataDto);
-		notificationService.sendIndividual(notificationContent, dataDto);
 
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함

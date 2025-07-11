@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.example.taste.common.util.MemoryTracker;
@@ -15,7 +14,6 @@ import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.redis.CategorySupport;
 import com.example.taste.domain.notification.service.NotificationService;
-import com.example.taste.domain.user.entity.User;
 import com.example.taste.domain.user.repository.UserRepository;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -51,18 +49,19 @@ public class SystemNotificationStrategy implements NotificationStrategy, Categor
 
 		// 페이징 방식
 		// 유저를 1000명 단위로 끊어와 보냄
+		// reference by id
 		int page = 0;
-		int size = 1000;
-		Page<User> users;
+		int size = 10000;
+		Page<Long> userIds;
 		do {
-			users = userRepository.findAll(PageRequest.of(page, size, Sort.by("id").ascending()));
-			List<User> currentUsers = users.getContent();
-			memoryTracker.measureMemoryUsage("sendBunch", () -> {
-				notificationService.sendBunch(notificationContent, dataDto, currentUsers);
+			userIds = userRepository.getAllUserIdPage(PageRequest.of(page, size));
+			List<Long> currentUserId = userIds.getContent();
+			memoryTracker.measureMemoryUsage("reference", () -> {
+				notificationService.sendBunchUsingReference(notificationContent, dataDto, currentUserId);
 			});
 			entityManager.clear();
 			page++;
-		} while (users.hasNext());
+		} while (userIds.hasNext());
 		sample.stop(meterRegistry.timer("sendBunch"));
 
 	}
