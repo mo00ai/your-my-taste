@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.example.taste.domain.user.entity.Follow;
 
 @Repository
-public interface FollowRepository extends JpaRepository<Follow, Long> {
+public interface FollowRepository extends JpaRepository<Follow, Long>, FollowRepositroryCustom {
 
 	Optional<Follow> findByFollowerIdAndFollowingId(Long followerId, Long followingId);
 

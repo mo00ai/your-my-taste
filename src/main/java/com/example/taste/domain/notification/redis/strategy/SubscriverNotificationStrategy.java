@@ -1,11 +1,13 @@
 package com.example.taste.domain.notification.redis.strategy;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import com.example.taste.common.util.MemoryTracker;
 import com.example.taste.domain.notification.dto.NotificationDataDto;
 import com.example.taste.domain.notification.dto.NotificationPublishDto;
 import com.example.taste.domain.notification.entity.NotificationContent;
@@ -15,6 +17,10 @@ import com.example.taste.domain.notification.service.NotificationService;
 import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.repository.FollowRepository;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,8 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SubscriverNotificationStrategy implements NotificationStrategy, CategorySupport {
 
+	private final MeterRegistry meterRegistry;
+	private final MemoryTracker memoryTracker;
 	private final NotificationService notificationService;
 	private final FollowRepository followRepository;
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Override
 	public Set<NotificationCategory> getSupportedCategories() {
@@ -33,6 +43,7 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 
 	@Override
 	public void handle(NotificationPublishDto dto) {
+		Timer.Sample sample = Timer.start(meterRegistry);
 		NotificationDataDto dataDto = notificationService.makeDataDto(dto);
 		NotificationContent notificationContent = notificationService.saveContent(dataDto);
 
@@ -41,11 +52,18 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
 		List<Follow> followList = followRepository.findByFollowingId(dto.getUserId());
 		// 팔로우 하는 모든 유저를 가져옴
-		List<Long> followerIds = new ArrayList<>();
-		for (Follow follow : followList) {
-			followerIds.add(follow.getFollower().getId());
-		}
-		notificationService.sendBunchUsingReference(notificationContent, dataDto, followerIds);
-
+		int page = 0;
+		int size = 10000;
+		Page<Long> userIds;
+		do {
+			PageRequest pageRequest = PageRequest.of(page, size);
+			userIds = followRepository.findAllIdByFollowing(dto.getUserId(), pageRequest);
+			List<Long> currentUserId = userIds.getContent();
+			memoryTracker.measureMemoryUsage("reference", () -> {
+				notificationService.sendBunchUsingReference(notificationContent, dataDto, currentUserId);
+			});
+			entityManager.clear();
+			page++;
+		} while (userIds.hasNext());
 	}
 }
