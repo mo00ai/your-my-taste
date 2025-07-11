@@ -46,3 +46,4 @@ src/main/generated
 
 .DS_Store
 /src/main/java/com/example/taste/common/util/BulkUserInsertRunner.java
+

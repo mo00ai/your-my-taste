@@ -81,7 +81,7 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_IMAGE }}
 
-  build-and-test:
+  build-and-integrationTest:
     runs-on: ubuntu-latest
     needs: generate-jooq
 
@@ -116,7 +116,7 @@ jobs:
       FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
       FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
 
-    
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
@@ -165,3 +165,4 @@ jobs:
 
       - name: Run Integration Tests
         run: ./gradlew integrationTest
+

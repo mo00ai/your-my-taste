@@ -72,6 +72,6 @@ jobs:
             echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
             echo "FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}" >> .env
             
-            docker-compose down
+            docker-compose down --remove-orphans
             docker-compose pull
             docker-compose up -d --build
