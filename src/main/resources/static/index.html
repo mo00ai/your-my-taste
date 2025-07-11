@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Cloud Messaging Test</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Login</h1>
+<div>
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email" placeholder="Enter your email">
+</div>
+<div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password">
+</div>
+<button id="loginBtn">Login</button>
+
+<hr>
+
+<h1>Firebase Cloud Messaging</h1>
+<p>Status: <span id="status">Not logged in</span></p>
+<p>FCM Token: <span id="token"></span></p>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmnbh0Elmt4KV-p3AqVhGLVulRz39LoMo",
+        authDomain: "webpush-56042.firebaseapp.com",
+        projectId: "webpush-56042",
+        storageBucket: "webpush-56042.firebasestorage.app",
+        messagingSenderId: "955852041033",
+        appId: "1:955852041033:web:3dc89ec02b35578c960898",
+        measurementId: "G-F8CV4K3ES5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    const loginBtn = document.getElementById('loginBtn');
+    const statusEl = document.getElementById('status');
+    const tokenEl = document.getElementById('token');
+
+    let vapidPublicKey = null;
+
+    loginBtn.addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        statusEl.innerText = 'Logging in...';
+
+        fetch('/auth/signin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email, password}),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                statusEl.innerText = 'Login successful!';
+                vapidPublicKey = data.data.vapidPublicKey;
+                console.log('VAPID Public Key:', vapidPublicKey);
+                requestNotificationPermission();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusEl.innerText = 'Login failed. Check console.';
+            });
+    });
+
+    function requestNotificationPermission() {
+        if (!vapidPublicKey) {
+            console.error('VAPID key is not set. Please login first.');
+            statusEl.innerText = 'VAPID key is missing.';
+            return;
+        }
+
+        console.log('Requesting notification permission...');
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                console.log('Notification permission granted.');
+                statusEl.innerText = 'Permission granted. Getting token...';
+                getToken();
+            } else {
+                console.log('Unable to get permission to notify.');
+                statusEl.innerText = 'Notification permission denied.';
+            }
+        });
+    }
+
+    function getToken(retries = 3) {
+        console.log('Attempting to get FCM token with VAPID key:', vapidPublicKey);
+        messaging.getToken({vapidKey: vapidPublicKey})
+            .then((currentToken) => {
+                if (currentToken) {
+                    console.log('FCM Token:', currentToken);
+                    tokenEl.innerText = currentToken;
+                    statusEl.innerText = 'Token received. Subscribing...';
+                    subscribeToServer(currentToken);
+                } else {
+                    console.log('No registration token available. Request permission to generate one.');
+                    statusEl.innerText = 'Could not get token.';
+                }
+            }).catch((err) => {
+            console.log('An error occurred while retrieving token. ', err);
+            if (err.code === 'messaging/failed-service-worker-registration' || err.name === 'AbortError') {
+                if (retries > 0) {
+                    console.log(`Retrying getToken... (${retries} retries left)`);
+                    setTimeout(() => getToken(retries - 1), 1000); // Retry after 1 second
+                } else {
+                    statusEl.innerText = 'Error getting token. Max retries reached.';
+                }
+            } else {
+                statusEl.innerText = 'Error getting token. Check console.';
+            }
+        });
+    }
+
+    function subscribeToServer(token) {
+        fetch('/web-push/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({fcmToken: token}),
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Successfully subscribed to push notifications.');
+                    statusEl.innerText = 'Subscribed successfully!';
+                } else {
+                    throw new Error('Failed to subscribe');
+                }
+            })
+            .catch(error => {
+                console.error('Error subscribing:', error);
+                statusEl.innerText = 'Subscription failed. Check console.';
+            });
+    }
+
+    messaging.onMessage((payload) => {
+        console.log('Message received. ', payload);
+        const notificationTitle = payload.notification.title;
+        const notificationOptions = {
+            body: payload.notification.body,
+            icon: 'image.jpg' // You can host a logo in your static assets
+        };
+        new Notification(notificationTitle, notificationOptions);
+    });
+
+</script>
+</body>
+</html>

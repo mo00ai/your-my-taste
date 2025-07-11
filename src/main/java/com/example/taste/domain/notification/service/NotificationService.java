@@ -89,7 +89,7 @@ public class NotificationService {
 	}
 
 	// 단체알림 reference by id (다른 방식으로 구현)
-	@Transactional
+	// @Transactional 다른 방식으로
 	public void sendBunchUsingReference(NotificationContent content, NotificationDataDto dataDto,
 		List<Long> allUserId) {
 
@@ -105,11 +105,11 @@ public class NotificationService {
 			}
 			notificationRedisService.storeAndTrimNotification(id, content.getId(),
 				dataDto);
-
+			// 가지고 있는 리스트
 			notificationInfos.add(NotificationInfo.builder()
 				.category(dataDto.getCategory())
 				.notificationContent(content)
-				//.user(userRepository.getReferenceById(id)) 오히려 db 접근 횟수만 늘어남-> 실제 객체 주입보다 성능이 떨어짐.
+				.user(userRepository.getReferenceById(id))
 				.user(new User(id))
 				.build());
 		}
