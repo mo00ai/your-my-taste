@@ -14,7 +14,6 @@ import com.example.taste.domain.notification.entity.NotificationContent;
 import com.example.taste.domain.notification.entity.enums.NotificationCategory;
 import com.example.taste.domain.notification.redis.CategorySupport;
 import com.example.taste.domain.notification.service.NotificationService;
-import com.example.taste.domain.user.entity.Follow;
 import com.example.taste.domain.user.repository.FollowRepository;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -49,8 +48,6 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 
 		// 이 경우 event 가 가진 user id는 게시글을 작성한 유저임
 		// 게시글을 작성한 유저를 팔로우 하는 유저를 찾아야 함
-		// 우선 구독 관계 테이블에서 해당 유저가 팔로잉 받는 데이터들을 모두 가져옴
-		List<Follow> followList = followRepository.findByFollowingId(dto.getUserId());
 		// 팔로우 하는 모든 유저를 가져옴
 		int page = 0;
 		int size = 10000;
@@ -65,5 +62,6 @@ public class SubscriverNotificationStrategy implements NotificationStrategy, Cat
 			entityManager.clear();
 			page++;
 		} while (userIds.hasNext());
+		sample.stop(meterRegistry.timer("subscribeNotifications"));
 	}
 }
