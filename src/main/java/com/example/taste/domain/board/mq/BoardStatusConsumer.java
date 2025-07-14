@@ -1,6 +1,7 @@
 package com.example.taste.domain.board.mq;
 
 import static com.example.taste.common.constant.RabbitConst.*;
+import static com.example.taste.common.constant.SocketConst.*;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,7 +20,7 @@ public class BoardStatusConsumer {
 
 	@RabbitListener(queues = QUEUE_NAME, concurrency = "3-10")
 	public void handleBoardStatus(BoardStatusDto dto) {
-		String destination = "/sub/openrun/board/" + dto.getBoardId();
+		String destination = BOARD_SOCKET_DESTINATION + dto.getBoardId();
 		messagingTemplate.convertAndSend(destination, dto.getRemainingSlot());
 	}
 }

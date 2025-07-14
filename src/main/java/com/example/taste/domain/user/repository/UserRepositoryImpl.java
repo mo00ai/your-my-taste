@@ -39,17 +39,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	// }
 
 	@Override
-	public int increasePostingCount(Long userId, int limit) {
-		return (int)queryFactory.update(user)
-			.set(user.postingCount, user.postingCount.add(1))
-			.where(
-				user.id.eq(userId),
-				user.postingCount.lt(limit)
-			)
-			.execute();
-	}
-
-	@Override
 	public Integer findAgeByUserId(Long userId) {
 		return queryFactory
 			.select(user.age)

@@ -27,7 +27,6 @@ import com.example.taste.common.exception.CustomException;
 import com.example.taste.common.exception.ErrorCode;
 import com.example.taste.common.response.CommonResponse;
 import com.example.taste.common.response.PageResponse;
-import com.example.taste.domain.user.entity.CustomUserDetails;
 import com.example.taste.domain.board.dto.request.BoardRequestDto;
 import com.example.taste.domain.board.dto.request.BoardUpdateRequestDto;
 import com.example.taste.domain.board.dto.response.BoardListResponseDto;
@@ -36,9 +35,13 @@ import com.example.taste.domain.board.dto.response.OpenRunBoardResponseDto;
 import com.example.taste.domain.board.dto.search.BoardSearchCondition;
 import com.example.taste.domain.board.service.BoardService;
 import com.example.taste.domain.board.service.LikeService;
+import com.example.taste.domain.user.entity.CustomUserDetails;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -48,6 +51,23 @@ public class BoardController {
 
 	private final BoardService boardService;
 	private final LikeService likeService;
+	private final MeterRegistry registry;
+
+	private Timer boardRate;
+	private Counter counter;
+
+	@PostConstruct
+	void init() {
+		boardRate = Timer.builder("api.board.latency")
+			.description("Board 단건 조회 응답 시간")
+			.publishPercentileHistogram()
+			.publishPercentiles(0.5, 0.95)
+			.register(registry);
+
+		counter = Counter.builder("api.board.tps")
+			.description("Board API 요청 수")
+			.register(registry);
+	}
 
 	@ImageValid
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -57,7 +77,6 @@ public class BoardController {
 		@RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
 		boardService.createBoard(userDetails.getId(), requestDto, files);
 		return CommonResponse.success(BOARD_CREATED);
-
 	}
 
 	// 게시글 단건 조회
@@ -65,8 +84,15 @@ public class BoardController {
 	public CommonResponse<BoardResponseDto> findBoard(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Long boardId) {
+		Timer.Sample sample = Timer.start(registry);
 		Long userId = userDetails.getId();
-		BoardResponseDto responseDto = boardService.findBoard(boardId, userId);
+
+		//BoardResponseDto responseDto = boardService.findBoard(boardId, userId);
+		BoardResponseDto responseDto = boardService.findBoardInCache(boardId, userId);
+
+		sample.stop(boardRate);
+		counter.increment();
+
 		return CommonResponse.ok(responseDto);
 	}
 

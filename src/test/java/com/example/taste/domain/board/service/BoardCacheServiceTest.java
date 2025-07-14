@@ -1,18 +1,20 @@
 package com.example.taste.domain.board.service;
 
-import static com.example.taste.common.constant.CacheConst.*;
+import static com.example.taste.common.constant.RedisConst.*;
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 
+import com.example.taste.common.exception.CustomException;
+import com.example.taste.common.service.RedisService;
 import com.example.taste.domain.board.dto.response.BoardResponseDto;
 import com.example.taste.domain.board.entity.Board;
 import com.example.taste.domain.board.repository.BoardRepository;
@@ -45,15 +47,13 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 	private StoreRepository storeRepository;
 	@Autowired
 	private CategoryRepository categoryRepository;
+
 	@Autowired
-	private CacheManager cacheManager;
-	@Autowired
-	@Qualifier(value = "redisCacheManager")
-	private CacheManager redisCacheManager;
+	private RedisService redisService;
 
 	@Test
 	@Transactional
-	void getInMemoryCache_whenCacheEmpty_thenSaveCacheAndReturn() {
+	void getOrSetCache_whenCacheEmpty_thenSaveCacheAndReturn() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));
@@ -62,55 +62,35 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 		Board board = boardRepository.saveAndFlush(
 			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10, LocalDateTime.now(), store,
 				user));
+		BoardResponseDto dto = new BoardResponseDto(board);
 
 		// when
-		BoardResponseDto result = boardCacheService.getInMemoryCache(board);
+		BoardResponseDto result = boardCacheService.getOrSetCache(dto.getBoardId());
 
 		// then
 		assertThat(result.getBoardId()).isEqualTo(board.getId());
-		assertThat(cacheManager.getCache(TIMEATTACK_CACHE_NAME).get(board.getId()).get()).isEqualTo(result);
 
 		// clean-up
-		cacheManager.getCache(TIMEATTACK_CACHE_NAME).evictIfPresent(board.getId());
+		redisService.deleteKey(CACHE_KEY_PREFIX + board.getId());
 	}
 
 	@Test
 	@Transactional
-	void getInMemoryCache_whenClosedBoard_thenNotSaveCache() {
+	void getOrSetCache_whenClosedBoard_thenNotSaveCache() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));
 		Category category = categoryRepository.save(CategoryFixture.create());
 		Store store = storeRepository.save(StoreFixture.create(category));
 		Board board = boardRepository.saveAndFlush(
-			BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10, LocalDateTime.now(), store, user));
-
-		// when
-		BoardResponseDto result = boardCacheService.getInMemoryCache(board);
-
-		// then
-		assertThat(result.getBoardId()).isEqualTo(board.getId());
-		assertThat(cacheManager.getCache(TIMEATTACK_CACHE_NAME).get(board.getId())).isNull();
-	}
-
-	@Test
-	@Transactional
-	void getRedisCache_whenExpiredTTL_thenNotSaveCache() {
-		// given
-		Image image = ImageFixture.create();
-		User user = userRepository.save(UserFixture.create(image));
-		Category category = categoryRepository.save(CategoryFixture.create());
-		Store store = storeRepository.save(StoreFixture.create(category));
-		Board board = boardRepository.saveAndFlush(
-			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10, LocalDateTime.now().minusMinutes(10),
+			BoardFixture.createOBoard("title", "contents", "O", CLOSED.name(), 10, LocalDateTime.now().minusDays(1),
 				store, user));
 
-		// when
-		BoardResponseDto result = boardCacheService.getRedisCache(board);
-
-		// then
-		assertThat(result.getBoardId()).isEqualTo(board.getId());
-		assertThat(redisCacheManager.getCache(FCFS_CACHE_NAME).get(board.getId())).isNull();
+		// when, then
+		assertThrows(CustomException.class, () -> {
+			boardCacheService.getOrSetCache(board.getId());
+		});
+		assertThat(redisService.getKeyValue(CACHE_KEY_PREFIX + board.getId())).isNull();
 	}
 
 	@Test
@@ -125,18 +105,20 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 				LocalDateTime.now().minusMinutes(10), store, user));
 
-		cacheManager.getCache(TIMEATTACK_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
+		redisService.setKeyValue(CACHE_KEY_PREFIX + board.getId(), new BoardResponseDto(board),
+			Duration.between(LocalDateTime.now(),
+				board.getOpenTime().plusMinutes(board.getOpenLimit())));
 
 		// when
 		boardCacheService.evictTimeAttackCaches(List.of(board.getId()));
 
 		// then
-		assertThat(cacheManager.getCache(TIMEATTACK_CACHE_NAME).get(board.getId())).isNull();
+		assertThat(redisService.getKeyValue(CACHE_KEY_PREFIX + board.getId())).isNull();
 	}
 
 	@Test
 	@Transactional
-	void evictCache_whenInputTimeAttackBoard_thenEvictInMemoryCache() {
+	void evictCache_success() {
 		// given
 		Image image = ImageFixture.create();
 		User user = userRepository.save(UserFixture.create(image));
@@ -146,33 +128,14 @@ class BoardCacheServiceTest extends AbstractIntegrationTest {
 			BoardFixture.createOBoard("title", "contents", "O", TIMEATTACK.name(), 10,
 				LocalDateTime.now().minusMinutes(10), store, user));
 
-		cacheManager.getCache(TIMEATTACK_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
+		redisService.setKeyValue(CACHE_KEY_PREFIX + board.getId(), new BoardResponseDto(board),
+			Duration.between(LocalDateTime.now(),
+				board.getOpenTime().plusMinutes(board.getOpenLimit())));
 
 		// when
 		boardCacheService.evictCache(board);
 
 		// then
-		assertThat(cacheManager.getCache(TIMEATTACK_CACHE_NAME).get(board.getId())).isNull();
-	}
-
-	@Test
-	@Transactional
-	void evictCache_whenInputFcfsBoard_thenEvictRedisCache() {
-		// given
-		Image image = ImageFixture.create();
-		User user = userRepository.save(UserFixture.create(image));
-		Category category = categoryRepository.save(CategoryFixture.create());
-		Store store = storeRepository.save(StoreFixture.create(category));
-		Board board = boardRepository.saveAndFlush(
-			BoardFixture.createOBoard("title", "contents", "O", FCFS.name(), 10, LocalDateTime.now().minusMinutes(10),
-				store, user));
-
-		redisCacheManager.getCache(FCFS_CACHE_NAME).put(board.getId(), new BoardResponseDto(board));
-
-		// when
-		boardCacheService.evictCache(board);
-
-		// then
-		assertThat(redisCacheManager.getCache(FCFS_CACHE_NAME).get(board.getId())).isNull();
+		assertThat(redisService.getKeyValue(CACHE_KEY_PREFIX + board.getId())).isNull();
 	}
 }
