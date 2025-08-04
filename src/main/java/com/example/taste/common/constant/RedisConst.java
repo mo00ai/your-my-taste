@@ -10,5 +10,6 @@ public abstract class RedisConst {
 	public final static String FCFS_KEY_PREFIX = "board:";
 	public final static String FCFS_LOCK_KEY_PREFIX = "lock:board:";
 	public final static String CACHE_KEY_PREFIX = "cache:board:";
+	public final static String CACHE_LOCK_KEY_PREFIX = "lock:cache:board:";
 	public static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
 }
