@@ -91,7 +91,6 @@ public class BoardService {
 		}
 		if (!saved.isNBoard()) {
 			user.updatePostingCnt();
-			boardCacheService.setCacheBoardResponseDto(saved); // 캐시 저장
 		}
 
 		pkService.savePkLog(userId, PkType.POST);
@@ -129,8 +128,8 @@ public class BoardService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-		BoardResponseDto responseDto = boardCacheService.getOrSetCache(boardId);
-		//BoardResponseDto responseDto = boardCacheService.getCachedBoardResponseDto(boardId);
+		//BoardResponseDto responseDto = boardCacheService.getOrSetCache(boardId);
+		BoardResponseDto responseDto = boardCacheService.getCachedBoardResponseDto(boardId);
 
 		if (N.matches(responseDto.getType())) {
 			return responseDto;
