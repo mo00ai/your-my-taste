@@ -26,7 +26,7 @@ public class ClosingBoardQuartzConfig {
 		return TriggerBuilder.newTrigger()
 			.forJob(closingBoardJobDetail)
 			.withIdentity("closingBoardJobTrigger")
-			.withSchedule(CronScheduleBuilder.cronSchedule("0 0/10 * * * ?"))
+			.withSchedule(CronScheduleBuilder.cronSchedule("0 0 4 * * ?"))
 			.build();
 	}
 }
