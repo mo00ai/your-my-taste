@@ -2,7 +2,6 @@ package com.example.taste.domain.board.batch;
 
 import static com.example.taste.domain.board.entity.AccessPolicy.*;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.batch.core.Job;
@@ -15,6 +14,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessException;
@@ -85,16 +85,6 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 	// @Bean
 	// @StepScope
 	// public ItemReader<Long> closingBoardReader(BoardService boardService) {
-	// 	// 1차 캐시가 bulk 연산을 덮어쓰지 않도록 board가 아닌 id 값만 반환
-	// 	log.info("스케줄러 실행 시간 : {}", System.currentTimeMillis());
-	// 	List<Long> expiredBoardIds = boardService.findExpiredTimeAttackBoardIds(TIMEATTACK);
-	// 	//log.debug("[BoardScheduler] 만료된 오픈런 게시글 id: {}", expiredBoardIds);
-	// 	return new IteratorItemReader<>(expiredBoardIds);
-	// }
-
-	// @Bean
-	// @StepScope
-	// public ItemReader<Long> closingBoardReader(BoardService boardService) {
 	// 	return new ItemReader<>() {
 	// 		private static final int PAGE_SIZE = 100;
 	// 		private int currentPage = 0;
@@ -126,39 +116,49 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 	// 	};
 	// }
 
+	// @Bean
+	// @StepScope
+	// public ItemReader<Long> closingBoardReader(BoardService boardService) {
+	// 	return new ItemReader<>() {
+	// 		private static final int PAGE_SIZE = 100;
+	// 		private Long lastSeenId = 0L;
+	// 		private Iterator<Long> currentIterator = null;
+	// 		private boolean noMoreData = false;
+	//
+	// 		@Override
+	// 		public Long read() {
+	// 			if (noMoreData) {
+	// 				return null;
+	// 			}
+	//
+	// 			// 현재 iterator가 없거나 모두 소비했으면 다음 페이지 조회
+	// 			if (currentIterator == null || !currentIterator.hasNext()) {
+	// 				List<Long> nextPage = boardService.findExpiredTimeAttackBoardIdsAfterId(TIMEATTACK, lastSeenId,
+	// 					PAGE_SIZE);
+	//
+	// 				if (nextPage == null || nextPage.isEmpty()) {
+	// 					noMoreData = true;
+	// 					return null;
+	// 				}
+	//
+	// 				currentIterator = nextPage.iterator();
+	// 			}
+	//
+	// 			Long next = currentIterator.next();
+	// 			lastSeenId = next;
+	// 			return next;
+	// 		}
+	// 	};
+	// }
+
 	@Bean
 	@StepScope
 	public ItemReader<Long> closingBoardReader(BoardService boardService) {
-		return new ItemReader<>() {
-			private static final int PAGE_SIZE = 100;
-			private Long lastSeenId = 0L;
-			private Iterator<Long> currentIterator = null;
-			private boolean noMoreData = false;
-
-			@Override
-			public Long read() {
-				if (noMoreData) {
-					return null;
-				}
-
-				// 현재 iterator가 없거나 모두 소비했으면 다음 페이지 조회
-				if (currentIterator == null || !currentIterator.hasNext()) {
-					List<Long> nextPage = boardService.findExpiredTimeAttackBoardIdsAfterId(TIMEATTACK, lastSeenId,
-						PAGE_SIZE);
-
-					if (nextPage == null || nextPage.isEmpty()) {
-						noMoreData = true;
-						return null;
-					}
-
-					currentIterator = nextPage.iterator();
-				}
-
-				Long next = currentIterator.next();
-				lastSeenId = next;
-				return next;
-			}
-		};
+		// 1차 캐시가 bulk 연산을 덮어쓰지 않도록 board가 아닌 id 값만 반환
+		log.info("스케줄러 실행 시간 : {}", System.currentTimeMillis());
+		List<Long> expiredBoardIds = boardService.findExpiredTimeAttackBoardIds(TIMEATTACK);
+		log.debug("[BoardScheduler] 만료된 오픈런 게시글 id: {}", expiredBoardIds);
+		return new IteratorItemReader<>(expiredBoardIds);
 	}
 
 	@Bean
@@ -172,7 +172,6 @@ public class ClosingBoardBatchConfig extends DefaultBatchConfiguration {
 
 			long updatedCount = boardService.closeTimeAttackBoardsByIds(items.getItems());
 			counter.increment(updatedCount);
-			log.info("[BoardScheduler] 다음 게시글들을 CLOSED로 변경함: {}", items.getItems());
 			log.info("[BoardScheduler] 총 {}건 게시글 상태 변경 완료", updatedCount);
 		};
 	}
